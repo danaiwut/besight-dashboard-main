@@ -4,9 +4,20 @@ import { Plan, PrismaClient, RecordStatus } from "../generated/prisma/client";
 
 const databaseUrl = process.env.DATABASE_URL;
 if (!databaseUrl) throw new Error("DATABASE_URL is not configured");
-const prisma = new PrismaClient({ adapter: new PrismaMariaDb(databaseUrl) });
+  const prisma = new PrismaClient({ adapter: new PrismaMariaDb(databaseUrl) });
 
 async function main() {
+  await prisma.broker.upsert({
+    where: { code: "EXNESS" },
+    update: { name: "Exness", url: "https://www.exness.com/", status: RecordStatus.active, importMethod: "API" },
+    create: { code: "EXNESS", name: "Exness", url: "https://www.exness.com/", status: RecordStatus.active, importMethod: "API" },
+  });
+  await prisma.broker.upsert({
+    where: { code: "XM" },
+    update: { name: "XM", url: "https://www.xm.com/", status: RecordStatus.active, importMethod: "API" },
+    create: { code: "XM", name: "XM", url: "https://www.xm.com/", status: RecordStatus.active, importMethod: "API" },
+  });
+
   const one = await prisma.indicator.upsert({
     where: { name: "BeSight One STR" },
     update: { publicationId: "75ee20d5bee6431c9bdef0282d58fdd3", status: RecordStatus.active },

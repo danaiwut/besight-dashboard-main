@@ -113,6 +113,8 @@ function normalizeCustomer(row: RawObject, index: number): NormalizedCustomer {
   const normalizedAccounts = accountRows(row).map((account) => {
     const verification = stringValue(first(account, ["verification", "verification_status", "status"])).toLowerCase();
     const status = stringValue(first(account, ["account_status", "status"])).toLowerCase();
+    const rawBrokerCode = stringValue(first(account, ["broker_code", "brokerCode"])).toUpperCase();
+    const brokerCode = rawBrokerCode === "XM" || rawBrokerCode === "EXNESS" ? rawBrokerCode : "";
     return {
       tradeId: stringValue(first(account, ["trade_id", "tradeId", "tradeid", "loginId", "login_id", "mt4id", "mt5id"])),
       accountType: stringValue(first(account, ["account_type", "accountType", "type"])) || "Standard",
@@ -121,8 +123,8 @@ function normalizeCustomer(row: RawObject, index: number): NormalizedCustomer {
       createdDate: dateValue(first(account, ["created_at", "createdDate", "created_date"]) || createdDate),
       lastSync: dateValue(first(account, ["last_sync", "lastSync", "updated_at"])),
       status: status === "inactive" ? "inactive" as const : "active" as const,
-      brokerCode: stringValue(first(account, ["broker_code", "brokerCode"])).toUpperCase(),
-      brokerName: stringValue(first(account, ["broker_name", "brokerName"])),
+      brokerCode,
+      brokerName: brokerCode ? stringValue(first(account, ["broker_name", "brokerName"])) : "",
     };
   }).filter((account) => account.tradeId);
 

@@ -278,7 +278,7 @@ function generateBulkTradeAccounts(bulkMembers: Member[], startId: number): { ac
   const logs: TradeLog[] = [];
   let logId = 0;
   bulkMembers.forEach((m, i) => {
-    const brokerId = (i % 5) + 1;
+    const brokerId = (i % 2) + 1;
     const broker = INITIAL_BROKERS[brokerId - 1];
     const lots = Math.round((((i * 37) % 1500) / 100) * 10) / 10;
     const verification: VerificationStatus = i % 9 === 0 ? "pending" : "verified";
@@ -332,10 +332,7 @@ const INITIAL_MEMBERS: Member[] = [...HANDWRITTEN_MEMBERS, ...BULK_MEMBERS];
 
 const INITIAL_BROKERS: Broker[] = [
   { id: 1, name: "Exness", logo: "/img/broker/logo_exness_white.svg", code: "BS-EX2049", url: "https://www.exness.com/", status: "active", importMethod: "CSV Import" },
-  { id: 2, name: "IC Markets", logo: "/img/broker/ic-logo-logon.svg", code: "BS-IC7781", url: "https://www.icmarkets.com/", status: "active", importMethod: "CSV Import" },
-  { id: 3, name: "Pepperstone", logo: "/img/broker/pepperstone-logo-inverse-rgb.svg", code: "BS-PS6120", url: "https://pepperstone.com/", status: "active", importMethod: "CSV Import" },
-  { id: 4, name: "XM", logo: "/img/broker/XM-Logo-White-RGB.png", code: "BSIMX", url: "https://www.xm.com/", status: "active", importMethod: "API" },
-  { id: 5, name: "HFM", logo: "/img/broker/hfm_logo.svg", code: "BS-HF1029", url: "https://www.hfm.com/", status: "active", importMethod: "CSV Import" },
+  { id: 2, name: "XM", logo: "/img/broker/XM-Logo-White-RGB.png", code: "BSIMX", url: "https://www.xm.com/", status: "active", importMethod: "API" },
 ];
 
 const HANDWRITTEN_TRADE_ACCOUNTS: TradeAccount[] = [
