@@ -410,25 +410,12 @@ const INITIAL_TRADE_LOGS: TradeLog[] = [
 ];
 
 const INITIAL_INDICATORS: Indicator[] = [
-  { id: 1, name: "BeSight ONE", pubId: "besight-one", status: "active" },
-  { id: 2, name: "BeSight Orca", pubId: "besight-orca", status: "active", eaFile: "/downloads/BeSight-Orca-EA.mq4" },
-  { id: 3, name: "BeSight Pulse", pubId: "besight-pulse", status: "active" },
+  { id: 1, name: "BeSight One STR", pubId: "75ee20d5bee6431c9bdef0282d58fdd3", status: "active" },
+  { id: 2, name: "Besight Orca", pubId: "341c1526463b46f198b3f2ee63d9bf4a", status: "active" },
 ];
 
 const INITIAL_INDICATOR_ACCESS: IndicatorAccess[] = [
-  { id: 1, memberId: 1, indicator: "BeSight ONE", status: "active", source: "Broker", startDate: "2026-01-09", expiryDate: "2027-01-09", lastRenewalDate: "2026-08-09" },
-  { id: 12, memberId: 1, indicator: "BeSight Orca", status: "active", source: "Broker", startDate: "2026-01-09", expiryDate: "2027-01-09", lastRenewalDate: "2026-08-09" },
-  { id: 13, memberId: 1, indicator: "BeSight Pulse", status: "expired", source: "Broker", startDate: "2025-08-09", expiryDate: "2026-08-09" },
-  { id: 2, memberId: 2, indicator: "BeSight ONE", status: "suspended", source: "Broker", startDate: "2025-11-20", expiryDate: "2026-06-20", lastRenewalDate: "2026-05-20" },
-  { id: 3, memberId: 3, indicator: "BeSight ONE", status: "active", source: "Broker", startDate: "2025-11-18", expiryDate: "2027-01-18", lastRenewalDate: "2026-08-18" },
-  { id: 4, memberId: 4, indicator: "BeSight Orca", status: "active", source: "Admin", startDate: "2026-01-30", expiryDate: "2026-12-31" },
-  { id: 5, memberId: 5, indicator: "BeSight ONE", status: "pending", source: "Broker", startDate: "2026-03-05", expiryDate: "2026-09-05" },
-  { id: 6, memberId: 6, indicator: "BeSight Orca", status: "active", source: "Broker", startDate: "2025-12-04", expiryDate: "2026-11-01", lastRenewalDate: "2026-08-01" },
-  { id: 7, memberId: 7, indicator: "BeSight ONE", status: "expired", source: "Broker", startDate: "2025-09-27", expiryDate: "2025-10-27" },
-  { id: 8, memberId: 8, indicator: "BeSight Orca", status: "pending", source: "Broker", startDate: "2026-08-01", expiryDate: "2026-09-01" },
-  { id: 9, memberId: 9, indicator: "BeSight ONE", status: "active", source: "Broker", startDate: "2025-12-02", expiryDate: "2027-02-02", lastRenewalDate: "2026-08-02" },
-  { id: 10, memberId: 10, indicator: "BeSight Orca", status: "active", source: "Broker", startDate: "2026-02-14", expiryDate: "2026-09-02", lastRenewalDate: "2026-08-02" },
-  { id: 11, memberId: 3, indicator: "BeSight Orca", status: "active", source: "Broker", startDate: "2026-03-01", expiryDate: "2026-10-01", lastRenewalDate: "2026-09-01" },
+  // Live access records are loaded from the database on provider mount.
 ];
 
 const INITIAL_TELEGRAM_ACCESS: TelegramAccess[] = [
@@ -552,6 +539,25 @@ export function CrmProvider({ children }: { children: ReactNode }) {
     const timer = window.setTimeout(() => void refreshMembers(), 0);
     return () => window.clearTimeout(timer);
   }, [refreshMembers]);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/crm/indicators/", { cache: "no-store" })
+      .then(async (response) => {
+        const payload = await response.json() as {
+          ok?: boolean;
+          indicators?: Indicator[];
+          indicatorAccess?: IndicatorAccess[];
+          planEntitlements?: Record<Plan, number[]>;
+        };
+        if (cancelled || !response.ok || !payload.ok) return;
+        if (payload.indicators) setIndicators(payload.indicators);
+        if (payload.indicatorAccess) setIndicatorAccess(payload.indicatorAccess);
+        if (payload.planEntitlements) setSettings((current) => ({ ...current, planEntitlements: payload.planEntitlements! }));
+      })
+      .catch(() => undefined);
+    return () => { cancelled = true; };
+  }, []);
 
   function toast(msg: string) {
     setToastMsg(msg);

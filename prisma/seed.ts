@@ -8,25 +8,20 @@ const prisma = new PrismaClient({ adapter: new PrismaMariaDb(databaseUrl) });
 
 async function main() {
   const one = await prisma.indicator.upsert({
-    where: { name: "BeSight ONE" },
-    update: { status: RecordStatus.active },
-    create: { name: "BeSight ONE", publicationId: "BESIGHT-ONE", status: RecordStatus.active },
+    where: { name: "BeSight One STR" },
+    update: { publicationId: "75ee20d5bee6431c9bdef0282d58fdd3", status: RecordStatus.active },
+    create: { name: "BeSight One STR", publicationId: "75ee20d5bee6431c9bdef0282d58fdd3", status: RecordStatus.active },
   });
   const orca = await prisma.indicator.upsert({
-    where: { name: "BeSight Orca" },
-    update: { status: RecordStatus.active },
-    create: { name: "BeSight Orca", publicationId: "BESIGHT-ORCA", status: RecordStatus.active },
-  });
-  const freeIndicator = await prisma.indicator.upsert({
-    where: { name: "BeSight Starter" },
-    update: { status: RecordStatus.active },
-    create: { name: "BeSight Starter", publicationId: "BESIGHT-STARTER", status: RecordStatus.active },
+    where: { name: "Besight Orca" },
+    update: { publicationId: "341c1526463b46f198b3f2ee63d9bf4a", status: RecordStatus.active },
+    create: { name: "Besight Orca", publicationId: "341c1526463b46f198b3f2ee63d9bf4a", status: RecordStatus.active },
   });
 
   for (const [plan, indicatorId] of [
     [Plan.ib_partner, one.id],
     [Plan.ib_partner, orca.id],
-    [Plan.free, freeIndicator.id],
+    [Plan.free, orca.id],
   ] as const) {
     await prisma.planIndicatorEntitlement.upsert({
       where: { plan_indicatorId: { plan, indicatorId } },
