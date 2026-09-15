@@ -1,0 +1,45 @@
+/* ── Shared design tokens ──
+   Canonical values reconciled from styles.css / pages.css / auth.css /
+   dashboard.css / crm.css / legal.css / thankyou.css (all defined the
+   same core palette independently). Each route-group stylesheet may
+   still add its own extra tokens (e.g. --green, --sidebar-w) or, in the
+   rare case a page's original value genuinely differed (e.g. --border
+   opacity), override it locally — see the top of that stylesheet. */
+:root {
+  --bg-deepest: #05070E;
+  --bg-dark:    #0A0E1F;
+  --bg-card:    #0E1428;
+  --bg-card2:   #131A33;
+  --cyan:       #00B8DB;
+  --blue:       #1A4FD6;
+  --pink:       #DD2CB8;
+  --white:      #FFFFFF;
+  --muted:      #D9DDE8;
+  --text-sub:   #767F9E;
+  --border:     rgba(255,255,255,0.08);
+  --gradient-cta: linear-gradient(135deg, var(--blue), var(--pink));
+  --font: var(--font-open-sans), sans-serif;
+  --transition: 200ms ease;
+}
+
+/* ── Material Symbols icon font (fonts.google.com/icons) ── */
+.material-symbols-outlined {
+  font-family: 'Material Symbols Outlined';
+  font-weight: normal;
+  font-style: normal;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  -webkit-font-feature-settings: 'liga';
+  -webkit-font-smoothing: antialiased;
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+}
+.icon {
+  font-size: 20px;
+  vertical-align: middle;
+  color: currentColor;
+}

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" viewBox="0 0 512 512">
+  <!-- Generator: Adobe Illustrator 29.5.0, SVG Export Plug-In . SVG Version: 2.1.0 Build 137)  -->
+  <defs>
+    <style>
+      .st0 {
+        fill: none;
+      }
+
+      .st1 {
+        fill: url(#linear-gradient);
+      }
+
+      .st2 {
+        fill: #fff;
+      }
+
+      .st3 {
+        clip-path: url(#clippath);
+      }
+    </style>
+    <clipPath id="clippath">
+      <circle class="st0" cx="256" cy="256" r="256"/>
+    </clipPath>
+    <linearGradient id="linear-gradient" x1="74.06" y1="433.05" x2="427.86" y2="88.76" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#025"/>
+      <stop offset=".55" stop-color="#0030ec"/>
+    </linearGradient>
+  </defs>
+  <g class="st3">
+    <g>
+      <path class="st1" d="M256,0h0c141.38,0,256,114.62,256,256h0c0,141.38-114.62,256-256,256h0C114.62,512,0,397.38,0,256h0C0,114.62,114.62,0,256,0Z"/>
+      <path class="st2" d="M18.94,357.56c8.27-39.64,81.41-132.72,113-160.64-10.08,1.69-19.47,6.2-27.11,12.99-10.34-18.9-3.5-42.6,15.31-53.1s42.57-3.88,53.23,14.84c53.1-28.02,116.89-26.71,168.79,3.48,30.6-4.47,61.69-4.41,92.27.2,14.34,115.04-23.07,149.41-103.81,158.28-43.52,4.78-105.36,17.67-105.36,176.79,0,0-143.21-6.85-206.33-152.84h.01Z"/>
+    </g>
+  </g>
+</svg>
