@@ -535,10 +535,11 @@ export function CrmProvider({ children }: { children: ReactNode }) {
     setMemberSyncError("");
     try {
       const response = await fetch("/api/crm/customers/sync/", { cache: "no-store" });
-      const payload = await response.json() as { ok?: boolean; error?: string; members?: Member[]; tradeAccounts?: TradeAccount[] };
+      const payload = await response.json() as { ok?: boolean; error?: string; members?: Member[]; tradeAccounts?: TradeAccount[]; indicatorAccess?: IndicatorAccess[] };
       if (!response.ok || !payload.ok) throw new Error(payload.error || `Customer sync failed (${response.status})`);
       if (payload.members?.length) setMembers(payload.members);
       if (payload.tradeAccounts) setTradeAccounts(payload.tradeAccounts);
+      if (payload.indicatorAccess) setIndicatorAccess(payload.indicatorAccess);
       setMemberSyncStatus("live");
     } catch (error) {
       setMemberSyncStatus("error");

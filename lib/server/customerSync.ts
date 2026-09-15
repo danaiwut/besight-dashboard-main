@@ -1,4 +1,4 @@
-import { Plan, RecordStatus, VerificationStatus } from "@/generated/prisma/client";
+import { AccessSource, IndicatorAccessStatus, Plan, RecordStatus, VerificationStatus } from "@/generated/prisma/client";
 import { getPrisma, isDatabaseConfigured } from "./prisma";
 
 type RawObject = Record<string, unknown>;
@@ -39,10 +39,23 @@ export type CustomerTradeAccountDto = {
   status: "active" | "inactive";
 };
 
+export type CustomerIndicatorAccessDto = {
+  id: number;
+  memberId: number;
+  indicator: string;
+  status: "active" | "suspended" | "pending" | "expired";
+  source: "Broker" | "Admin" | "SpecialAccess" | "Plan";
+  startDate: string;
+  expiryDate: string;
+  lastRenewalDate?: string;
+};
+
 type NormalizedCustomer = {
   externalId?: string;
   member: Omit<CustomerMemberDto, "id" | "primaryTradeAccountId">;
   accounts: Array<Omit<CustomerTradeAccountDto, "id" | "memberId" | "brokerId"> & { brokerCode: string; brokerName: string }>;
+  // ข้อมูลอินดิเคเตอร์ที่ลูกค้าคนนี้ได้สิทธิ์ในแถวนี้ (1 แถวจาก /tradingview = 1 อินดี้ต่อ 1 คน)
+  indicatorGrant?: Omit<CustomerIndicatorAccessDto, "id" | "memberId">;
 };
 
 function object(value: unknown): RawObject | undefined {
@@ -113,9 +126,30 @@ function normalizeCustomer(row: RawObject, index: number): NormalizedCustomer {
     };
   }).filter((account) => account.tradeId);
 
+  // อินดิเคเตอร์ที่ให้สิทธิ์ในแถวนี้ (จาก /tradingview: indicator_name + status + granted_at/expiration)
+  const indicatorName = stringValue(first(row, ["indicator_name", "indicatorName", "indicator"]));
+  const tvStatusRaw = stringValue(first(row, ["status"])).toLowerCase();
+  const tvStatus: CustomerIndicatorAccessDto["status"] =
+    tvStatusRaw === "active" ? "active"
+    : tvStatusRaw === "revoked" ? "suspended"
+    : tvStatusRaw === "expired" ? "expired"
+    : "pending";
+  const grantedAt = first(row, ["granted_at", "grantedAt"]);
+  const expiration = first(row, ["expiration", "tv_expiration"]);
+  const lastGrantedAt = first(row, ["last_granted_at", "lastGrantedAt"]);
+  const indicatorGrant = indicatorName ? {
+    indicator: indicatorName,
+    status: tvStatus,
+    source: "Admin" as const,
+    startDate: dateValue(grantedAt || createdDate),
+    expiryDate: dateValue(expiration || grantedAt || createdDate),
+    lastRenewalDate: lastGrantedAt && lastGrantedAt !== grantedAt ? dateValue(lastGrantedAt) : undefined,
+  } : undefined;
+
   const override = Number(first(row, ["required_lots_override", "requiredLotsOverride"]));
   return {
     externalId,
+    indicatorGrant,
     member: {
       code,
       name,
@@ -250,13 +284,41 @@ async function saveCustomers(customers: NormalizedCustomer[]) {
         },
       });
     }
+
+    if (customer.indicatorGrant) {
+      const grant = customer.indicatorGrant;
+      const indicator = await prisma.indicator.upsert({
+        where: { name: grant.indicator },
+        update: {},
+        create: { name: grant.indicator, status: RecordStatus.active },
+      });
+      await prisma.memberIndicatorAccess.upsert({
+        where: { memberId_indicatorId: { memberId: member.id, indicatorId: indicator.id } },
+        update: {
+          status: grant.status as IndicatorAccessStatus,
+          source: grant.source as AccessSource,
+          startsAt: new Date(`${grant.startDate}T00:00:00Z`),
+          expiresAt: new Date(`${grant.expiryDate}T00:00:00Z`),
+          lastRenewedAt: grant.lastRenewalDate ? new Date(`${grant.lastRenewalDate}T00:00:00Z`) : undefined,
+        },
+        create: {
+          memberId: member.id,
+          indicatorId: indicator.id,
+          status: grant.status as IndicatorAccessStatus,
+          source: grant.source as AccessSource,
+          startsAt: new Date(`${grant.startDate}T00:00:00Z`),
+          expiresAt: new Date(`${grant.expiryDate}T00:00:00Z`),
+          lastRenewedAt: grant.lastRenewalDate ? new Date(`${grant.lastRenewalDate}T00:00:00Z`) : undefined,
+        },
+      });
+    }
   }
 }
 
 async function readDatabaseDtos() {
   const prisma = getPrisma();
   const records = await prisma.member.findMany({
-    include: { acquisitionChannels: true, tradeAccounts: true },
+    include: { acquisitionChannels: true, tradeAccounts: true, indicatorAccess: { include: { indicator: true } } },
     orderBy: { joinedAt: "desc" },
   });
   const members: CustomerMemberDto[] = records.map((member) => ({
@@ -293,7 +355,17 @@ async function readDatabaseDtos() {
     lastSync: (account.lastSyncAt || account.updatedAt).toISOString().slice(0, 10),
     status: account.status,
   })));
-  return { members, tradeAccounts };
+  const indicatorAccess: CustomerIndicatorAccessDto[] = records.flatMap((member) => member.indicatorAccess.map((access) => ({
+    id: access.id,
+    memberId: member.id,
+    indicator: access.indicator.name,
+    status: access.status,
+    source: access.source,
+    startDate: access.startsAt.toISOString().slice(0, 10),
+    expiryDate: access.expiresAt.toISOString().slice(0, 10),
+    lastRenewalDate: access.lastRenewedAt?.toISOString().slice(0, 10),
+  })));
+  return { members, tradeAccounts, indicatorAccess };
 }
 
 export async function syncCustomerMembers() {
@@ -312,5 +384,10 @@ export async function syncCustomerMembers() {
     const memberId = members[index].id;
     return customer.accounts.map((account) => ({ ...account, id: accountId++, memberId, brokerId: 1 }));
   });
-  return { members, tradeAccounts, saved: 0, database: false };
+  let indicatorAccessId = 1;
+  const indicatorAccess: CustomerIndicatorAccessDto[] = customers.flatMap((customer, index) => {
+    const memberId = members[index].id;
+    return customer.indicatorGrant ? [{ ...customer.indicatorGrant, id: indicatorAccessId++, memberId }] : [];
+  });
+  return { members, tradeAccounts, indicatorAccess, saved: 0, database: false };
 }
