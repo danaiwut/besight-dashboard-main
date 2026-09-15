@@ -79,6 +79,8 @@ model Member {
   primaryTradeAccountId    Int?                       @unique
   requiredLotsOverride     Decimal?                   @db.Decimal(12, 4)
   requiredLotsOverrideNote String?                    @db.Text
+  crmStartDate             DateTime?
+  crmExpiryDate            DateTime?
   customerStageOverride    CustomerStage?
   primaryTradeAccount      TradeAccount?              @relation("PrimaryTradeAccount", fields: [primaryTradeAccountId], references: [id], onDelete: SetNull)
   tradeAccounts            TradeAccount[]             @relation("MemberTradeAccounts")

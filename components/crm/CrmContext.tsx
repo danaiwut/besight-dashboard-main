@@ -135,6 +135,8 @@ export type Member = {
   socialLinks?: { google?: boolean; line?: boolean; facebook?: boolean };
   createdDate: string;
   joinedDate: string;
+  crmStartDate?: string;
+  crmExpiryDate?: string;
   /** Where this member first heard about BeSight — admin-tagged, multi-select. */
   channels?: AcquisitionChannel[];
   primaryTradeAccountId?: number;

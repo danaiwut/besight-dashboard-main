@@ -107,6 +107,8 @@ export const MemberScalarFieldEnum = {
   primaryTradeAccountId: 'primaryTradeAccountId',
   requiredLotsOverride: 'requiredLotsOverride',
   requiredLotsOverrideNote: 'requiredLotsOverrideNote',
+  crmStartDate: 'crmStartDate',
+  crmExpiryDate: 'crmExpiryDate',
   customerStageOverride: 'customerStageOverride'
 } as const
 

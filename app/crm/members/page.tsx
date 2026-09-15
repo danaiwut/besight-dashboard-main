@@ -136,8 +136,8 @@ export default function MembersPage() {
       if (sortKey === "lots") {
         return (memberLots(a, tradeAccounts, tradeLogs, settings) - memberLots(b, tradeAccounts, tradeLogs, settings)) * dir;
       }
-      const av = (sortKey === "startDate" ? accessOf(a.id)?.startDate : accessOf(a.id)?.expiryDate) ?? "";
-      const bv = (sortKey === "startDate" ? accessOf(b.id)?.startDate : accessOf(b.id)?.expiryDate) ?? "";
+      const av = (sortKey === "startDate" ? accessOf(a.id)?.startDate ?? a.crmStartDate : accessOf(a.id)?.expiryDate ?? a.crmExpiryDate) ?? "";
+      const bv = (sortKey === "startDate" ? accessOf(b.id)?.startDate ?? b.crmStartDate : accessOf(b.id)?.expiryDate ?? b.crmExpiryDate) ?? "";
       return av.localeCompare(bv) * dir;
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -183,7 +183,7 @@ export default function MembersPage() {
       const tail = [
         m.tv, m.telegramUsername ?? "",
         access?.indicator ?? "", memberLots(m, tradeAccounts, tradeLogs, settings), requiredLotsFor(m, settings),
-        accessLabel(access, settings), fmtDate(access?.startDate), fmtDate(access?.expiryDate), fmtDate(m.joinedDate),
+        accessLabel(access, settings), fmtDate(access?.startDate ?? m.crmStartDate), fmtDate(access?.expiryDate ?? m.crmExpiryDate), fmtDate(m.joinedDate),
         m.channels?.map((c) => ACQUISITION_CHANNEL_LABELS[c]).join(" / ") ?? "",
       ];
       if (!accts.length) return [[...base, "", "", "", ...tail]];
@@ -472,8 +472,8 @@ export default function MembersPage() {
                         <td>
                           <span className={`badge ${accessBadgeClass(label)}`}>{t(accessLabelKey(label))}</span>
                         </td>
-                        <td className="mono">{fmtDate(access?.startDate)}</td>
-                        <td className="mono">{fmtDate(access?.expiryDate)}</td>
+                        <td className="mono">{fmtDate(access?.startDate ?? m.crmStartDate)}</td>
+                        <td className="mono">{fmtDate(access?.expiryDate ?? m.crmExpiryDate)}</td>
                         <td className="mono">{fmtDate(m.joinedDate)}</td>
                         <td>
                           {m.channels?.length ? (

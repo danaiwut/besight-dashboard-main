@@ -17,6 +17,8 @@ export type CustomerMemberDto = {
   telegramUsername?: string;
   telegramUserId?: string;
   discordUsername?: string;
+  crmStartDate?: string;
+  crmExpiryDate?: string;
   createdDate: string;
   joinedDate: string;
   channels?: Array<"facebook" | "instagram" | "tiktok">;
@@ -65,6 +67,17 @@ function dateValue(value: unknown) {
   const raw = stringValue(value);
   const parsed = raw ? new Date(raw) : new Date();
   return Number.isNaN(parsed.getTime()) ? new Date().toISOString().slice(0, 10) : parsed.toISOString().slice(0, 10);
+}
+
+function optionalDateValue(value: unknown) {
+  const raw = stringValue(value);
+  if (!raw) return undefined;
+  const parsed = new Date(raw);
+  return Number.isNaN(parsed.getTime()) ? undefined : parsed;
+}
+
+function optionalDateStringValue(value: unknown) {
+  return optionalDateValue(value)?.toISOString().slice(0, 10);
 }
 
 function numericId(seed: string, index: number) {
@@ -129,6 +142,8 @@ function normalizeCustomer(row: RawObject, index: number): NormalizedCustomer {
       telegramUsername: stringValue(first(row, ["telegram_username", "telegramUsername", "telegram"])) || undefined,
       telegramUserId: stringValue(first(row, ["telegram_user_id", "telegramUserId"])) || undefined,
       discordUsername: stringValue(first(row, ["discord_username", "discordUsername", "discord"])) || undefined,
+      crmStartDate: optionalDateStringValue(first(row, ["granted_at", "grantedAt", "tv_granted_at", "tvGrantedAt"])),
+      crmExpiryDate: optionalDateStringValue(first(row, ["expiration", "expires_at", "expiry", "tv_expiration", "tvExpiration"])),
       createdDate,
       joinedDate: dateValue(first(row, ["joined_at", "joinedDate", "joined_date", "created_at"])),
       channels: channels(first(row, ["channels", "acquisition_channels", "source"])),
@@ -209,6 +224,8 @@ async function saveCustomers(customers: NormalizedCustomer[]) {
       plan: customer.member.plan === "ib_partner" ? Plan.ib_partner : Plan.free,
       requiredLotsOverride: customer.member.requiredLotsOverride,
       requiredLotsOverrideNote: customer.member.requiredLotsOverrideNote,
+      crmStartDate: optionalDateValue(customer.member.crmStartDate) || null,
+      crmExpiryDate: optionalDateValue(customer.member.crmExpiryDate) || null,
     };
     const member = existing
       ? await prisma.member.update({ where: { id: existing.id }, data })
@@ -272,6 +289,8 @@ async function readDatabaseDtos() {
     telegramUsername: member.telegramUsername || undefined,
     telegramUserId: member.telegramUserId || undefined,
     discordUsername: member.discordUsername || undefined,
+    crmStartDate: member.crmStartDate?.toISOString().slice(0, 10),
+    crmExpiryDate: member.crmExpiryDate?.toISOString().slice(0, 10),
     createdDate: member.createdAt.toISOString().slice(0, 10),
     joinedDate: member.joinedAt.toISOString().slice(0, 10),
     channels: member.acquisitionChannels.map((item) => item.channel).filter((item): item is "facebook" | "instagram" | "tiktok" => ["facebook", "instagram", "tiktok"].includes(item)),
@@ -295,7 +314,19 @@ async function readDatabaseDtos() {
   return { members, tradeAccounts };
 }
 
+let syncInFlight: Promise<Awaited<ReturnType<typeof syncCustomerMembersOnce>>> | null = null;
+
 export async function syncCustomerMembers() {
+  if (syncInFlight) return syncInFlight;
+  syncInFlight = syncCustomerMembersOnce();
+  try {
+    return await syncInFlight;
+  } finally {
+    syncInFlight = null;
+  }
+}
+
+async function syncCustomerMembersOnce() {
   const customers = await fetchCustomers();
   if (isDatabaseConfigured()) {
     await saveCustomers(customers);

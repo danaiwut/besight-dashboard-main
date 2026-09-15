@@ -646,10 +646,6 @@ export type EnumVerificationStatusFieldUpdateOperationsInput = {
   set?: $Enums.VerificationStatus
 }
 
-export type NullableDateTimeFieldUpdateOperationsInput = {
-  set?: Date | string | null
-}
-
 export type TradeAccountCreateNestedOneWithoutTradeLogsInput = {
   create?: Prisma.XOR<Prisma.TradeAccountCreateWithoutTradeLogsInput, Prisma.TradeAccountUncheckedCreateWithoutTradeLogsInput>
   connectOrCreate?: Prisma.TradeAccountCreateOrConnectWithoutTradeLogsInput
