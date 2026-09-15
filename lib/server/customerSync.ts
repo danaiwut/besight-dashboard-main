@@ -90,7 +90,7 @@ function accountRows(row: RawObject): RawObject[] {
 function normalizeCustomer(row: RawObject, index: number): NormalizedCustomer {
   const externalId = stringValue(first(row, ["external_id", "customer_id", "member_id", "id"])) || undefined;
   const email = stringValue(first(row, ["email", "email_address"]));
-  const name = stringValue(first(row, ["name", "full_name", "fullname", "customer_name"])) ||
+  const name = stringValue(first(row, ["name", "full_name", "fullname", "customer_name", "display_name"])) ||
     [first(row, ["first_name", "firstname"]), first(row, ["last_name", "lastname"])].map(stringValue).filter(Boolean).join(" ") ||
     email || `Member ${index + 1}`;
   const code = stringValue(first(row, ["code", "member_code", "customer_code"])) ||
@@ -125,7 +125,7 @@ function normalizeCustomer(row: RawObject, index: number): NormalizedCustomer {
       phone: stringValue(first(row, ["phone", "phone_number", "mobile"])),
       country: stringValue(first(row, ["country", "country_name"])) || undefined,
       address: stringValue(first(row, ["address", "full_address"])) || undefined,
-      tv: stringValue(first(row, ["tradingview", "trading_view", "tradingView", "tv", "tv_username"])),
+      tv: stringValue(first(row, ["tradingview", "trading_view", "tradingView", "tv", "tv_username", "username"])),
       telegramUsername: stringValue(first(row, ["telegram_username", "telegramUsername", "telegram"])) || undefined,
       telegramUserId: stringValue(first(row, ["telegram_user_id", "telegramUserId"])) || undefined,
       discordUsername: stringValue(first(row, ["discord_username", "discordUsername", "discord"])) || undefined,
@@ -151,17 +151,31 @@ function extractRows(payload: unknown): RawObject[] {
 }
 
 async function fetchCustomers() {
-  const url = process.env.CRM_CUSTOMERS_URL || "https://nmetbatfjiagpjbbmowp.supabase.co/functions/v1/crm-customers";
+  const baseUrl = process.env.CRM_CUSTOMERS_URL || "https://nmetbatfjiagpjbbmowp.supabase.co/functions/v1/crm-customers/tradingview";
   const token = process.env.CRM_CUSTOMERS_TOKEN || process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!token) throw new Error("CRM_CUSTOMERS_TOKEN is not configured");
-  const response = await fetch(url, {
-    headers: { Authorization: `Bearer ${token}`, apikey: token, Accept: "application/json" },
-    cache: "no-store",
-    signal: AbortSignal.timeout(30_000),
-  });
-  const body = await response.text();
-  if (!response.ok) throw new Error(`CRM customers returned ${response.status}: ${body.slice(0, 240)}`);
-  return extractRows(JSON.parse(body)).map(normalizeCustomer);
+
+  const rows: RawObject[] = [];
+  let cursor: string | null = null;
+  for (let page = 0; page < 100; page++) {
+    const url = new URL(baseUrl);
+    url.searchParams.set("limit", "1000");
+    if (cursor) url.searchParams.set("cursor", cursor);
+    const response = await fetch(url, {
+      headers: { Authorization: `Bearer ${token}`, apikey: token, Accept: "application/json" },
+      cache: "no-store",
+      signal: AbortSignal.timeout(30_000),
+    });
+    const body = await response.text();
+    if (!response.ok) throw new Error(`CRM customers returned ${response.status}: ${body.slice(0, 240)}`);
+    const parsed: unknown = JSON.parse(body);
+    rows.push(...extractRows(parsed));
+    const pagination = object(parsed);
+    if (!pagination?.has_more || !pagination.next_cursor) break;
+    cursor = stringValue(pagination.next_cursor) || null;
+    if (!cursor) break;
+  }
+  return rows.map(normalizeCustomer);
 }
 
 async function saveCustomers(customers: NormalizedCustomer[]) {
