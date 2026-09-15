@@ -120,7 +120,7 @@ model Broker {
 model TradeAccount {
   id                Int                @id @default(autoincrement())
   memberId          Int
-  brokerId          Int
+  brokerId          Int?
   tradeId           String             @db.VarChar(64)
   accountType       String?            @db.VarChar(64)
   partnerIb         String?            @db.VarChar(96)
@@ -130,14 +130,14 @@ model TradeAccount {
   updatedAt         DateTime           @updatedAt
   lastSyncAt        DateTime?
   member            Member             @relation("MemberTradeAccounts", fields: [memberId], references: [id], onDelete: Cascade)
-  broker            Broker             @relation(fields: [brokerId], references: [id])
+  broker            Broker?            @relation(fields: [brokerId], references: [id], onDelete: SetNull)
   primaryForMembers Member[]           @relation("PrimaryTradeAccount")
   tradeLogs         TradeLog[]
   lotCheckRuns      LotCheckRun[]
 
-  @@unique([brokerId, tradeId])
+  @@index([brokerId, tradeId])
+  @@index([memberId, tradeId])
   @@index([memberId, status])
-  @@index([tradeId])
 }
 
 model TradeLog {

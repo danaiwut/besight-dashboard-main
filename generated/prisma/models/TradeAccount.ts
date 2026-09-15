@@ -226,7 +226,7 @@ export type TradeAccountGroupByArgs<ExtArgs extends runtime.Types.Extensions.Int
 export type TradeAccountGroupByOutputType = {
   id: number
   memberId: number
-  brokerId: number
+  brokerId: number | null
   tradeId: string
   accountType: string | null
   partnerIb: string | null
@@ -263,7 +263,7 @@ export type TradeAccountWhereInput = {
   NOT?: Prisma.TradeAccountWhereInput | Prisma.TradeAccountWhereInput[]
   id?: Prisma.IntFilter<"TradeAccount"> | number
   memberId?: Prisma.IntFilter<"TradeAccount"> | number
-  brokerId?: Prisma.IntFilter<"TradeAccount"> | number
+  brokerId?: Prisma.IntNullableFilter<"TradeAccount"> | number | null
   tradeId?: Prisma.StringFilter<"TradeAccount"> | string
   accountType?: Prisma.StringNullableFilter<"TradeAccount"> | string | null
   partnerIb?: Prisma.StringNullableFilter<"TradeAccount"> | string | null
@@ -273,7 +273,7 @@ export type TradeAccountWhereInput = {
   updatedAt?: Prisma.DateTimeFilter<"TradeAccount"> | Date | string
   lastSyncAt?: Prisma.DateTimeNullableFilter<"TradeAccount"> | Date | string | null
   member?: Prisma.XOR<Prisma.MemberScalarRelationFilter, Prisma.MemberWhereInput>
-  broker?: Prisma.XOR<Prisma.BrokerScalarRelationFilter, Prisma.BrokerWhereInput>
+  broker?: Prisma.XOR<Prisma.BrokerNullableScalarRelationFilter, Prisma.BrokerWhereInput> | null
   primaryForMembers?: Prisma.MemberListRelationFilter
   tradeLogs?: Prisma.TradeLogListRelationFilter
   lotCheckRuns?: Prisma.LotCheckRunListRelationFilter
@@ -282,7 +282,7 @@ export type TradeAccountWhereInput = {
 export type TradeAccountOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   memberId?: Prisma.SortOrder
-  brokerId?: Prisma.SortOrder
+  brokerId?: Prisma.SortOrderInput | Prisma.SortOrder
   tradeId?: Prisma.SortOrder
   accountType?: Prisma.SortOrderInput | Prisma.SortOrder
   partnerIb?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -301,12 +301,11 @@ export type TradeAccountOrderByWithRelationInput = {
 
 export type TradeAccountWhereUniqueInput = Prisma.AtLeast<{
   id?: number
-  brokerId_tradeId?: Prisma.TradeAccountBrokerIdTradeIdCompoundUniqueInput
   AND?: Prisma.TradeAccountWhereInput | Prisma.TradeAccountWhereInput[]
   OR?: Prisma.TradeAccountWhereInput[]
   NOT?: Prisma.TradeAccountWhereInput | Prisma.TradeAccountWhereInput[]
   memberId?: Prisma.IntFilter<"TradeAccount"> | number
-  brokerId?: Prisma.IntFilter<"TradeAccount"> | number
+  brokerId?: Prisma.IntNullableFilter<"TradeAccount"> | number | null
   tradeId?: Prisma.StringFilter<"TradeAccount"> | string
   accountType?: Prisma.StringNullableFilter<"TradeAccount"> | string | null
   partnerIb?: Prisma.StringNullableFilter<"TradeAccount"> | string | null
@@ -316,16 +315,16 @@ export type TradeAccountWhereUniqueInput = Prisma.AtLeast<{
   updatedAt?: Prisma.DateTimeFilter<"TradeAccount"> | Date | string
   lastSyncAt?: Prisma.DateTimeNullableFilter<"TradeAccount"> | Date | string | null
   member?: Prisma.XOR<Prisma.MemberScalarRelationFilter, Prisma.MemberWhereInput>
-  broker?: Prisma.XOR<Prisma.BrokerScalarRelationFilter, Prisma.BrokerWhereInput>
+  broker?: Prisma.XOR<Prisma.BrokerNullableScalarRelationFilter, Prisma.BrokerWhereInput> | null
   primaryForMembers?: Prisma.MemberListRelationFilter
   tradeLogs?: Prisma.TradeLogListRelationFilter
   lotCheckRuns?: Prisma.LotCheckRunListRelationFilter
-}, "id" | "brokerId_tradeId">
+}, "id">
 
 export type TradeAccountOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   memberId?: Prisma.SortOrder
-  brokerId?: Prisma.SortOrder
+  brokerId?: Prisma.SortOrderInput | Prisma.SortOrder
   tradeId?: Prisma.SortOrder
   accountType?: Prisma.SortOrderInput | Prisma.SortOrder
   partnerIb?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -347,7 +346,7 @@ export type TradeAccountScalarWhereWithAggregatesInput = {
   NOT?: Prisma.TradeAccountScalarWhereWithAggregatesInput | Prisma.TradeAccountScalarWhereWithAggregatesInput[]
   id?: Prisma.IntWithAggregatesFilter<"TradeAccount"> | number
   memberId?: Prisma.IntWithAggregatesFilter<"TradeAccount"> | number
-  brokerId?: Prisma.IntWithAggregatesFilter<"TradeAccount"> | number
+  brokerId?: Prisma.IntNullableWithAggregatesFilter<"TradeAccount"> | number | null
   tradeId?: Prisma.StringWithAggregatesFilter<"TradeAccount"> | string
   accountType?: Prisma.StringNullableWithAggregatesFilter<"TradeAccount"> | string | null
   partnerIb?: Prisma.StringNullableWithAggregatesFilter<"TradeAccount"> | string | null
@@ -368,7 +367,7 @@ export type TradeAccountCreateInput = {
   updatedAt?: Date | string
   lastSyncAt?: Date | string | null
   member: Prisma.MemberCreateNestedOneWithoutTradeAccountsInput
-  broker: Prisma.BrokerCreateNestedOneWithoutAccountsInput
+  broker?: Prisma.BrokerCreateNestedOneWithoutAccountsInput
   primaryForMembers?: Prisma.MemberCreateNestedManyWithoutPrimaryTradeAccountInput
   tradeLogs?: Prisma.TradeLogCreateNestedManyWithoutTradeAccountInput
   lotCheckRuns?: Prisma.LotCheckRunCreateNestedManyWithoutTradeAccountInput
@@ -377,7 +376,7 @@ export type TradeAccountCreateInput = {
 export type TradeAccountUncheckedCreateInput = {
   id?: number
   memberId: number
-  brokerId: number
+  brokerId?: number | null
   tradeId: string
   accountType?: string | null
   partnerIb?: string | null
@@ -401,7 +400,7 @@ export type TradeAccountUpdateInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lastSyncAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   member?: Prisma.MemberUpdateOneRequiredWithoutTradeAccountsNestedInput
-  broker?: Prisma.BrokerUpdateOneRequiredWithoutAccountsNestedInput
+  broker?: Prisma.BrokerUpdateOneWithoutAccountsNestedInput
   primaryForMembers?: Prisma.MemberUpdateManyWithoutPrimaryTradeAccountNestedInput
   tradeLogs?: Prisma.TradeLogUpdateManyWithoutTradeAccountNestedInput
   lotCheckRuns?: Prisma.LotCheckRunUpdateManyWithoutTradeAccountNestedInput
@@ -410,7 +409,7 @@ export type TradeAccountUpdateInput = {
 export type TradeAccountUncheckedUpdateInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   memberId?: Prisma.IntFieldUpdateOperationsInput | number
-  brokerId?: Prisma.IntFieldUpdateOperationsInput | number
+  brokerId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   tradeId?: Prisma.StringFieldUpdateOperationsInput | string
   accountType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   partnerIb?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -427,7 +426,7 @@ export type TradeAccountUncheckedUpdateInput = {
 export type TradeAccountCreateManyInput = {
   id?: number
   memberId: number
-  brokerId: number
+  brokerId?: number | null
   tradeId: string
   accountType?: string | null
   partnerIb?: string | null
@@ -452,7 +451,7 @@ export type TradeAccountUpdateManyMutationInput = {
 export type TradeAccountUncheckedUpdateManyInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   memberId?: Prisma.IntFieldUpdateOperationsInput | number
-  brokerId?: Prisma.IntFieldUpdateOperationsInput | number
+  brokerId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   tradeId?: Prisma.StringFieldUpdateOperationsInput | string
   accountType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   partnerIb?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -482,11 +481,6 @@ export type TradeAccountOrderByRelevanceInput = {
   fields: Prisma.TradeAccountOrderByRelevanceFieldEnum | Prisma.TradeAccountOrderByRelevanceFieldEnum[]
   sort: Prisma.SortOrder
   search: string
-}
-
-export type TradeAccountBrokerIdTradeIdCompoundUniqueInput = {
-  brokerId: number
-  tradeId: string
 }
 
 export type TradeAccountCountOrderByAggregateInput = {
@@ -696,7 +690,7 @@ export type TradeAccountCreateWithoutPrimaryForMembersInput = {
   updatedAt?: Date | string
   lastSyncAt?: Date | string | null
   member: Prisma.MemberCreateNestedOneWithoutTradeAccountsInput
-  broker: Prisma.BrokerCreateNestedOneWithoutAccountsInput
+  broker?: Prisma.BrokerCreateNestedOneWithoutAccountsInput
   tradeLogs?: Prisma.TradeLogCreateNestedManyWithoutTradeAccountInput
   lotCheckRuns?: Prisma.LotCheckRunCreateNestedManyWithoutTradeAccountInput
 }
@@ -704,7 +698,7 @@ export type TradeAccountCreateWithoutPrimaryForMembersInput = {
 export type TradeAccountUncheckedCreateWithoutPrimaryForMembersInput = {
   id?: number
   memberId: number
-  brokerId: number
+  brokerId?: number | null
   tradeId: string
   accountType?: string | null
   partnerIb?: string | null
@@ -731,7 +725,7 @@ export type TradeAccountCreateWithoutMemberInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   lastSyncAt?: Date | string | null
-  broker: Prisma.BrokerCreateNestedOneWithoutAccountsInput
+  broker?: Prisma.BrokerCreateNestedOneWithoutAccountsInput
   primaryForMembers?: Prisma.MemberCreateNestedManyWithoutPrimaryTradeAccountInput
   tradeLogs?: Prisma.TradeLogCreateNestedManyWithoutTradeAccountInput
   lotCheckRuns?: Prisma.LotCheckRunCreateNestedManyWithoutTradeAccountInput
@@ -739,7 +733,7 @@ export type TradeAccountCreateWithoutMemberInput = {
 
 export type TradeAccountUncheckedCreateWithoutMemberInput = {
   id?: number
-  brokerId: number
+  brokerId?: number | null
   tradeId: string
   accountType?: string | null
   partnerIb?: string | null
@@ -784,7 +778,7 @@ export type TradeAccountUpdateWithoutPrimaryForMembersInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lastSyncAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   member?: Prisma.MemberUpdateOneRequiredWithoutTradeAccountsNestedInput
-  broker?: Prisma.BrokerUpdateOneRequiredWithoutAccountsNestedInput
+  broker?: Prisma.BrokerUpdateOneWithoutAccountsNestedInput
   tradeLogs?: Prisma.TradeLogUpdateManyWithoutTradeAccountNestedInput
   lotCheckRuns?: Prisma.LotCheckRunUpdateManyWithoutTradeAccountNestedInput
 }
@@ -792,7 +786,7 @@ export type TradeAccountUpdateWithoutPrimaryForMembersInput = {
 export type TradeAccountUncheckedUpdateWithoutPrimaryForMembersInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   memberId?: Prisma.IntFieldUpdateOperationsInput | number
-  brokerId?: Prisma.IntFieldUpdateOperationsInput | number
+  brokerId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   tradeId?: Prisma.StringFieldUpdateOperationsInput | string
   accountType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   partnerIb?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -827,7 +821,7 @@ export type TradeAccountScalarWhereInput = {
   NOT?: Prisma.TradeAccountScalarWhereInput | Prisma.TradeAccountScalarWhereInput[]
   id?: Prisma.IntFilter<"TradeAccount"> | number
   memberId?: Prisma.IntFilter<"TradeAccount"> | number
-  brokerId?: Prisma.IntFilter<"TradeAccount"> | number
+  brokerId?: Prisma.IntNullableFilter<"TradeAccount"> | number | null
   tradeId?: Prisma.StringFilter<"TradeAccount"> | string
   accountType?: Prisma.StringNullableFilter<"TradeAccount"> | string | null
   partnerIb?: Prisma.StringNullableFilter<"TradeAccount"> | string | null
@@ -905,7 +899,7 @@ export type TradeAccountCreateWithoutTradeLogsInput = {
   updatedAt?: Date | string
   lastSyncAt?: Date | string | null
   member: Prisma.MemberCreateNestedOneWithoutTradeAccountsInput
-  broker: Prisma.BrokerCreateNestedOneWithoutAccountsInput
+  broker?: Prisma.BrokerCreateNestedOneWithoutAccountsInput
   primaryForMembers?: Prisma.MemberCreateNestedManyWithoutPrimaryTradeAccountInput
   lotCheckRuns?: Prisma.LotCheckRunCreateNestedManyWithoutTradeAccountInput
 }
@@ -913,7 +907,7 @@ export type TradeAccountCreateWithoutTradeLogsInput = {
 export type TradeAccountUncheckedCreateWithoutTradeLogsInput = {
   id?: number
   memberId: number
-  brokerId: number
+  brokerId?: number | null
   tradeId: string
   accountType?: string | null
   partnerIb?: string | null
@@ -952,7 +946,7 @@ export type TradeAccountUpdateWithoutTradeLogsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lastSyncAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   member?: Prisma.MemberUpdateOneRequiredWithoutTradeAccountsNestedInput
-  broker?: Prisma.BrokerUpdateOneRequiredWithoutAccountsNestedInput
+  broker?: Prisma.BrokerUpdateOneWithoutAccountsNestedInput
   primaryForMembers?: Prisma.MemberUpdateManyWithoutPrimaryTradeAccountNestedInput
   lotCheckRuns?: Prisma.LotCheckRunUpdateManyWithoutTradeAccountNestedInput
 }
@@ -960,7 +954,7 @@ export type TradeAccountUpdateWithoutTradeLogsInput = {
 export type TradeAccountUncheckedUpdateWithoutTradeLogsInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   memberId?: Prisma.IntFieldUpdateOperationsInput | number
-  brokerId?: Prisma.IntFieldUpdateOperationsInput | number
+  brokerId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   tradeId?: Prisma.StringFieldUpdateOperationsInput | string
   accountType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   partnerIb?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -983,7 +977,7 @@ export type TradeAccountCreateWithoutLotCheckRunsInput = {
   updatedAt?: Date | string
   lastSyncAt?: Date | string | null
   member: Prisma.MemberCreateNestedOneWithoutTradeAccountsInput
-  broker: Prisma.BrokerCreateNestedOneWithoutAccountsInput
+  broker?: Prisma.BrokerCreateNestedOneWithoutAccountsInput
   primaryForMembers?: Prisma.MemberCreateNestedManyWithoutPrimaryTradeAccountInput
   tradeLogs?: Prisma.TradeLogCreateNestedManyWithoutTradeAccountInput
 }
@@ -991,7 +985,7 @@ export type TradeAccountCreateWithoutLotCheckRunsInput = {
 export type TradeAccountUncheckedCreateWithoutLotCheckRunsInput = {
   id?: number
   memberId: number
-  brokerId: number
+  brokerId?: number | null
   tradeId: string
   accountType?: string | null
   partnerIb?: string | null
@@ -1030,7 +1024,7 @@ export type TradeAccountUpdateWithoutLotCheckRunsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lastSyncAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   member?: Prisma.MemberUpdateOneRequiredWithoutTradeAccountsNestedInput
-  broker?: Prisma.BrokerUpdateOneRequiredWithoutAccountsNestedInput
+  broker?: Prisma.BrokerUpdateOneWithoutAccountsNestedInput
   primaryForMembers?: Prisma.MemberUpdateManyWithoutPrimaryTradeAccountNestedInput
   tradeLogs?: Prisma.TradeLogUpdateManyWithoutTradeAccountNestedInput
 }
@@ -1038,7 +1032,7 @@ export type TradeAccountUpdateWithoutLotCheckRunsInput = {
 export type TradeAccountUncheckedUpdateWithoutLotCheckRunsInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   memberId?: Prisma.IntFieldUpdateOperationsInput | number
-  brokerId?: Prisma.IntFieldUpdateOperationsInput | number
+  brokerId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   tradeId?: Prisma.StringFieldUpdateOperationsInput | string
   accountType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   partnerIb?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1053,7 +1047,7 @@ export type TradeAccountUncheckedUpdateWithoutLotCheckRunsInput = {
 
 export type TradeAccountCreateManyMemberInput = {
   id?: number
-  brokerId: number
+  brokerId?: number | null
   tradeId: string
   accountType?: string | null
   partnerIb?: string | null
@@ -1073,7 +1067,7 @@ export type TradeAccountUpdateWithoutMemberInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lastSyncAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  broker?: Prisma.BrokerUpdateOneRequiredWithoutAccountsNestedInput
+  broker?: Prisma.BrokerUpdateOneWithoutAccountsNestedInput
   primaryForMembers?: Prisma.MemberUpdateManyWithoutPrimaryTradeAccountNestedInput
   tradeLogs?: Prisma.TradeLogUpdateManyWithoutTradeAccountNestedInput
   lotCheckRuns?: Prisma.LotCheckRunUpdateManyWithoutTradeAccountNestedInput
@@ -1081,7 +1075,7 @@ export type TradeAccountUpdateWithoutMemberInput = {
 
 export type TradeAccountUncheckedUpdateWithoutMemberInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
-  brokerId?: Prisma.IntFieldUpdateOperationsInput | number
+  brokerId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   tradeId?: Prisma.StringFieldUpdateOperationsInput | string
   accountType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   partnerIb?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1097,7 +1091,7 @@ export type TradeAccountUncheckedUpdateWithoutMemberInput = {
 
 export type TradeAccountUncheckedUpdateManyWithoutMemberInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
-  brokerId?: Prisma.IntFieldUpdateOperationsInput | number
+  brokerId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   tradeId?: Prisma.StringFieldUpdateOperationsInput | string
   accountType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   partnerIb?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1227,7 +1221,7 @@ export type TradeAccountSelect<ExtArgs extends runtime.Types.Extensions.Internal
   updatedAt?: boolean
   lastSyncAt?: boolean
   member?: boolean | Prisma.MemberDefaultArgs<ExtArgs>
-  broker?: boolean | Prisma.BrokerDefaultArgs<ExtArgs>
+  broker?: boolean | Prisma.TradeAccount$brokerArgs<ExtArgs>
   primaryForMembers?: boolean | Prisma.TradeAccount$primaryForMembersArgs<ExtArgs>
   tradeLogs?: boolean | Prisma.TradeAccount$tradeLogsArgs<ExtArgs>
   lotCheckRuns?: boolean | Prisma.TradeAccount$lotCheckRunsArgs<ExtArgs>
@@ -1253,7 +1247,7 @@ export type TradeAccountSelectScalar = {
 export type TradeAccountOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "memberId" | "brokerId" | "tradeId" | "accountType" | "partnerIb" | "verification" | "status" | "createdAt" | "updatedAt" | "lastSyncAt", ExtArgs["result"]["tradeAccount"]>
 export type TradeAccountInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   member?: boolean | Prisma.MemberDefaultArgs<ExtArgs>
-  broker?: boolean | Prisma.BrokerDefaultArgs<ExtArgs>
+  broker?: boolean | Prisma.TradeAccount$brokerArgs<ExtArgs>
   primaryForMembers?: boolean | Prisma.TradeAccount$primaryForMembersArgs<ExtArgs>
   tradeLogs?: boolean | Prisma.TradeAccount$tradeLogsArgs<ExtArgs>
   lotCheckRuns?: boolean | Prisma.TradeAccount$lotCheckRunsArgs<ExtArgs>
@@ -1264,7 +1258,7 @@ export type $TradeAccountPayload<ExtArgs extends runtime.Types.Extensions.Intern
   name: "TradeAccount"
   objects: {
     member: Prisma.$MemberPayload<ExtArgs>
-    broker: Prisma.$BrokerPayload<ExtArgs>
+    broker: Prisma.$BrokerPayload<ExtArgs> | null
     primaryForMembers: Prisma.$MemberPayload<ExtArgs>[]
     tradeLogs: Prisma.$TradeLogPayload<ExtArgs>[]
     lotCheckRuns: Prisma.$LotCheckRunPayload<ExtArgs>[]
@@ -1272,7 +1266,7 @@ export type $TradeAccountPayload<ExtArgs extends runtime.Types.Extensions.Intern
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: number
     memberId: number
-    brokerId: number
+    brokerId: number | null
     tradeId: string
     accountType: string | null
     partnerIb: string | null
@@ -1622,7 +1616,7 @@ readonly fields: TradeAccountFieldRefs;
 export interface Prisma__TradeAccountClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   member<T extends Prisma.MemberDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.MemberDefaultArgs<ExtArgs>>): Prisma.Prisma__MemberClient<runtime.Types.Result.GetResult<Prisma.$MemberPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
-  broker<T extends Prisma.BrokerDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.BrokerDefaultArgs<ExtArgs>>): Prisma.Prisma__BrokerClient<runtime.Types.Result.GetResult<Prisma.$BrokerPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  broker<T extends Prisma.TradeAccount$brokerArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.TradeAccount$brokerArgs<ExtArgs>>): Prisma.Prisma__BrokerClient<runtime.Types.Result.GetResult<Prisma.$BrokerPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   primaryForMembers<T extends Prisma.TradeAccount$primaryForMembersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.TradeAccount$primaryForMembersArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MemberPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   tradeLogs<T extends Prisma.TradeAccount$tradeLogsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.TradeAccount$tradeLogsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TradeLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   lotCheckRuns<T extends Prisma.TradeAccount$lotCheckRunsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.TradeAccount$lotCheckRunsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$LotCheckRunPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -2011,6 +2005,25 @@ export type TradeAccountDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.
    * Limit how many TradeAccounts to delete.
    */
   limit?: number
+}
+
+/**
+ * TradeAccount.broker
+ */
+export type TradeAccount$brokerArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Broker
+   */
+  select?: Prisma.BrokerSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Broker
+   */
+  omit?: Prisma.BrokerOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.BrokerInclude<ExtArgs> | null
+  where?: Prisma.BrokerWhereInput
 }
 
 /**

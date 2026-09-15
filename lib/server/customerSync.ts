@@ -108,8 +108,8 @@ function normalizeCustomer(row: RawObject, index: number): NormalizedCustomer {
       createdDate: dateValue(first(account, ["created_at", "createdDate", "created_date"]) || createdDate),
       lastSync: dateValue(first(account, ["last_sync", "lastSync", "updated_at"])),
       status: status === "inactive" ? "inactive" as const : "active" as const,
-      brokerCode: stringValue(first(account, ["broker_code", "brokerCode", "broker"])).toUpperCase() || "XM",
-      brokerName: stringValue(first(account, ["broker_name", "brokerName", "broker"])) || "XM",
+      brokerCode: stringValue(first(account, ["broker_code", "brokerCode"])).toUpperCase(),
+      brokerName: stringValue(first(account, ["broker_name", "brokerName"])),
     };
   }).filter((account) => account.tradeId);
 
@@ -220,33 +220,34 @@ async function saveCustomers(customers: NormalizedCustomer[]) {
     }
 
     for (const account of customer.accounts) {
-      const broker = await prisma.broker.upsert({
-        where: { code: account.brokerCode },
-        update: { name: account.brokerName, status: RecordStatus.active },
-        create: { code: account.brokerCode, name: account.brokerName, status: RecordStatus.active, importMethod: "API" },
-      });
-      await prisma.tradeAccount.upsert({
-        where: { brokerId_tradeId: { brokerId: broker.id, tradeId: account.tradeId } },
-        update: {
-          memberId: member.id,
-          accountType: account.accountType,
-          partnerIb: account.partnerIb,
-          verification: account.verification as VerificationStatus,
-          status: account.status as RecordStatus,
-          lastSyncAt: new Date(),
-        },
-        create: {
-          memberId: member.id,
-          brokerId: broker.id,
-          tradeId: account.tradeId,
-          accountType: account.accountType,
-          partnerIb: account.partnerIb,
-          verification: account.verification as VerificationStatus,
-          status: account.status as RecordStatus,
-          createdAt: new Date(`${account.createdDate}T00:00:00Z`),
-          lastSyncAt: new Date(),
-        },
-      });
+      const broker = account.brokerCode
+        ? await prisma.broker.upsert({
+            where: { code: account.brokerCode },
+            update: { name: account.brokerName || account.brokerCode, status: RecordStatus.active },
+            create: { code: account.brokerCode, name: account.brokerName || account.brokerCode, status: RecordStatus.active, importMethod: "API" },
+          })
+        : null;
+      const existingAccount = await prisma.tradeAccount.findFirst({ where: { memberId: member.id, tradeId: account.tradeId }, select: { id: true } });
+      const accountData = {
+        brokerId: broker?.id ?? null,
+        accountType: account.accountType,
+        partnerIb: account.partnerIb,
+        verification: account.verification as VerificationStatus,
+        status: account.status as RecordStatus,
+        lastSyncAt: new Date(),
+      };
+      if (existingAccount) {
+        await prisma.tradeAccount.update({ where: { id: existingAccount.id }, data: accountData });
+      } else {
+        await prisma.tradeAccount.create({
+          data: {
+            ...accountData,
+            memberId: member.id,
+            tradeId: account.tradeId,
+            createdAt: new Date(`${account.createdDate}T00:00:00Z`),
+          },
+        });
+      }
     }
   }
 }
@@ -282,7 +283,7 @@ async function readDatabaseDtos() {
   const tradeAccounts: CustomerTradeAccountDto[] = records.flatMap((member) => member.tradeAccounts.map((account) => ({
     id: account.id,
     memberId: member.id,
-    brokerId: account.brokerId,
+    brokerId: account.brokerId ?? 0,
     tradeId: account.tradeId,
     accountType: account.accountType || "Standard",
     partnerIb: account.partnerIb || "",
@@ -308,7 +309,7 @@ export async function syncCustomerMembers() {
   }));
   const tradeAccounts: CustomerTradeAccountDto[] = customers.flatMap((customer, index) => {
     const memberId = members[index].id;
-    return customer.accounts.map((account) => ({ ...account, id: accountId++, memberId, brokerId: 1 }));
+    return customer.accounts.map((account) => ({ ...account, id: accountId++, memberId, brokerId: 0 }));
   });
   return { members, tradeAccounts, saved: 0, database: false };
 }

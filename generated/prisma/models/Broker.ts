@@ -448,9 +448,9 @@ export type BrokerSumOrderByAggregateInput = {
   id?: Prisma.SortOrder
 }
 
-export type BrokerScalarRelationFilter = {
-  is?: Prisma.BrokerWhereInput
-  isNot?: Prisma.BrokerWhereInput
+export type BrokerNullableScalarRelationFilter = {
+  is?: Prisma.BrokerWhereInput | null
+  isNot?: Prisma.BrokerWhereInput | null
 }
 
 export type EnumRecordStatusFieldUpdateOperationsInput = {
@@ -463,10 +463,12 @@ export type BrokerCreateNestedOneWithoutAccountsInput = {
   connect?: Prisma.BrokerWhereUniqueInput
 }
 
-export type BrokerUpdateOneRequiredWithoutAccountsNestedInput = {
+export type BrokerUpdateOneWithoutAccountsNestedInput = {
   create?: Prisma.XOR<Prisma.BrokerCreateWithoutAccountsInput, Prisma.BrokerUncheckedCreateWithoutAccountsInput>
   connectOrCreate?: Prisma.BrokerCreateOrConnectWithoutAccountsInput
   upsert?: Prisma.BrokerUpsertWithoutAccountsInput
+  disconnect?: Prisma.BrokerWhereInput | boolean
+  delete?: Prisma.BrokerWhereInput | boolean
   connect?: Prisma.BrokerWhereUniqueInput
   update?: Prisma.XOR<Prisma.XOR<Prisma.BrokerUpdateToOneWithWhereWithoutAccountsInput, Prisma.BrokerUpdateWithoutAccountsInput>, Prisma.BrokerUncheckedUpdateWithoutAccountsInput>
 }
