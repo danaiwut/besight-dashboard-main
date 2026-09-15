@@ -28,6 +28,8 @@ export async function persistLotCheckAndAutomate(input: {
   dateTo: string;
   data: LotData;
   autoGrant: boolean;
+  period?: string;
+  indicatorIds?: number[];
 }) {
   if (!isDatabaseConfigured()) {
     return { database: false, linkedMember: null, qualified: null, requiredLots: null, granted: 0, renewed: 0, skipped: "DATABASE_URL is not configured" };
@@ -74,7 +76,11 @@ export async function persistLotCheckAndAutomate(input: {
       skipped = `Member has ${input.data.totalLots.toFixed(4)} of ${requiredLots.toFixed(4)} required lots`;
     } else {
       const entitlements = await tx.planIndicatorEntitlement.findMany({
-        where: { plan: account.member.plan, indicator: { status: RecordStatus.active } },
+        where: {
+          plan: account.member.plan,
+          indicator: { status: RecordStatus.active },
+          ...(input.indicatorIds?.length ? { indicatorId: { in: input.indicatorIds } } : {}),
+        },
         include: { indicator: true },
       });
       if (!entitlements.length) {
@@ -82,7 +88,7 @@ export async function persistLotCheckAndAutomate(input: {
       } else {
         const renewalMonths = settings.renewalMonths;
         const now = new Date();
-        const period = input.dateTo.slice(0, 7);
+        const period = input.period || `${input.dateFrom}_${input.dateTo}`;
         for (const entitlement of entitlements) {
           const alreadyProcessed = await tx.renewalRecord.findUnique({
             where: { memberId_indicatorId_period: { memberId: account.memberId, indicatorId: entitlement.indicatorId, period } },

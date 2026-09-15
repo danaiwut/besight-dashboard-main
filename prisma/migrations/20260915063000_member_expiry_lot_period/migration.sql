@@ -1,0 +1,1 @@
+ALTER TABLE `RenewalRecord` MODIFY `period` VARCHAR(32) NOT NULL;

@@ -210,7 +210,7 @@ model RenewalRecord {
   memberId          Int
   indicatorId       Int
   indicatorAccessId Int?
-  period            String                 @db.VarChar(7)
+  period            String                 @db.VarChar(32)
   qualifiedLots     Decimal                @db.Decimal(18, 8)
   requiredLots      Decimal                @db.Decimal(18, 8)
   renewed           Boolean

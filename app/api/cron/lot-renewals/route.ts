@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { RecordStatus, VerificationStatus } from "@/generated/prisma/client";
+import { IndicatorAccessStatus, RecordStatus, VerificationStatus } from "@/generated/prisma/client";
 import { persistLotCheckAndAutomate } from "@/lib/server/indicatorAutomation";
-import { fetchAccountLotCheck } from "@/lib/server/lotCheck";
+import { fetchAccountLotCheck, lotWindowForExpiry } from "@/lib/server/lotCheck";
 import { getPrisma, isDatabaseConfigured } from "@/lib/server/prisma";
 
 export const dynamic = "force-dynamic";
@@ -24,18 +24,42 @@ export async function GET(request: NextRequest) {
   }
 
   const defaults = monthRange();
-  const dateFrom = request.nextUrl.searchParams.get("date_from") || defaults.dateFrom;
-  const dateTo = request.nextUrl.searchParams.get("date_to") || defaults.dateTo;
+  const forcedDateFrom = request.nextUrl.searchParams.get("date_from");
+  const forcedDateTo = request.nextUrl.searchParams.get("date_to");
+  const forcedRange = forcedDateFrom && forcedDateTo ? { dateFrom: forcedDateFrom, dateTo: forcedDateTo, period: `${forcedDateFrom}_${forcedDateTo}` } : null;
+  const now = new Date();
   const accounts = await getPrisma().tradeAccount.findMany({
     where: { status: RecordStatus.active, verification: VerificationStatus.verified },
-    select: { tradeId: true },
+    select: {
+      tradeId: true,
+      member: {
+        select: {
+          indicatorAccess: {
+            where: { status: IndicatorAccessStatus.active },
+            select: { indicatorId: true, expiresAt: true },
+            orderBy: { expiresAt: "asc" },
+          },
+        },
+      },
+    },
   });
 
   const outcomes: Array<{ tradeId: string; ok: boolean; qualified?: boolean | null; granted?: number; renewed?: number; error?: string }> = [];
   for (const account of accounts) {
     try {
-      const data = await fetchAccountLotCheck(dateFrom, dateTo, account.tradeId);
-      const automation = await persistLotCheckAndAutomate({ tradeId: account.tradeId, dateFrom, dateTo, data, autoGrant: true });
+      const dueAccess = account.member.indicatorAccess.filter((access) => access.expiresAt <= now);
+      if (!forcedRange && account.member.indicatorAccess.length && !dueAccess.length) continue;
+      const range = forcedRange || (dueAccess.length ? lotWindowForExpiry(dueAccess[0].expiresAt) : { ...defaults, period: `${defaults.dateFrom}_${defaults.dateTo}` });
+      const data = await fetchAccountLotCheck(range.dateFrom, range.dateTo, account.tradeId);
+      const automation = await persistLotCheckAndAutomate({
+        tradeId: account.tradeId,
+        dateFrom: range.dateFrom,
+        dateTo: range.dateTo,
+        data,
+        autoGrant: true,
+        period: range.period,
+        indicatorIds: forcedRange ? undefined : (dueAccess.length ? dueAccess.map((access) => access.indicatorId) : undefined),
+      });
       outcomes.push({ tradeId: account.tradeId, ok: true, qualified: automation.qualified, granted: automation.granted, renewed: automation.renewed });
     } catch (error) {
       outcomes.push({ tradeId: account.tradeId, ok: false, error: error instanceof Error ? error.message : "Unknown error" });
@@ -44,8 +68,8 @@ export async function GET(request: NextRequest) {
 
   return NextResponse.json({
     ok: outcomes.every((outcome) => outcome.ok),
-    dateFrom,
-    dateTo,
+    dateFrom: forcedRange?.dateFrom || defaults.dateFrom,
+    dateTo: forcedRange?.dateTo || defaults.dateTo,
     checked: outcomes.length,
     qualified: outcomes.filter((outcome) => outcome.qualified).length,
     granted: outcomes.reduce((sum, outcome) => sum + (outcome.granted || 0), 0),

@@ -21,6 +21,22 @@ function number(value: unknown) {
   return Number.isFinite(parsed) ? parsed : 0;
 }
 
+function addMonths(date: Date, months: number) {
+  const result = new Date(date);
+  const day = result.getUTCDate();
+  result.setUTCDate(1);
+  result.setUTCMonth(result.getUTCMonth() + months);
+  const lastDay = new Date(Date.UTC(result.getUTCFullYear(), result.getUTCMonth() + 1, 0)).getUTCDate();
+  result.setUTCDate(Math.min(day, lastDay));
+  return result;
+}
+
+export function lotWindowForExpiry(expiresAt: Date) {
+  const dateFrom = addMonths(expiresAt, -1).toISOString().slice(0, 10);
+  const dateTo = expiresAt.toISOString().slice(0, 10);
+  return { dateFrom, dateTo, period: `${dateFrom}_${dateTo}` };
+}
+
 function assertDate(value: string, field: string) {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(value) || Number.isNaN(Date.parse(`${value}T00:00:00Z`))) {
     throw new Error(`${field} must be a valid YYYY-MM-DD date`);
