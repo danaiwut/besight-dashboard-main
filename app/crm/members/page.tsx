@@ -35,7 +35,7 @@ import Pagination from "../../../components/crm/Pagination";
 import { exportCsv } from "../../../lib/exportCsv";
 
 type DrawerMode = { kind: "form"; member: Member | null } | null;
-const PAGE_SIZE = 8;
+const PAGE_SIZE = 50;
 
 export default function MembersPage() {
   const { members, tradeAccounts, tradeLogs, indicatorAccess, brokers, settings, toast, memberSyncStatus, memberSyncError, refreshMembers } = useCrm();
