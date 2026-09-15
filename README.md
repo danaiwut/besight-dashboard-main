@@ -17,6 +17,8 @@ npm run dev
 
 Open [http://localhost:3000/crm/members](http://localhost:3000/crm/members) for synchronized customers and [http://localhost:3000/crm/campaigns](http://localhost:3000/crm/campaigns) for lot checking.
 
+Customer sync is a replace sync: after a non-empty API response succeeds, members and trade accounts that are no longer present in the CRM response are removed. An empty API response is rejected and never clears existing data.
+
 ## Automatic lot renewal
 
 Schedule a daily authenticated request to:

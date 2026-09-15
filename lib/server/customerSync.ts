@@ -197,6 +197,8 @@ async function fetchCustomers() {
 
 async function saveCustomers(customers: NormalizedCustomer[]) {
   const prisma = getPrisma();
+  const savedMemberIds = new Set<number>();
+  const tradeIdsByMember = new Map<number, Set<string>>();
   for (const customer of customers) {
     const existing = await prisma.member.findFirst({
       where: {
@@ -232,6 +234,8 @@ async function saveCustomers(customers: NormalizedCustomer[]) {
     const member = existing
       ? await prisma.member.update({ where: { id: existing.id }, data })
       : await prisma.member.create({ data });
+    savedMemberIds.add(member.id);
+    if (!tradeIdsByMember.has(member.id)) tradeIdsByMember.set(member.id, new Set());
 
     await prisma.memberAcquisitionChannel.deleteMany({ where: { memberId: member.id } });
     if (customer.member.channels?.length) {
@@ -239,6 +243,7 @@ async function saveCustomers(customers: NormalizedCustomer[]) {
     }
 
     for (const account of customer.accounts) {
+      tradeIdsByMember.get(member.id)?.add(account.tradeId);
       const broker = account.brokerCode
         ? await prisma.broker.upsert({
             where: { code: account.brokerCode },
@@ -269,6 +274,16 @@ async function saveCustomers(customers: NormalizedCustomer[]) {
       }
     }
   }
+
+  let removedTradeAccounts = 0;
+  for (const [memberId, tradeIds] of tradeIdsByMember) {
+    const removed = await prisma.tradeAccount.deleteMany({
+      where: { memberId, ...(tradeIds.size ? { tradeId: { notIn: [...tradeIds] } } : {}) },
+    });
+    removedTradeAccounts += removed.count;
+  }
+  const removedMembers = await prisma.member.deleteMany({ where: { id: { notIn: [...savedMemberIds] } } });
+  return { removedMembers: removedMembers.count, removedTradeAccounts };
 }
 
 async function readDatabaseDtos() {
@@ -331,8 +346,9 @@ export async function syncCustomerMembers() {
 async function syncCustomerMembersOnce() {
   const customers = await fetchCustomers();
   if (isDatabaseConfigured()) {
-    await saveCustomers(customers);
-    return { ...(await readDatabaseDtos()), saved: customers.length, database: true };
+    if (!customers.length) throw new Error("CRM customers returned no rows; refusing to clear existing data");
+    const cleanup = await saveCustomers(customers);
+    return { ...(await readDatabaseDtos()), ...cleanup, saved: customers.length, database: true };
   }
 
   let accountId = 1;
