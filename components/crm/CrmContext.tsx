@@ -434,16 +434,7 @@ const INITIAL_RENEWAL_HISTORY: RenewalRecord[] = [
   { id: 5, memberId: 3, indicator: "BeSight Orca", period: "2026-09", qualifiedLots: 21.5, renewed: true, oldExpiry: "2026-09-01", newExpiry: "2026-10-01", createdDate: "2026-09-01" },
 ];
 
-const INITIAL_ACTIVITY_LOGS: ActivityLog[] = [
-  { id: 1, timestamp: "2026-08-26T14:02:00", actor: "System", memberId: 1, memberName: "Somchai Wattana", action: "Lots Updated", description: "Lots synced from XM import — total 4.67 lots this month." },
-  { id: 2, timestamp: "2026-08-18T09:00:00", actor: "System", memberId: 3, memberName: "Marco Rossi", action: "Indicator Renewed", description: "Qualified 21.5 / 3.0 lots. Expiry changed 2026-08-18 → 2027-01-18." },
-  { id: 3, timestamp: "2026-08-02T09:00:00", actor: "System", memberId: 9, memberName: "Liam O'Connor", action: "Indicator Renewed", description: "Qualified 6.5 / 3.0 lots. Expiry changed 2026-08-02 → 2027-02-02." },
-  { id: 4, timestamp: "2026-08-01T11:20:00", actor: "Alex Dean", memberId: 8, memberName: "Emma Chen", action: "Telegram Access Granted", description: "Added to BeSight VIP Signals — pending TradingView verification." },
-  { id: 5, timestamp: "2026-06-21T08:15:00", actor: "System", memberId: 2, memberName: "Aisha Rahman", action: "Indicator Expired", description: "Lots 1.4 / 3.0 not met by expiry. Access suspended." },
-  { id: 6, timestamp: "2026-06-21T08:15:00", actor: "System", memberId: 2, memberName: "Aisha Rahman", action: "Telegram Access Removed", description: "Removed from BeSight VIP Signals — indicator access expired." },
-  { id: 7, timestamp: "2025-10-27T09:00:00", actor: "System", memberId: 7, memberName: "Tom Becker", action: "Indicator Expired", description: "Trade ID not found at broker — no lots recorded, access expired." },
-  { id: 8, timestamp: "2025-12-04T10:05:00", actor: "Maria Lopez", memberId: 6, memberName: "Priya Nair", action: "Manual Admin Override", description: "Telegram banned for spamming the signals room." },
-];
+const INITIAL_ACTIVITY_LOGS: ActivityLog[] = [];
 
 const DEFAULT_SETTINGS: Settings = {
   requiredLots: 3.0,
@@ -556,6 +547,17 @@ export function CrmProvider({ children }: { children: ReactNode }) {
     return () => { cancelled = true; };
   }, []);
 
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/crm/activity-logs/?limit=2000", { cache: "no-store" })
+      .then(async (response) => {
+        const payload = await response.json() as { ok?: boolean; activityLogs?: ActivityLog[] };
+        if (!cancelled && response.ok && payload.ok && payload.activityLogs) setActivityLogs(payload.activityLogs);
+      })
+      .catch(() => undefined);
+    return () => { cancelled = true; };
+  }, []);
+
   function toast(msg: string) {
     setToastMsg(msg);
     setToastShow(true);
@@ -567,6 +569,11 @@ export function CrmProvider({ children }: { children: ReactNode }) {
       { id: Math.max(0, ...cur.map((l) => l.id)) + 1, timestamp: new Date().toISOString(), ...entry },
       ...cur,
     ]);
+    void fetch("/api/crm/activity-logs/", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(entry),
+    }).catch(() => undefined);
   }
 
   /* Idempotent by design: a renewal is only written once per (memberId,
