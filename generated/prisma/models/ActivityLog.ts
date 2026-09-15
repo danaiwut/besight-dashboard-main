@@ -42,6 +42,8 @@ export type ActivityLogMinAggregateOutputType = {
   actor: string | null
   action: string | null
   description: string | null
+  notification: boolean | null
+  notificationReadAt: Date | null
   createdAt: Date | null
 }
 
@@ -51,6 +53,8 @@ export type ActivityLogMaxAggregateOutputType = {
   actor: string | null
   action: string | null
   description: string | null
+  notification: boolean | null
+  notificationReadAt: Date | null
   createdAt: Date | null
 }
 
@@ -60,6 +64,8 @@ export type ActivityLogCountAggregateOutputType = {
   actor: number
   action: number
   description: number
+  notification: number
+  notificationReadAt: number
   createdAt: number
   _all: number
 }
@@ -81,6 +87,8 @@ export type ActivityLogMinAggregateInputType = {
   actor?: true
   action?: true
   description?: true
+  notification?: true
+  notificationReadAt?: true
   createdAt?: true
 }
 
@@ -90,6 +98,8 @@ export type ActivityLogMaxAggregateInputType = {
   actor?: true
   action?: true
   description?: true
+  notification?: true
+  notificationReadAt?: true
   createdAt?: true
 }
 
@@ -99,6 +109,8 @@ export type ActivityLogCountAggregateInputType = {
   actor?: true
   action?: true
   description?: true
+  notification?: true
+  notificationReadAt?: true
   createdAt?: true
   _all?: true
 }
@@ -195,6 +207,8 @@ export type ActivityLogGroupByOutputType = {
   actor: string
   action: string
   description: string
+  notification: boolean
+  notificationReadAt: Date | null
   createdAt: Date
   _count: ActivityLogCountAggregateOutputType | null
   _avg: ActivityLogAvgAggregateOutputType | null
@@ -227,6 +241,8 @@ export type ActivityLogWhereInput = {
   actor?: Prisma.StringFilter<"ActivityLog"> | string
   action?: Prisma.StringFilter<"ActivityLog"> | string
   description?: Prisma.StringFilter<"ActivityLog"> | string
+  notification?: Prisma.BoolFilter<"ActivityLog"> | boolean
+  notificationReadAt?: Prisma.DateTimeNullableFilter<"ActivityLog"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"ActivityLog"> | Date | string
   member?: Prisma.XOR<Prisma.MemberNullableScalarRelationFilter, Prisma.MemberWhereInput> | null
 }
@@ -237,6 +253,8 @@ export type ActivityLogOrderByWithRelationInput = {
   actor?: Prisma.SortOrder
   action?: Prisma.SortOrder
   description?: Prisma.SortOrder
+  notification?: Prisma.SortOrder
+  notificationReadAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   member?: Prisma.MemberOrderByWithRelationInput
   _relevance?: Prisma.ActivityLogOrderByRelevanceInput
@@ -251,6 +269,8 @@ export type ActivityLogWhereUniqueInput = Prisma.AtLeast<{
   actor?: Prisma.StringFilter<"ActivityLog"> | string
   action?: Prisma.StringFilter<"ActivityLog"> | string
   description?: Prisma.StringFilter<"ActivityLog"> | string
+  notification?: Prisma.BoolFilter<"ActivityLog"> | boolean
+  notificationReadAt?: Prisma.DateTimeNullableFilter<"ActivityLog"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"ActivityLog"> | Date | string
   member?: Prisma.XOR<Prisma.MemberNullableScalarRelationFilter, Prisma.MemberWhereInput> | null
 }, "id">
@@ -261,6 +281,8 @@ export type ActivityLogOrderByWithAggregationInput = {
   actor?: Prisma.SortOrder
   action?: Prisma.SortOrder
   description?: Prisma.SortOrder
+  notification?: Prisma.SortOrder
+  notificationReadAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   _count?: Prisma.ActivityLogCountOrderByAggregateInput
   _avg?: Prisma.ActivityLogAvgOrderByAggregateInput
@@ -278,6 +300,8 @@ export type ActivityLogScalarWhereWithAggregatesInput = {
   actor?: Prisma.StringWithAggregatesFilter<"ActivityLog"> | string
   action?: Prisma.StringWithAggregatesFilter<"ActivityLog"> | string
   description?: Prisma.StringWithAggregatesFilter<"ActivityLog"> | string
+  notification?: Prisma.BoolWithAggregatesFilter<"ActivityLog"> | boolean
+  notificationReadAt?: Prisma.DateTimeNullableWithAggregatesFilter<"ActivityLog"> | Date | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"ActivityLog"> | Date | string
 }
 
@@ -286,6 +310,8 @@ export type ActivityLogCreateInput = {
   actor: string
   action: string
   description: string
+  notification?: boolean
+  notificationReadAt?: Date | string | null
   createdAt?: Date | string
   member?: Prisma.MemberCreateNestedOneWithoutActivityLogsInput
 }
@@ -296,6 +322,8 @@ export type ActivityLogUncheckedCreateInput = {
   actor: string
   action: string
   description: string
+  notification?: boolean
+  notificationReadAt?: Date | string | null
   createdAt?: Date | string
 }
 
@@ -304,6 +332,8 @@ export type ActivityLogUpdateInput = {
   actor?: Prisma.StringFieldUpdateOperationsInput | string
   action?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.StringFieldUpdateOperationsInput | string
+  notification?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  notificationReadAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   member?: Prisma.MemberUpdateOneWithoutActivityLogsNestedInput
 }
@@ -314,6 +344,8 @@ export type ActivityLogUncheckedUpdateInput = {
   actor?: Prisma.StringFieldUpdateOperationsInput | string
   action?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.StringFieldUpdateOperationsInput | string
+  notification?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  notificationReadAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -323,6 +355,8 @@ export type ActivityLogCreateManyInput = {
   actor: string
   action: string
   description: string
+  notification?: boolean
+  notificationReadAt?: Date | string | null
   createdAt?: Date | string
 }
 
@@ -331,6 +365,8 @@ export type ActivityLogUpdateManyMutationInput = {
   actor?: Prisma.StringFieldUpdateOperationsInput | string
   action?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.StringFieldUpdateOperationsInput | string
+  notification?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  notificationReadAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -340,6 +376,8 @@ export type ActivityLogUncheckedUpdateManyInput = {
   actor?: Prisma.StringFieldUpdateOperationsInput | string
   action?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.StringFieldUpdateOperationsInput | string
+  notification?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  notificationReadAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -365,6 +403,8 @@ export type ActivityLogCountOrderByAggregateInput = {
   actor?: Prisma.SortOrder
   action?: Prisma.SortOrder
   description?: Prisma.SortOrder
+  notification?: Prisma.SortOrder
+  notificationReadAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
@@ -379,6 +419,8 @@ export type ActivityLogMaxOrderByAggregateInput = {
   actor?: Prisma.SortOrder
   action?: Prisma.SortOrder
   description?: Prisma.SortOrder
+  notification?: Prisma.SortOrder
+  notificationReadAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
@@ -388,6 +430,8 @@ export type ActivityLogMinOrderByAggregateInput = {
   actor?: Prisma.SortOrder
   action?: Prisma.SortOrder
   description?: Prisma.SortOrder
+  notification?: Prisma.SortOrder
+  notificationReadAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
@@ -443,6 +487,8 @@ export type ActivityLogCreateWithoutMemberInput = {
   actor: string
   action: string
   description: string
+  notification?: boolean
+  notificationReadAt?: Date | string | null
   createdAt?: Date | string
 }
 
@@ -451,6 +497,8 @@ export type ActivityLogUncheckedCreateWithoutMemberInput = {
   actor: string
   action: string
   description: string
+  notification?: boolean
+  notificationReadAt?: Date | string | null
   createdAt?: Date | string
 }
 
@@ -489,6 +537,8 @@ export type ActivityLogScalarWhereInput = {
   actor?: Prisma.StringFilter<"ActivityLog"> | string
   action?: Prisma.StringFilter<"ActivityLog"> | string
   description?: Prisma.StringFilter<"ActivityLog"> | string
+  notification?: Prisma.BoolFilter<"ActivityLog"> | boolean
+  notificationReadAt?: Prisma.DateTimeNullableFilter<"ActivityLog"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"ActivityLog"> | Date | string
 }
 
@@ -497,6 +547,8 @@ export type ActivityLogCreateManyMemberInput = {
   actor: string
   action: string
   description: string
+  notification?: boolean
+  notificationReadAt?: Date | string | null
   createdAt?: Date | string
 }
 
@@ -505,6 +557,8 @@ export type ActivityLogUpdateWithoutMemberInput = {
   actor?: Prisma.StringFieldUpdateOperationsInput | string
   action?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.StringFieldUpdateOperationsInput | string
+  notification?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  notificationReadAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -513,6 +567,8 @@ export type ActivityLogUncheckedUpdateWithoutMemberInput = {
   actor?: Prisma.StringFieldUpdateOperationsInput | string
   action?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.StringFieldUpdateOperationsInput | string
+  notification?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  notificationReadAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -521,6 +577,8 @@ export type ActivityLogUncheckedUpdateManyWithoutMemberInput = {
   actor?: Prisma.StringFieldUpdateOperationsInput | string
   action?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.StringFieldUpdateOperationsInput | string
+  notification?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  notificationReadAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -532,6 +590,8 @@ export type ActivityLogSelect<ExtArgs extends runtime.Types.Extensions.InternalA
   actor?: boolean
   action?: boolean
   description?: boolean
+  notification?: boolean
+  notificationReadAt?: boolean
   createdAt?: boolean
   member?: boolean | Prisma.ActivityLog$memberArgs<ExtArgs>
 }, ExtArgs["result"]["activityLog"]>
@@ -544,10 +604,12 @@ export type ActivityLogSelectScalar = {
   actor?: boolean
   action?: boolean
   description?: boolean
+  notification?: boolean
+  notificationReadAt?: boolean
   createdAt?: boolean
 }
 
-export type ActivityLogOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "memberId" | "actor" | "action" | "description" | "createdAt", ExtArgs["result"]["activityLog"]>
+export type ActivityLogOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "memberId" | "actor" | "action" | "description" | "notification" | "notificationReadAt" | "createdAt", ExtArgs["result"]["activityLog"]>
 export type ActivityLogInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   member?: boolean | Prisma.ActivityLog$memberArgs<ExtArgs>
 }
@@ -563,6 +625,8 @@ export type $ActivityLogPayload<ExtArgs extends runtime.Types.Extensions.Interna
     actor: string
     action: string
     description: string
+    notification: boolean
+    notificationReadAt: Date | null
     createdAt: Date
   }, ExtArgs["result"]["activityLog"]>
   composites: {}
@@ -939,6 +1003,8 @@ export interface ActivityLogFieldRefs {
   readonly actor: Prisma.FieldRef<"ActivityLog", 'String'>
   readonly action: Prisma.FieldRef<"ActivityLog", 'String'>
   readonly description: Prisma.FieldRef<"ActivityLog", 'String'>
+  readonly notification: Prisma.FieldRef<"ActivityLog", 'Boolean'>
+  readonly notificationReadAt: Prisma.FieldRef<"ActivityLog", 'DateTime'>
   readonly createdAt: Prisma.FieldRef<"ActivityLog", 'DateTime'>
 }
     

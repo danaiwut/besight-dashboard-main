@@ -39,10 +39,29 @@ export async function POST(request: NextRequest) {
         memberId: body.memberId || null,
         action: body.action.trim(),
         description: body.description.trim(),
+        notification: true,
       },
     });
     return NextResponse.json({ ok: true, id: Number(record.id) });
   } catch (error) {
     return NextResponse.json({ ok: false, error: error instanceof Error ? error.message : "Unable to save activity log" }, { status: 400 });
+  }
+}
+
+export async function PATCH(request: NextRequest) {
+  if (!isDatabaseConfigured()) return NextResponse.json({ ok: false, error: "DATABASE_URL is not configured" }, { status: 503 });
+  try {
+    const body = await request.json() as { id?: number; all?: boolean };
+    const data = { notificationReadAt: new Date() };
+    if (body.all) {
+      await getPrisma().activityLog.updateMany({ where: { notification: true, notificationReadAt: null }, data });
+    } else if (body.id) {
+      await getPrisma().activityLog.update({ where: { id: BigInt(body.id) }, data });
+    } else {
+      return NextResponse.json({ ok: false, error: "id or all is required" }, { status: 400 });
+    }
+    return NextResponse.json({ ok: true });
+  } catch (error) {
+    return NextResponse.json({ ok: false, error: error instanceof Error ? error.message : "Unable to update notification" }, { status: 400 });
   }
 }

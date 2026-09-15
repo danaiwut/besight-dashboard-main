@@ -286,6 +286,8 @@ export const ActivityLogScalarFieldEnum = {
   actor: 'actor',
   action: 'action',
   description: 'description',
+  notification: 'notification',
+  notificationReadAt: 'notificationReadAt',
   createdAt: 'createdAt'
 } as const
 

@@ -283,11 +283,14 @@ model ActivityLog {
   actor       String   @db.VarChar(96)
   action      String   @db.VarChar(120)
   description String   @db.Text
+  notification Boolean  @default(true)
+  notificationReadAt DateTime?
   createdAt   DateTime @default(now())
   member      Member?  @relation(fields: [memberId], references: [id], onDelete: SetNull)
 
   @@index([createdAt])
   @@index([memberId, createdAt])
+  @@index([notification, notificationReadAt, createdAt])
 }
 
 model Admin {

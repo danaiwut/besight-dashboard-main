@@ -19,12 +19,18 @@ const ICONS: Record<NotifItem["icon"], React.ReactNode> = {
   telegram: <Icon name="send" />,
 };
 
-const INITIAL: NotifItem[] = [
-  { id: 1, icon: "member", html: "<strong>Emma Chen</strong> just added a new trade account, pending verification.", time: "5 min ago", read: false },
-  { id: 2, icon: "renewal", html: "<strong>Marco Rossi</strong>'s indicator access renewed automatically — qualified 21.5 lots.", time: "40 min ago", read: false },
-  { id: 3, icon: "warn", html: "<strong>Aisha Rahman</strong> is below the monthly lot minimum.", time: "2 hours ago", read: false },
-  { id: 4, icon: "telegram", html: "<strong>Priya Nair</strong> was banned from the private Telegram room.", time: "Yesterday", read: true },
-];
+const INITIAL: NotifItem[] = [];
+
+function relativeTime(timestamp: string) {
+  const seconds = Math.max(0, Math.floor((Date.now() - new Date(timestamp).getTime()) / 1000));
+  if (seconds < 60) return "just now";
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return `${minutes} min ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours} hour${hours === 1 ? "" : "s"} ago`;
+  const days = Math.floor(hours / 24);
+  return `${days} day${days === 1 ? "" : "s"} ago`;
+}
 
 export default function CrmNotifications() {
   const { t } = useLanguage();
@@ -32,6 +38,28 @@ export default function CrmNotifications() {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   const unread = items.filter((n) => !n.read).length;
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/crm/notifications/", { cache: "no-store" })
+      .then(async (response) => {
+        const payload = await response.json() as { ok?: boolean; notifications?: Array<Omit<NotifItem, "time"> & { timestamp: string }> };
+        if (cancelled || !response.ok || !payload.ok || !payload.notifications) return;
+        setItems(payload.notifications.map((item) => ({ ...item, time: relativeTime(item.timestamp) })));
+      })
+      .catch(() => undefined);
+    return () => { cancelled = true; };
+  }, []);
+
+  function markRead(id: number) {
+    setItems((cur) => cur.map((item) => item.id === id ? { ...item, read: true } : item));
+    void fetch("/api/crm/activity-logs/", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id }) }).catch(() => undefined);
+  }
+
+  function markAllRead() {
+    setItems((cur) => cur.map((item) => ({ ...item, read: true })));
+    void fetch("/api/crm/activity-logs/", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ all: true }) }).catch(() => undefined);
+  }
 
   useEffect(() => {
     function onDocClick(e: MouseEvent) {
@@ -71,7 +99,7 @@ export default function CrmNotifications() {
               className="notif-mark"
               onClick={(e) => {
                 e.stopPropagation();
-                setItems((cur) => cur.map((n) => ({ ...n, read: true })));
+                markAllRead();
               }}
             >
               {t("menu.markAllRead")}
@@ -84,7 +112,7 @@ export default function CrmNotifications() {
               <div
                 key={n.id}
                 className={`notif-item${n.read ? "" : " unread"}`}
-                onClick={() => setItems((cur) => cur.map((x) => (x.id === n.id ? { ...x, read: true } : x)))}
+                onClick={() => markRead(n.id)}
               >
                 <span className="ni-ic">{ICONS[n.icon]}</span>
                 <div className="ni-body">
