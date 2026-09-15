@@ -11,6 +11,7 @@ import {
   telegramStatusLabelKey,
   primaryIndicatorAccess,
   memberLots,
+  currentMonthRange,
   requiredLotsFor,
   customerStage,
   customerStageBadgeClass,
@@ -61,7 +62,12 @@ function MemberDetailContent() {
   const label = accessLabel(access, settings);
   const telegram = telegramAccess.find((tg) => tg.memberId === member.id);
   const stage = customerStage(member, indicatorAccess);
-  const lots = memberLots(member, tradeAccounts, tradeLogs, settings);
+  const fallbackLotRange = currentMonthRange();
+  const lotRange = {
+    from: member.crmStartDate || fallbackLotRange.from,
+    to: member.crmExpiryDate || fallbackLotRange.to,
+  };
+  const lots = memberLots(member, tradeAccounts, tradeLogs, settings, lotRange);
   const required = requiredLotsFor(member, settings);
   const tone = progressTone(lots, required);
   const pct = Math.min(100, required > 0 ? (lots / required) * 100 : 100);
@@ -189,7 +195,7 @@ function MemberDetailContent() {
         </div>
       </div>
 
-      <MemberTradeAccountsCard member={member} />
+      <MemberTradeAccountsCard key={`${member.id}:${member.crmStartDate || ""}:${member.crmExpiryDate || ""}`} member={member} />
 
       <Drawer
         open={editOpen}

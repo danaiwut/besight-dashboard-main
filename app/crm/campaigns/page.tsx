@@ -750,8 +750,9 @@ function LotCheckPanel() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ dateFrom: range.from, dateTo: range.to, tradeId, autoGrant }),
       });
-      const payload = await response.json() as { ok?: boolean; error?: string; data?: LotCheckData; automation?: LotAutomation };
+      const payload = await response.json() as { ok?: boolean; error?: string; data?: LotCheckData; automation?: LotAutomation; dateFrom?: string; dateTo?: string };
       if (!response.ok || !payload.ok || !payload.data || !payload.automation) throw new Error(payload.error || "ตรวจ Lot ไม่สำเร็จ");
+      if (payload.dateFrom && payload.dateTo) setRange({ from: payload.dateFrom, to: payload.dateTo });
       setResult({ data: payload.data, automation: payload.automation });
     } catch (requestError) {
       setError(requestError instanceof Error ? requestError.message : "ตรวจ Lot ไม่สำเร็จ");

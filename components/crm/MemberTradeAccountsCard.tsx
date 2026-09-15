@@ -29,11 +29,19 @@ function currentMonthRange() {
   return { from: `${y}-${pad(m)}-01`, to: `${y}-${pad(m)}-${pad(lastDay)}` };
 }
 
+function memberLotRange(member: Member) {
+  const fallback = currentMonthRange();
+  return {
+    from: member.crmStartDate || fallback.from,
+    to: member.crmExpiryDate || fallback.to,
+  };
+}
+
 export default function MemberTradeAccountsCard({ member }: { member: Member }) {
   const { tradeAccounts, tradeLogs, brokers } = useCrm();
   const { t } = useLanguage();
   const accounts = memberTradeAccounts(member.id, tradeAccounts);
-  const [range, setDateRange] = useState(currentMonthRange);
+  const [range, setDateRange] = useState(() => memberLotRange(member));
   const totalLots = accounts.reduce((s, a) => s + accountLots(a.id, tradeLogs, range), 0);
   const totalRebate = accounts.reduce((s, a) => s + accountRebate(a.id, tradeLogs, range), 0);
   const [drawerOpen, setDrawerOpen] = useState<{ account: TradeAccount | null } | null>(null);

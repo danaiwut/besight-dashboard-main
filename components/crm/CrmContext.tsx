@@ -834,25 +834,25 @@ export function backfillRebateData(accounts: TradeAccount[], from: string, to: s
 
 /** Respects Settings.lotCalculationMode — sum every verified account, or
  *  only the member's designated primary account (Mode B in the spec). */
-export function memberLots(member: Member, accounts: TradeAccount[], logs: TradeLog[], settings: Settings): number {
+export function memberLots(member: Member, accounts: TradeAccount[], logs: TradeLog[], settings: Settings, range?: DateRange): number {
   const mine = memberTradeAccounts(member.id, accounts);
   if (settings.lotCalculationMode === "selected_only") {
     const primary = mine.find((a) => a.id === member.primaryTradeAccountId) ?? mine[0];
-    return primary && primary.verification === "verified" ? accountLots(primary.id, logs) : 0;
+    return primary && primary.verification === "verified" ? accountLots(primary.id, logs, range) : 0;
   }
-  return mine.filter((a) => a.verification === "verified" && a.status === "active").reduce((s, a) => s + accountLots(a.id, logs), 0);
+  return mine.filter((a) => a.verification === "verified" && a.status === "active").reduce((s, a) => s + accountLots(a.id, logs, range), 0);
 }
 
 /** Same shape as memberLots, but sums accountRebate instead — this month's
  *  rebate rather than this month's lots. Used by the customer dashboard's
  *  "This Month's Rebate" stat. */
-export function memberRebate(member: Member, accounts: TradeAccount[], logs: TradeLog[], settings: Settings): number {
+export function memberRebate(member: Member, accounts: TradeAccount[], logs: TradeLog[], settings: Settings, range?: DateRange): number {
   const mine = memberTradeAccounts(member.id, accounts);
   if (settings.lotCalculationMode === "selected_only") {
     const primary = mine.find((a) => a.id === member.primaryTradeAccountId) ?? mine[0];
-    return primary && primary.verification === "verified" ? accountRebate(primary.id, logs) : 0;
+    return primary && primary.verification === "verified" ? accountRebate(primary.id, logs, range) : 0;
   }
-  return mine.filter((a) => a.verification === "verified" && a.status === "active").reduce((s, a) => s + accountRebate(a.id, logs), 0);
+  return mine.filter((a) => a.verification === "verified" && a.status === "active").reduce((s, a) => s + accountRebate(a.id, logs, range), 0);
 }
 
 /** Case-by-case admin override of the monthly lot requirement, falling back to the global Settings value. */
