@@ -11,6 +11,7 @@ import {
   primaryIndicatorAccess,
   memberIndicatorAccess,
   memberLots,
+  memberLotRange,
   accountLots,
   requiredLotsFor,
   memberTradeAccounts,
@@ -109,7 +110,7 @@ export default function MembersPage() {
   const qualificationCounts = useMemo(() => {
     let qualified = 0;
     for (const m of members) {
-      const lots = memberLots(m, tradeAccounts, tradeLogs, settings);
+      const lots = memberLots(m, tradeAccounts, tradeLogs, settings, memberLotRange(m));
       const required = requiredLotsFor(m, settings);
       if (qualification(lots, required) === "qualified") qualified++;
     }
@@ -134,7 +135,7 @@ export default function MembersPage() {
     const dir = sortDir === "asc" ? 1 : -1;
     return [...filtered].sort((a, b) => {
       if (sortKey === "lots") {
-        return (memberLots(a, tradeAccounts, tradeLogs, settings) - memberLots(b, tradeAccounts, tradeLogs, settings)) * dir;
+        return (memberLots(a, tradeAccounts, tradeLogs, settings, memberLotRange(a)) - memberLots(b, tradeAccounts, tradeLogs, settings, memberLotRange(b))) * dir;
       }
       const av = (sortKey === "startDate" ? accessOf(a.id)?.startDate ?? a.crmStartDate : accessOf(a.id)?.expiryDate ?? a.crmExpiryDate) ?? "";
       const bv = (sortKey === "startDate" ? accessOf(b.id)?.startDate ?? b.crmStartDate : accessOf(b.id)?.expiryDate ?? b.crmExpiryDate) ?? "";
@@ -182,7 +183,7 @@ export default function MembersPage() {
       const base = [m.code, m.name, m.email, m.phone, m.country ?? "", PLAN_LABELS[m.plan]];
       const tail = [
         m.tv, m.telegramUsername ?? "",
-        access?.indicator ?? "", memberLots(m, tradeAccounts, tradeLogs, settings), requiredLotsFor(m, settings),
+        access?.indicator ?? "", memberLots(m, tradeAccounts, tradeLogs, settings, memberLotRange(m)), requiredLotsFor(m, settings),
         accessLabel(access, settings), fmtDate(access?.startDate ?? m.crmStartDate), fmtDate(access?.expiryDate ?? m.crmExpiryDate), fmtDate(m.joinedDate),
         m.channels?.map((c) => ACQUISITION_CHANNEL_LABELS[c]).join(" / ") ?? "",
       ];
@@ -403,7 +404,7 @@ export default function MembersPage() {
                   const isOpen = expanded.has(m.id);
                   const access = accessOf(m.id);
                   const label = accessLabel(access, settings);
-                  const lots = memberLots(m, tradeAccounts, tradeLogs, settings);
+                  const lots = memberLots(m, tradeAccounts, tradeLogs, settings, memberLotRange(m));
                   const required = requiredLotsFor(m, settings);
                   const stage = customerStage(m, indicatorAccess);
                   const primaryBroker = accts[0] ? brokers.find((b) => b.id === accts[0].brokerId)?.name ?? "—" : "—";

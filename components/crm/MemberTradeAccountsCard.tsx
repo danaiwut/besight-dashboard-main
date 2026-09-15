@@ -6,6 +6,7 @@ import {
   accountLots,
   accountRebate,
   memberTradeAccounts,
+  memberLotRange,
   verificationBadgeClass,
   verificationLabelKey,
   lot,
@@ -19,23 +20,6 @@ import TradeAccountForm, { type TradeAccountFormHandle } from "./TradeAccountFor
 import TradeAccountHistoryPanel from "./TradeAccountHistoryPanel";
 import SummaryTotalBar from "./SummaryTotalBar";
 import DateRangePicker from "./DateRangePicker";
-
-function currentMonthRange() {
-  const now = new Date();
-  const pad = (n: number) => String(n).padStart(2, "0");
-  const y = now.getFullYear();
-  const m = now.getMonth() + 1;
-  const lastDay = new Date(y, m, 0).getDate();
-  return { from: `${y}-${pad(m)}-01`, to: `${y}-${pad(m)}-${pad(lastDay)}` };
-}
-
-function memberLotRange(member: Member) {
-  const fallback = currentMonthRange();
-  return {
-    from: member.crmStartDate || fallback.from,
-    to: member.crmExpiryDate || fallback.to,
-  };
-}
 
 export default function MemberTradeAccountsCard({ member }: { member: Member }) {
   const { tradeAccounts, tradeLogs, brokers } = useCrm();

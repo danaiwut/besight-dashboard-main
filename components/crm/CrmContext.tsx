@@ -740,11 +740,20 @@ function toLocalISODate(d: Date): string {
  *  calendar month" when no explicit DateRange is given). Built from local
  *  Y/M/D components rather than toISOString(), which converts to UTC and
  *  can roll the date back a day in timezones ahead of UTC. */
-export function currentMonthRange(): DateRange {
+export function currentMonthRange(): { from: string; to: string } {
   const now = new Date();
   const from = toLocalISODate(new Date(now.getFullYear(), now.getMonth(), 1));
   const to = toLocalISODate(new Date(now.getFullYear(), now.getMonth() + 1, 0));
   return { from, to };
+}
+
+/** The lot cycle follows the member's CRM entitlement dates when available. */
+export function memberLotRange(member: Member): { from: string; to: string } {
+  const fallback = currentMonthRange();
+  return {
+    from: member.crmStartDate || fallback.from,
+    to: member.crmExpiryDate || fallback.to,
+  };
 }
 
 export function memberTradeAccounts(memberId: number, accounts: TradeAccount[]) {
