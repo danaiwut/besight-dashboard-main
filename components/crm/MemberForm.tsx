@@ -17,6 +17,7 @@ import {
   type CustomerStage,
 } from "./CrmContext";
 import { useLanguage } from "./LanguageContext";
+import { apiCall } from "../../lib/crmApi";
 import Icon from "../Icon";
 
 type Row = {
@@ -66,7 +67,7 @@ export type MemberFormHandle = { save: () => void };
 
 const MemberForm = forwardRef<MemberFormHandle, { member: Member | null; onDone: () => void }>(
   function MemberForm({ member, onDone }, ref) {
-    const { members, setMembers, setTradeAccounts, brokers, tradeAccounts, toast, log, syncPlanAccess } = useCrm();
+    const { members, setMembers, setTradeAccounts, brokers, tradeAccounts, toast, log, syncPlanAccess, backendLive } = useCrm();
     const { t } = useLanguage();
     const isNew = !member;
     const [name, setName] = useState(member?.name ?? "");
@@ -121,85 +122,189 @@ const MemberForm = forwardRef<MemberFormHandle, { member: Member | null; onDone:
 
     useImperativeHandle(ref, () => ({
       save() {
-        const trimmedName = name.trim();
-        const trimmedEmail = email.trim();
-        if (!trimmedName || !trimmedEmail) {
-          toast(t("members.toast.nameEmailRequired"));
-          return;
-        }
-        const today = new Date().toISOString().slice(0, 10);
-        const data = {
-          name: trimmedName,
-          email: trimmedEmail,
-          phone: phone.trim(),
-          country: country.trim() || undefined,
-          tv: tv.trim() || "—",
-          telegramUsername: telegramUsername.trim() || undefined,
-          channels: channels.length ? channels : undefined,
-          plan,
-          customerStageOverride: stageOverride === "auto" ? undefined : stageOverride,
-        };
-
-        if (isNew) {
-          const id = Math.max(0, ...members.map((m) => m.id)) + 1;
-          const code = `BS-${String(id).padStart(4, "0")}`;
-          setMembers((cur) => {
-            const newAccounts: TradeAccount[] = rows
-              .filter((r) => r.tradeId.trim())
-              .map((r, i) => {
-                const { trimmedId, verification, accountType } = resolveNewAccountFields(r);
-                return {
-                  id: Math.max(0, ...tradeAccounts.map((a) => a.id)) + i + 1,
-                  memberId: id,
-                  brokerId: r.brokerId,
-                  tradeId: trimmedId,
-                  accountType,
-                  partnerIb: brokers.find((b) => b.id === r.brokerId)?.code ?? "",
-                  verification,
-                  createdDate: today,
-                  lastSync: today,
-                  status: "active" as const,
-                };
-              });
-            setTradeAccounts((accts) => [...accts, ...newAccounts]);
-            log({ actor: "Alex Dean", memberId: id, memberName: trimmedName, action: "Member Added", description: `${trimmedName} added with ${newAccounts.length} trade account(s).` });
-            return [{ id, code, joinedDate: today, createdDate: today, ...data }, ...cur];
-          });
-          const granted = syncPlanAccess(id, plan, trimmedName);
-          toast(granted ? t("members.toast.addedWithPlan", { plan: PLAN_LABELS[plan], n: granted }) : t("members.toast.added"));
-        } else {
-          const planChanged = member!.plan !== plan;
-          setMembers((cur) => cur.map((m) => (m.id === member!.id ? { ...m, ...data } : m)));
-          const granted = planChanged ? syncPlanAccess(member!.id, plan, trimmedName) : 0;
-          setTradeAccounts((accts) => {
-            const others = accts.filter((a) => a.memberId !== member!.id);
-            const mine = accts.filter((a) => a.memberId === member!.id);
-            const updated = rows
-              .filter((r) => r.tradeId.trim())
-              .map((r, i) => {
-                const existing = mine[i];
-                if (existing) return { ...existing, brokerId: r.brokerId, tradeId: r.tradeId.trim() };
-                const { trimmedId, verification, accountType } = resolveNewAccountFields(r);
-                return {
-                  id: Math.max(0, ...accts.map((a) => a.id)) + i + 1,
-                  memberId: member!.id,
-                  brokerId: r.brokerId,
-                  tradeId: trimmedId,
-                  accountType,
-                  partnerIb: brokers.find((b) => b.id === r.brokerId)?.code ?? "",
-                  verification,
-                  createdDate: today,
-                  lastSync: today,
-                  status: "active" as const,
-                };
-              });
-            return [...others, ...updated];
-          });
-          toast(granted ? t("members.toast.updatedWithPlan", { plan: PLAN_LABELS[plan], n: granted }) : t("members.toast.updated"));
-        }
-        onDone();
+        void saveAsync();
       },
     }));
+
+    async function saveAsync() {
+      const trimmedName = name.trim();
+      const trimmedEmail = email.trim();
+      if (!trimmedName || !trimmedEmail) {
+        toast(t("members.toast.nameEmailRequired"));
+        return;
+      }
+      if (!backendLive) {
+        saveLocal(trimmedName, trimmedEmail);
+        onDone();
+        return;
+      }
+      try {
+        if (isNew) await saveNewRemote(trimmedName, trimmedEmail);
+        else await saveEditRemote(trimmedName, trimmedEmail);
+        onDone();
+      } catch (error) {
+        toast(error instanceof Error ? error.message : "Unable to save member");
+      }
+    }
+
+    /* Demo mode (no backend): the original local-only flow, unchanged. */
+    async function saveLocal(trimmedName: string, trimmedEmail: string) {
+      const today = new Date().toISOString().slice(0, 10);
+      const data = {
+        name: trimmedName,
+        email: trimmedEmail,
+        phone: phone.trim(),
+        country: country.trim() || undefined,
+        tv: tv.trim() || "—",
+        telegramUsername: telegramUsername.trim() || undefined,
+        channels: channels.length ? channels : undefined,
+        plan,
+        customerStageOverride: stageOverride === "auto" ? undefined : stageOverride,
+      };
+
+      if (isNew) {
+        const id = Math.max(0, ...members.map((m) => m.id)) + 1;
+        const code = `BS-${String(id).padStart(4, "0")}`;
+        setMembers((cur) => {
+          const newAccounts: TradeAccount[] = rows
+            .filter((r) => r.tradeId.trim())
+            .map((r, i) => {
+              const { trimmedId, verification, accountType } = resolveNewAccountFields(r);
+              return {
+                id: Math.max(0, ...tradeAccounts.map((a) => a.id)) + i + 1,
+                memberId: id,
+                brokerId: r.brokerId,
+                tradeId: trimmedId,
+                accountType,
+                partnerIb: brokers.find((b) => b.id === r.brokerId)?.code ?? "",
+                verification,
+                createdDate: today,
+                lastSync: today,
+                status: "active" as const,
+              };
+            });
+          setTradeAccounts((accts) => [...accts, ...newAccounts]);
+          log({ actor: "Alex Dean", memberId: id, memberName: trimmedName, action: "Member Added", description: `${trimmedName} added with ${newAccounts.length} trade account(s).` });
+          return [{ id, code, joinedDate: today, createdDate: today, ...data }, ...cur];
+        });
+        const granted = await syncPlanAccess(id, plan, trimmedName);
+        toast(granted ? t("members.toast.addedWithPlan", { plan: PLAN_LABELS[plan], n: granted }) : t("members.toast.added"));
+      } else {
+        const planChanged = member!.plan !== plan;
+        setMembers((cur) => cur.map((m) => (m.id === member!.id ? { ...m, ...data } : m)));
+        const granted = planChanged ? await syncPlanAccess(member!.id, plan, trimmedName) : 0;
+        setTradeAccounts((accts) => {
+          const others = accts.filter((a) => a.memberId !== member!.id);
+          const mine = accts.filter((a) => a.memberId === member!.id);
+          const updated = rows
+            .filter((r) => r.tradeId.trim())
+            .map((r, i) => {
+              const existing = mine[i];
+              if (existing) return { ...existing, brokerId: r.brokerId, tradeId: r.tradeId.trim() };
+              const { trimmedId, verification, accountType } = resolveNewAccountFields(r);
+              return {
+                id: Math.max(0, ...accts.map((a) => a.id)) + i + 1,
+                memberId: member!.id,
+                brokerId: r.brokerId,
+                tradeId: trimmedId,
+                accountType,
+                partnerIb: brokers.find((b) => b.id === r.brokerId)?.code ?? "",
+                verification,
+                createdDate: today,
+                lastSync: today,
+                status: "active" as const,
+              };
+            });
+          return [...others, ...updated];
+        });
+        toast(granted ? t("members.toast.updatedWithPlan", { plan: PLAN_LABELS[plan], n: granted }) : t("members.toast.updated"));
+      }
+    }
+
+    /* Backend mode: persist via API, then apply the server DTOs to state. */
+    function memberPayload(trimmedName: string, trimmedEmail: string) {
+      return {
+        name: trimmedName,
+        email: trimmedEmail,
+        phone: phone.trim(),
+        country: country.trim(),
+        tradingView: tv.trim(),
+        telegramUsername: telegramUsername.trim(),
+        channels,
+        plan,
+        customerStageOverride: stageOverride === "auto" ? null : stageOverride,
+      };
+    }
+
+    async function saveNewRemote(trimmedName: string, trimmedEmail: string) {
+      let createdId = 0;
+      try {
+        const created = await apiCall<{ member: Member }>("/api/crm/members/", "POST", memberPayload(trimmedName, trimmedEmail));
+        createdId = created.member.id;
+        const newAccounts: TradeAccount[] = [];
+        for (const r of rows.filter((row) => row.tradeId.trim())) {
+          const { trimmedId, verification, accountType } = resolveNewAccountFields(r);
+          const saved = await apiCall<{ tradeAccount: TradeAccount }>("/api/crm/trade-accounts/", "POST", {
+            memberId: createdId,
+            brokerId: r.brokerId,
+            tradeId: trimmedId,
+            accountType,
+            partnerIb: brokers.find((b) => b.id === r.brokerId)?.code ?? "",
+            verification,
+            status: "active",
+          });
+          newAccounts.push(saved.tradeAccount);
+        }
+        setMembers((cur) => [created.member, ...cur]);
+        if (newAccounts.length) setTradeAccounts((cur) => [...newAccounts, ...cur]);
+        log({ actor: "Alex Dean", memberId: createdId, memberName: trimmedName, action: "Member Added", description: `${trimmedName} added with ${newAccounts.length} trade account(s).` });
+        const granted = await syncPlanAccess(createdId, plan, trimmedName);
+        toast(granted ? t("members.toast.addedWithPlan", { plan: PLAN_LABELS[plan], n: granted }) : t("members.toast.added"));
+      } catch (error) {
+        // All-or-nothing create: roll the member back so a retry can't duplicate.
+        if (createdId) await apiCall(`/api/crm/members/${createdId}/`, "DELETE").catch(() => undefined);
+        throw error;
+      }
+    }
+
+    async function saveEditRemote(trimmedName: string, trimmedEmail: string) {
+      const id = member!.id;
+      const updated = await apiCall<{ member: Member }>(`/api/crm/members/${id}/`, "PUT", memberPayload(trimmedName, trimmedEmail));
+      setMembers((cur) => cur.map((m) => (m.id === id ? updated.member : m)));
+      const planChanged = member!.plan !== plan;
+      const granted = planChanged ? await syncPlanAccess(id, plan, trimmedName) : 0;
+
+      const mine = tradeAccounts.filter((a) => a.memberId === id);
+      const filled = rows.filter((r) => r.tradeId.trim());
+      const savedAccounts: TradeAccount[] = [];
+      for (let i = 0; i < filled.length; i++) {
+        const r = filled[i];
+        if (i < mine.length) {
+          const saved = await apiCall<{ tradeAccount: TradeAccount }>(`/api/crm/trade-accounts/${mine[i].id}/`, "PUT", {
+            brokerId: r.brokerId,
+            tradeId: r.tradeId.trim(),
+          });
+          savedAccounts.push(saved.tradeAccount);
+        } else {
+          const { trimmedId, verification, accountType } = resolveNewAccountFields(r);
+          const saved = await apiCall<{ tradeAccount: TradeAccount }>("/api/crm/trade-accounts/", "POST", {
+            memberId: id,
+            brokerId: r.brokerId,
+            tradeId: trimmedId,
+            accountType,
+            partnerIb: brokers.find((b) => b.id === r.brokerId)?.code ?? "",
+            verification,
+            status: "active",
+          });
+          savedAccounts.push(saved.tradeAccount);
+        }
+      }
+      for (const extra of mine.slice(filled.length)) {
+        await apiCall(`/api/crm/trade-accounts/${extra.id}/`, "DELETE").catch(() => undefined);
+      }
+      setTradeAccounts((cur) => [...cur.filter((a) => a.memberId !== id), ...savedAccounts]);
+      toast(granted ? t("members.toast.updatedWithPlan", { plan: PLAN_LABELS[plan], n: granted }) : t("members.toast.updated"));
+    }
 
     return (
       <>

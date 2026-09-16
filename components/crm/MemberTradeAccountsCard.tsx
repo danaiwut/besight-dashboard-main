@@ -1,10 +1,9 @@
 "use client";
 
-import { Fragment, useRef, useState } from "react";
+import { Fragment, useEffect, useRef, useState } from "react";
 import {
   useCrm,
-  accountLots,
-  accountRebate,
+  fetchRealAccountLots,
   memberTradeAccounts,
   memberLotRange,
   verificationBadgeClass,
@@ -22,15 +21,32 @@ import SummaryTotalBar from "./SummaryTotalBar";
 import DateRangePicker from "./DateRangePicker";
 
 export default function MemberTradeAccountsCard({ member }: { member: Member }) {
-  const { tradeAccounts, tradeLogs, brokers } = useCrm();
+  const { tradeAccounts, brokers } = useCrm();
   const { t } = useLanguage();
   const accounts = memberTradeAccounts(member.id, tradeAccounts);
   const [range, setDateRange] = useState(() => memberLotRange(member));
-  const totalLots = accounts.reduce((s, a) => s + accountLots(a.id, tradeLogs, range), 0);
-  const totalRebate = accounts.reduce((s, a) => s + accountRebate(a.id, tradeLogs, range), 0);
+  const [lotsByAccount, setLotsByAccount] = useState<Record<number, number | null>>({});
   const [drawerOpen, setDrawerOpen] = useState<{ account: TradeAccount | null } | null>(null);
   const [expanded, setExpanded] = useState<Set<number>>(new Set());
   const formRef = useRef<TradeAccountFormHandle>(null);
+
+  // Real per-account lots, straight from the CRM lot-check webhook — same
+  // source the renewal engine qualifies against, no mock trade-log data.
+  // A failed lookup stays null (rendered as "—"), never a fake zero.
+  useEffect(() => {
+    let cancelled = false;
+    // Reset to the loading state ("…" cells) before refetching.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setLotsByAccount({});
+    Promise.all(accounts.map(async (a) => [a.id, await fetchRealAccountLots(a.tradeId, range).catch(() => null)] as const))
+      .then((pairs) => { if (!cancelled) setLotsByAccount(Object.fromEntries(pairs)); });
+    return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [accounts.map((a) => a.tradeId).join(","), range.from, range.to]);
+
+  const loaded = accounts.every((a) => lotsByAccount[a.id] !== undefined);
+  const anyFailed = accounts.some((a) => lotsByAccount[a.id] === null);
+  const totalLots = loaded && !anyFailed ? accounts.reduce((s, a) => s + (lotsByAccount[a.id] || 0), 0) : null;
 
   function toggleExpand(id: number) {
     setExpanded((cur) => {
@@ -56,7 +72,10 @@ export default function MemberTradeAccountsCard({ member }: { member: Member }) 
             </button>
           </div>
         </div>
-        {accounts.length > 0 && <SummaryTotalBar label={t("ta.history.total")} lots={totalLots} rebate={totalRebate} style={{ marginBottom: 14 }} />}
+        {accounts.length > 0 && totalLots !== null && <SummaryTotalBar label={t("ta.history.total")} lots={totalLots} rebate={0} style={{ marginBottom: 14 }} />}
+        {accounts.length > 0 && totalLots === null && loaded && (
+          <div style={{ fontSize: 12.5, color: "var(--text-sub)", marginBottom: 14 }}>{t("ta.history.liveUnavailable")}</div>
+        )}
         {accounts.length ? (
           <div className="table-wrap">
             <table className="data">
@@ -75,6 +94,7 @@ export default function MemberTradeAccountsCard({ member }: { member: Member }) 
               <tbody>
                 {accounts.map((a) => {
                   const isOpen = expanded.has(a.id);
+                  const liveLots = lotsByAccount[a.id];
                   return (
                     <Fragment key={a.id}>
                       <tr onClick={() => toggleExpand(a.id)} style={{ cursor: "pointer" }}>
@@ -98,8 +118,8 @@ export default function MemberTradeAccountsCard({ member }: { member: Member }) 
                         <td>
                           <span className={`badge ${verificationBadgeClass(a.verification)}`}>{t(verificationLabelKey(a.verification))}</span>
                         </td>
-                        <td className="mono">{lot(accountLots(a.id, tradeLogs, range))}</td>
-                        <td className="mono">${accountRebate(a.id, tradeLogs, range).toFixed(2)}</td>
+                        <td className="mono">{liveLots === undefined ? "…" : liveLots === null ? "—" : lot(liveLots)}</td>
+                        <td className="mono">$0.00</td>
                         <td>
                           <span className={`badge ${a.status === "active" ? "active" : "suspended"}`}>{a.status === "active" ? t("common.active") : t("common.inactive")}</span>
                         </td>
@@ -112,7 +132,7 @@ export default function MemberTradeAccountsCard({ member }: { member: Member }) 
                       <tr className="cust-sub" hidden={!isOpen}>
                         <td></td>
                         <td colSpan={7}>
-                          <TradeAccountHistoryPanel accountId={a.id} />
+                          <TradeAccountHistoryPanel accountId={a.id} tradeId={a.tradeId} range={range} />
                         </td>
                       </tr>
                     </Fragment>

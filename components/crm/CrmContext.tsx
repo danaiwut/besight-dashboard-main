@@ -1,6 +1,8 @@
 "use client";
 
-import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from "react";
+import { apiCall } from "../../lib/crmApi";
+import { formatDay, getDateLang } from "../../lib/dateLocale";
 
 /* ── BeSight CRM data model ──
    Member 1:N TradeAccount (never a comma-joined string — a real relation).
@@ -146,6 +148,14 @@ export type Member = {
   requiredLotsOverrideNote?: string;
   /** Manual override of the auto-detected customer lifecycle tag (see customerStage()) — replaces the derived value for this member only. */
   customerStageOverride?: CustomerStage;
+  /** Real lots for the member's current entitlement period, from the CRM lot-check webhook —
+   *  persisted by the member-lots-snapshot cron so list views don't need a live call per row.
+   *  Only valid for the stamped from/to window (a later sync can move the
+   *  member's qualification dates — see memberLots()). */
+  currentPeriodLots?: number;
+  currentPeriodLotsAt?: string;
+  currentPeriodLotsFrom?: string;
+  currentPeriodLotsTo?: string;
 };
 
 export type Admin = { id: number; name: string; email: string; role: string; owner?: boolean };
@@ -482,13 +492,77 @@ type CrmContextValue = {
   toastShow: boolean;
   log: (entry: Omit<ActivityLog, "id" | "timestamp">) => void;
   runRenewalCheck: () => { renewed: number; expired: number };
-  syncPlanAccess: (memberId: number, plan: Plan, memberName: string) => number;
+  syncPlanAccess: (memberId: number, plan: Plan, memberName: string) => Promise<number>;
   memberSyncStatus: "idle" | "loading" | "live" | "error";
   memberSyncError: string;
   refreshMembers: () => Promise<void>;
+  /** "loading" until every initial backend read has settled (success or
+   *  failure) — pages render skeletons while this is "loading". */
+  crmDataStatus: "loading" | "ready";
+  /** Last seen realtime counter (see ADR-001) — detail views refetch their
+   *  own slices when this moves. */
+  dataVersion: number;
+  /** True once any backend read has succeeded — mutations persist via API;
+   *  false means pure demo mode (mutations stay local). */
+  backendLive: boolean;
+  /** Re-read every dataset from DB-read endpoints (no upstream sync). */
+  reloadFromDatabase: () => Promise<void>;
 };
 
 const CrmContext = createContext<CrmContextValue | null>(null);
+
+/* Module-level: when the last successful upstream sync finished. Mounts
+   within SYNC_COOLDOWN_MS reuse current DB state instead of firing another
+   ~9s replace-sync (freshness still comes from the 10s version poll, the
+   crons, and the manual Re-sync button, which always forces). */
+let lastSyncFinishedAt = 0;
+const SYNC_COOLDOWN_MS = 120_000;
+
+async function loadJson<T>(url: string): Promise<(T & { ok?: boolean }) | null> {
+  try {
+    const response = await fetch(url, { cache: "no-store" });
+    const payload = await response.json() as T & { ok?: boolean };
+    return response.ok && payload.ok ? payload : null;
+  } catch {
+    return null;
+  }
+}
+
+/* One fetch per backend dataset — DB reads only, never the slow upstream
+   Supabase sync. Shared by initial load and the realtime reload path. */
+type DatabasePayloads = {
+  members?: { members?: Member[]; tradeAccounts?: TradeAccount[] } | null;
+  brokers?: { brokers?: Broker[] } | null;
+  indicators?: { indicators?: Indicator[]; indicatorAccess?: IndicatorAccess[]; planEntitlements?: Record<Plan, number[]> } | null;
+  activity?: { activityLogs?: ActivityLog[] } | null;
+  telegram?: { telegramAccess?: TelegramAccess[] } | null;
+  admins?: { admins?: Admin[] } | null;
+  tradeLogs?: { tradeLogs?: TradeLog[] } | null;
+  automation?: { requiredLots?: number; renewalMonths?: number; enabled?: boolean } | null;
+  general?: { telegramBotToken?: string; telegramPrivateRoomId?: string; telegramAutoRemove?: boolean; expiringSoonDays?: number; lotCalculationMode?: LotCalculationMode } | null;
+  version?: { version?: number } | null;
+};
+
+async function fetchDatabasePayloads(): Promise<DatabasePayloads> {
+  const [members, brokers, indicators, activity, telegram, admins, tradeLogs, automation, general, version] = await Promise.all([
+    loadJson<{ members?: Member[]; tradeAccounts?: TradeAccount[] }>("/api/crm/members/"),
+    loadJson<{ brokers?: Broker[] }>("/api/crm/brokers/"),
+    loadJson<{ indicators?: Indicator[]; indicatorAccess?: IndicatorAccess[]; planEntitlements?: Record<Plan, number[]> }>("/api/crm/indicators/"),
+    loadJson<{ activityLogs?: ActivityLog[] }>("/api/crm/activity-logs/?limit=2000"),
+    loadJson<{ telegramAccess?: TelegramAccess[] }>("/api/crm/telegram-access/"),
+    loadJson<{ admins?: Admin[] }>("/api/crm/admins/"),
+    loadJson<{ tradeLogs?: TradeLog[] }>("/api/crm/trade-logs/"),
+    loadJson<{ settings?: { requiredLots?: number; renewalMonths?: number; enabled?: boolean } }>("/api/crm/settings/indicator-automation/"),
+    loadJson<{ settings?: DatabasePayloads["general"] }>("/api/crm/settings/general/"),
+    loadJson<{ version?: number }>("/api/crm/version/"),
+  ]);
+  return {
+    members, brokers, indicators, activity, telegram, admins, tradeLogs,
+    automation: automation?.settings,
+    general: general?.settings ?? undefined,
+    version,
+  };
+}
 
 export function CrmProvider({ children }: { children: ReactNode }) {
   const [members, setMembers] = useState<Member[]>(INITIAL_MEMBERS);
@@ -506,6 +580,73 @@ export function CrmProvider({ children }: { children: ReactNode }) {
   const [toastShow, setToastShow] = useState(false);
   const [memberSyncStatus, setMemberSyncStatus] = useState<"idle" | "loading" | "live" | "error">("idle");
   const [memberSyncError, setMemberSyncError] = useState("");
+  const [crmDataStatus, setCrmDataStatus] = useState<"loading" | "ready">("loading");
+  const [dataVersion, setDataVersion] = useState(0);
+  const [backendLive, setBackendLive] = useState(false);
+
+  /* Applies one full set of backend payloads to state. Rules per resource:
+     - members/brokers/admins/telegram: replace only when non-empty (their DB
+       tables may legitimately be empty while still demo-backed).
+     - indicators/access/activity/tradeLogs/automation/general: the DB wins,
+       even when empty (populated by seed/sync/cron flows).
+     A failed/503 source keeps its mock seed (demo-mode fallback). */
+  const applyHydration = useCallback((p: DatabasePayloads) => {
+    if (Object.values(p).some((v) => v !== null && v !== undefined)) setBackendLive(true);
+    if (p.members?.members?.length) setMembers(p.members.members);
+    if (p.members?.tradeAccounts) setTradeAccounts(p.members.tradeAccounts);
+    if (p.brokers?.brokers?.length) setBrokers(p.brokers.brokers);
+    if (p.admins?.admins?.length) setAdmins(p.admins.admins);
+    if (p.telegram?.telegramAccess?.length) setTelegramAccess(p.telegram.telegramAccess);
+    if (p.indicators) {
+      if (p.indicators.indicators) setIndicators(p.indicators.indicators);
+      if (p.indicators.indicatorAccess) setIndicatorAccess(p.indicators.indicatorAccess);
+      if (p.indicators.planEntitlements) {
+        const entitlements = p.indicators.planEntitlements;
+        setSettings((current) => ({ ...current, planEntitlements: entitlements }));
+      }
+    }
+    if (p.activity?.activityLogs) setActivityLogs(p.activity.activityLogs);
+    if (p.tradeLogs?.tradeLogs) setTradeLogs(p.tradeLogs.tradeLogs);
+    if (p.automation) {
+      const automation = p.automation;
+      setSettings((current) => ({
+        ...current,
+        ...(typeof automation.requiredLots === "number" ? { requiredLots: automation.requiredLots } : {}),
+        ...(typeof automation.renewalMonths === "number" ? { renewalPeriodMonths: automation.renewalMonths } : {}),
+        ...(typeof automation.enabled === "boolean" ? { autoRenewalEnabled: automation.enabled } : {}),
+      }));
+    }
+    if (p.general) {
+      const general = p.general;
+      setSettings((current) => ({
+        ...current,
+        ...(typeof general.telegramBotToken === "string" ? { telegramBotToken: general.telegramBotToken } : {}),
+        ...(typeof general.telegramPrivateRoomId === "string" ? { telegramPrivateRoomId: general.telegramPrivateRoomId } : {}),
+        ...(typeof general.telegramAutoRemove === "boolean" ? { telegramAutoRemove: general.telegramAutoRemove } : {}),
+        ...(typeof general.expiringSoonDays === "number" ? { expiringSoonDays: general.expiringSoonDays } : {}),
+        ...(general.lotCalculationMode === "sum_all_verified" || general.lotCalculationMode === "selected_only"
+          ? { lotCalculationMode: general.lotCalculationMode }
+          : {}),
+      }));
+    }
+    if (typeof p.version?.version === "number") setDataVersion(p.version.version);
+  }, []);
+
+  /* Re-read every dataset from DB-read endpoints (no upstream sync) — the
+     realtime reload path. Server wins; ephemeral local-only rows (e.g. the
+     rebate-backfill estimator, which deliberately never persists) are dropped.
+     Overlapping reloads are skipped — every reload reads full state, so a
+     skipped one loses nothing. */
+  const reloadInFlight = useRef(false);
+  const reloadFromDatabase = useCallback(async () => {
+    if (reloadInFlight.current) return;
+    reloadInFlight.current = true;
+    try {
+      applyHydration(await fetchDatabasePayloads());
+    } finally {
+      reloadInFlight.current = false;
+    }
+  }, [applyHydration]);
 
   const refreshMembers = useCallback(async () => {
     setMemberSyncStatus("loading");
@@ -517,46 +658,66 @@ export function CrmProvider({ children }: { children: ReactNode }) {
       if (payload.members?.length) setMembers(payload.members);
       if (payload.tradeAccounts) setTradeAccounts(payload.tradeAccounts);
       setMemberSyncStatus("live");
+      lastSyncFinishedAt = Date.now();
+      // The sync also wrote indicator/telegram rows — read everything back.
+      await reloadFromDatabase();
     } catch (error) {
       setMemberSyncStatus("error");
       setMemberSyncError(error instanceof Error ? error.message : "Customer sync failed");
     }
-  }, []);
+  }, [reloadFromDatabase]);
 
-  useEffect(() => {
-    const timer = window.setTimeout(() => void refreshMembers(), 0);
-    return () => window.clearTimeout(timer);
-  }, [refreshMembers]);
-
-  useEffect(() => {
-    let cancelled = false;
-    fetch("/api/crm/indicators/", { cache: "no-store" })
-      .then(async (response) => {
-        const payload = await response.json() as {
-          ok?: boolean;
-          indicators?: Indicator[];
-          indicatorAccess?: IndicatorAccess[];
-          planEntitlements?: Record<Plan, number[]>;
-        };
-        if (cancelled || !response.ok || !payload.ok) return;
-        if (payload.indicators) setIndicators(payload.indicators);
-        if (payload.indicatorAccess) setIndicatorAccess(payload.indicatorAccess);
-        if (payload.planEntitlements) setSettings((current) => ({ ...current, planEntitlements: payload.planEntitlements! }));
-      })
-      .catch(() => undefined);
-    return () => { cancelled = true; };
-  }, []);
-
+  /* ── Initial backend hydration ──
+     DB reads first (fast, parallel — typically well under a second), so pages
+     leave skeleton state almost immediately; the slow upstream replace-sync
+     (~9s+: Supabase pagination + hundreds of upserts + lot recomputes) then
+     runs in the background with progress surfaced by the members sync banner,
+     merging fresh rows in when it arrives. */
   useEffect(() => {
     let cancelled = false;
-    fetch("/api/crm/activity-logs/?limit=2000", { cache: "no-store" })
-      .then(async (response) => {
-        const payload = await response.json() as { ok?: boolean; activityLogs?: ActivityLog[] };
-        if (!cancelled && response.ok && payload.ok && payload.activityLogs) setActivityLogs(payload.activityLogs);
-      })
-      .catch(() => undefined);
-    return () => { cancelled = true; };
-  }, []);
+    async function initialLoad() {
+      await reloadFromDatabase();
+      if (cancelled) return;
+      setCrmDataStatus("ready");
+      // Non-blocking: the sync response merges in via refreshMembers' own
+      // reload (plus the version poll), so this is never awaited here.
+      // Skipped when a sync finished recently — mounts minutes apart don't
+      // each need another full replace-sync storm.
+      if (Date.now() - lastSyncFinishedAt > SYNC_COOLDOWN_MS) void refreshMembers();
+    }
+    const timer = window.setTimeout(() => void initialLoad(), 0);
+    return () => { cancelled = true; window.clearTimeout(timer); };
+  }, [refreshMembers, reloadFromDatabase]);
+
+  /* ── Realtime refresh (see ADR-001) ──
+     Poll the version counter every 10s (skipped while the tab is hidden) and
+     on tab focus; any move means new data from some writer (UI, sync, cron) —
+     reload all datasets. Starts only after the initial load settles. */
+  const lastSeenVersion = useRef(-1);
+  useEffect(() => {
+    if (crmDataStatus !== "ready") return;
+    let cancelled = false;
+    async function checkVersion() {
+      if (document.hidden) return;
+      const payload = await loadJson<{ version?: number }>("/api/crm/version/");
+      if (cancelled || typeof payload?.version !== "number") return;
+      if (lastSeenVersion.current === -1) {
+        lastSeenVersion.current = payload.version;
+        setDataVersion(payload.version);
+        return;
+      }
+      if (payload.version !== lastSeenVersion.current) {
+        lastSeenVersion.current = payload.version;
+        setDataVersion(payload.version);
+        await reloadFromDatabase();
+      }
+    }
+    void checkVersion();
+    const timer = window.setInterval(() => void checkVersion(), 10_000);
+    const onVisibility = () => { if (!document.hidden) void checkVersion(); };
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => { cancelled = true; window.clearInterval(timer); document.removeEventListener("visibilitychange", onVisibility); };
+  }, [crmDataStatus, reloadFromDatabase]);
 
   function toast(msg: string) {
     setToastMsg(msg);
@@ -646,8 +807,10 @@ export function CrmProvider({ children }: { children: ReactNode }) {
      never silently re-granted). It never removes access, so a manual grant
      that goes beyond the plan (e.g. Special Access on a Free member) or a
      manual restriction always wins — Manage stays the source of truth for
-     anything the plan didn't set up. Returns how many grants it created. */
-  function syncPlanAccess(memberId: number, plan: Plan, memberName: string): number {
+     anything the plan didn't set up. Grants persist via the API when the
+     backend is live, else locally (demo mode). Returns how many grants it
+     created. */
+  async function syncPlanAccess(memberId: number, plan: Plan, memberName: string): Promise<number> {
     const entitledIds = settings.planEntitlements[plan] ?? [];
     const entitled = indicators.filter((i) => entitledIds.includes(i.id) && i.status === "active");
     const mine = indicatorAccess.filter((a) => a.memberId === memberId);
@@ -656,23 +819,40 @@ export function CrmProvider({ children }: { children: ReactNode }) {
 
     const today = new Date().toISOString().slice(0, 10);
     const expiry = addMonths(today, settings.renewalPeriodMonths);
-    setIndicatorAccess((cur) => {
-      let nextId = Math.max(0, ...cur.map((a) => a.id));
-      const grants: IndicatorAccess[] = missing.map((i) => ({
-        id: ++nextId,
-        memberId,
-        indicator: i.name,
-        status: "active",
-        source: "Plan",
-        startDate: today,
-        expiryDate: expiry,
-      }));
-      return [...grants, ...cur];
-    });
-    missing.forEach((i) =>
-      log({ actor: "System", memberId, memberName, action: "Indicator Granted", description: `${i.name} auto-granted from the ${PLAN_LABELS[plan]} plan, expires ${expiry}.` })
-    );
-    return missing.length;
+    const granted: IndicatorAccess[] = [];
+    if (backendLive) {
+      for (const indicator of missing) {
+        try {
+          const payload = await apiCall<{ indicatorAccess: IndicatorAccess }>("/api/crm/indicator-access/", "POST", {
+            memberId, indicatorId: indicator.id, status: "active", source: "Plan", startsAt: today, expiresAt: expiry,
+          });
+          granted.push(payload.indicatorAccess);
+        } catch (error) {
+          toast(error instanceof Error ? error.message : "Unable to grant indicator access");
+          break;
+        }
+      }
+    } else {
+      let nextId = Math.max(0, ...indicatorAccess.map((a) => a.id));
+      for (const indicator of missing) {
+        granted.push({
+          id: ++nextId,
+          memberId,
+          indicator: indicator.name,
+          status: "active",
+          source: "Plan",
+          startDate: today,
+          expiryDate: expiry,
+        });
+      }
+    }
+    if (granted.length) {
+      setIndicatorAccess((cur) => [...granted, ...cur]);
+      for (const access of granted) {
+        log({ actor: "System", memberId, memberName, action: "Indicator Granted", description: `${access.indicator} auto-granted from the ${PLAN_LABELS[plan]} plan, expires ${access.expiryDate}.` });
+      }
+    }
+    return granted.length;
   }
 
   return (
@@ -692,6 +872,7 @@ export function CrmProvider({ children }: { children: ReactNode }) {
         toast, toastMsg, toastShow,
         log, runRenewalCheck, syncPlanAccess,
         memberSyncStatus, memberSyncError, refreshMembers,
+        crmDataStatus, dataVersion, backendLive, reloadFromDatabase,
       }}
     >
       {children}
@@ -710,10 +891,22 @@ export const initials = (n: string) =>
   n.trim().split(/\s+/).slice(0, 2).map((w) => w[0]).join("").toUpperCase();
 export const displayNameOf = (m: Member) => m.displayName?.trim() || m.name;
 export const lot = (n: number) => Number(n).toFixed(2);
-export const fmtDate = (d?: string) =>
-  d ? new Date(d + "T00:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "—";
-export const fmtDateTime = (d: string) =>
-  new Date(d).toLocaleString("en-US", { month: "short", day: "numeric", year: "numeric", hour: "numeric", minute: "2-digit" });
+/** Locale-aware date ("Sep 16, 2026" / "16 ก.ย. 2026") — follows the shared
+ *  app language; English output is byte-identical to before. */
+export const fmtDate = (d?: string) => {
+  if (!d) return "—";
+  const dt = new Date(d + "T00:00:00");
+  if (getDateLang() === "th") return formatDay(dt);
+  return dt.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+};
+/** Locale-aware timestamp — Thai uses 24h time + "น.", English unchanged. */
+export const fmtDateTime = (d: string) => {
+  const dt = new Date(d);
+  if (getDateLang() === "th") {
+    return `${formatDay(dt)}, ${String(dt.getHours()).padStart(2, "0")}:${String(dt.getMinutes()).padStart(2, "0")} น.`;
+  }
+  return dt.toLocaleString("en-US", { month: "short", day: "numeric", year: "numeric", hour: "numeric", minute: "2-digit" });
+};
 export const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 export const brokerInitials = (n: string) =>
   n.replace(/[^A-Za-z ]/g, "").trim().split(/\s+/).slice(0, 2).map((w) => w[0]).join("").toUpperCase() || "BK";
@@ -842,14 +1035,30 @@ export function backfillRebateData(accounts: TradeAccount[], from: string, to: s
 }
 
 /** Respects Settings.lotCalculationMode — sum every verified account, or
- *  only the member's designated primary account (Mode B in the spec). */
+ *  only the member's designated primary account (Mode B in the spec).
+ *  Prefers the real, persisted `currentPeriodLots` (from the CRM lot-check
+ *  webhook via the member-lots-snapshot cron) — but ONLY when its stamped
+ *  window matches the member's current qualification window. A later sync can
+ *  move crmStartDate/crmExpiryDate, which would otherwise leave a
+ *  stale-window number on screen (the list/detail mismatch). On a window
+ *  miss it falls back to the ledger math over the current window, which is
+ *  window-correct by construction. */
 export function memberLots(member: Member, accounts: TradeAccount[], logs: TradeLog[], settings: Settings, range?: DateRange): number {
+  const window = range?.from && range?.to ? { from: range.from, to: range.to } : memberLotRange(member);
+  if (
+    member.currentPeriodLots !== undefined &&
+    member.currentPeriodLotsFrom === window.from &&
+    member.currentPeriodLotsTo === window.to
+  ) {
+    return member.currentPeriodLots;
+  }
   const mine = memberTradeAccounts(member.id, accounts);
+  const windowRange = { from: window.from, to: window.to };
   if (settings.lotCalculationMode === "selected_only") {
     const primary = mine.find((a) => a.id === member.primaryTradeAccountId) ?? mine[0];
-    return primary && primary.verification === "verified" ? accountLots(primary.id, logs, range) : 0;
+    return primary && primary.verification === "verified" ? accountLots(primary.id, logs, windowRange) : 0;
   }
-  return mine.filter((a) => a.verification === "verified" && a.status === "active").reduce((s, a) => s + accountLots(a.id, logs, range), 0);
+  return mine.filter((a) => a.verification === "verified" && a.status === "active").reduce((s, a) => s + accountLots(a.id, logs, windowRange), 0);
 }
 
 /** Same shape as memberLots, but sums accountRebate instead — this month's
@@ -867,6 +1076,50 @@ export function memberRebate(member: Member, accounts: TradeAccount[], logs: Tra
 /** Case-by-case admin override of the monthly lot requirement, falling back to the global Settings value. */
 export function requiredLotsFor(member: Member, settings: Settings): number {
   return member.requiredLotsOverride ?? settings.requiredLots;
+}
+
+/** Live lots for one account, straight from the CRM lot-check webhook (the
+ *  same source the renewal engine qualifies members against) — no mock/backfilled
+ *  trade-log data involved. */
+export async function fetchRealAccountLots(tradeId: string, range: DateRange): Promise<number> {
+  const from = range.from || currentMonthRange().from;
+  const to = range.to || currentMonthRange().to;
+  const url = `/api/crm/lot-check/?date_from=${from}&date_to=${to}&tradeid=${encodeURIComponent(tradeId)}`;
+  const response = await fetch(url, { cache: "no-store" });
+  const payload = await response.json() as { ok?: boolean; data?: { totalLots?: number } };
+  if (!response.ok || !payload.ok) throw new Error("Unable to load real lots");
+  return payload.data?.totalLots || 0;
+}
+
+/** Hook mirroring memberLots' shape (respects lotCalculationMode), but sourced
+ *  live from the real CRM webhook instead of any local/mock trade-log array —
+ *  so what an admin sees here always matches what actually qualifies a member
+ *  for renewal. Returns null while the real total is still loading. */
+export function useRealMemberLots(member: Member | undefined, accounts: TradeAccount[], settings: Settings, range: DateRange): number | null {
+  const [lots, setLots] = useState<number | null>(null);
+  const mine = member ? memberTradeAccounts(member.id, accounts) : [];
+  const targets = member && settings.lotCalculationMode === "selected_only"
+    ? [mine.find((a) => a.id === member.primaryTradeAccountId) ?? mine[0]].filter((a): a is TradeAccount => Boolean(a) && a!.verification === "verified")
+    : mine.filter((a) => a.verification === "verified" && a.status === "active");
+  const tradeIds = targets.map((a) => a.tradeId).join(",");
+
+  useEffect(() => {
+    let cancelled = false;
+    // Reset to the loading state ("…" in the UI) before refetching.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setLots(null);
+    if (!tradeIds) {
+      setLots(0);
+      return;
+    }
+    Promise.all(tradeIds.split(",").map((tradeId) => fetchRealAccountLots(tradeId, range)))
+      .then((values) => { if (!cancelled) setLots(values.reduce((s, v) => s + v, 0)); })
+      .catch(() => { if (!cancelled) setLots(0); });
+    return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tradeIds, range.from, range.to]);
+
+  return lots;
 }
 
 /** Lifetime lots/rebate across every trade log for a member — unlike

@@ -1,8 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import {
-  useCrm,
+import { useCrm,
   accessLabel,
   accessBadgeClass,
   accessLabelKey,
@@ -13,9 +12,10 @@ import {
   type IndicatorAccess,
 } from "./CrmContext";
 import { useLanguage } from "./LanguageContext";
+import { apiCall } from "../../lib/crmApi";
 
 export default function MemberIndicatorAccessPanel({ member }: { member: Member }) {
-  const { settings, toast, log, indicatorAccess, setIndicatorAccess, indicators } = useCrm();
+  const { settings, toast, log, indicatorAccess, setIndicatorAccess, indicators, backendLive } = useCrm();
   const { t } = useLanguage();
   const [grantName, setGrantName] = useState("");
 
@@ -23,36 +23,92 @@ export default function MemberIndicatorAccessPanel({ member }: { member: Member 
   const grantable = indicators.filter((i) => i.status === "active" && !myAccess.some((a) => a.indicator === i.name && a.status !== "expired"));
   const effectiveGrantName = grantable.some((i) => i.name === grantName) ? grantName : grantable[0]?.name ?? "";
 
-  function grantAccess() {
+  function applyAccess(id: number, patch: Partial<IndicatorAccess>) {
+    setIndicatorAccess((cur) => cur.map((a) => (a.id === id ? { ...a, ...patch } : a)));
+  }
+
+  async function patchAccess(access: IndicatorAccess, patch: Partial<IndicatorAccess>, action: string, description: string, toastKey: string) {
+    if (!backendLive) {
+      applyAccess(access.id, patch);
+      log({ actor: "Alex Dean", memberId: member.id, memberName: member.name, action, description });
+      toast(t(toastKey, { name: member.name }));
+      return;
+    }
+    try {
+      const payload = await apiCall<{ indicatorAccess: IndicatorAccess }>(`/api/crm/indicator-access/${access.id}/`, "PATCH", {
+        ...(patch.status ? { status: patch.status } : {}),
+        ...(patch.expiryDate ? { expiresAt: patch.expiryDate } : {}),
+        ...(patch.status === "active" && patch.expiryDate ? { renewed: true } : {}),
+      });
+      applyAccess(access.id, payload.indicatorAccess);
+      log({ actor: "Alex Dean", memberId: member.id, memberName: member.name, action, description });
+      toast(t(toastKey, { name: member.name }));
+    } catch (error) {
+      toast(error instanceof Error ? error.message : "Unable to update indicator access");
+    }
+  }
+
+  async function grantAccess() {
     if (!effectiveGrantName) return;
     const today = new Date().toISOString().slice(0, 10);
     const expiry = addMonths(today, settings.renewalPeriodMonths);
-    setIndicatorAccess((cur) => [
-      { id: Math.max(0, ...cur.map((a) => a.id)) + 1, memberId: member.id, indicator: effectiveGrantName, status: "active", source: "Admin", startDate: today, expiryDate: expiry },
-      ...cur,
-    ]);
-    log({ actor: "Alex Dean", memberId: member.id, memberName: member.name, action: "Indicator Granted", description: `${effectiveGrantName} granted by admin, expires ${expiry}.` });
-    toast(t("ia.toast.granted", { name: member.name, indicator: effectiveGrantName }));
+    if (!backendLive) {
+      setIndicatorAccess((cur) => [
+        { id: Math.max(0, ...cur.map((a) => a.id)) + 1, memberId: member.id, indicator: effectiveGrantName, status: "active", source: "Admin", startDate: today, expiryDate: expiry },
+        ...cur,
+      ]);
+      log({ actor: "Alex Dean", memberId: member.id, memberName: member.name, action: "Indicator Granted", description: `${effectiveGrantName} granted by admin, expires ${expiry}.` });
+      toast(t("ia.toast.granted", { name: member.name, indicator: effectiveGrantName }));
+      return;
+    }
+    try {
+      const indicator = indicators.find((i) => i.name === effectiveGrantName);
+      const payload = await apiCall<{ indicatorAccess: IndicatorAccess }>("/api/crm/indicator-access/", "POST", {
+        memberId: member.id,
+        ...(indicator ? { indicatorId: indicator.id } : { indicatorName: effectiveGrantName }),
+        status: "active",
+        source: "Admin",
+        startsAt: today,
+        expiresAt: expiry,
+      });
+      setIndicatorAccess((cur) => [payload.indicatorAccess, ...cur]);
+      log({ actor: "Alex Dean", memberId: member.id, memberName: member.name, action: "Indicator Granted", description: `${effectiveGrantName} granted by admin, expires ${expiry}.` });
+      toast(t("ia.toast.granted", { name: member.name, indicator: effectiveGrantName }));
+    } catch (error) {
+      toast(error instanceof Error ? error.message : "Unable to grant indicator access");
+    }
   }
 
   function extendAccess(access: IndicatorAccess) {
     const oldExpiry = access.expiryDate;
     const newExpiry = addMonths(oldExpiry, settings.renewalPeriodMonths);
-    setIndicatorAccess((cur) => cur.map((a) => (a.id === access.id ? { ...a, status: "active", expiryDate: newExpiry, lastRenewalDate: new Date().toISOString().slice(0, 10) } : a)));
-    log({ actor: "Alex Dean", memberId: member.id, memberName: member.name, action: "Indicator Renewed", description: `${access.indicator}: manually extended ${settings.renewalPeriodMonths} month(s). Expiry changed ${oldExpiry} → ${newExpiry}.` });
-    toast(t("ia.toast.extended", { name: member.name }));
+    void patchAccess(
+      access,
+      { status: "active", expiryDate: newExpiry, lastRenewalDate: new Date().toISOString().slice(0, 10) },
+      "Indicator Renewed",
+      `${access.indicator}: manually extended ${settings.renewalPeriodMonths} month(s). Expiry changed ${oldExpiry} → ${newExpiry}.`,
+      "ia.toast.extended",
+    );
   }
 
   function suspendAccess(access: IndicatorAccess) {
-    setIndicatorAccess((cur) => cur.map((a) => (a.id === access.id ? { ...a, status: "suspended" } : a)));
-    log({ actor: "Alex Dean", memberId: member.id, memberName: member.name, action: "Manual Admin Override", description: `${access.indicator}: access suspended by admin.` });
-    toast(t("ia.toast.suspended", { name: member.name }));
+    void patchAccess(
+      access,
+      { status: "suspended" },
+      "Manual Admin Override",
+      `${access.indicator}: access suspended by admin.`,
+      "ia.toast.suspended",
+    );
   }
 
   function revokeAccess(access: IndicatorAccess) {
-    setIndicatorAccess((cur) => cur.map((a) => (a.id === access.id ? { ...a, status: "expired" } : a)));
-    log({ actor: "Alex Dean", memberId: member.id, memberName: member.name, action: "Indicator Expired", description: `${access.indicator}: access revoked by admin.` });
-    toast(t("ia.toast.revoked", { name: member.name }));
+    void patchAccess(
+      access,
+      { status: "expired" },
+      "Indicator Expired",
+      `${access.indicator}: access revoked by admin.`,
+      "ia.toast.revoked",
+    );
   }
 
   return (

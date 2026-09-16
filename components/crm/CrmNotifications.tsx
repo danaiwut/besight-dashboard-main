@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useLanguage } from "./LanguageContext";
+import { NotificationsSkeleton } from "./Skeletons";
 import Icon from "../Icon";
 
 type NotifItem = {
@@ -35,6 +36,7 @@ function relativeTime(timestamp: string) {
 export default function CrmNotifications() {
   const { t } = useLanguage();
   const [items, setItems] = useState<NotifItem[]>(INITIAL);
+  const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   const unread = items.filter((n) => !n.read).length;
@@ -47,7 +49,10 @@ export default function CrmNotifications() {
         if (cancelled || !response.ok || !payload.ok || !payload.notifications) return;
         setItems(payload.notifications.map((item) => ({ ...item, time: relativeTime(item.timestamp) })));
       })
-      .catch(() => undefined);
+      .catch(() => undefined)
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
     return () => { cancelled = true; };
   }, []);
 
@@ -107,7 +112,9 @@ export default function CrmNotifications() {
           )}
         </div>
         <div className="notif-list">
-          {items.length ? (
+          {loading ? (
+            <NotificationsSkeleton />
+          ) : items.length ? (
             items.map((n) => (
               <div
                 key={n.id}

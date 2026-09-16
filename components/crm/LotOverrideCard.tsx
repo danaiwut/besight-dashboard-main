@@ -3,23 +3,41 @@
 import { useState } from "react";
 import { useCrm, lot, type Member } from "./CrmContext";
 import { useLanguage } from "./LanguageContext";
+import { apiCall } from "../../lib/crmApi";
 
 export default function LotOverrideCard({ member }: { member: Member }) {
-  const { setMembers, settings, toast, log } = useCrm();
+  const { members, setMembers, settings, toast, log, backendLive } = useCrm();
   const { t } = useLanguage();
   const [overrideOn, setOverrideOn] = useState(member.requiredLotsOverride != null);
   const [overrideVal, setOverrideVal] = useState(member.requiredLotsOverride ?? settings.requiredLots);
   const [note, setNote] = useState(member.requiredLotsOverrideNote ?? "");
 
-  function saveOverride() {
+  async function saveOverride() {
     const trimmedNote = note.trim();
-    setMembers((cur) =>
-      cur.map((m) =>
-        m.id === member.id
-          ? { ...m, requiredLotsOverride: overrideOn ? overrideVal : undefined, requiredLotsOverrideNote: overrideOn ? trimmedNote || undefined : undefined }
-          : m
-      )
-    );
+    const patch = {
+      requiredLotsOverride: overrideOn ? overrideVal : undefined,
+      requiredLotsOverrideNote: overrideOn ? trimmedNote || undefined : undefined,
+    };
+    if (!backendLive) {
+      setMembers((cur) => cur.map((m) => (m.id === member.id ? { ...m, ...patch } : m)));
+      afterSave(trimmedNote);
+      return;
+    }
+    try {
+      const payload = await apiCall<{ member: Member }>(`/api/crm/members/${member.id}/`, "PUT", {
+        requiredLotsOverride: overrideOn ? overrideVal : null,
+        requiredLotsOverrideNote: overrideOn ? trimmedNote : null,
+      });
+      // Keep unrelated local fields (channels etc.) — the server DTO is fresh.
+      const fresh = members.find((m) => m.id === member.id);
+      setMembers((cur) => cur.map((m) => (m.id === member.id ? { ...(fresh ?? m), ...payload.member } : m)));
+      afterSave(trimmedNote);
+    } catch (error) {
+      toast(error instanceof Error ? error.message : "Unable to save lot override");
+    }
+  }
+
+  function afterSave(trimmedNote: string) {
     log({
       actor: "Alex Dean",
       memberId: member.id,

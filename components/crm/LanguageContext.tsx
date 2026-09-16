@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import { translate, type Lang } from "../../lib/i18n";
+import { setDateLang } from "../../lib/dateLocale";
 
 const STORAGE_KEY = "bs_crm_lang";
 
@@ -20,12 +21,14 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     // localStorage only exists client-side — synced post-mount.
     const saved = window.localStorage.getItem(STORAGE_KEY);
     if (saved === "en" || saved === "th") {
+      setDateLang(saved);
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setLangState(saved);
     }
   }, []);
 
   function setLang(next: Lang) {
+    setDateLang(next);
     setLangState(next);
     try {
       window.localStorage.setItem(STORAGE_KEY, next);

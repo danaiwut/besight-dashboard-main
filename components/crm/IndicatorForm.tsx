@@ -2,12 +2,13 @@
 
 import { forwardRef, useImperativeHandle, useState } from "react";
 import { useCrm, type Indicator } from "./CrmContext";
+import { apiCall } from "../../lib/crmApi";
 
 export type IndicatorFormHandle = { save: () => void };
 
 const IndicatorForm = forwardRef<IndicatorFormHandle, { indicator: Indicator | null; onDone: () => void }>(
   function IndicatorForm({ indicator, onDone }, ref) {
-    const { setIndicators, toast } = useCrm();
+    const { setIndicators, toast, backendLive } = useCrm();
     const isNew = !indicator;
     const [name, setName] = useState(indicator?.name ?? "");
     const [pubId, setPubId] = useState(indicator?.pubId ?? "");
@@ -15,22 +16,44 @@ const IndicatorForm = forwardRef<IndicatorFormHandle, { indicator: Indicator | n
 
     useImperativeHandle(ref, () => ({
       save() {
-        const trimmedName = name.trim();
-        if (!trimmedName) {
-          toast("Indicator name is required");
-          return;
-        }
-        const trimmedPubId = pubId.trim();
+        void saveAsync();
+      },
+    }));
+
+    async function saveAsync() {
+      const trimmedName = name.trim();
+      if (!trimmedName) {
+        toast("Indicator name is required");
+        return;
+      }
+      const trimmedPubId = pubId.trim();
+      const data = { name: trimmedName, pubId: trimmedPubId, status };
+      if (!backendLive) {
         if (isNew) {
-          setIndicators((cur) => [...cur, { id: Math.max(0, ...cur.map((i) => i.id)) + 1, name: trimmedName, pubId: trimmedPubId, status }]);
+          setIndicators((cur) => [...cur, { id: Math.max(0, ...cur.map((i) => i.id)) + 1, ...data }]);
           toast("Indicator added");
         } else {
-          setIndicators((cur) => cur.map((i) => (i.id === indicator!.id ? { ...i, name: trimmedName, pubId: trimmedPubId, status } : i)));
+          setIndicators((cur) => cur.map((i) => (i.id === indicator!.id ? { ...i, ...data } : i)));
           toast("Indicator updated");
         }
         onDone();
-      },
-    }));
+        return;
+      }
+      try {
+        if (isNew) {
+          const payload = await apiCall<{ indicator: Indicator }>("/api/crm/indicators/", "POST", data);
+          setIndicators((cur) => [...cur, payload.indicator]);
+          toast("Indicator added");
+        } else {
+          const payload = await apiCall<{ indicator: Indicator }>(`/api/crm/indicators/${indicator!.id}/`, "PUT", data);
+          setIndicators((cur) => cur.map((i) => (i.id === indicator!.id ? payload.indicator : i)));
+          toast("Indicator updated");
+        }
+        onDone();
+      } catch (error) {
+        toast(error instanceof Error ? error.message : "Unable to save indicator");
+      }
+    }
 
     return (
       <>

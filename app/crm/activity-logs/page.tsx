@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { useCrm, fmtDateTime } from "../../../components/crm/CrmContext";
 import { useLanguage } from "../../../components/crm/LanguageContext";
+import { ActivityLogsSkeleton } from "../../../components/crm/Skeletons";
 import Icon from "../../../components/Icon";
 import Pagination from "../../../components/crm/Pagination";
 import { exportCsv } from "../../../lib/exportCsv";
@@ -24,7 +25,7 @@ const ACTION_TONE: Record<string, string> = {
 };
 
 export default function ActivityLogsPage() {
-  const { activityLogs, toast } = useCrm();
+  const { activityLogs, toast, crmDataStatus } = useCrm();
   const { t } = useLanguage();
   const [actionFilter, setActionFilter] = useState("all");
   const [query, setQuery] = useState("");
@@ -48,6 +49,8 @@ export default function ActivityLogsPage() {
     exportCsv("activity-logs-export", headers, rows);
     toast(t("al.toast.exported", { n: list.length }));
   }
+
+  if (crmDataStatus === "loading") return <ActivityLogsSkeleton />;
 
   return (
     <section className="panel is-active">

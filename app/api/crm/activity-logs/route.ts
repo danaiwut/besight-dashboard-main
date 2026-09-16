@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getPrisma, isDatabaseConfigured } from "@/lib/server/prisma";
+import { bumpDataVersion } from "@/lib/server/dataVersion";
 
 export const dynamic = "force-dynamic";
 
@@ -42,6 +43,7 @@ export async function POST(request: NextRequest) {
         notification: true,
       },
     });
+    await bumpDataVersion();
     return NextResponse.json({ ok: true, id: Number(record.id) });
   } catch (error) {
     return NextResponse.json({ ok: false, error: error instanceof Error ? error.message : "Unable to save activity log" }, { status: 400 });

@@ -3,6 +3,8 @@
 import { useRef, useState } from "react";
 import { useCrm, brokerInitials, accountLots, lot, type Broker } from "../../../components/crm/CrmContext";
 import { useLanguage } from "../../../components/crm/LanguageContext";
+import { BrokersSkeleton } from "../../../components/crm/Skeletons";
+import { apiCall } from "../../../lib/crmApi";
 import Icon from "../../../components/Icon";
 import Drawer from "../../../components/crm/Drawer";
 import BrokerForm, { type BrokerFormHandle } from "../../../components/crm/BrokerForm";
@@ -23,9 +25,37 @@ function BrokerDirectory({
   drawerOpen: { broker: Broker | null } | null;
   setDrawerOpen: (v: { broker: Broker | null } | null) => void;
 }) {
-  const { brokers, setBrokers, tradeAccounts, tradeLogs, toast } = useCrm();
+  const { brokers, setBrokers, tradeAccounts, tradeLogs, toast, backendLive } = useCrm();
   const { t } = useLanguage();
   const formRef = useRef<BrokerFormHandle>(null);
+
+  async function removeBroker(id: number, name: string) {
+    if (!backendLive) {
+      setBrokers((cur) => cur.filter((x) => x.id !== id));
+      toast(t("br.toast.removed", { name }));
+      return;
+    }
+    try {
+      await apiCall(`/api/crm/brokers/${id}/`, "DELETE");
+      setBrokers((cur) => cur.filter((x) => x.id !== id));
+      toast(t("br.toast.removed", { name }));
+    } catch (error) {
+      toast(error instanceof Error ? error.message : "Unable to delete broker");
+    }
+  }
+
+  async function saveBrokerField(id: number, patch: { code?: string; url?: string }) {
+    if (!backendLive) {
+      setBrokers((cur) => cur.map((x) => (x.id === id ? { ...x, ...patch } : x)));
+      return;
+    }
+    try {
+      const payload = await apiCall<{ broker: Broker }>(`/api/crm/brokers/${id}/`, "PUT", patch);
+      setBrokers((cur) => cur.map((x) => (x.id === id ? payload.broker : x)));
+    } catch (error) {
+      toast(error instanceof Error ? error.message : "Unable to save broker");
+    }
+  }
 
   return (
     <>
@@ -51,10 +81,7 @@ function BrokerDirectory({
                   className="kebab bk-del"
                   aria-label={t("br.deleteBroker")}
                   style={{ marginLeft: "auto" }}
-                  onClick={() => {
-                    setBrokers((cur) => cur.filter((x) => x.id !== b.id));
-                    toast(t("br.toast.removed", { name: b.name }));
-                  }}
+                  onClick={() => void removeBroker(b.id, b.name)}
                 >
                   <Icon name="delete" />
                 </button>
@@ -84,7 +111,10 @@ function BrokerDirectory({
                     className="input"
                     defaultValue={b.code}
                     placeholder="e.g. BS-XXXX"
-                    onBlur={(e) => setBrokers((cur) => cur.map((x) => (x.id === b.id ? { ...x, code: e.target.value.trim() } : x)))}
+                    onBlur={(e) => {
+                      const code = e.target.value.trim();
+                      if (code !== b.code) void saveBrokerField(b.id, { code });
+                    }}
                   />
                 </div>
                 <div className="field" style={{ marginBottom: 0 }}>
@@ -93,7 +123,10 @@ function BrokerDirectory({
                     className="input"
                     defaultValue={b.url}
                     placeholder="https://…"
-                    onBlur={(e) => setBrokers((cur) => cur.map((x) => (x.id === b.id ? { ...x, url: e.target.value.trim() } : x)))}
+                    onBlur={(e) => {
+                      const url = e.target.value.trim();
+                      if (url !== b.url) void saveBrokerField(b.id, { url });
+                    }}
                   />
                 </div>
                 <button className="btn btn-ghost bk-save" style={{ width: "100%", marginTop: 12 }} onClick={() => toast(t("br.toast.updated", { name: b.name }))}>
@@ -129,7 +162,10 @@ function BrokerDirectory({
 
 export default function BrokersPage() {
   const { t } = useLanguage();
+  const { crmDataStatus } = useCrm();
   const [drawerOpen, setDrawerOpen] = useState<{ broker: Broker | null } | null>(null);
+
+  if (crmDataStatus === "loading") return <BrokersSkeleton />;
 
   return (
     <section className="panel is-active">

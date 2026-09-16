@@ -30,12 +30,14 @@ export type MemberAvgAggregateOutputType = {
   id: number | null
   primaryTradeAccountId: number | null
   requiredLotsOverride: runtime.Decimal | null
+  currentPeriodLots: runtime.Decimal | null
 }
 
 export type MemberSumAggregateOutputType = {
   id: number | null
   primaryTradeAccountId: number | null
   requiredLotsOverride: runtime.Decimal | null
+  currentPeriodLots: runtime.Decimal | null
 }
 
 export type MemberMinAggregateOutputType = {
@@ -63,6 +65,10 @@ export type MemberMinAggregateOutputType = {
   requiredLotsOverrideNote: string | null
   crmStartDate: Date | null
   crmExpiryDate: Date | null
+  currentPeriodLots: runtime.Decimal | null
+  currentPeriodLotsAt: Date | null
+  currentPeriodLotsFrom: Date | null
+  currentPeriodLotsTo: Date | null
   customerStageOverride: $Enums.CustomerStage | null
 }
 
@@ -91,6 +97,10 @@ export type MemberMaxAggregateOutputType = {
   requiredLotsOverrideNote: string | null
   crmStartDate: Date | null
   crmExpiryDate: Date | null
+  currentPeriodLots: runtime.Decimal | null
+  currentPeriodLotsAt: Date | null
+  currentPeriodLotsFrom: Date | null
+  currentPeriodLotsTo: Date | null
   customerStageOverride: $Enums.CustomerStage | null
 }
 
@@ -119,6 +129,10 @@ export type MemberCountAggregateOutputType = {
   requiredLotsOverrideNote: number
   crmStartDate: number
   crmExpiryDate: number
+  currentPeriodLots: number
+  currentPeriodLotsAt: number
+  currentPeriodLotsFrom: number
+  currentPeriodLotsTo: number
   customerStageOverride: number
   _all: number
 }
@@ -128,12 +142,14 @@ export type MemberAvgAggregateInputType = {
   id?: true
   primaryTradeAccountId?: true
   requiredLotsOverride?: true
+  currentPeriodLots?: true
 }
 
 export type MemberSumAggregateInputType = {
   id?: true
   primaryTradeAccountId?: true
   requiredLotsOverride?: true
+  currentPeriodLots?: true
 }
 
 export type MemberMinAggregateInputType = {
@@ -161,6 +177,10 @@ export type MemberMinAggregateInputType = {
   requiredLotsOverrideNote?: true
   crmStartDate?: true
   crmExpiryDate?: true
+  currentPeriodLots?: true
+  currentPeriodLotsAt?: true
+  currentPeriodLotsFrom?: true
+  currentPeriodLotsTo?: true
   customerStageOverride?: true
 }
 
@@ -189,6 +209,10 @@ export type MemberMaxAggregateInputType = {
   requiredLotsOverrideNote?: true
   crmStartDate?: true
   crmExpiryDate?: true
+  currentPeriodLots?: true
+  currentPeriodLotsAt?: true
+  currentPeriodLotsFrom?: true
+  currentPeriodLotsTo?: true
   customerStageOverride?: true
 }
 
@@ -217,6 +241,10 @@ export type MemberCountAggregateInputType = {
   requiredLotsOverrideNote?: true
   crmStartDate?: true
   crmExpiryDate?: true
+  currentPeriodLots?: true
+  currentPeriodLotsAt?: true
+  currentPeriodLotsFrom?: true
+  currentPeriodLotsTo?: true
   customerStageOverride?: true
   _all?: true
 }
@@ -332,6 +360,10 @@ export type MemberGroupByOutputType = {
   requiredLotsOverrideNote: string | null
   crmStartDate: Date | null
   crmExpiryDate: Date | null
+  currentPeriodLots: runtime.Decimal
+  currentPeriodLotsAt: Date | null
+  currentPeriodLotsFrom: Date | null
+  currentPeriodLotsTo: Date | null
   customerStageOverride: $Enums.CustomerStage | null
   _count: MemberCountAggregateOutputType | null
   _avg: MemberAvgAggregateOutputType | null
@@ -383,6 +415,10 @@ export type MemberWhereInput = {
   requiredLotsOverrideNote?: Prisma.StringNullableFilter<"Member"> | string | null
   crmStartDate?: Prisma.DateTimeNullableFilter<"Member"> | Date | string | null
   crmExpiryDate?: Prisma.DateTimeNullableFilter<"Member"> | Date | string | null
+  currentPeriodLots?: Prisma.DecimalFilter<"Member"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  currentPeriodLotsAt?: Prisma.DateTimeNullableFilter<"Member"> | Date | string | null
+  currentPeriodLotsFrom?: Prisma.DateTimeNullableFilter<"Member"> | Date | string | null
+  currentPeriodLotsTo?: Prisma.DateTimeNullableFilter<"Member"> | Date | string | null
   customerStageOverride?: Prisma.EnumCustomerStageNullableFilter<"Member"> | $Enums.CustomerStage | null
   primaryTradeAccount?: Prisma.XOR<Prisma.TradeAccountNullableScalarRelationFilter, Prisma.TradeAccountWhereInput> | null
   tradeAccounts?: Prisma.TradeAccountListRelationFilter
@@ -420,6 +456,10 @@ export type MemberOrderByWithRelationInput = {
   requiredLotsOverrideNote?: Prisma.SortOrderInput | Prisma.SortOrder
   crmStartDate?: Prisma.SortOrderInput | Prisma.SortOrder
   crmExpiryDate?: Prisma.SortOrderInput | Prisma.SortOrder
+  currentPeriodLots?: Prisma.SortOrder
+  currentPeriodLotsAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  currentPeriodLotsFrom?: Prisma.SortOrderInput | Prisma.SortOrder
+  currentPeriodLotsTo?: Prisma.SortOrderInput | Prisma.SortOrder
   customerStageOverride?: Prisma.SortOrderInput | Prisma.SortOrder
   primaryTradeAccount?: Prisma.TradeAccountOrderByWithRelationInput
   tradeAccounts?: Prisma.TradeAccountOrderByRelationAggregateInput
@@ -461,6 +501,10 @@ export type MemberWhereUniqueInput = Prisma.AtLeast<{
   requiredLotsOverrideNote?: Prisma.StringNullableFilter<"Member"> | string | null
   crmStartDate?: Prisma.DateTimeNullableFilter<"Member"> | Date | string | null
   crmExpiryDate?: Prisma.DateTimeNullableFilter<"Member"> | Date | string | null
+  currentPeriodLots?: Prisma.DecimalFilter<"Member"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  currentPeriodLotsAt?: Prisma.DateTimeNullableFilter<"Member"> | Date | string | null
+  currentPeriodLotsFrom?: Prisma.DateTimeNullableFilter<"Member"> | Date | string | null
+  currentPeriodLotsTo?: Prisma.DateTimeNullableFilter<"Member"> | Date | string | null
   customerStageOverride?: Prisma.EnumCustomerStageNullableFilter<"Member"> | $Enums.CustomerStage | null
   primaryTradeAccount?: Prisma.XOR<Prisma.TradeAccountNullableScalarRelationFilter, Prisma.TradeAccountWhereInput> | null
   tradeAccounts?: Prisma.TradeAccountListRelationFilter
@@ -498,6 +542,10 @@ export type MemberOrderByWithAggregationInput = {
   requiredLotsOverrideNote?: Prisma.SortOrderInput | Prisma.SortOrder
   crmStartDate?: Prisma.SortOrderInput | Prisma.SortOrder
   crmExpiryDate?: Prisma.SortOrderInput | Prisma.SortOrder
+  currentPeriodLots?: Prisma.SortOrder
+  currentPeriodLotsAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  currentPeriodLotsFrom?: Prisma.SortOrderInput | Prisma.SortOrder
+  currentPeriodLotsTo?: Prisma.SortOrderInput | Prisma.SortOrder
   customerStageOverride?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.MemberCountOrderByAggregateInput
   _avg?: Prisma.MemberAvgOrderByAggregateInput
@@ -534,6 +582,10 @@ export type MemberScalarWhereWithAggregatesInput = {
   requiredLotsOverrideNote?: Prisma.StringNullableWithAggregatesFilter<"Member"> | string | null
   crmStartDate?: Prisma.DateTimeNullableWithAggregatesFilter<"Member"> | Date | string | null
   crmExpiryDate?: Prisma.DateTimeNullableWithAggregatesFilter<"Member"> | Date | string | null
+  currentPeriodLots?: Prisma.DecimalWithAggregatesFilter<"Member"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  currentPeriodLotsAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Member"> | Date | string | null
+  currentPeriodLotsFrom?: Prisma.DateTimeNullableWithAggregatesFilter<"Member"> | Date | string | null
+  currentPeriodLotsTo?: Prisma.DateTimeNullableWithAggregatesFilter<"Member"> | Date | string | null
   customerStageOverride?: Prisma.EnumCustomerStageNullableWithAggregatesFilter<"Member"> | $Enums.CustomerStage | null
 }
 
@@ -560,6 +612,10 @@ export type MemberCreateInput = {
   requiredLotsOverrideNote?: string | null
   crmStartDate?: Date | string | null
   crmExpiryDate?: Date | string | null
+  currentPeriodLots?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  currentPeriodLotsAt?: Date | string | null
+  currentPeriodLotsFrom?: Date | string | null
+  currentPeriodLotsTo?: Date | string | null
   customerStageOverride?: $Enums.CustomerStage | null
   primaryTradeAccount?: Prisma.TradeAccountCreateNestedOneWithoutPrimaryForMembersInput
   tradeAccounts?: Prisma.TradeAccountCreateNestedManyWithoutMemberInput
@@ -597,6 +653,10 @@ export type MemberUncheckedCreateInput = {
   requiredLotsOverrideNote?: string | null
   crmStartDate?: Date | string | null
   crmExpiryDate?: Date | string | null
+  currentPeriodLots?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  currentPeriodLotsAt?: Date | string | null
+  currentPeriodLotsFrom?: Date | string | null
+  currentPeriodLotsTo?: Date | string | null
   customerStageOverride?: $Enums.CustomerStage | null
   tradeAccounts?: Prisma.TradeAccountUncheckedCreateNestedManyWithoutMemberInput
   tradeLogs?: Prisma.TradeLogUncheckedCreateNestedManyWithoutMemberInput
@@ -631,6 +691,10 @@ export type MemberUpdateInput = {
   requiredLotsOverrideNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   crmStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   crmExpiryDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  currentPeriodLots?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  currentPeriodLotsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  currentPeriodLotsFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  currentPeriodLotsTo?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   customerStageOverride?: Prisma.NullableEnumCustomerStageFieldUpdateOperationsInput | $Enums.CustomerStage | null
   primaryTradeAccount?: Prisma.TradeAccountUpdateOneWithoutPrimaryForMembersNestedInput
   tradeAccounts?: Prisma.TradeAccountUpdateManyWithoutMemberNestedInput
@@ -668,6 +732,10 @@ export type MemberUncheckedUpdateInput = {
   requiredLotsOverrideNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   crmStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   crmExpiryDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  currentPeriodLots?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  currentPeriodLotsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  currentPeriodLotsFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  currentPeriodLotsTo?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   customerStageOverride?: Prisma.NullableEnumCustomerStageFieldUpdateOperationsInput | $Enums.CustomerStage | null
   tradeAccounts?: Prisma.TradeAccountUncheckedUpdateManyWithoutMemberNestedInput
   tradeLogs?: Prisma.TradeLogUncheckedUpdateManyWithoutMemberNestedInput
@@ -704,6 +772,10 @@ export type MemberCreateManyInput = {
   requiredLotsOverrideNote?: string | null
   crmStartDate?: Date | string | null
   crmExpiryDate?: Date | string | null
+  currentPeriodLots?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  currentPeriodLotsAt?: Date | string | null
+  currentPeriodLotsFrom?: Date | string | null
+  currentPeriodLotsTo?: Date | string | null
   customerStageOverride?: $Enums.CustomerStage | null
 }
 
@@ -730,6 +802,10 @@ export type MemberUpdateManyMutationInput = {
   requiredLotsOverrideNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   crmStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   crmExpiryDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  currentPeriodLots?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  currentPeriodLotsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  currentPeriodLotsFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  currentPeriodLotsTo?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   customerStageOverride?: Prisma.NullableEnumCustomerStageFieldUpdateOperationsInput | $Enums.CustomerStage | null
 }
 
@@ -758,6 +834,10 @@ export type MemberUncheckedUpdateManyInput = {
   requiredLotsOverrideNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   crmStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   crmExpiryDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  currentPeriodLots?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  currentPeriodLotsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  currentPeriodLotsFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  currentPeriodLotsTo?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   customerStageOverride?: Prisma.NullableEnumCustomerStageFieldUpdateOperationsInput | $Enums.CustomerStage | null
 }
 
@@ -792,6 +872,10 @@ export type MemberCountOrderByAggregateInput = {
   requiredLotsOverrideNote?: Prisma.SortOrder
   crmStartDate?: Prisma.SortOrder
   crmExpiryDate?: Prisma.SortOrder
+  currentPeriodLots?: Prisma.SortOrder
+  currentPeriodLotsAt?: Prisma.SortOrder
+  currentPeriodLotsFrom?: Prisma.SortOrder
+  currentPeriodLotsTo?: Prisma.SortOrder
   customerStageOverride?: Prisma.SortOrder
 }
 
@@ -799,6 +883,7 @@ export type MemberAvgOrderByAggregateInput = {
   id?: Prisma.SortOrder
   primaryTradeAccountId?: Prisma.SortOrder
   requiredLotsOverride?: Prisma.SortOrder
+  currentPeriodLots?: Prisma.SortOrder
 }
 
 export type MemberMaxOrderByAggregateInput = {
@@ -826,6 +911,10 @@ export type MemberMaxOrderByAggregateInput = {
   requiredLotsOverrideNote?: Prisma.SortOrder
   crmStartDate?: Prisma.SortOrder
   crmExpiryDate?: Prisma.SortOrder
+  currentPeriodLots?: Prisma.SortOrder
+  currentPeriodLotsAt?: Prisma.SortOrder
+  currentPeriodLotsFrom?: Prisma.SortOrder
+  currentPeriodLotsTo?: Prisma.SortOrder
   customerStageOverride?: Prisma.SortOrder
 }
 
@@ -854,6 +943,10 @@ export type MemberMinOrderByAggregateInput = {
   requiredLotsOverrideNote?: Prisma.SortOrder
   crmStartDate?: Prisma.SortOrder
   crmExpiryDate?: Prisma.SortOrder
+  currentPeriodLots?: Prisma.SortOrder
+  currentPeriodLotsAt?: Prisma.SortOrder
+  currentPeriodLotsFrom?: Prisma.SortOrder
+  currentPeriodLotsTo?: Prisma.SortOrder
   customerStageOverride?: Prisma.SortOrder
 }
 
@@ -861,6 +954,7 @@ export type MemberSumOrderByAggregateInput = {
   id?: Prisma.SortOrder
   primaryTradeAccountId?: Prisma.SortOrder
   requiredLotsOverride?: Prisma.SortOrder
+  currentPeriodLots?: Prisma.SortOrder
 }
 
 export type MemberScalarRelationFilter = {
@@ -909,6 +1003,14 @@ export type NullableDecimalFieldUpdateOperationsInput = {
 
 export type NullableDateTimeFieldUpdateOperationsInput = {
   set?: Date | string | null
+}
+
+export type DecimalFieldUpdateOperationsInput = {
+  set?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  increment?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  decrement?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  multiply?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  divide?: runtime.Decimal | runtime.DecimalJsLike | number | string
 }
 
 export type NullableEnumCustomerStageFieldUpdateOperationsInput = {
@@ -1112,6 +1214,10 @@ export type MemberCreateWithoutAcquisitionChannelsInput = {
   requiredLotsOverrideNote?: string | null
   crmStartDate?: Date | string | null
   crmExpiryDate?: Date | string | null
+  currentPeriodLots?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  currentPeriodLotsAt?: Date | string | null
+  currentPeriodLotsFrom?: Date | string | null
+  currentPeriodLotsTo?: Date | string | null
   customerStageOverride?: $Enums.CustomerStage | null
   primaryTradeAccount?: Prisma.TradeAccountCreateNestedOneWithoutPrimaryForMembersInput
   tradeAccounts?: Prisma.TradeAccountCreateNestedManyWithoutMemberInput
@@ -1148,6 +1254,10 @@ export type MemberUncheckedCreateWithoutAcquisitionChannelsInput = {
   requiredLotsOverrideNote?: string | null
   crmStartDate?: Date | string | null
   crmExpiryDate?: Date | string | null
+  currentPeriodLots?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  currentPeriodLotsAt?: Date | string | null
+  currentPeriodLotsFrom?: Date | string | null
+  currentPeriodLotsTo?: Date | string | null
   customerStageOverride?: $Enums.CustomerStage | null
   tradeAccounts?: Prisma.TradeAccountUncheckedCreateNestedManyWithoutMemberInput
   tradeLogs?: Prisma.TradeLogUncheckedCreateNestedManyWithoutMemberInput
@@ -1197,6 +1307,10 @@ export type MemberUpdateWithoutAcquisitionChannelsInput = {
   requiredLotsOverrideNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   crmStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   crmExpiryDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  currentPeriodLots?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  currentPeriodLotsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  currentPeriodLotsFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  currentPeriodLotsTo?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   customerStageOverride?: Prisma.NullableEnumCustomerStageFieldUpdateOperationsInput | $Enums.CustomerStage | null
   primaryTradeAccount?: Prisma.TradeAccountUpdateOneWithoutPrimaryForMembersNestedInput
   tradeAccounts?: Prisma.TradeAccountUpdateManyWithoutMemberNestedInput
@@ -1233,6 +1347,10 @@ export type MemberUncheckedUpdateWithoutAcquisitionChannelsInput = {
   requiredLotsOverrideNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   crmStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   crmExpiryDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  currentPeriodLots?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  currentPeriodLotsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  currentPeriodLotsFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  currentPeriodLotsTo?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   customerStageOverride?: Prisma.NullableEnumCustomerStageFieldUpdateOperationsInput | $Enums.CustomerStage | null
   tradeAccounts?: Prisma.TradeAccountUncheckedUpdateManyWithoutMemberNestedInput
   tradeLogs?: Prisma.TradeLogUncheckedUpdateManyWithoutMemberNestedInput
@@ -1266,6 +1384,10 @@ export type MemberCreateWithoutTradeAccountsInput = {
   requiredLotsOverrideNote?: string | null
   crmStartDate?: Date | string | null
   crmExpiryDate?: Date | string | null
+  currentPeriodLots?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  currentPeriodLotsAt?: Date | string | null
+  currentPeriodLotsFrom?: Date | string | null
+  currentPeriodLotsTo?: Date | string | null
   customerStageOverride?: $Enums.CustomerStage | null
   primaryTradeAccount?: Prisma.TradeAccountCreateNestedOneWithoutPrimaryForMembersInput
   tradeLogs?: Prisma.TradeLogCreateNestedManyWithoutMemberInput
@@ -1302,6 +1424,10 @@ export type MemberUncheckedCreateWithoutTradeAccountsInput = {
   requiredLotsOverrideNote?: string | null
   crmStartDate?: Date | string | null
   crmExpiryDate?: Date | string | null
+  currentPeriodLots?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  currentPeriodLotsAt?: Date | string | null
+  currentPeriodLotsFrom?: Date | string | null
+  currentPeriodLotsTo?: Date | string | null
   customerStageOverride?: $Enums.CustomerStage | null
   tradeLogs?: Prisma.TradeLogUncheckedCreateNestedManyWithoutMemberInput
   acquisitionChannels?: Prisma.MemberAcquisitionChannelUncheckedCreateNestedManyWithoutMemberInput
@@ -1340,6 +1466,10 @@ export type MemberCreateWithoutPrimaryTradeAccountInput = {
   requiredLotsOverrideNote?: string | null
   crmStartDate?: Date | string | null
   crmExpiryDate?: Date | string | null
+  currentPeriodLots?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  currentPeriodLotsAt?: Date | string | null
+  currentPeriodLotsFrom?: Date | string | null
+  currentPeriodLotsTo?: Date | string | null
   customerStageOverride?: $Enums.CustomerStage | null
   tradeAccounts?: Prisma.TradeAccountCreateNestedManyWithoutMemberInput
   tradeLogs?: Prisma.TradeLogCreateNestedManyWithoutMemberInput
@@ -1375,6 +1505,10 @@ export type MemberUncheckedCreateWithoutPrimaryTradeAccountInput = {
   requiredLotsOverrideNote?: string | null
   crmStartDate?: Date | string | null
   crmExpiryDate?: Date | string | null
+  currentPeriodLots?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  currentPeriodLotsAt?: Date | string | null
+  currentPeriodLotsFrom?: Date | string | null
+  currentPeriodLotsTo?: Date | string | null
   customerStageOverride?: $Enums.CustomerStage | null
   tradeAccounts?: Prisma.TradeAccountUncheckedCreateNestedManyWithoutMemberInput
   tradeLogs?: Prisma.TradeLogUncheckedCreateNestedManyWithoutMemberInput
@@ -1430,6 +1564,10 @@ export type MemberUpdateWithoutTradeAccountsInput = {
   requiredLotsOverrideNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   crmStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   crmExpiryDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  currentPeriodLots?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  currentPeriodLotsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  currentPeriodLotsFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  currentPeriodLotsTo?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   customerStageOverride?: Prisma.NullableEnumCustomerStageFieldUpdateOperationsInput | $Enums.CustomerStage | null
   primaryTradeAccount?: Prisma.TradeAccountUpdateOneWithoutPrimaryForMembersNestedInput
   tradeLogs?: Prisma.TradeLogUpdateManyWithoutMemberNestedInput
@@ -1466,6 +1604,10 @@ export type MemberUncheckedUpdateWithoutTradeAccountsInput = {
   requiredLotsOverrideNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   crmStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   crmExpiryDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  currentPeriodLots?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  currentPeriodLotsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  currentPeriodLotsFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  currentPeriodLotsTo?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   customerStageOverride?: Prisma.NullableEnumCustomerStageFieldUpdateOperationsInput | $Enums.CustomerStage | null
   tradeLogs?: Prisma.TradeLogUncheckedUpdateManyWithoutMemberNestedInput
   acquisitionChannels?: Prisma.MemberAcquisitionChannelUncheckedUpdateManyWithoutMemberNestedInput
@@ -1520,6 +1662,10 @@ export type MemberScalarWhereInput = {
   requiredLotsOverrideNote?: Prisma.StringNullableFilter<"Member"> | string | null
   crmStartDate?: Prisma.DateTimeNullableFilter<"Member"> | Date | string | null
   crmExpiryDate?: Prisma.DateTimeNullableFilter<"Member"> | Date | string | null
+  currentPeriodLots?: Prisma.DecimalFilter<"Member"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  currentPeriodLotsAt?: Prisma.DateTimeNullableFilter<"Member"> | Date | string | null
+  currentPeriodLotsFrom?: Prisma.DateTimeNullableFilter<"Member"> | Date | string | null
+  currentPeriodLotsTo?: Prisma.DateTimeNullableFilter<"Member"> | Date | string | null
   customerStageOverride?: Prisma.EnumCustomerStageNullableFilter<"Member"> | $Enums.CustomerStage | null
 }
 
@@ -1546,6 +1692,10 @@ export type MemberCreateWithoutTradeLogsInput = {
   requiredLotsOverrideNote?: string | null
   crmStartDate?: Date | string | null
   crmExpiryDate?: Date | string | null
+  currentPeriodLots?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  currentPeriodLotsAt?: Date | string | null
+  currentPeriodLotsFrom?: Date | string | null
+  currentPeriodLotsTo?: Date | string | null
   customerStageOverride?: $Enums.CustomerStage | null
   primaryTradeAccount?: Prisma.TradeAccountCreateNestedOneWithoutPrimaryForMembersInput
   tradeAccounts?: Prisma.TradeAccountCreateNestedManyWithoutMemberInput
@@ -1582,6 +1732,10 @@ export type MemberUncheckedCreateWithoutTradeLogsInput = {
   requiredLotsOverrideNote?: string | null
   crmStartDate?: Date | string | null
   crmExpiryDate?: Date | string | null
+  currentPeriodLots?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  currentPeriodLotsAt?: Date | string | null
+  currentPeriodLotsFrom?: Date | string | null
+  currentPeriodLotsTo?: Date | string | null
   customerStageOverride?: $Enums.CustomerStage | null
   tradeAccounts?: Prisma.TradeAccountUncheckedCreateNestedManyWithoutMemberInput
   acquisitionChannels?: Prisma.MemberAcquisitionChannelUncheckedCreateNestedManyWithoutMemberInput
@@ -1631,6 +1785,10 @@ export type MemberUpdateWithoutTradeLogsInput = {
   requiredLotsOverrideNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   crmStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   crmExpiryDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  currentPeriodLots?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  currentPeriodLotsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  currentPeriodLotsFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  currentPeriodLotsTo?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   customerStageOverride?: Prisma.NullableEnumCustomerStageFieldUpdateOperationsInput | $Enums.CustomerStage | null
   primaryTradeAccount?: Prisma.TradeAccountUpdateOneWithoutPrimaryForMembersNestedInput
   tradeAccounts?: Prisma.TradeAccountUpdateManyWithoutMemberNestedInput
@@ -1667,6 +1825,10 @@ export type MemberUncheckedUpdateWithoutTradeLogsInput = {
   requiredLotsOverrideNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   crmStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   crmExpiryDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  currentPeriodLots?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  currentPeriodLotsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  currentPeriodLotsFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  currentPeriodLotsTo?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   customerStageOverride?: Prisma.NullableEnumCustomerStageFieldUpdateOperationsInput | $Enums.CustomerStage | null
   tradeAccounts?: Prisma.TradeAccountUncheckedUpdateManyWithoutMemberNestedInput
   acquisitionChannels?: Prisma.MemberAcquisitionChannelUncheckedUpdateManyWithoutMemberNestedInput
@@ -1700,6 +1862,10 @@ export type MemberCreateWithoutIndicatorAccessInput = {
   requiredLotsOverrideNote?: string | null
   crmStartDate?: Date | string | null
   crmExpiryDate?: Date | string | null
+  currentPeriodLots?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  currentPeriodLotsAt?: Date | string | null
+  currentPeriodLotsFrom?: Date | string | null
+  currentPeriodLotsTo?: Date | string | null
   customerStageOverride?: $Enums.CustomerStage | null
   primaryTradeAccount?: Prisma.TradeAccountCreateNestedOneWithoutPrimaryForMembersInput
   tradeAccounts?: Prisma.TradeAccountCreateNestedManyWithoutMemberInput
@@ -1736,6 +1902,10 @@ export type MemberUncheckedCreateWithoutIndicatorAccessInput = {
   requiredLotsOverrideNote?: string | null
   crmStartDate?: Date | string | null
   crmExpiryDate?: Date | string | null
+  currentPeriodLots?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  currentPeriodLotsAt?: Date | string | null
+  currentPeriodLotsFrom?: Date | string | null
+  currentPeriodLotsTo?: Date | string | null
   customerStageOverride?: $Enums.CustomerStage | null
   tradeAccounts?: Prisma.TradeAccountUncheckedCreateNestedManyWithoutMemberInput
   tradeLogs?: Prisma.TradeLogUncheckedCreateNestedManyWithoutMemberInput
@@ -1785,6 +1955,10 @@ export type MemberUpdateWithoutIndicatorAccessInput = {
   requiredLotsOverrideNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   crmStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   crmExpiryDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  currentPeriodLots?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  currentPeriodLotsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  currentPeriodLotsFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  currentPeriodLotsTo?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   customerStageOverride?: Prisma.NullableEnumCustomerStageFieldUpdateOperationsInput | $Enums.CustomerStage | null
   primaryTradeAccount?: Prisma.TradeAccountUpdateOneWithoutPrimaryForMembersNestedInput
   tradeAccounts?: Prisma.TradeAccountUpdateManyWithoutMemberNestedInput
@@ -1821,6 +1995,10 @@ export type MemberUncheckedUpdateWithoutIndicatorAccessInput = {
   requiredLotsOverrideNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   crmStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   crmExpiryDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  currentPeriodLots?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  currentPeriodLotsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  currentPeriodLotsFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  currentPeriodLotsTo?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   customerStageOverride?: Prisma.NullableEnumCustomerStageFieldUpdateOperationsInput | $Enums.CustomerStage | null
   tradeAccounts?: Prisma.TradeAccountUncheckedUpdateManyWithoutMemberNestedInput
   tradeLogs?: Prisma.TradeLogUncheckedUpdateManyWithoutMemberNestedInput
@@ -1854,6 +2032,10 @@ export type MemberCreateWithoutRenewalHistoryInput = {
   requiredLotsOverrideNote?: string | null
   crmStartDate?: Date | string | null
   crmExpiryDate?: Date | string | null
+  currentPeriodLots?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  currentPeriodLotsAt?: Date | string | null
+  currentPeriodLotsFrom?: Date | string | null
+  currentPeriodLotsTo?: Date | string | null
   customerStageOverride?: $Enums.CustomerStage | null
   primaryTradeAccount?: Prisma.TradeAccountCreateNestedOneWithoutPrimaryForMembersInput
   tradeAccounts?: Prisma.TradeAccountCreateNestedManyWithoutMemberInput
@@ -1890,6 +2072,10 @@ export type MemberUncheckedCreateWithoutRenewalHistoryInput = {
   requiredLotsOverrideNote?: string | null
   crmStartDate?: Date | string | null
   crmExpiryDate?: Date | string | null
+  currentPeriodLots?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  currentPeriodLotsAt?: Date | string | null
+  currentPeriodLotsFrom?: Date | string | null
+  currentPeriodLotsTo?: Date | string | null
   customerStageOverride?: $Enums.CustomerStage | null
   tradeAccounts?: Prisma.TradeAccountUncheckedCreateNestedManyWithoutMemberInput
   tradeLogs?: Prisma.TradeLogUncheckedCreateNestedManyWithoutMemberInput
@@ -1939,6 +2125,10 @@ export type MemberUpdateWithoutRenewalHistoryInput = {
   requiredLotsOverrideNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   crmStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   crmExpiryDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  currentPeriodLots?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  currentPeriodLotsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  currentPeriodLotsFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  currentPeriodLotsTo?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   customerStageOverride?: Prisma.NullableEnumCustomerStageFieldUpdateOperationsInput | $Enums.CustomerStage | null
   primaryTradeAccount?: Prisma.TradeAccountUpdateOneWithoutPrimaryForMembersNestedInput
   tradeAccounts?: Prisma.TradeAccountUpdateManyWithoutMemberNestedInput
@@ -1975,6 +2165,10 @@ export type MemberUncheckedUpdateWithoutRenewalHistoryInput = {
   requiredLotsOverrideNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   crmStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   crmExpiryDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  currentPeriodLots?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  currentPeriodLotsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  currentPeriodLotsFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  currentPeriodLotsTo?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   customerStageOverride?: Prisma.NullableEnumCustomerStageFieldUpdateOperationsInput | $Enums.CustomerStage | null
   tradeAccounts?: Prisma.TradeAccountUncheckedUpdateManyWithoutMemberNestedInput
   tradeLogs?: Prisma.TradeLogUncheckedUpdateManyWithoutMemberNestedInput
@@ -2008,6 +2202,10 @@ export type MemberCreateWithoutTelegramAccessInput = {
   requiredLotsOverrideNote?: string | null
   crmStartDate?: Date | string | null
   crmExpiryDate?: Date | string | null
+  currentPeriodLots?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  currentPeriodLotsAt?: Date | string | null
+  currentPeriodLotsFrom?: Date | string | null
+  currentPeriodLotsTo?: Date | string | null
   customerStageOverride?: $Enums.CustomerStage | null
   primaryTradeAccount?: Prisma.TradeAccountCreateNestedOneWithoutPrimaryForMembersInput
   tradeAccounts?: Prisma.TradeAccountCreateNestedManyWithoutMemberInput
@@ -2044,6 +2242,10 @@ export type MemberUncheckedCreateWithoutTelegramAccessInput = {
   requiredLotsOverrideNote?: string | null
   crmStartDate?: Date | string | null
   crmExpiryDate?: Date | string | null
+  currentPeriodLots?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  currentPeriodLotsAt?: Date | string | null
+  currentPeriodLotsFrom?: Date | string | null
+  currentPeriodLotsTo?: Date | string | null
   customerStageOverride?: $Enums.CustomerStage | null
   tradeAccounts?: Prisma.TradeAccountUncheckedCreateNestedManyWithoutMemberInput
   tradeLogs?: Prisma.TradeLogUncheckedCreateNestedManyWithoutMemberInput
@@ -2093,6 +2295,10 @@ export type MemberUpdateWithoutTelegramAccessInput = {
   requiredLotsOverrideNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   crmStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   crmExpiryDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  currentPeriodLots?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  currentPeriodLotsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  currentPeriodLotsFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  currentPeriodLotsTo?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   customerStageOverride?: Prisma.NullableEnumCustomerStageFieldUpdateOperationsInput | $Enums.CustomerStage | null
   primaryTradeAccount?: Prisma.TradeAccountUpdateOneWithoutPrimaryForMembersNestedInput
   tradeAccounts?: Prisma.TradeAccountUpdateManyWithoutMemberNestedInput
@@ -2129,6 +2335,10 @@ export type MemberUncheckedUpdateWithoutTelegramAccessInput = {
   requiredLotsOverrideNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   crmStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   crmExpiryDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  currentPeriodLots?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  currentPeriodLotsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  currentPeriodLotsFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  currentPeriodLotsTo?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   customerStageOverride?: Prisma.NullableEnumCustomerStageFieldUpdateOperationsInput | $Enums.CustomerStage | null
   tradeAccounts?: Prisma.TradeAccountUncheckedUpdateManyWithoutMemberNestedInput
   tradeLogs?: Prisma.TradeLogUncheckedUpdateManyWithoutMemberNestedInput
@@ -2162,6 +2372,10 @@ export type MemberCreateWithoutLotCheckRunsInput = {
   requiredLotsOverrideNote?: string | null
   crmStartDate?: Date | string | null
   crmExpiryDate?: Date | string | null
+  currentPeriodLots?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  currentPeriodLotsAt?: Date | string | null
+  currentPeriodLotsFrom?: Date | string | null
+  currentPeriodLotsTo?: Date | string | null
   customerStageOverride?: $Enums.CustomerStage | null
   primaryTradeAccount?: Prisma.TradeAccountCreateNestedOneWithoutPrimaryForMembersInput
   tradeAccounts?: Prisma.TradeAccountCreateNestedManyWithoutMemberInput
@@ -2198,6 +2412,10 @@ export type MemberUncheckedCreateWithoutLotCheckRunsInput = {
   requiredLotsOverrideNote?: string | null
   crmStartDate?: Date | string | null
   crmExpiryDate?: Date | string | null
+  currentPeriodLots?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  currentPeriodLotsAt?: Date | string | null
+  currentPeriodLotsFrom?: Date | string | null
+  currentPeriodLotsTo?: Date | string | null
   customerStageOverride?: $Enums.CustomerStage | null
   tradeAccounts?: Prisma.TradeAccountUncheckedCreateNestedManyWithoutMemberInput
   tradeLogs?: Prisma.TradeLogUncheckedCreateNestedManyWithoutMemberInput
@@ -2247,6 +2465,10 @@ export type MemberUpdateWithoutLotCheckRunsInput = {
   requiredLotsOverrideNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   crmStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   crmExpiryDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  currentPeriodLots?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  currentPeriodLotsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  currentPeriodLotsFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  currentPeriodLotsTo?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   customerStageOverride?: Prisma.NullableEnumCustomerStageFieldUpdateOperationsInput | $Enums.CustomerStage | null
   primaryTradeAccount?: Prisma.TradeAccountUpdateOneWithoutPrimaryForMembersNestedInput
   tradeAccounts?: Prisma.TradeAccountUpdateManyWithoutMemberNestedInput
@@ -2283,6 +2505,10 @@ export type MemberUncheckedUpdateWithoutLotCheckRunsInput = {
   requiredLotsOverrideNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   crmStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   crmExpiryDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  currentPeriodLots?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  currentPeriodLotsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  currentPeriodLotsFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  currentPeriodLotsTo?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   customerStageOverride?: Prisma.NullableEnumCustomerStageFieldUpdateOperationsInput | $Enums.CustomerStage | null
   tradeAccounts?: Prisma.TradeAccountUncheckedUpdateManyWithoutMemberNestedInput
   tradeLogs?: Prisma.TradeLogUncheckedUpdateManyWithoutMemberNestedInput
@@ -2316,6 +2542,10 @@ export type MemberCreateWithoutActivityLogsInput = {
   requiredLotsOverrideNote?: string | null
   crmStartDate?: Date | string | null
   crmExpiryDate?: Date | string | null
+  currentPeriodLots?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  currentPeriodLotsAt?: Date | string | null
+  currentPeriodLotsFrom?: Date | string | null
+  currentPeriodLotsTo?: Date | string | null
   customerStageOverride?: $Enums.CustomerStage | null
   primaryTradeAccount?: Prisma.TradeAccountCreateNestedOneWithoutPrimaryForMembersInput
   tradeAccounts?: Prisma.TradeAccountCreateNestedManyWithoutMemberInput
@@ -2352,6 +2582,10 @@ export type MemberUncheckedCreateWithoutActivityLogsInput = {
   requiredLotsOverrideNote?: string | null
   crmStartDate?: Date | string | null
   crmExpiryDate?: Date | string | null
+  currentPeriodLots?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  currentPeriodLotsAt?: Date | string | null
+  currentPeriodLotsFrom?: Date | string | null
+  currentPeriodLotsTo?: Date | string | null
   customerStageOverride?: $Enums.CustomerStage | null
   tradeAccounts?: Prisma.TradeAccountUncheckedCreateNestedManyWithoutMemberInput
   tradeLogs?: Prisma.TradeLogUncheckedCreateNestedManyWithoutMemberInput
@@ -2401,6 +2635,10 @@ export type MemberUpdateWithoutActivityLogsInput = {
   requiredLotsOverrideNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   crmStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   crmExpiryDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  currentPeriodLots?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  currentPeriodLotsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  currentPeriodLotsFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  currentPeriodLotsTo?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   customerStageOverride?: Prisma.NullableEnumCustomerStageFieldUpdateOperationsInput | $Enums.CustomerStage | null
   primaryTradeAccount?: Prisma.TradeAccountUpdateOneWithoutPrimaryForMembersNestedInput
   tradeAccounts?: Prisma.TradeAccountUpdateManyWithoutMemberNestedInput
@@ -2437,6 +2675,10 @@ export type MemberUncheckedUpdateWithoutActivityLogsInput = {
   requiredLotsOverrideNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   crmStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   crmExpiryDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  currentPeriodLots?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  currentPeriodLotsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  currentPeriodLotsFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  currentPeriodLotsTo?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   customerStageOverride?: Prisma.NullableEnumCustomerStageFieldUpdateOperationsInput | $Enums.CustomerStage | null
   tradeAccounts?: Prisma.TradeAccountUncheckedUpdateManyWithoutMemberNestedInput
   tradeLogs?: Prisma.TradeLogUncheckedUpdateManyWithoutMemberNestedInput
@@ -2471,6 +2713,10 @@ export type MemberCreateManyPrimaryTradeAccountInput = {
   requiredLotsOverrideNote?: string | null
   crmStartDate?: Date | string | null
   crmExpiryDate?: Date | string | null
+  currentPeriodLots?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  currentPeriodLotsAt?: Date | string | null
+  currentPeriodLotsFrom?: Date | string | null
+  currentPeriodLotsTo?: Date | string | null
   customerStageOverride?: $Enums.CustomerStage | null
 }
 
@@ -2497,6 +2743,10 @@ export type MemberUpdateWithoutPrimaryTradeAccountInput = {
   requiredLotsOverrideNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   crmStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   crmExpiryDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  currentPeriodLots?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  currentPeriodLotsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  currentPeriodLotsFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  currentPeriodLotsTo?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   customerStageOverride?: Prisma.NullableEnumCustomerStageFieldUpdateOperationsInput | $Enums.CustomerStage | null
   tradeAccounts?: Prisma.TradeAccountUpdateManyWithoutMemberNestedInput
   tradeLogs?: Prisma.TradeLogUpdateManyWithoutMemberNestedInput
@@ -2532,6 +2782,10 @@ export type MemberUncheckedUpdateWithoutPrimaryTradeAccountInput = {
   requiredLotsOverrideNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   crmStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   crmExpiryDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  currentPeriodLots?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  currentPeriodLotsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  currentPeriodLotsFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  currentPeriodLotsTo?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   customerStageOverride?: Prisma.NullableEnumCustomerStageFieldUpdateOperationsInput | $Enums.CustomerStage | null
   tradeAccounts?: Prisma.TradeAccountUncheckedUpdateManyWithoutMemberNestedInput
   tradeLogs?: Prisma.TradeLogUncheckedUpdateManyWithoutMemberNestedInput
@@ -2567,6 +2821,10 @@ export type MemberUncheckedUpdateManyWithoutPrimaryTradeAccountInput = {
   requiredLotsOverrideNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   crmStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   crmExpiryDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  currentPeriodLots?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  currentPeriodLotsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  currentPeriodLotsFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  currentPeriodLotsTo?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   customerStageOverride?: Prisma.NullableEnumCustomerStageFieldUpdateOperationsInput | $Enums.CustomerStage | null
 }
 
@@ -2689,6 +2947,10 @@ export type MemberSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   requiredLotsOverrideNote?: boolean
   crmStartDate?: boolean
   crmExpiryDate?: boolean
+  currentPeriodLots?: boolean
+  currentPeriodLotsAt?: boolean
+  currentPeriodLotsFrom?: boolean
+  currentPeriodLotsTo?: boolean
   customerStageOverride?: boolean
   primaryTradeAccount?: boolean | Prisma.Member$primaryTradeAccountArgs<ExtArgs>
   tradeAccounts?: boolean | Prisma.Member$tradeAccountsArgs<ExtArgs>
@@ -2729,10 +2991,14 @@ export type MemberSelectScalar = {
   requiredLotsOverrideNote?: boolean
   crmStartDate?: boolean
   crmExpiryDate?: boolean
+  currentPeriodLots?: boolean
+  currentPeriodLotsAt?: boolean
+  currentPeriodLotsFrom?: boolean
+  currentPeriodLotsTo?: boolean
   customerStageOverride?: boolean
 }
 
-export type MemberOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "externalId" | "code" | "name" | "displayName" | "avatarUrl" | "email" | "phone" | "country" | "address" | "tradingView" | "telegramUsername" | "telegramUserId" | "discordUsername" | "socialLinksJson" | "joinedAt" | "createdAt" | "updatedAt" | "plan" | "primaryTradeAccountId" | "requiredLotsOverride" | "requiredLotsOverrideNote" | "crmStartDate" | "crmExpiryDate" | "customerStageOverride", ExtArgs["result"]["member"]>
+export type MemberOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "externalId" | "code" | "name" | "displayName" | "avatarUrl" | "email" | "phone" | "country" | "address" | "tradingView" | "telegramUsername" | "telegramUserId" | "discordUsername" | "socialLinksJson" | "joinedAt" | "createdAt" | "updatedAt" | "plan" | "primaryTradeAccountId" | "requiredLotsOverride" | "requiredLotsOverrideNote" | "crmStartDate" | "crmExpiryDate" | "currentPeriodLots" | "currentPeriodLotsAt" | "currentPeriodLotsFrom" | "currentPeriodLotsTo" | "customerStageOverride", ExtArgs["result"]["member"]>
 export type MemberInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   primaryTradeAccount?: boolean | Prisma.Member$primaryTradeAccountArgs<ExtArgs>
   tradeAccounts?: boolean | Prisma.Member$tradeAccountsArgs<ExtArgs>
@@ -2784,6 +3050,16 @@ export type $MemberPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
     requiredLotsOverrideNote: string | null
     crmStartDate: Date | null
     crmExpiryDate: Date | null
+    currentPeriodLots: runtime.Decimal
+    currentPeriodLotsAt: Date | null
+    /**
+     * * The window the snapshot above was computed for — display layers only
+     *    *  trust currentPeriodLots when this matches the member's current
+     *    *  qualification window (a later sync can move crmStart/crmExpiry dates,
+     *    *  which would otherwise leave a stale-window number on screen).
+     */
+    currentPeriodLotsFrom: Date | null
+    currentPeriodLotsTo: Date | null
     customerStageOverride: $Enums.CustomerStage | null
   }, ExtArgs["result"]["member"]>
   composites: {}
@@ -3187,6 +3463,10 @@ export interface MemberFieldRefs {
   readonly requiredLotsOverrideNote: Prisma.FieldRef<"Member", 'String'>
   readonly crmStartDate: Prisma.FieldRef<"Member", 'DateTime'>
   readonly crmExpiryDate: Prisma.FieldRef<"Member", 'DateTime'>
+  readonly currentPeriodLots: Prisma.FieldRef<"Member", 'Decimal'>
+  readonly currentPeriodLotsAt: Prisma.FieldRef<"Member", 'DateTime'>
+  readonly currentPeriodLotsFrom: Prisma.FieldRef<"Member", 'DateTime'>
+  readonly currentPeriodLotsTo: Prisma.FieldRef<"Member", 'DateTime'>
   readonly customerStageOverride: Prisma.FieldRef<"Member", 'CustomerStage'>
 }
     

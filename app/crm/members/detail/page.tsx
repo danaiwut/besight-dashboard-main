@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useRef, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
@@ -18,10 +18,15 @@ import {
   progressTone,
   initials,
   fmtDate,
+  fmtDateTime,
   lot,
   PLAN_LABELS,
+  type IndicatorAccess,
+  type Member,
 } from "../../../../components/crm/CrmContext";
 import { useLanguage } from "../../../../components/crm/LanguageContext";
+import { MemberDetailSkeleton } from "../../../../components/crm/Skeletons";
+import { apiCall } from "../../../../lib/crmApi";
 import Icon from "../../../../components/Icon";
 import Drawer from "../../../../components/crm/Drawer";
 import MemberForm from "../../../../components/crm/MemberForm";
@@ -30,17 +35,138 @@ import LotOverrideCard from "../../../../components/crm/LotOverrideCard";
 import MemberIndicatorAccessPanel from "../../../../components/crm/MemberIndicatorAccessPanel";
 import MemberTradeAccountsCard from "../../../../components/crm/MemberTradeAccountsCard";
 
+type RenewalRow = {
+  id: number;
+  indicator: string;
+  period: string;
+  qualifiedLots: number;
+  requiredLots: number;
+  renewed: boolean;
+  oldExpiry?: string;
+  newExpiry?: string;
+  createdDate: string;
+};
+
+/* Grant/renew audit for one member, read live from RenewalRecord (written by
+   the lot-check automation and the renewal cron). Refetches whenever the
+   realtime data version moves. Hidden while loading; hidden entirely when the
+   member has no history yet. */
+function MemberRenewalHistory({ memberId }: { memberId: number }) {
+  const { t } = useLanguage();
+  const { dataVersion, backendLive } = useCrm();
+  const [rows, setRows] = useState<RenewalRow[] | null>(null);
+
+  useEffect(() => {
+    if (!backendLive) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setRows([]);
+      return;
+    }
+    let cancelled = false;
+    // Reset to the loading state before refetching.
+    setRows(null);
+    fetch(`/api/crm/renewal-history/?memberId=${memberId}`, { cache: "no-store" })
+      .then(async (response) => {
+        const payload = await response.json() as { ok?: boolean; renewalHistory?: RenewalRow[] };
+        if (!cancelled) setRows(response.ok && payload.ok && payload.renewalHistory ? payload.renewalHistory : []);
+      })
+      .catch(() => { if (!cancelled) setRows([]); });
+    return () => { cancelled = true; };
+  }, [memberId, dataVersion, backendLive]);
+
+  if (rows === null) {
+    return (
+      <div className="card" style={{ padding: 20, marginBottom: 16 }} aria-busy="true">
+        <span className="skeleton" style={{ width: 170, height: 15, marginBottom: 16 }} />
+        <span className="skeleton" style={{ height: 12, marginBottom: 10 }} />
+        <span className="skeleton" style={{ width: "70%", height: 12 }} />
+      </div>
+    );
+  }
+  if (!rows.length) return null;
+
+  return (
+    <div className="card" style={{ padding: 20, marginBottom: 16 }}>
+      <div className="panel-section-title">{t("members.section.renewalHistory")}</div>
+      <div className="table-wrap">
+        <table className="data" style={{ minWidth: 760 }}>
+          <thead>
+            <tr>
+              <th>{t("members.col.period")}</th>
+              <th>{t("members.col.indicator")}</th>
+              <th>{t("members.col.qualifiedLots")}</th>
+              <th>{t("members.col.result")}</th>
+              <th>{t("members.col.expiryChange")}</th>
+              <th>{t("members.col.processedAt")}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((r) => (
+              <tr key={r.id}>
+                <td className="mono">{r.period}</td>
+                <td>{r.indicator}</td>
+                <td>
+                  <span className={`lots ${r.qualifiedLots >= r.requiredLots ? "met" : "risk"}`}>
+                    {lot(r.qualifiedLots)}
+                    <span className="req">/ {lot(r.requiredLots)}</span>
+                  </span>
+                </td>
+                <td>
+                  <span className={`badge ${r.renewed ? "active" : "expired"}`}>
+                    {r.renewed ? t("members.renewal.renewed") : t("members.renewal.notRenewed")}
+                  </span>
+                </td>
+                <td className="mono">{r.oldExpiry ? `${fmtDate(r.oldExpiry)} → ${fmtDate(r.newExpiry)}` : "—"}</td>
+                <td className="mono">{fmtDate(r.createdDate)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
 function MemberDetailContent() {
   const params = useSearchParams();
   const router = useRouter();
-  const { members, setMembers, tradeAccounts, tradeLogs, indicatorAccess, setIndicatorAccess, telegramAccess, settings, toast, log } = useCrm();
+  const { members, setMembers, tradeAccounts, tradeLogs, indicatorAccess, setIndicatorAccess, telegramAccess, settings, toast, log, crmDataStatus, backendLive } = useCrm();
   const { t } = useLanguage();
   const [editOpen, setEditOpen] = useState(false);
   const [suspendOpen, setSuspendOpen] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   const formRef = useRef<{ save: () => void }>(null);
 
   const id = Number(params.get("id"));
   const member = members.find((m) => m.id === id);
+  const fallbackLotRange = currentMonthRange();
+  const lotRange = {
+    from: member?.crmStartDate || fallbackLotRange.from,
+    to: member?.crmExpiryDate || fallbackLotRange.to,
+  };
+
+  // Same source as the Members list (memberLots): the persisted snapshot when
+  // its window matches, else window-correct ledger math — never a divergent
+  // live number.
+  const lots = member ? memberLots(member, tradeAccounts, tradeLogs, settings, lotRange) : 0;
+
+  async function refreshLots() {
+    if (!member || refreshing) return;
+    setRefreshing(true);
+    try {
+      const payload = await apiCall<{ member: Member }>(`/api/crm/members/${member.id}/lots/refresh/`, "POST");
+      setMembers((cur) => cur.map((m) => (m.id === member.id ? payload.member : m)));
+      toast(t("members.detail.lotsRefreshed"));
+    } catch (error) {
+      toast(error instanceof Error ? error.message : "Unable to refresh lots");
+    } finally {
+      setRefreshing(false);
+    }
+  }
+
+  // Show a skeleton until the initial backend load settles — this also avoids
+  // a false "member not found" flash while mock members are being replaced.
+  if (crmDataStatus === "loading") return <MemberDetailSkeleton />;
 
   if (!member) {
     return (
@@ -62,21 +188,36 @@ function MemberDetailContent() {
   const label = accessLabel(access, settings);
   const telegram = telegramAccess.find((tg) => tg.memberId === member.id);
   const stage = customerStage(member, indicatorAccess);
-  const fallbackLotRange = currentMonthRange();
-  const lotRange = {
-    from: member.crmStartDate || fallbackLotRange.from,
-    to: member.crmExpiryDate || fallbackLotRange.to,
-  };
-  const lots = memberLots(member, tradeAccounts, tradeLogs, settings, lotRange);
   const required = requiredLotsFor(member, settings);
   const tone = progressTone(lots, required);
   const pct = Math.min(100, required > 0 ? (lots / required) * 100 : 100);
+  const snapshotFresh = member.currentPeriodLots !== undefined &&
+    member.currentPeriodLotsFrom === lotRange.from &&
+    member.currentPeriodLotsTo === lotRange.to;
+  const asOfText = snapshotFresh && member.currentPeriodLotsAt
+    ? t("members.detail.lotsAsOf", { when: fmtDateTime(member.currentPeriodLotsAt) })
+    : t("members.detail.lotsLedger");
 
-  function handleSuspend(reasons: string[], note: string) {
-    setIndicatorAccess((cur) => cur.map((a) => (a.memberId === member!.id ? { ...a, status: "suspended" } : a)));
+  async function handleSuspend(reasons: string[], note: string) {
+    const id = member!.id;
+    if (backendLive) {
+      try {
+        const mine = indicatorAccess.filter((a) => a.memberId === id);
+        const saved = await Promise.all(
+          mine.map((a) => apiCall<{ indicatorAccess: IndicatorAccess }>(`/api/crm/indicator-access/${a.id}/`, "PATCH", { status: "suspended" }))
+        );
+        const byId = new Map(saved.map((s) => [s.indicatorAccess.id, s.indicatorAccess]));
+        setIndicatorAccess((cur) => cur.map((a) => byId.get(a.id) ?? a));
+      } catch (error) {
+        toast(error instanceof Error ? error.message : "Unable to suspend access");
+        return;
+      }
+    } else {
+      setIndicatorAccess((cur) => cur.map((a) => (a.memberId === id ? { ...a, status: "suspended" } : a)));
+    }
     log({
       actor: "Alex Dean",
-      memberId: member!.id,
+      memberId: id,
       memberName: member!.name,
       action: "Manual Admin Override",
       description: `Indicator access suspended.${reasons.length ? ` Reason: ${reasons.join(", ")}.` : ""}${note ? ` "${note}"` : ""}`,
@@ -85,9 +226,19 @@ function MemberDetailContent() {
     setSuspendOpen(false);
   }
 
-  function handleDelete() {
-    setMembers((cur) => cur.filter((x) => x.id !== member!.id));
-    toast(t("members.toast.deleted", { name: member!.name }));
+  async function handleDelete() {
+    const id = member!.id;
+    const name = member!.name;
+    if (backendLive) {
+      try {
+        await apiCall(`/api/crm/members/${id}/`, "DELETE");
+      } catch (error) {
+        toast(error instanceof Error ? error.message : "Unable to delete member");
+        return;
+      }
+    }
+    setMembers((cur) => cur.filter((x) => x.id !== id));
+    toast(t("members.toast.deleted", { name }));
     router.push("/crm/members/");
   }
 
@@ -181,10 +332,19 @@ function MemberDetailContent() {
             <div className="lp-track">
               <span className="lp-fill" style={{ width: `${pct}%` }}></span>
             </div>
-            <span className="lp-label">{t("lm.lotsLabel", { lots: lot(lots), required: lot(required) })}</span>
+            <span className="lp-label">
+              {t("lm.lotsLabel", { lots: lot(lots), required: lot(required) })}
+            </span>
           </div>
           <div style={{ marginTop: 4 }}>
             <span className={`badge ${accessBadgeClass(label)}`}>{t(accessLabelKey(label))}</span>
+          </div>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, marginTop: 10, flexWrap: "wrap" }}>
+            <span style={{ fontSize: 12, color: "var(--text-sub)" }}>{asOfText}</span>
+            <button className="btn btn-ghost" style={{ padding: "6px 12px" }} onClick={() => void refreshLots()} disabled={refreshing || !backendLive}>
+              <Icon name="sync" />
+              {refreshing ? t("members.detail.refreshing") : t("members.detail.refreshLots")}
+            </button>
           </div>
           <div style={{ marginTop: 16 }}>
             <LotOverrideCard member={member} />
@@ -194,6 +354,8 @@ function MemberDetailContent() {
           <MemberIndicatorAccessPanel member={member} />
         </div>
       </div>
+
+      <MemberRenewalHistory memberId={member.id} />
 
       <MemberTradeAccountsCard key={`${member.id}:${member.crmStartDate || ""}:${member.crmExpiryDate || ""}`} member={member} />
 

@@ -1,8 +1,9 @@
 "use client";
 
 import { forwardRef, useImperativeHandle, useState } from "react";
-import { useCrm, simulateTradeIdVerification, simulateAccountType, type TradeAccount, type VerificationStatus } from "./CrmContext";
+import { useCrm, simulateTradeIdVerification, simulateAccountType, memberLotRange, currentMonthRange, type TradeAccount, type VerificationStatus } from "./CrmContext";
 import { useLanguage } from "./LanguageContext";
+import { apiCall } from "../../lib/crmApi";
 import Icon from "../Icon";
 import MemberCombobox from "./MemberCombobox";
 import TradeAccountHistoryPanel from "./TradeAccountHistoryPanel";
@@ -11,7 +12,7 @@ export type TradeAccountFormHandle = { save: () => void };
 
 const TradeAccountForm = forwardRef<TradeAccountFormHandle, { account: TradeAccount | null; defaultMemberId?: number; onDone: () => void }>(
   function TradeAccountForm({ account, defaultMemberId, onDone }, ref) {
-    const { setTradeAccounts, members, brokers, toast, log } = useCrm();
+    const { setTradeAccounts, members, brokers, toast, log, backendLive } = useCrm();
     const { t } = useLanguage();
     const isNew = !account;
     const [memberId, setMemberId] = useState(account?.memberId ?? defaultMemberId ?? 0);
@@ -33,11 +34,62 @@ const TradeAccountForm = forwardRef<TradeAccountFormHandle, { account: TradeAcco
 
     useImperativeHandle(ref, () => ({
       save() {
-        const trimmedId = tradeId.trim();
-        if (!trimmedId) {
-          toast(t("ta.toast.tradeIdRequired"));
-          return;
+        void saveAsync();
+      },
+    }));
+
+    async function saveAsync() {
+      const trimmedId = tradeId.trim();
+      if (!trimmedId) {
+        toast(t("ta.toast.tradeIdRequired"));
+        return;
+      }
+      if (!backendLive) {
+        saveLocal(trimmedId);
+        onDone();
+        return;
+      }
+      try {
+        const member = members.find((m) => m.id === memberId);
+        const broker = brokers.find((b) => b.id === brokerId);
+        const data = {
+          memberId,
+          brokerId,
+          tradeId: trimmedId,
+          accountType,
+          partnerIb: broker?.code ?? "",
+          verification,
+          status,
+        };
+        if (isNew) {
+          const payload = await apiCall<{ tradeAccount: TradeAccount }>("/api/crm/trade-accounts/", "POST", data);
+          setTradeAccounts((cur) => [payload.tradeAccount, ...cur]);
+          log({
+            actor: "Alex Dean",
+            memberId: memberId || undefined,
+            memberName: member?.name,
+            action: "Trade ID Added",
+            description: member
+              ? `Trade ID ${trimmedId} at ${broker?.name ?? "broker"} added for ${member.name}.`
+              : `Trade ID ${trimmedId} at ${broker?.name ?? "broker"} added — not yet linked to a member.`,
+          });
+          toast(t("ta.toast.added"));
+        } else {
+          const payload = await apiCall<{ tradeAccount: TradeAccount }>(`/api/crm/trade-accounts/${account!.id}/`, "PUT", data);
+          setTradeAccounts((cur) => cur.map((a) => (a.id === account!.id ? payload.tradeAccount : a)));
+          if (account!.verification !== verification && verification === "verified") {
+            log({ actor: "Alex Dean", memberId, memberName: member?.name, action: "Trade ID Verified", description: `Trade ID ${trimmedId} at ${broker?.name ?? "broker"} marked verified.` });
+          }
+          toast(t("ta.toast.updated"));
         }
+        onDone();
+      } catch (error) {
+        toast(error instanceof Error ? error.message : "Unable to save trade account");
+      }
+    }
+
+    /* Demo mode (no backend): the original local-only flow, unchanged. */
+    function saveLocal(trimmedId: string) {
         const member = members.find((m) => m.id === memberId);
         const broker = brokers.find((b) => b.id === brokerId);
         const today = new Date().toISOString().slice(0, 10);
@@ -65,9 +117,7 @@ const TradeAccountForm = forwardRef<TradeAccountFormHandle, { account: TradeAcco
           }
           toast(t("ta.toast.updated"));
         }
-        onDone();
-      },
-    }));
+    }
 
     return (
       <>
@@ -127,7 +177,10 @@ const TradeAccountForm = forwardRef<TradeAccountFormHandle, { account: TradeAcco
             <option value="inactive">{t("common.inactive")}</option>
           </select>
         </div>
-        {!isNew && <TradeAccountHistoryPanel accountId={account!.id} />}
+        {!isNew && (() => {
+          const owner = members.find((m) => m.id === account!.memberId);
+          return <TradeAccountHistoryPanel accountId={account!.id} tradeId={account!.tradeId} range={owner ? memberLotRange(owner) : currentMonthRange()} />;
+        })()}
       </>
     );
   }

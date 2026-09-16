@@ -28,6 +28,7 @@ import {
   type Member,
 } from "../../../components/crm/CrmContext";
 import { useLanguage } from "../../../components/crm/LanguageContext";
+import { MembersSkeleton } from "../../../components/crm/Skeletons";
 import Icon from "../../../components/Icon";
 import Drawer from "../../../components/crm/Drawer";
 import MemberForm from "../../../components/crm/MemberForm";
@@ -39,7 +40,7 @@ type DrawerMode = { kind: "form"; member: Member | null } | null;
 const PAGE_SIZE = 50;
 
 export default function MembersPage() {
-  const { members, tradeAccounts, tradeLogs, indicatorAccess, brokers, settings, toast, memberSyncStatus, memberSyncError, refreshMembers } = useCrm();
+  const { members, tradeAccounts, tradeLogs, indicatorAccess, brokers, settings, toast, memberSyncStatus, memberSyncError, refreshMembers, crmDataStatus } = useCrm();
   const { t } = useLanguage();
   const router = useRouter();
   const [statusFilter, setStatusFilter] = useState("all");
@@ -201,6 +202,8 @@ export default function MembersPage() {
   }
 
   const title = drawerMode?.kind === "form" ? (drawerMode.member ? t("members.drawer.edit") : t("members.drawer.add")) : "";
+
+  if (crmDataStatus === "loading") return <MembersSkeleton />;
 
   return (
     <section className="panel is-active">

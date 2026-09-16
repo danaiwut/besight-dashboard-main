@@ -691,3 +691,20 @@ table.data tbody tr:last-child td { border-bottom: none; }
   .pagination .pg-info { width: 100%; text-align: center; margin-right: 0; }
   .lookup-broker-select { width: 100%; }
 }
+
+/* ── Skeleton loading ──
+   Shimmer blocks shown while the CRM provider performs its initial backend
+   hydration (crmDataStatus === "loading"). Layout classes (stat-grid, card,
+   table-wrap…) are reused so the swap to live data doesn't shift the page. */
+@keyframes skeleton-shimmer {
+  0% { background-position: 100% 0; }
+  100% { background-position: -100% 0; }
+}
+.skeleton {
+  display: block;
+  border-radius: 6px;
+  background: linear-gradient(90deg, var(--bg-card2) 30%, rgba(255, 255, 255, 0.08) 50%, var(--bg-card2) 70%);
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.5s ease-in-out infinite;
+}
+.skeleton.circle { border-radius: 50%; }

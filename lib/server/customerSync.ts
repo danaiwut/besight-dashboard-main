@@ -1,5 +1,50 @@
-import { Plan, RecordStatus, VerificationStatus } from "@/generated/prisma/client";
+import { AccessSource, IndicatorAccessStatus, Plan, RecordStatus, TelegramStatus, VerificationStatus } from "@/generated/prisma/client";
 import { getPrisma, isDatabaseConfigured } from "./prisma";
+import { bumpDataVersion } from "./dataVersion";
+import { toMemberDto, toTradeAccountDto } from "./crmDtos";
+import { snapshotOneMemberLots } from "./memberLotsSync";
+
+/** Default private room for Telegram rows derived from member contact info —
+ *  the sync payload carries no room, so derived rows share one room until an
+ *  admin manages them explicitly. */
+export const DEFAULT_TELEGRAM_ROOM = "BeSight VIP Signals";
+
+/* Derive one TelegramAccess row from the member's own telegram contact info.
+   A manual "banned" is never overwritten; otherwise status follows indicator
+   standing so the Telegram page's indicator sync stays truthful. Shared by
+   the customer replace-sync and the member create/update routes. */
+export async function upsertTelegramFromMember(
+  memberId: number,
+  username: string | null | undefined,
+  userId: string | null | undefined,
+  hasActiveIndicator: boolean,
+) {
+  const tgUsername = username || undefined;
+  const tgUserId = userId || undefined;
+  if (!tgUsername && !tgUserId) return null;
+  const prisma = getPrisma();
+  const existingTg = await prisma.telegramAccess.findFirst({ where: { memberId }, orderBy: { id: "asc" } });
+  const room = existingTg?.room || DEFAULT_TELEGRAM_ROOM;
+  const status = existingTg?.status === TelegramStatus.banned
+    ? TelegramStatus.banned
+    : hasActiveIndicator ? TelegramStatus.active : TelegramStatus.pending;
+  return prisma.telegramAccess.upsert({
+    where: { memberId_room: { memberId, room } },
+    update: {
+      username: tgUsername ?? existingTg?.username,
+      userId: tgUserId ?? existingTg?.userId,
+      status,
+    },
+    create: {
+      memberId,
+      username: tgUsername,
+      userId: tgUserId,
+      room,
+      status,
+      grantedAt: new Date(),
+    },
+  });
+}
 
 type RawObject = Record<string, unknown>;
 
@@ -26,6 +71,12 @@ export type CustomerMemberDto = {
   plan: "free" | "ib_partner";
   requiredLotsOverride?: number;
   requiredLotsOverrideNote?: string;
+  currentPeriodLots?: number;
+  currentPeriodLotsAt?: string;
+  /** Window the snapshot above was computed for (YYYY-MM-DD) — display
+   *  layers only trust it when it matches the member's current window. */
+  currentPeriodLotsFrom?: string;
+  currentPeriodLotsTo?: string;
 };
 
 export type CustomerTradeAccountDto = {
@@ -44,7 +95,15 @@ export type CustomerTradeAccountDto = {
 type NormalizedCustomer = {
   externalId?: string;
   member: Omit<CustomerMemberDto, "id" | "primaryTradeAccountId">;
-  accounts: Array<Omit<CustomerTradeAccountDto, "id" | "memberId" | "brokerId"> & { brokerCode: string; brokerName: string }>;
+  accounts: Array<Omit<CustomerTradeAccountDto, "id" | "memberId" | "brokerId"> & {
+    brokerCode: string;
+    brokerName: string;
+    indicatorName?: string;
+    indicatorPubId?: string;
+    indicatorGrantedAt?: Date;
+    indicatorExpiresAt?: Date;
+    indicatorActive?: boolean;
+  }>;
 };
 
 function object(value: unknown): RawObject | undefined {
@@ -113,8 +172,10 @@ function normalizeCustomer(row: RawObject, index: number): NormalizedCustomer {
   const normalizedAccounts = accountRows(row).map((account) => {
     const verification = stringValue(first(account, ["verification", "verification_status", "status"])).toLowerCase();
     const status = stringValue(first(account, ["account_status", "status"])).toLowerCase();
-    const rawBrokerCode = stringValue(first(account, ["broker_code", "brokerCode"])).toUpperCase();
+    const rawBrokerCode = stringValue(first(account, ["broker_code", "brokerCode", "broker"])).toUpperCase();
     const brokerCode = rawBrokerCode === "XM" || rawBrokerCode === "EXNESS" ? rawBrokerCode : "";
+    const indicatorName = stringValue(first(account, ["indicator_name", "indicatorName"])) || undefined;
+    const indicatorStatus = stringValue(first(account, ["status"])).toLowerCase();
     return {
       tradeId: stringValue(first(account, ["trade_id", "tradeId", "tradeid", "loginId", "login_id", "mt4id", "mt5id"])),
       accountType: stringValue(first(account, ["account_type", "accountType", "type"])) || "Standard",
@@ -124,7 +185,12 @@ function normalizeCustomer(row: RawObject, index: number): NormalizedCustomer {
       lastSync: dateValue(first(account, ["last_sync", "lastSync", "updated_at"])),
       status: status === "inactive" ? "inactive" as const : "active" as const,
       brokerCode,
-      brokerName: brokerCode ? stringValue(first(account, ["broker_name", "brokerName"])) : "",
+      brokerName: brokerCode ? (stringValue(first(account, ["broker_name", "brokerName"])) || brokerCode) : "",
+      indicatorName,
+      indicatorPubId: stringValue(first(account, ["pine_id", "publicationId"])) || undefined,
+      indicatorGrantedAt: optionalDateValue(first(account, ["granted_at", "grantedAt", "tv_granted_at", "tvGrantedAt"])),
+      indicatorExpiresAt: optionalDateValue(first(account, ["expiration", "expires_at", "expiry", "tv_expiration", "tvExpiration"])),
+      indicatorActive: indicatorName ? indicatorStatus !== "expired" && indicatorStatus !== "revoked" && indicatorStatus !== "suspended" : undefined,
     };
   }).filter((account) => account.tradeId);
 
@@ -199,6 +265,22 @@ async function saveCustomers(customers: NormalizedCustomer[]) {
   const prisma = getPrisma();
   const savedMemberIds = new Set<number>();
   const tradeIdsByMember = new Map<number, Set<string>>();
+  const indicatorIdByName = new Map<string, number>();
+  /** Members whose qualification window is new/changed — their persisted lots
+   *  belong to another window and must be recomputed before anyone reads them. */
+  const recomputeIds: number[] = [];
+
+  async function resolveIndicatorId(name: string, pubId?: string) {
+    const cached = indicatorIdByName.get(name);
+    if (cached) return cached;
+    const indicator = await prisma.indicator.upsert({
+      where: { name },
+      update: pubId ? { publicationId: pubId } : {},
+      create: { name, publicationId: pubId, status: RecordStatus.active },
+    });
+    indicatorIdByName.set(name, indicator.id);
+    return indicator.id;
+  }
   for (const customer of customers) {
     const existing = await prisma.member.findFirst({
       where: {
@@ -208,7 +290,7 @@ async function saveCustomers(customers: NormalizedCustomer[]) {
           ...(customer.member.email ? [{ email: customer.member.email }] : []),
         ],
       },
-      select: { id: true },
+      select: { id: true, crmStartDate: true, crmExpiryDate: true },
     });
     const data = {
       externalId: customer.externalId,
@@ -236,6 +318,17 @@ async function saveCustomers(customers: NormalizedCustomer[]) {
       : await prisma.member.create({ data });
     savedMemberIds.add(member.id);
     if (!tradeIdsByMember.has(member.id)) tradeIdsByMember.set(member.id, new Set());
+    let memberHasActiveIndicator = false;
+
+    /* Window tracking: a new member — or one whose qualification dates just
+       moved — needs fresh lots for the CURRENT window, not the persisted
+       value from a previous one. */
+    const day = (d: Date | null | undefined) => d ? d.toISOString().slice(0, 10) : null;
+    const nextStart = day(data.crmStartDate as Date | null);
+    const nextExpiry = day(data.crmExpiryDate as Date | null);
+    if (!existing || day(existing.crmStartDate) !== nextStart || day(existing.crmExpiryDate) !== nextExpiry) {
+      recomputeIds.push(member.id);
+    }
 
     await prisma.memberAcquisitionChannel.deleteMany({ where: { memberId: member.id } });
     if (customer.member.channels?.length) {
@@ -272,7 +365,39 @@ async function saveCustomers(customers: NormalizedCustomer[]) {
           },
         });
       }
+
+      if (account.indicatorName) {
+        if (account.indicatorActive !== false) memberHasActiveIndicator = true;
+        const indicatorId = await resolveIndicatorId(account.indicatorName, account.indicatorPubId);
+        const existingAccess = await prisma.memberIndicatorAccess.findUnique({
+          where: { memberId_indicatorId: { memberId: member.id, indicatorId } },
+        });
+        if (!existingAccess?.manualLock) {
+          const startsAt = account.indicatorGrantedAt || existingAccess?.startsAt || new Date();
+          const expiresAt = account.indicatorExpiresAt || existingAccess?.expiresAt || startsAt;
+          const status = account.indicatorActive === false ? IndicatorAccessStatus.suspended : IndicatorAccessStatus.active;
+          if (existingAccess) {
+            await prisma.memberIndicatorAccess.update({
+              where: { id: existingAccess.id },
+              data: { status, startsAt, expiresAt },
+            });
+          } else {
+            await prisma.memberIndicatorAccess.create({
+              data: { memberId: member.id, indicatorId, status, source: AccessSource.Broker, startsAt, expiresAt },
+            });
+          }
+        }
+      }
     }
+
+    /* Derive one TelegramAccess row from the member's own telegram contact
+       info (the sync payload carries no room/status). */
+    await upsertTelegramFromMember(
+      member.id,
+      customer.member.telegramUsername,
+      customer.member.telegramUserId,
+      memberHasActiveIndicator,
+    );
   }
 
   let removedTradeAccounts = 0;
@@ -283,51 +408,28 @@ async function saveCustomers(customers: NormalizedCustomer[]) {
     removedTradeAccounts += removed.count;
   }
   const removedMembers = await prisma.member.deleteMany({ where: { id: { notIn: [...savedMemberIds] } } });
-  return { removedMembers: removedMembers.count, removedTradeAccounts };
+  // Recompute lots for new/window-changed members immediately so no page ever
+  // reads a stale-window snapshot. Capped per sync (the 4h snapshot cron
+  // converges the rest); failures keep the old value — display layers fall
+  // back to window-correct ledger math instead of a wrong-window number.
+  const recomputeQueue = [...new Set(recomputeIds)].slice(0, 30);
+  let recomputedLots = 0;
+  for (let i = 0; i < recomputeQueue.length; i += 10) {
+    const results = await Promise.all(recomputeQueue.slice(i, i + 10).map((id) => snapshotOneMemberLots(id).catch(() => null)));
+    recomputedLots += results.filter((v) => v !== null).length;
+  }
+  await bumpDataVersion();
+  return { removedMembers: removedMembers.count, removedTradeAccounts, recomputedLots };
 }
 
-async function readDatabaseDtos() {
+export async function readDatabaseDtos() {
   const prisma = getPrisma();
   const records = await prisma.member.findMany({
     include: { acquisitionChannels: true, tradeAccounts: true },
     orderBy: { joinedAt: "desc" },
   });
-  const members: CustomerMemberDto[] = records.map((member) => ({
-    id: member.id,
-    code: member.code,
-    name: member.name,
-    displayName: member.displayName || undefined,
-    avatarUrl: member.avatarUrl || undefined,
-    email: member.email || "",
-    phone: member.phone || "",
-    country: member.country || undefined,
-    address: member.address || undefined,
-    tv: member.tradingView || "",
-    telegramUsername: member.telegramUsername || undefined,
-    telegramUserId: member.telegramUserId || undefined,
-    discordUsername: member.discordUsername || undefined,
-    crmStartDate: member.crmStartDate?.toISOString().slice(0, 10),
-    crmExpiryDate: member.crmExpiryDate?.toISOString().slice(0, 10),
-    createdDate: member.createdAt.toISOString().slice(0, 10),
-    joinedDate: member.joinedAt.toISOString().slice(0, 10),
-    channels: member.acquisitionChannels.map((item) => item.channel).filter((item): item is "facebook" | "instagram" | "tiktok" => ["facebook", "instagram", "tiktok"].includes(item)),
-    primaryTradeAccountId: member.primaryTradeAccountId || undefined,
-    plan: member.plan,
-    requiredLotsOverride: member.requiredLotsOverride?.toNumber(),
-    requiredLotsOverrideNote: member.requiredLotsOverrideNote || undefined,
-  }));
-  const tradeAccounts: CustomerTradeAccountDto[] = records.flatMap((member) => member.tradeAccounts.map((account) => ({
-    id: account.id,
-    memberId: member.id,
-    brokerId: account.brokerId ?? 0,
-    tradeId: account.tradeId,
-    accountType: account.accountType || "Standard",
-    partnerIb: account.partnerIb || "",
-    verification: account.verification,
-    createdDate: account.createdAt.toISOString().slice(0, 10),
-    lastSync: (account.lastSyncAt || account.updatedAt).toISOString().slice(0, 10),
-    status: account.status,
-  })));
+  const members: CustomerMemberDto[] = records.map(toMemberDto);
+  const tradeAccounts: CustomerTradeAccountDto[] = records.flatMap((member) => member.tradeAccounts.map(toTradeAccountDto));
   return { members, tradeAccounts };
 }
 

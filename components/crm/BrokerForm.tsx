@@ -3,13 +3,14 @@
 import { forwardRef, useImperativeHandle, useState } from "react";
 import { useCrm, brokerInitials, type Broker } from "./CrmContext";
 import { useLanguage } from "./LanguageContext";
+import { apiCall } from "../../lib/crmApi";
 import Icon from "../Icon";
 
 export type BrokerFormHandle = { save: () => void };
 
 const BrokerForm = forwardRef<BrokerFormHandle, { broker: Broker | null; onDone: () => void }>(
   function BrokerForm({ broker, onDone }, ref) {
-    const { setBrokers, toast } = useCrm();
+    const { setBrokers, toast, backendLive } = useCrm();
     const { t } = useLanguage();
     const isNew = !broker;
     const [name, setName] = useState(broker?.name ?? "");
@@ -42,12 +43,18 @@ const BrokerForm = forwardRef<BrokerFormHandle, { broker: Broker | null; onDone:
 
     useImperativeHandle(ref, () => ({
       save() {
-        const trimmedName = name.trim();
-        if (!trimmedName) {
-          toast(t("br.toast.nameRequired"));
-          return;
-        }
-        const data = { name: trimmedName, logo, code: code.trim(), url: url.trim(), importMethod };
+        void saveAsync();
+      },
+    }));
+
+    async function saveAsync() {
+      const trimmedName = name.trim();
+      if (!trimmedName) {
+        toast(t("br.toast.nameRequired"));
+        return;
+      }
+      const data = { name: trimmedName, logo, code: code.trim(), url: url.trim(), importMethod };
+      if (!backendLive) {
         if (isNew) {
           setBrokers((cur) => [...cur, { id: Math.max(0, ...cur.map((b) => b.id)) + 1, status: "active" as const, ...data }]);
           toast(t("br.toast.added"));
@@ -56,8 +63,23 @@ const BrokerForm = forwardRef<BrokerFormHandle, { broker: Broker | null; onDone:
           toast(t("br.toast.saved"));
         }
         onDone();
-      },
-    }));
+        return;
+      }
+      try {
+        if (isNew) {
+          const payload = await apiCall<{ broker: Broker }>("/api/crm/brokers/", "POST", data);
+          setBrokers((cur) => [...cur, payload.broker]);
+          toast(t("br.toast.added"));
+        } else {
+          const payload = await apiCall<{ broker: Broker }>(`/api/crm/brokers/${broker!.id}/`, "PUT", data);
+          setBrokers((cur) => cur.map((b) => (b.id === broker!.id ? payload.broker : b)));
+          toast(t("br.toast.saved"));
+        }
+        onDone();
+      } catch (error) {
+        toast(error instanceof Error ? error.message : "Unable to save broker");
+      }
+    }
 
     return (
       <>

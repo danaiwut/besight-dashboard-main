@@ -1,0 +1,16 @@
+{
+  "crons": [
+    {
+      "path": "/api/cron/lot-renewals/",
+      "schedule": "0 1 * * *"
+    },
+    {
+      "path": "/api/cron/trade-log-snapshot/",
+      "schedule": "30 0 * * *"
+    },
+    {
+      "path": "/api/cron/member-lots-snapshot/",
+      "schedule": "0 */4 * * *"
+    }
+  ]
+}

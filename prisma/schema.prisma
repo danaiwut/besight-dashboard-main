@@ -81,6 +81,14 @@ model Member {
   requiredLotsOverrideNote String?                    @db.Text
   crmStartDate             DateTime?
   crmExpiryDate            DateTime?
+  currentPeriodLots        Decimal                    @default(0) @db.Decimal(18, 8)
+  currentPeriodLotsAt      DateTime?
+  /** The window the snapshot above was computed for — display layers only
+   *  trust currentPeriodLots when this matches the member's current
+   *  qualification window (a later sync can move crmStart/crmExpiry dates,
+   *  which would otherwise leave a stale-window number on screen). */
+  currentPeriodLotsFrom    DateTime?
+  currentPeriodLotsTo      DateTime?
   customerStageOverride    CustomerStage?
   primaryTradeAccount      TradeAccount?              @relation("PrimaryTradeAccount", fields: [primaryTradeAccountId], references: [id], onDelete: SetNull)
   tradeAccounts            TradeAccount[]             @relation("MemberTradeAccounts")

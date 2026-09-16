@@ -1,76 +1,103 @@
 "use client";
 
-import { useState } from "react";
-import { useCrm, fmtDate, lot } from "./CrmContext";
+import { useEffect, useState } from "react";
+import { type TradeLog, type DateRange, fmtDate, lot } from "./CrmContext";
 import { useLanguage } from "./LanguageContext";
 import SummaryTotalBar from "./SummaryTotalBar";
 
-const MONTH_LABELS = Array.from({ length: 12 }, (_, i) => new Date(2000, i, 1).toLocaleDateString("en-US", { month: "short" }));
 const HISTORY_ROW_HEIGHT = 38.5;
 
-export default function TradeAccountHistoryPanel({ accountId }: { accountId: number }) {
-  const { tradeLogs } = useCrm();
-  const { t } = useLanguage();
-  const currentDate = new Date();
-  const [historyYear, setHistoryYear] = useState(currentDate.getFullYear());
-  const [historyMonth, setHistoryMonth] = useState(currentDate.getMonth() + 1);
+type ExcludedSymbolRow = { instrument: string; lots: number };
 
-  const allRows = tradeLogs.filter((l) => l.tradeAccountId === accountId);
-  const selectedKey = `${historyYear}-${String(historyMonth).padStart(2, "0")}`;
-  const rows = allRows.filter((l) => l.tradeDate.slice(0, 7) === selectedKey).sort((a, b) => b.tradeDate.localeCompare(a.tradeDate));
-  const monthLots = rows.reduce((s, l) => s + l.lots, 0);
-  const monthRebate = rows.reduce((s, l) => s + l.rebate, 0);
-  const bySymbol = new Map<string, number>();
-  rows.forEach((l) => bySymbol.set(l.symbol, (bySymbol.get(l.symbol) ?? 0) + l.lots));
-  const symbolRows = Array.from(bySymbol.entries()).sort((a, b) => b[1] - a[1]);
-  const yearsAvailable = Array.from(new Set([...allRows.map((l) => Number(l.tradeDate.slice(0, 4))), currentDate.getFullYear()])).sort((a, b) => b - a);
+export default function TradeAccountHistoryPanel({ accountId, tradeId, range }: { accountId: number; tradeId: string; range: DateRange }) {
+  const { t } = useLanguage();
+  const [dailyRows, setDailyRows] = useState<TradeLog[]>([]);
+  const [periodTotal, setPeriodTotal] = useState<number | null>(null);
+  const [pairs, setPairs] = useState<ExcludedSymbolRow[]>([]);
+
+  useEffect(() => {
+    let cancelled = false;
+    // Reset to the loading state before refetching.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setDailyRows([]);
+    fetch(`/api/crm/trade-logs/?tradeAccountId=${accountId}`, { cache: "no-store" })
+      .then(async (response) => {
+        const payload = await response.json() as { ok?: boolean; tradeLogs?: TradeLog[] };
+        if (!cancelled && response.ok && payload.ok && payload.tradeLogs) setDailyRows(payload.tradeLogs);
+      })
+      .catch(() => undefined);
+    return () => { cancelled = true; };
+  }, [accountId]);
+
+  // Same real webhook + same date range as the Trade Accounts total above, so
+  // this panel's total always matches it exactly — one source of truth, not two.
+  useEffect(() => {
+    let cancelled = false;
+    // Reset to the loading state before refetching.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setPeriodTotal(null);
+    setPairs([]);
+    const url = `/api/crm/lot-check/?date_from=${range.from}&date_to=${range.to}&tradeid=${encodeURIComponent(tradeId)}`;
+    fetch(url, { cache: "no-store" })
+      .then(async (response) => {
+        const payload = await response.json() as {
+          ok?: boolean;
+          data?: { totalLots?: number; excludedSymbols?: Array<{ loginId: string; instrument: string; lots: number }> };
+        };
+        if (cancelled || !response.ok || !payload.ok) return;
+        setPeriodTotal(payload.data?.totalLots ?? 0);
+        const mine = (payload.data?.excludedSymbols || []).filter((row) => row.loginId === tradeId);
+        const bySymbol = new Map<string, number>();
+        mine.forEach((row) => bySymbol.set(row.instrument, (bySymbol.get(row.instrument) ?? 0) + row.lots));
+        setPairs(Array.from(bySymbol, ([instrument, lots]) => ({ instrument, lots })).sort((a, b) => b.lots - a.lots));
+      })
+      .catch(() => { if (!cancelled) setPeriodTotal(0); });
+    return () => { cancelled = true; };
+  }, [tradeId, range.from, range.to]);
+
+  const rows = dailyRows
+    .filter((l) => (!range.from || l.tradeDate >= range.from) && (!range.to || l.tradeDate <= range.to))
+    .sort((a, b) => b.tradeDate.localeCompare(a.tradeDate));
 
   return (
     <div className="field" style={{ marginTop: 12, marginBottom: 0 }}>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 8, marginBottom: 14 }}>
         <label style={{ margin: 0 }}>{t("ta.history.title")}</label>
-        <div style={{ display: "flex", gap: 6 }}>
-          <select className="filter-select" aria-label={t("ta.history.month")} value={historyMonth} onChange={(e) => setHistoryMonth(Number(e.target.value))}>
-            {MONTH_LABELS.map((label, i) => (
-              <option key={label} value={i + 1}>
-                {label}
-              </option>
-            ))}
-          </select>
-          <select className="filter-select" aria-label={t("ta.history.year")} value={historyYear} onChange={(e) => setHistoryYear(Number(e.target.value))}>
-            {yearsAvailable.map((y) => (
-              <option key={y} value={y}>
-                {y}
-              </option>
-            ))}
-          </select>
-        </div>
+        <span style={{ fontSize: 12, color: "var(--text-sub)" }}>
+          {fmtDate(range.from)} – {fmtDate(range.to)}
+        </span>
       </div>
-      <SummaryTotalBar label={t("ta.history.total")} lots={monthLots} rebate={monthRebate} style={{ margin: "0 0 14px" }} />
+      <SummaryTotalBar label={t("ta.history.total")} lots={periodTotal ?? 0} rebate={0} style={{ margin: "0 0 14px" }} />
 
       <label style={{ fontSize: 12, fontWeight: 600, color: "var(--text-sub)", display: "block", marginBottom: 6 }}>{t("ta.symbols.title")}</label>
-      <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 14 }}>
-        {(symbolRows.length ? symbolRows : ([["—", 0]] as [string, number][])).map(([symbol, lots]) => (
-          <span
-            key={symbol}
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: 6,
-              padding: "5px 12px",
-              borderRadius: 999,
-              fontSize: 12.5,
-              fontWeight: 600,
-              background: "var(--bg-card2)",
-              border: "1px solid var(--border)",
-            }}
-          >
-            {symbol}
-            <span style={{ color: "var(--text-sub)", fontWeight: 500 }}>{lot(lots)} Lots</span>
-          </span>
-        ))}
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 6 }}>
+        {pairs.length ? (
+          pairs.map(({ instrument, lots }) => (
+            <span
+              key={instrument}
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 6,
+                padding: "5px 12px",
+                borderRadius: 999,
+                fontSize: 12.5,
+                fontWeight: 600,
+                background: "var(--bg-card2)",
+                border: "1px solid var(--border)",
+              }}
+            >
+              {instrument}
+              <span style={{ color: "var(--text-sub)", fontWeight: 500 }}>{lot(lots)} Lots</span>
+            </span>
+          ))
+        ) : (
+          <span style={{ fontSize: 12.5, color: "var(--text-sub)" }}>{t("ta.symbols.none")}</span>
+        )}
       </div>
+      <div style={{ fontSize: 11, color: "var(--text-sub)", marginBottom: 14 }}>{t("ta.symbols.note")}</div>
 
+      <label style={{ fontSize: 12, fontWeight: 600, color: "var(--text-sub)", display: "block", marginBottom: 6 }}>{t("ta.daily.title")}</label>
       <div
         style={{
           maxHeight: rows.length > 5 ? 5 * HISTORY_ROW_HEIGHT : undefined,
@@ -91,9 +118,8 @@ export default function TradeAccountHistoryPanel({ accountId }: { accountId: num
               borderBottom: i === (rows.length ? rows.length - 1 : 0) ? "none" : "1px solid var(--border)",
             }}
           >
-            <span style={{ fontSize: 12.5, color: "var(--text-sub)" }}>{l ? fmtDate(l.tradeDate) : "—"}</span>
-            <span style={{ fontSize: 13 }}>{lot(l ? l.lots : 0)} Lots</span>
-            <span style={{ fontSize: 13, color: "var(--green)" }}>${(l ? l.rebate : 0).toFixed(2)}</span>
+            <span style={{ fontSize: 12.5, color: "var(--text-sub)" }}>{l ? fmtDate(l.tradeDate) : t("ta.daily.empty")}</span>
+            <span style={{ fontSize: 13 }}>{l ? `${lot(l.lots)} Lots` : ""}</span>
           </div>
         ))}
       </div>

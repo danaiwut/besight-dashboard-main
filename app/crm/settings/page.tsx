@@ -1,8 +1,10 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useCrm, initials, fmtDate, backfillRebateData, ROLE_DESC, ROLES, type Admin } from "../../../components/crm/CrmContext";
 import { useLanguage } from "../../../components/crm/LanguageContext";
+import { apiCall } from "../../../lib/crmApi";
+import { SettingsSkeleton } from "../../../components/crm/Skeletons";
 import Icon from "../../../components/Icon";
 import Drawer from "../../../components/crm/Drawer";
 import AdminForm, { type AdminFormHandle } from "../../../components/crm/AdminForm";
@@ -32,11 +34,39 @@ function LanguageCard() {
 }
 
 function TelegramSettingsCard() {
-  const { settings, setSettings, toast } = useCrm();
+  const { settings, setSettings, toast, backendLive } = useCrm();
   const { t } = useLanguage();
   const [botToken, setBotToken] = useState(settings.telegramBotToken);
   const [roomId, setRoomId] = useState(settings.telegramPrivateRoomId);
   const [autoRemove, setAutoRemove] = useState(settings.telegramAutoRemove);
+
+  // General settings hydrate from the backend after mount — adopt them.
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setBotToken(settings.telegramBotToken);
+    setRoomId(settings.telegramPrivateRoomId);
+    setAutoRemove(settings.telegramAutoRemove);
+  }, [settings.telegramBotToken, settings.telegramPrivateRoomId, settings.telegramAutoRemove]);
+
+  async function save() {
+    const data = { telegramBotToken: botToken.trim(), telegramPrivateRoomId: roomId.trim(), telegramAutoRemove: autoRemove };
+    if (!backendLive) {
+      setSettings((cur) => ({ ...cur, ...data }));
+      toast(t("set.toast.telegramSaved"));
+      return;
+    }
+    try {
+      const payload = await apiCall<{ settings: { telegramBotToken: string; telegramPrivateRoomId: string; telegramAutoRemove: boolean } }>(
+        "/api/crm/settings/general/",
+        "PUT",
+        data,
+      );
+      setSettings((cur) => ({ ...cur, ...payload.settings }));
+      toast(t("set.toast.telegramSaved"));
+    } catch (error) {
+      toast(error instanceof Error ? error.message : "Unable to save Telegram settings");
+    }
+  }
 
   return (
     <div className="card" style={{ padding: 22, marginBottom: 22 }}>
@@ -69,10 +99,7 @@ function TelegramSettingsCard() {
       <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 18 }}>
         <button
           className="btn btn-primary"
-          onClick={() => {
-            setSettings((cur) => ({ ...cur, telegramBotToken: botToken.trim(), telegramPrivateRoomId: roomId.trim(), telegramAutoRemove: autoRemove }));
-            toast(t("set.toast.telegramSaved"));
-          }}
+          onClick={() => void save()}
         >
           {t("set.saveTelegramSettings")}
         </button>
@@ -182,10 +209,40 @@ function RebateBackfillCard() {
 }
 
 function TeamPermissions() {
-  const { admins, setAdmins, toast } = useCrm();
+  const { admins, setAdmins, toast, backendLive } = useCrm();
   const { t } = useLanguage();
   const [drawerOpen, setDrawerOpen] = useState<{ admin: Admin | null } | null>(null);
   const formRef = useRef<AdminFormHandle>(null);
+
+  async function setRole(a: Admin, role: string) {
+    if (!backendLive) {
+      setAdmins((cur) => cur.map((x) => (x.id === a.id ? { ...x, role } : x)));
+      toast(t("set.toast.adminSet", { name: a.name, role }));
+      return;
+    }
+    try {
+      const payload = await apiCall<{ admin: Admin }>(`/api/crm/admins/${a.id}/`, "PUT", { role });
+      setAdmins((cur) => cur.map((x) => (x.id === a.id ? payload.admin : x)));
+      toast(t("set.toast.adminSet", { name: a.name, role }));
+    } catch (error) {
+      toast(error instanceof Error ? error.message : "Unable to update admin");
+    }
+  }
+
+  async function removeAdmin(a: Admin) {
+    if (!backendLive) {
+      setAdmins((cur) => cur.filter((x) => x.id !== a.id));
+      toast(t("set.toast.adminRemoved", { name: a.name }));
+      return;
+    }
+    try {
+      await apiCall(`/api/crm/admins/${a.id}/`, "DELETE");
+      setAdmins((cur) => cur.filter((x) => x.id !== a.id));
+      toast(t("set.toast.adminRemoved", { name: a.name }));
+    } catch (error) {
+      toast(error instanceof Error ? error.message : "Unable to remove admin");
+    }
+  }
 
   return (
     <div className="card" style={{ padding: 22, marginBottom: 22 }}>
@@ -232,11 +289,7 @@ function TeamPermissions() {
                     <select
                       className="input role-select"
                       value={a.role}
-                      onChange={(e) => {
-                        const role = e.target.value;
-                        setAdmins((cur) => cur.map((x) => (x.id === a.id ? { ...x, role } : x)));
-                        toast(t("set.toast.adminSet", { name: a.name, role }));
-                      }}
+                      onChange={(e) => void setRole(a, e.target.value)}
                     >
                       {ROLES.map((r) => (
                         <option key={r}>{r}</option>
@@ -250,10 +303,7 @@ function TeamPermissions() {
                     <button
                       className="kebab"
                       aria-label="Remove admin"
-                      onClick={() => {
-                        setAdmins((cur) => cur.filter((x) => x.id !== a.id));
-                        toast(t("set.toast.adminRemoved", { name: a.name }));
-                      }}
+                      onClick={() => void removeAdmin(a)}
                     >
                       <Icon name="delete" />
                     </button>
@@ -289,6 +339,10 @@ function TeamPermissions() {
 
 export default function CrmSettingsPage() {
   const { t } = useLanguage();
+  const { crmDataStatus } = useCrm();
+
+  if (crmDataStatus === "loading") return <SettingsSkeleton />;
+
   return (
     <section className="panel is-active">
       <LanguageCard />

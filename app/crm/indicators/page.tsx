@@ -3,24 +3,36 @@
 import { useEffect, useRef, useState } from "react";
 import { useCrm, PLAN_LABELS, type Indicator, type LotCalculationMode, type Plan } from "../../../components/crm/CrmContext";
 import { useLanguage } from "../../../components/crm/LanguageContext";
+import { apiCall } from "../../../lib/crmApi";
+import { IndicatorsSkeleton } from "../../../components/crm/Skeletons";
 import Icon from "../../../components/Icon";
 import Drawer from "../../../components/crm/Drawer";
 import IndicatorForm, { type IndicatorFormHandle } from "../../../components/crm/IndicatorForm";
 
 function IndicatorsCard() {
-  const { indicators, setIndicators, indicatorAccess, toast } = useCrm();
+  const { indicators, setIndicators, indicatorAccess, toast, backendLive } = useCrm();
   const { t } = useLanguage();
   const [drawerOpen, setDrawerOpen] = useState<{ indicator: Indicator | null } | null>(null);
   const formRef = useRef<IndicatorFormHandle>(null);
 
-  function remove(ind: Indicator) {
+  async function remove(ind: Indicator) {
     const inUse = indicatorAccess.some((a) => a.indicator === ind.name);
     if (inUse) {
       toast(t("set.toast.indicatorInUse", { name: ind.name }));
       return;
     }
-    setIndicators((cur) => cur.filter((i) => i.id !== ind.id));
-    toast(t("set.toast.indicatorRemoved", { name: ind.name }));
+    if (!backendLive) {
+      setIndicators((cur) => cur.filter((i) => i.id !== ind.id));
+      toast(t("set.toast.indicatorRemoved", { name: ind.name }));
+      return;
+    }
+    try {
+      await apiCall(`/api/crm/indicators/${ind.id}/`, "DELETE");
+      setIndicators((cur) => cur.filter((i) => i.id !== ind.id));
+      toast(t("set.toast.indicatorRemoved", { name: ind.name }));
+    } catch (error) {
+      toast(error instanceof Error ? error.message : "Unable to delete indicator");
+    }
   }
 
   return (
@@ -84,9 +96,20 @@ function IndicatorsCard() {
 }
 
 function PlansCard() {
-  const { members, indicators, settings, setSettings, syncPlanAccess, toast } = useCrm();
+  const { members, indicators, settings, setSettings, syncPlanAccess, toast, backendLive } = useCrm();
   const { t } = useLanguage();
   const [draft, setDraft] = useState(settings.planEntitlements);
+
+  // The provider hydrates real entitlements after mount — adopt them until
+  // the admin starts editing (tracked by comparing against the last synced).
+  const [synced, setSynced] = useState(settings.planEntitlements);
+  useEffect(() => {
+    if (JSON.stringify(draft) === JSON.stringify(synced)) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setDraft(settings.planEntitlements);
+      setSynced(settings.planEntitlements);
+    }
+  }, [settings.planEntitlements, draft, synced]);
 
   function toggle(plan: Plan, indicatorId: number) {
     setDraft((cur) => {
@@ -95,13 +118,26 @@ function PlansCard() {
     });
   }
 
-  function save() {
-    setSettings((cur) => ({ ...cur, planEntitlements: draft }));
-    toast(t("set.toast.plansSaved"));
+  async function save() {
+    if (!backendLive) {
+      setSettings((cur) => ({ ...cur, planEntitlements: draft }));
+      setSynced(draft);
+      toast(t("set.toast.plansSaved"));
+      return;
+    }
+    try {
+      const payload = await apiCall<{ planEntitlements: Record<Plan, number[]> }>("/api/crm/settings/plan-entitlements/", "PUT", draft);
+      setSettings((cur) => ({ ...cur, planEntitlements: payload.planEntitlements }));
+      setSynced(payload.planEntitlements);
+      toast(t("set.toast.plansSaved"));
+    } catch (error) {
+      toast(error instanceof Error ? error.message : "Unable to save plans");
+    }
   }
 
-  function syncAll() {
-    const total = members.reduce((sum, m) => sum + syncPlanAccess(m.id, m.plan, m.name), 0);
+  async function syncAll() {
+    let total = 0;
+    for (const m of members) total += await syncPlanAccess(m.id, m.plan, m.name);
     toast(total ? t("set.toast.syncedSome", { n: total }) : t("set.toast.syncedNone"));
   }
 
@@ -152,7 +188,7 @@ function PlansCard() {
 }
 
 function IndicatorSettingsCard() {
-  const { settings, setSettings, toast } = useCrm();
+  const { settings, setSettings, toast, backendLive } = useCrm();
   const { t } = useLanguage();
   const [requiredLots, setRequiredLots] = useState(settings.requiredLots);
   const [renewalPeriodMonths, setRenewalPeriodMonths] = useState(settings.renewalPeriodMonths);
@@ -161,29 +197,24 @@ function IndicatorSettingsCard() {
   const [lotCalculationMode, setLotCalculationMode] = useState<LotCalculationMode>(settings.lotCalculationMode);
   const [saving, setSaving] = useState(false);
 
+  // Automation + general settings hydrate from the backend after mount (the
+  // provider owns the fetch now) — adopt them into the draft form.
   useEffect(() => {
-    let cancelled = false;
-    fetch("/api/crm/settings/indicator-automation/", { cache: "no-store" })
-      .then(async (response) => {
-        const payload = await response.json() as { ok?: boolean; settings?: { requiredLots: number; renewalMonths: number; enabled: boolean } };
-        if (!response.ok || !payload.ok || !payload.settings || cancelled) return;
-        setRequiredLots(payload.settings.requiredLots);
-        setRenewalPeriodMonths(payload.settings.renewalMonths);
-        setAutoRenewalEnabled(payload.settings.enabled);
-        setSettings((current) => ({
-          ...current,
-          requiredLots: payload.settings!.requiredLots,
-          renewalPeriodMonths: payload.settings!.renewalMonths,
-          autoRenewalEnabled: payload.settings!.enabled,
-        }));
-      })
-      .catch(() => undefined);
-    return () => { cancelled = true; };
-  }, [setSettings]);
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setRequiredLots(settings.requiredLots);
+    setRenewalPeriodMonths(settings.renewalPeriodMonths);
+    setAutoRenewalEnabled(settings.autoRenewalEnabled);
+    setLotCalculationMode(settings.lotCalculationMode);
+  }, [settings.requiredLots, settings.renewalPeriodMonths, settings.autoRenewalEnabled, settings.lotCalculationMode]);
 
   async function save() {
     setSaving(true);
     try {
+      if (!backendLive) {
+        setSettings((current) => ({ ...current, requiredLots, renewalPeriodMonths, expiringSoonDays, autoRenewalEnabled, lotCalculationMode }));
+        toast(t("set.toast.indicatorSaved"));
+        return;
+      }
       const response = await fetch("/api/crm/settings/indicator-automation/", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
@@ -253,6 +284,10 @@ function IndicatorSettingsCard() {
 }
 
 export default function IndicatorsPage() {
+  const { crmDataStatus } = useCrm();
+
+  if (crmDataStatus === "loading") return <IndicatorsSkeleton />;
+
   return (
     <section className="panel is-active">
       <IndicatorsCard />

@@ -6,6 +6,7 @@ import {
 } from "@/generated/prisma/client";
 import type { LotAccountRow, LotCampaignRow, LotCountryRow, LotExcludedSymbolRow } from "./lotCheck";
 import { getPrisma, isDatabaseConfigured } from "./prisma";
+import { bumpDataVersion } from "./dataVersion";
 import { readIndicatorAutomationSettings } from "./indicatorSettings";
 
 type LotData = {
@@ -37,7 +38,7 @@ export async function persistLotCheckAndAutomate(input: {
 
   const prisma = getPrisma();
   const settings = await readIndicatorAutomationSettings();
-  return prisma.$transaction(async (tx) => {
+  const result = await prisma.$transaction(async (tx) => {
     const account = input.tradeId
       ? await tx.tradeAccount.findFirst({ where: { tradeId: input.tradeId }, include: { member: true } })
       : null;
@@ -159,4 +160,6 @@ export async function persistLotCheckAndAutomate(input: {
       skipped,
     };
   });
+  await bumpDataVersion();
+  return result;
 }

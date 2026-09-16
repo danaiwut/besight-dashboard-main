@@ -3,13 +3,15 @@
 import { useState } from "react";
 import { useCrm, accessLabel, primaryIndicatorAccess, memberLots, requiredLotsFor, initials, fmtDate } from "../../components/crm/CrmContext";
 import { useLanguage } from "../../components/crm/LanguageContext";
+import { MONTHS_SHORT } from "../../lib/dateLocale";
+import { OverviewSkeleton } from "../../components/crm/Skeletons";
 import Icon from "../../components/Icon";
 
 type ChartMetric = "new" | "total" | "activeTraders";
 
 export default function CrmOverviewPage() {
-  const { members, tradeAccounts, tradeLogs, indicatorAccess, settings } = useCrm();
-  const { t } = useLanguage();
+  const { members, tradeAccounts, tradeLogs, indicatorAccess, settings, crmDataStatus } = useCrm();
+  const { t, lang } = useLanguage();
   const [chartMetric, setChartMetric] = useState<ChartMetric>("new");
   const [chartYear, setChartYear] = useState(() => new Date().getFullYear());
 
@@ -48,7 +50,7 @@ export default function CrmOverviewPage() {
 
   const monthsOfYear = Array.from({ length: 12 }, (_, i) => monthKeyOf(chartYear, i));
   const chartByMonth = monthsOfYear.map((mo, i) => {
-    const monthLabel = new Date(chartYear, i, 1).toLocaleDateString("en-US", { month: "short" });
+    const monthLabel = MONTHS_SHORT[lang][i];
     let count: number;
     if (chartMetric === "new") {
       count = members.filter((m) => monthKey(m.joinedDate) === mo).length;
@@ -61,6 +63,8 @@ export default function CrmOverviewPage() {
   });
   const maxChartCount = Math.max(1, ...chartByMonth.map((m) => m.count));
   const chartTitleKey = chartMetric === "new" ? "ov.newMembersPerMonth" : chartMetric === "total" ? "ov.totalMembersPerMonth" : "ov.activeTradersPerMonth";
+
+  if (crmDataStatus === "loading") return <OverviewSkeleton />;
 
   return (
     <section className="panel is-active">

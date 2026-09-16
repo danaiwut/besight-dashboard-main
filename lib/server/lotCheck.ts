@@ -57,6 +57,9 @@ async function requestRows(path: string, dateFrom: string, dateTo: string, trade
   const response = await fetch(url, { cache: "no-store", signal: AbortSignal.timeout(30_000) });
   const body = await response.text();
   if (!response.ok) throw new Error(`Lot service returned ${response.status}: ${body.slice(0, 240)}`);
+  // The service sends a genuinely empty body (not "[]") when a query matches no rows
+  // at all — that's a real "zero", not a malformed response.
+  if (!body.trim()) return [];
   const parsed: unknown = JSON.parse(body);
   if (!Array.isArray(parsed)) throw new Error("Lot service returned an unexpected response");
   return parsed.filter((row): row is RawRow => Boolean(row) && typeof row === "object");

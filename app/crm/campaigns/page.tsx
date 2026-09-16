@@ -7,6 +7,8 @@ import Icon from "../../../components/Icon";
 import DateRangePicker, { type DateRange } from "../../../components/crm/DateRangePicker";
 import { exportCsv } from "../../../lib/exportCsv";
 import { WORLD_COUNTRIES } from "../../../lib/countries";
+import { MONTHS_LONG, formatDay, getDateLang } from "../../../lib/dateLocale";
+import { CampaignsSkeleton } from "../../../components/crm/Skeletons";
 
 const CAMPAIGNS = ["Summer Bonus 2026", "New Year Cashback", "Refer a Friend", "Zero Spread Week", "IB Growth Challenge"];
 const INSTRUMENTS = ["Forex", "Metals", "Indices", "Crypto", "CFDs"];
@@ -52,7 +54,7 @@ function isoDay(d: Date) {
   return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
 }
 function fmtDayLabel(d: Date) {
-  return d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+  return formatDay(d);
 }
 
 function dateRangeFor(timeFrame: TimeFrame): { start: Date; end: Date } {
@@ -95,7 +97,7 @@ function bucketsFor(timeFrame: TimeFrame, detail: DetailLevel): { key: string; l
     }
   } else {
     for (let d = new Date(start.getFullYear(), start.getMonth(), 1); d <= end; d = new Date(d.getFullYear(), d.getMonth() + 1, 1)) {
-      buckets.push({ key: `${d.getFullYear()}-${pad2(d.getMonth() + 1)}`, label: d.toLocaleDateString("en-US", { month: "long", year: "numeric" }) });
+      buckets.push({ key: `${d.getFullYear()}-${pad2(d.getMonth() + 1)}`, label: `${MONTHS_LONG[getDateLang()][d.getMonth()]} ${d.getFullYear()}` });
     }
   }
   return buckets;
@@ -735,7 +737,6 @@ function LotCheckPanel() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [result, setResult] = useState<{ data: LotCheckData; automation: LotAutomation } | null>(null);
-  const [resultTab, setResultTab] = useState<"account" | "campaign" | "country" | "symbol">("account");
 
   async function checkLots() {
     if (!range.from || !range.to) {
@@ -760,9 +761,6 @@ function LotCheckPanel() {
       setLoading(false);
     }
   }
-
-  const rows: Array<{ campaignName?: string; loginId?: string; country?: string; instrument?: string; lots: number }> | undefined =
-    resultTab === "account" ? result?.data.account : resultTab === "campaign" ? result?.data.campaigns : resultTab === "country" ? result?.data.countries : result?.data.excludedSymbols;
 
   return (
     <div className="card" style={{ padding: 20 }}>
@@ -829,31 +827,113 @@ function LotCheckPanel() {
             </div>
           </div>
 
+          <div className="panel-section-title" style={{ marginTop: 8 }}>ผลของ Trade ID นี้</div>
+          <div className="table-wrap">
+            <table className="data" style={{ minWidth: 520 }}>
+              <thead>
+                <tr>
+                  <th>Campaign</th>
+                  <th>Login ID</th>
+                  <th>Lots</th>
+                </tr>
+              </thead>
+              <tbody>
+                {result.data.account.length ? result.data.account.map((row, index) => (
+                  <tr key={`account-${index}`}>
+                    <td>{row.campaignName || "—"}</td>
+                    <td className="mono">{row.loginId || "—"}</td>
+                    <td className="mono">{row.lots.toFixed(8)}</td>
+                  </tr>
+                )) : (
+                  <tr><td colSpan={3}><div className="table-empty">ไม่พบข้อมูลในช่วงวันที่นี้</div></td></tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
+function LotOverviewPanel() {
+  const [range, setRange] = useState<DateRange>(defaultTxRange);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [data, setData] = useState<LotCheckData | null>(null);
+  const [tab, setTab] = useState<"campaign" | "country" | "symbol">("campaign");
+
+  async function load() {
+    if (!range.from || !range.to) {
+      setError("กรุณาเลือกช่วงวันที่");
+      return;
+    }
+    setLoading(true);
+    setError("");
+    try {
+      const response = await fetch(`/api/crm/lot-check/?date_from=${range.from}&date_to=${range.to}`, { cache: "no-store" });
+      const payload = await response.json() as { ok?: boolean; error?: string; data?: LotCheckData };
+      if (!response.ok || !payload.ok || !payload.data) throw new Error(payload.error || "ดึงภาพรวมไม่สำเร็จ");
+      setData(payload.data);
+    } catch (requestError) {
+      setError(requestError instanceof Error ? requestError.message : "ดึงภาพรวมไม่สำเร็จ");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  const rows: Array<{ campaignName?: string; loginId?: string; country?: string; instrument?: string; lots: number }> | undefined =
+    tab === "campaign" ? data?.campaigns : tab === "country" ? data?.countries : data?.excludedSymbols;
+
+  return (
+    <div className="card" style={{ padding: 20 }}>
+      <div className="panel-section-title" style={{ display: "flex", alignItems: "center", gap: 7 }}>
+        ภาพรวม Lot ทั้งระบบ
+        <span title="ตัวเลขในหน้านี้รวมทุกสมาชิกในระบบ ไม่ใช่ของ Trade ID ใดโดยเฉพาะ — ใช้ดูภาพรวมแคมเปญ/ประเทศ/ตราสารนอกรายการ">
+          <Icon name="info" style={{ fontSize: 16, color: "var(--text-sub)" }} />
+        </span>
+      </div>
+
+      <div className="toolbar" style={{ padding: "16px 0" }}>
+        <div className="field" style={{ marginBottom: 0, flex: 1, minWidth: 220, maxWidth: 290 }}>
+          <label>ช่วงวันที่</label>
+          <DateRangePicker value={range} onChange={setRange} placeholder="เลือกช่วงวันที่" />
+        </div>
+        <div style={{ flex: 1 }} />
+        <button className="btn btn-primary" onClick={() => void load()} disabled={loading}>
+          <Icon name={loading ? "progress_activity" : "query_stats"} />
+          {loading ? "กำลังดึงข้อมูล..." : "ดึงภาพรวม"}
+        </button>
+      </div>
+
+      {error && <div className="lot-message error"><Icon name="error" />{error}</div>}
+
+      {data && (
+        <>
           <div className="tabs lot-result-tabs">
-            <button className={`tab${resultTab === "account" ? " is-active" : ""}`} onClick={() => setResultTab("account")}>Trade ID <span className="n">{result.data.account.length}</span></button>
-            <button className={`tab${resultTab === "campaign" ? " is-active" : ""}`} onClick={() => setResultTab("campaign")}>Campaign <span className="n">{result.data.campaigns.length}</span></button>
-            <button className={`tab${resultTab === "country" ? " is-active" : ""}`} onClick={() => setResultTab("country")}>Country <span className="n">{result.data.countries.length}</span></button>
-            <button className={`tab${resultTab === "symbol" ? " is-active" : ""}`} onClick={() => setResultTab("symbol")}>Symbol นอก List <span className="n">{result.data.excludedSymbols.length}</span></button>
+            <button className={`tab${tab === "campaign" ? " is-active" : ""}`} onClick={() => setTab("campaign")}>Campaign <span className="n">{data.campaigns.length}</span></button>
+            <button className={`tab${tab === "country" ? " is-active" : ""}`} onClick={() => setTab("country")}>Country <span className="n">{data.countries.length}</span></button>
+            <button className={`tab${tab === "symbol" ? " is-active" : ""}`} onClick={() => setTab("symbol")}>Symbol นอก List <span className="n">{data.excludedSymbols.length}</span></button>
           </div>
 
           <div className="table-wrap">
-            <table className="data" style={{ minWidth: resultTab === "symbol" ? 760 : 520 }}>
+            <table className="data" style={{ minWidth: tab === "symbol" ? 760 : 520 }}>
               <thead>
                 <tr>
-                  {resultTab !== "country" && <th>Campaign</th>}
-                  {(resultTab === "account" || resultTab === "symbol") && <th>Login ID</th>}
-                  {resultTab === "country" && <th>Country</th>}
-                  {resultTab === "symbol" && <th>Instrument</th>}
+                  {tab !== "country" && <th>Campaign</th>}
+                  {tab === "symbol" && <th>Login ID</th>}
+                  {tab === "country" && <th>Country</th>}
+                  {tab === "symbol" && <th>Instrument</th>}
                   <th>Lots</th>
                 </tr>
               </thead>
               <tbody>
                 {rows?.length ? rows.map((row, index) => (
-                  <tr key={`${resultTab}-${index}`}>
-                    {resultTab !== "country" && <td>{row.campaignName || "—"}</td>}
-                    {(resultTab === "account" || resultTab === "symbol") && <td className="mono">{row.loginId || "—"}</td>}
-                    {resultTab === "country" && <td>{row.country || "—"}</td>}
-                    {resultTab === "symbol" && <td className="mono">{row.instrument || "—"}</td>}
+                  <tr key={`${tab}-${index}`}>
+                    {tab !== "country" && <td>{row.campaignName || "—"}</td>}
+                    {tab === "symbol" && <td className="mono">{row.loginId || "—"}</td>}
+                    {tab === "country" && <td>{row.country || "—"}</td>}
+                    {tab === "symbol" && <td className="mono">{row.instrument || "—"}</td>}
                     <td className="mono">{row.lots.toFixed(8)}</td>
                   </tr>
                 )) : (
@@ -869,8 +949,11 @@ function LotCheckPanel() {
 }
 
 export default function CampaignsPage() {
+  const { crmDataStatus } = useCrm();
   const { t } = useLanguage();
-  const [tab, setTab] = useState<"stats" | "transactions" | "lotCheck">("stats");
+  const [tab, setTab] = useState<"stats" | "transactions" | "lotCheck" | "lotOverview">("stats");
+
+  if (crmDataStatus === "loading") return <CampaignsSkeleton />;
 
   return (
     <section className="panel is-active">
@@ -884,8 +967,11 @@ export default function CampaignsPage() {
         <button className={`tab${tab === "lotCheck" ? " is-active" : ""}`} onClick={() => setTab("lotCheck")}>
           ตรวจ Lot
         </button>
+        <button className={`tab${tab === "lotOverview" ? " is-active" : ""}`} onClick={() => setTab("lotOverview")}>
+          ภาพรวม Lot ทั้งระบบ
+        </button>
       </div>
-      {tab === "stats" ? <CampaignStats /> : tab === "transactions" ? <TraderTransactions /> : <LotCheckPanel />}
+      {tab === "stats" ? <CampaignStats /> : tab === "transactions" ? <TraderTransactions /> : tab === "lotCheck" ? <LotCheckPanel /> : <LotOverviewPanel />}
     </section>
   );
 }
