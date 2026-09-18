@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE `CourseLesson` ADD COLUMN `videoEnd` INTEGER NULL,
+    ADD COLUMN `videoStart` INTEGER NOT NULL DEFAULT 0;

@@ -1,75 +1,75 @@
 "use client";
 
 import { useState } from "react";
-import { useCrm } from "../crm/CrmContext";
+import { useCrm, type TradeAccount } from "../crm/CrmContext";
 import { useLanguage } from "../crm/LanguageContext";
-import { useCustomerData } from "./useCustomerData";
+import { apiCall, ApiError } from "../../lib/crmApi";
 import VerifyResultModal, { type VerifyResult } from "../crm/VerifyResultModal";
 import Icon from "../Icon";
 
-/** Inline "type it and go" replacement for the old Add/Verify Trade ID
- *  drawer — the Trade ID field (and broker picker) is always visible right
- *  next to its own submit button instead of hiding behind a button that
- *  first opens a drawer. */
+/** Inline "type it and go" Trade ID entry on the dashboard home. The member
+ *  enters their own account — nothing is pre-provisioned — and it is saved to
+ *  the database via /api/me/trade-accounts (auto-verified against the lot
+ *  webhook, rejected if the ID already belongs to someone else). */
 const SUPPORTED_BROKER_NAMES = ["XM", "Exness"];
 
 export default function TradeIdInline() {
   const { t } = useLanguage();
-  const { brokers, tradeAccounts, setTradeAccounts } = useCrm();
-  const { member } = useCustomerData();
+  const { brokers, setTradeAccounts, identity, toast } = useCrm();
   const supportedBrokers = brokers.filter((b) => SUPPORTED_BROKER_NAMES.includes(b.name));
   const [brokerId, setBrokerId] = useState(() => String(supportedBrokers.find((b) => b.name === "XM")?.id ?? supportedBrokers[0]?.id ?? ""));
   const [tradeId, setTradeId] = useState("");
   const [result, setResult] = useState<VerifyResult | null>(null);
+  const [busy, setBusy] = useState(false);
 
-  function submit() {
+  async function submit() {
     const id = tradeId.trim();
-    if (!id) return;
-
-    const broker = supportedBrokers.find((b) => b.id === Number(brokerId)) ?? supportedBrokers[0];
-    const existing = tradeAccounts.find((a) => a.tradeId === id);
-
-    if (existing) {
+    if (!id) {
+      toast(t("dash.addTrade.tradeIdRequired"));
+      return;
+    }
+    if (!identity) {
+      toast(t("dash.identity.required"));
+      return;
+    }
+    setBusy(true);
+    try {
+      const payload = await apiCall<{ tradeAccount: TradeAccount; alreadyLinked?: boolean; verificationMessage?: string }>(
+        "/api/me/trade-accounts/",
+        "POST",
+        { tradeId: id, brokerId: Number(brokerId) || undefined, ...identity },
+      );
+      setTradeAccounts((cur) => (cur.some((a) => a.id === payload.tradeAccount.id) ? cur : [payload.tradeAccount, ...cur]));
       setTradeId("");
-      if (existing.memberId === member.id) {
+
+      if (payload.alreadyLinked) {
         setResult({
           status: "pending",
           title: t("dash.addTrade.result.existingMineTitle"),
           detail: t("dash.addTrade.result.existingMineDetail", { tradeId: id }),
         });
       } else {
+        const verified = payload.tradeAccount.verification === "verified";
+        const brokerName = supportedBrokers.find((b) => b.id === Number(brokerId))?.name ?? "";
         setResult({
-          status: "fail",
-          title: t("dash.addTrade.result.existingOtherTitle"),
-          detail: t("dash.addTrade.result.existingOtherDetail", { tradeId: id }),
+          status: verified ? "pass" : "pending",
+          title: t("dash.addTrade.result.newTitle"),
+          detail: payload.verificationMessage || t("dash.addTrade.result.newDetail", { tradeId: id, broker: brokerName }),
         });
       }
-      return;
+      toast(t("dash.addTrade.toast.added", { tradeId: id }));
+    } catch (error) {
+      const taken = error instanceof ApiError && error.code === "trade_id_taken";
+      setResult({
+        status: "fail",
+        title: taken ? t("dash.addTrade.result.existingOtherTitle") : t("dash.addTrade.result.failTitle"),
+        detail: taken
+          ? t("dash.addTrade.result.existingOtherDetail", { tradeId: id })
+          : error instanceof Error ? error.message : "",
+      });
+    } finally {
+      setBusy(false);
     }
-
-    const nextId = Math.max(0, ...tradeAccounts.map((a) => a.id)) + 1;
-    const today = new Date().toISOString().slice(0, 10);
-    setTradeAccounts((cur) => [
-      ...cur,
-      {
-        id: nextId,
-        memberId: member.id,
-        brokerId: broker?.id ?? 0,
-        tradeId: id,
-        accountType: "Standard",
-        partnerIb: broker?.code ?? "",
-        verification: "pending" as const,
-        createdDate: today,
-        lastSync: today,
-        status: "active" as const,
-      },
-    ]);
-    setTradeId("");
-    setResult({
-      status: "pending",
-      title: t("dash.addTrade.result.newTitle"),
-      detail: t("dash.addTrade.result.newDetail", { tradeId: id, broker: broker?.name ?? "" }),
-    });
   }
 
   return (
@@ -93,12 +93,13 @@ export default function TradeIdInline() {
             onChange={(e) => setTradeId(e.target.value)}
             placeholder={t("dash.addTrade.tradeIdPlaceholder")}
             aria-label={t("dash.addTrade.tradeId")}
+            disabled={busy}
             onKeyDown={(e) => {
-              if (e.key === "Enter") submit();
+              if (e.key === "Enter") void submit();
             }}
           />
         </div>
-        <button className="btn btn-primary" onClick={submit}>
+        <button className="btn btn-primary" onClick={() => void submit()} disabled={busy || !identity} title={identity ? undefined : t("dash.identity.required")}>
           <Icon name="add_circle" />
           {t("dash.addTrade.confirm")}
         </button>

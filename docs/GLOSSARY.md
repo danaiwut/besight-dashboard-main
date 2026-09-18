@@ -12,9 +12,10 @@
 | Indicator | A TradingView product (`Indicator`, e.g. BeSight One STR) gated by access expiry. |
 | Indicator access | `MemberIndicatorAccess`: one member+indicator grant, lifecycle `pending → active → expired`, plus `suspended` (manual) and `manualLock` (automation must not touch). `source` records who granted it: `Broker | Admin | SpecialAccess | Plan`. |
 | Plan / Entitlement | `Plan` (`free | ib_partner`) → which Indicators it unlocks (`PlanIndicatorEntitlement`). Drives auto-grant. |
-| Renewal | Extending an access `expiresAt` by `renewalMonths` after qualification. Recorded idempotently in `RenewalRecord` per (member, indicator, period). |
+| Renewal | Extending an access `expiresAt` from max(expiry, now) by `renewalMonths` after qualification. Recorded idempotently in `RenewalRecord` per (member, indicator, cycle period) with `origin` (`auto` = lot-check/cron, `manual` = admin Grant/Extend + attached cycle lots). Auto-grants run on the monthly cycle only; other check windows are view-only. |
 | Lot check run | Audit of one lot query (`LotCheckRun` + `LotCheckResult` rows split by account/campaign/country/excluded-symbol). |
 | Telegram access | `TelegramAccess`: one member+room grant (`active/pending/expired/banned`). Derived from member telegram fields during customer sync. |
+| Activity | Customer-facing monthly trading competition shown on `/dashboard/activities` (`Activity` table; admin-managed in `/crm/activities`). Not to be confused with Activity log. |
 | Activity log | Append-only `ActivityLog`; rows flagged `notification` feed the notification bell. Every admin action writes one (and bumps the data version). |
 | Acquisition channel | Where a member came from (`facebook/instagram/tiktok`, multi-select). |
 | Customer stage | Lifecycle tag: `new` (never renewed) vs `existing` (renewed ≥ once), overridable per member. |
@@ -22,3 +23,10 @@
 | Backfill | Estimator (`backfillRebateData`) generating deterministic placeholder logs for display only — **never persisted** to the ledger. |
 | Data version | Monotonic `crm_data_version` counter bumped on every server write; clients poll it for realtime refresh (see ADR-001). |
 | Skeleton | Shimmer placeholder UI rendered while `crmDataStatus === "loading"`. |
+| Access gate | **Removed.** Replaced by Auth.js per-user sign-in with admin/member roles. |
+| Session | Stateless Auth.js JWT (`AUTH_SECRET`) carrying `{ role, memberId?, adminId? }`; identity is the underlying `Admin` or `Member` row. |
+| Admin / Member role | `admin` may use the CRM (`/crm`, `/api/crm/*`); `member` sees only their own dashboard (`/dashboard`, `/api/me/*`). Enforced in layouts and per-route guards. |
+| `/api/me` | Session-scoped endpoint returning the signed-in member's own data — never a query-param member id. |
+| Identity check | Before a member can claim/add a trade account, they enter their TradingView username + email; both are compared (case-insensitive, `@`-tolerant) against the CRM-synced `Member` record. A match confirms the claimant knows the member's own CRM details (`/api/me/verify-identity`, re-enforced inside the trade-account endpoint). |
+| Self-linked trade account | Trade accounts are never shown to a member until they claim them: a CRM-synced row starts `memberConfirmed = false` and stays hidden from the dashboard (as a "found on your behalf" pending item) until the member confirms it (identity check + `POST /api/me/trade-accounts`, which claims it) or enters the Trade ID themselves. Verified against the lot webhook, rejected (409) if the ID belongs to another member, and removable (`DELETE …/[id]`, own rows only). The CRM always sees every account regardless. |
+| Mock fallback | **Removed.** The CRM no longer seeds sample rows: a failed read yields an empty collection plus a visible error, never fake data. |

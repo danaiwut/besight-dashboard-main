@@ -21,32 +21,78 @@ import SummaryTotalBar from "./SummaryTotalBar";
 import DateRangePicker from "./DateRangePicker";
 
 export default function MemberTradeAccountsCard({ member }: { member: Member }) {
-  const { tradeAccounts, brokers } = useCrm();
+  const { tradeAccounts, brokers, lotSummaries } = useCrm();
   const { t } = useLanguage();
   const accounts = memberTradeAccounts(member.id, tradeAccounts);
+  const summary = lotSummaries[member.id];
   const [range, setDateRange] = useState(() => memberLotRange(member));
+  const [customRange, setCustomRange] = useState(false);
   const [lotsByAccount, setLotsByAccount] = useState<Record<number, number | null>>({});
+  // Member-level breakdown (all active accounts) fetched ONCE for the current
+  // cycle — no N+1 live calls on mount. A custom date range still falls back
+  // to per-account live lookups below.
+  const [breakdown, setBreakdown] = useState<{ window: { from: string; to: string }; byTradeId: Record<string, number> } | null>(null);
   const [drawerOpen, setDrawerOpen] = useState<{ account: TradeAccount | null } | null>(null);
   const [expanded, setExpanded] = useState<Set<number>>(new Set());
   const formRef = useRef<TradeAccountFormHandle>(null);
 
-  // Real per-account lots, straight from the CRM lot-check webhook — same
-  // source the renewal engine qualifies against, no mock trade-log data.
-  // A failed lookup stays null (rendered as "—"), never a fake zero.
   useEffect(() => {
     let cancelled = false;
-    // Reset to the loading state ("…" cells) before refetching.
     // eslint-disable-next-line react-hooks/set-state-in-effect
-    setLotsByAccount({});
-    Promise.all(accounts.map(async (a) => [a.id, await fetchRealAccountLots(a.tradeId, range).catch(() => null)] as const))
-      .then((pairs) => { if (!cancelled) setLotsByAccount(Object.fromEntries(pairs)); });
+    setBreakdown(null);
+    fetch(`/api/crm/members/${member.id}/lots/?period=cycle`, { cache: "no-store" })
+      .then(async (response) => {
+        const payload = await response.json() as {
+          ok?: boolean;
+          window?: { from: string; to: string };
+          byAccount?: Array<{ accountId: number; tradeId: string; lots: number }>;
+        };
+        if (!cancelled && response.ok && payload.ok && payload.window && payload.byAccount) {
+          setBreakdown({
+            window: payload.window,
+            byTradeId: Object.fromEntries(payload.byAccount.map((row) => [row.tradeId.trim(), row.lots])),
+          });
+        }
+      })
+      .catch(() => undefined);
     return () => { cancelled = true; };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [accounts.map((a) => a.tradeId).join(","), range.from, range.to]);
+  }, [member.id]);
 
-  const loaded = accounts.every((a) => lotsByAccount[a.id] !== undefined);
-  const anyFailed = accounts.some((a) => lotsByAccount[a.id] === null);
-  const totalLots = loaded && !anyFailed ? accounts.reduce((s, a) => s + (lotsByAccount[a.id] || 0), 0) : null;
+  const breakdownActive = breakdown !== null && !customRange &&
+    breakdown.window.from === range.from && breakdown.window.to === range.to;
+
+  // Per-account live lots, straight from the CRM lot-check webhook — only for
+  // a custom date range. The default cycle view reads the one-shot breakdown
+  // above instead. A failed lookup stays null (rendered as "—"), never a fake zero.
+  useEffect(() => {
+    if (!breakdownActive) {
+      let cancelled = false;
+      // Reset to the loading state ("…" cells) before refetching.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setLotsByAccount({});
+      Promise.all(accounts.map(async (a) => [a.id, await fetchRealAccountLots(a.tradeId, range).catch(() => null)] as const))
+        .then((pairs) => { if (!cancelled) setLotsByAccount(Object.fromEntries(pairs)); });
+      return () => { cancelled = true; };
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [breakdownActive, accounts.map((a) => a.tradeId).join(","), range.from, range.to]);
+
+  function lotsFor(account: TradeAccount): number | null | undefined {
+    if (breakdownActive && breakdown) {
+      const lots = breakdown.byTradeId[account.tradeId.trim()];
+      return lots ?? 0;
+    }
+    return lotsByAccount[account.id];
+  }
+
+  const loaded = breakdownActive || accounts.every((a) => lotsByAccount[a.id] !== undefined);
+  const anyFailed = !breakdownActive && accounts.some((a) => lotsByAccount[a.id] === null);
+  const totalLots = breakdownActive && breakdown
+    ? accounts.reduce((s, a) => s + (breakdown.byTradeId[a.tradeId.trim()] ?? 0), 0)
+    : loaded && !anyFailed
+      ? accounts.reduce((s, a) => s + (lotsByAccount[a.id] || 0), 0)
+      : null;
+  const cycleWindowLabel = summary && !customRange ? `${summary.from} – ${summary.to}` : null;
 
   function toggleExpand(id: number) {
     setExpanded((cur) => {
@@ -65,7 +111,14 @@ export default function MemberTradeAccountsCard({ member }: { member: Member }) 
             {t("members.section.tradeAccounts")} ({accounts.length})
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-            <DateRangePicker value={range} onChange={setDateRange} placeholder={t("ta.history.selectRange")} />
+            {cycleWindowLabel && (
+              <span className="mono" style={{ fontSize: 12, color: "var(--text-sub)" }}>{cycleWindowLabel}</span>
+            )}
+            <DateRangePicker
+              value={range}
+              onChange={(next) => { setDateRange(next); setCustomRange(true); }}
+              placeholder={t("ta.history.selectRange")}
+            />
             <button className="btn btn-ghost" onClick={() => setDrawerOpen({ account: null })}>
               <Icon name="add" />
               {t("ta.addTradeAccount")}
@@ -94,7 +147,7 @@ export default function MemberTradeAccountsCard({ member }: { member: Member }) 
               <tbody>
                 {accounts.map((a) => {
                   const isOpen = expanded.has(a.id);
-                  const liveLots = lotsByAccount[a.id];
+                  const liveLots = lotsFor(a);
                   return (
                     <Fragment key={a.id}>
                       <tr onClick={() => toggleExpand(a.id)} style={{ cursor: "pointer" }}>
@@ -113,7 +166,15 @@ export default function MemberTradeAccountsCard({ member }: { member: Member }) 
                           </button>
                           {brokers.find((b) => b.id === a.brokerId)?.name ?? "—"}
                         </td>
-                        <td className="mono">{a.tradeId}</td>
+                        <td className="mono">
+                          {a.tradeId}
+                          {a.duplicateTradeId && (
+                            <span className="badge suspended" style={{ marginLeft: 8 }} title={t("members.duplicateTradeId")}>
+                              <Icon name="warning" style={{ fontSize: 13 }} />
+                              {t("members.duplicate")}
+                            </span>
+                          )}
+                        </td>
                         <td>{a.accountType || "—"}</td>
                         <td>
                           <span className={`badge ${verificationBadgeClass(a.verification)}`}>{t(verificationLabelKey(a.verification))}</span>

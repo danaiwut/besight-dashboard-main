@@ -3,6 +3,8 @@ import { RecordStatus, VerificationStatus } from "@/generated/prisma/client";
 import { getPrisma, isDatabaseConfigured } from "@/lib/server/prisma";
 import { bumpDataVersion } from "@/lib/server/dataVersion";
 import { toTradeAccountDto } from "@/lib/server/crmDtos";
+import { adminWriteGuard } from "@/lib/session";
+
 
 export const dynamic = "force-dynamic";
 
@@ -21,6 +23,8 @@ async function resolveBrokerId(prisma: ReturnType<typeof getPrisma>, value: unkn
 }
 
 export async function POST(request: NextRequest) {
+  const guard = await adminWriteGuard();
+  if (!guard.ok) return guard.response;
   if (!isDatabaseConfigured()) return NextResponse.json({ ok: false, error: "DATABASE_URL is not configured" }, { status: 503 });
   try {
     const body = await request.json() as Record<string, unknown>;

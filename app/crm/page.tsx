@@ -10,7 +10,7 @@ import Icon from "../../components/Icon";
 type ChartMetric = "new" | "total" | "activeTraders";
 
 export default function CrmOverviewPage() {
-  const { members, tradeAccounts, tradeLogs, indicatorAccess, settings, crmDataStatus } = useCrm();
+  const { members, tradeAccounts, tradeLogs, indicatorAccess, settings, crmDataStatus, lotSummaries, lotOverview } = useCrm();
   const { t, lang } = useLanguage();
   const [chartMetric, setChartMetric] = useState<ChartMetric>("new");
   const [chartYear, setChartYear] = useState(() => new Date().getFullYear());
@@ -23,8 +23,10 @@ export default function CrmOverviewPage() {
   const expiringSoon = labels.filter((l) => l === "Expiring Soon").length;
   const expired = labels.filter((l) => l === "Expired").length;
 
-  const lotsPerMember = members.map((m) => memberLots(m, tradeAccounts, tradeLogs, settings));
-  const qualifiedLots = members.filter((m, i) => lotsPerMember[i] >= requiredLotsFor(m, settings)).length;
+  // Snapshot-only server summaries (current cycle) when available; local math
+  // in demo mode.
+  const lotsPerMember = members.map((m) => lotSummaries[m.id]?.lots ?? memberLots(m, tradeAccounts, tradeLogs, settings));
+  const qualifiedLots = lotOverview?.qualified ?? members.filter((m, i) => lotsPerMember[i] >= (lotSummaries[m.id]?.required ?? requiredLotsFor(m, settings))).length;
   const totalLots = lotsPerMember.reduce((s, l) => s + l, 0);
 
   const recent = [...members].sort((a, b) => b.joinedDate.localeCompare(a.joinedDate)).slice(0, 5);

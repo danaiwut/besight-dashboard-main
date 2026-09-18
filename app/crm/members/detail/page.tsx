@@ -11,7 +11,7 @@ import {
   telegramStatusLabelKey,
   primaryIndicatorAccess,
   memberLots,
-  currentMonthRange,
+  memberLotRange,
   requiredLotsFor,
   customerStage,
   customerStageBadgeClass,
@@ -34,6 +34,8 @@ import SuspendAccessModal from "../../../../components/crm/SuspendAccessModal";
 import LotOverrideCard from "../../../../components/crm/LotOverrideCard";
 import MemberIndicatorAccessPanel from "../../../../components/crm/MemberIndicatorAccessPanel";
 import MemberTradeAccountsCard from "../../../../components/crm/MemberTradeAccountsCard";
+import { MEMBER_LEVEL_LABEL_KEYS, PREMIUM_MONTHS, levelFromMonthlyLots, monthlyLotsFromLogs, recentMonthKeys } from "../../../../lib/memberLevel";
+import type { LotPeriod } from "../../../../lib/lotCycle";
 
 type RenewalRow = {
   id: number;
@@ -42,6 +44,8 @@ type RenewalRow = {
   qualifiedLots: number;
   requiredLots: number;
   renewed: boolean;
+  origin?: string;
+  note?: string;
   oldExpiry?: string;
   newExpiry?: string;
   createdDate: string;
@@ -89,13 +93,14 @@ function MemberRenewalHistory({ memberId }: { memberId: number }) {
     <div className="card" style={{ padding: 20, marginBottom: 16 }}>
       <div className="panel-section-title">{t("members.section.renewalHistory")}</div>
       <div className="table-wrap">
-        <table className="data" style={{ minWidth: 760 }}>
+        <table className="data" style={{ minWidth: 860 }}>
           <thead>
             <tr>
               <th>{t("members.col.period")}</th>
               <th>{t("members.col.indicator")}</th>
               <th>{t("members.col.qualifiedLots")}</th>
               <th>{t("members.col.result")}</th>
+              <th>{t("members.col.origin")}</th>
               <th>{t("members.col.expiryChange")}</th>
               <th>{t("members.col.processedAt")}</th>
             </tr>
@@ -116,6 +121,14 @@ function MemberRenewalHistory({ memberId }: { memberId: number }) {
                     {r.renewed ? t("members.renewal.renewed") : t("members.renewal.notRenewed")}
                   </span>
                 </td>
+                <td>
+                  <span
+                    className={`badge ${r.origin === "manual" ? "pending" : "suspended"}`}
+                    title={r.note || undefined}
+                  >
+                    {t(r.origin === "manual" ? "members.origin.manual" : "members.origin.auto")}
+                  </span>
+                </td>
                 <td className="mono">{r.oldExpiry ? `${fmtDate(r.oldExpiry)} → ${fmtDate(r.newExpiry)}` : "—"}</td>
                 <td className="mono">{fmtDate(r.createdDate)}</td>
               </tr>
@@ -130,32 +143,54 @@ function MemberRenewalHistory({ memberId }: { memberId: number }) {
 function MemberDetailContent() {
   const params = useSearchParams();
   const router = useRouter();
-  const { members, setMembers, tradeAccounts, tradeLogs, indicatorAccess, setIndicatorAccess, telegramAccess, settings, toast, log, crmDataStatus, backendLive } = useCrm();
+  const { members, setMembers, tradeAccounts, tradeLogs, indicatorAccess, setIndicatorAccess, telegramAccess, settings, toast, log, crmDataStatus, backendLive, lotSummaries, reloadFromDatabase } = useCrm();
   const { t } = useLanguage();
   const [editOpen, setEditOpen] = useState(false);
   const [suspendOpen, setSuspendOpen] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+  const [lotsPeriod, setLotsPeriod] = useState<LotPeriod>("cycle");
+  const [liveLots, setLiveLots] = useState<{ lots: number; required: number; checkedAt: string } | null>(null);
+  const [liveLoading, setLiveLoading] = useState(false);
   const formRef = useRef<{ save: () => void }>(null);
 
   const id = Number(params.get("id"));
   const member = members.find((m) => m.id === id);
-  const fallbackLotRange = currentMonthRange();
-  const lotRange = {
-    from: member?.crmStartDate || fallbackLotRange.from,
-    to: member?.crmExpiryDate || fallbackLotRange.to,
-  };
+  // Snapshot-only header (current cycle, same number as the members list).
+  // Other periods are read live from the server on demand.
+  const summary = member ? lotSummaries[member.id] : undefined;
+  const cycleLots = member
+    ? (summary?.lots ?? memberLots(member, tradeAccounts, tradeLogs, settings, memberLotRange(member)))
+    : 0;
+  const lots = lotsPeriod === "cycle" ? cycleLots : (liveLots?.lots ?? cycleLots);
 
-  // Same source as the Members list (memberLots): the persisted snapshot when
-  // its window matches, else window-correct ledger math — never a divergent
-  // live number.
-  const lots = member ? memberLots(member, tradeAccounts, tradeLogs, settings, lotRange) : 0;
+  useEffect(() => {
+    if (lotsPeriod === "cycle" || !member || !backendLive) return;
+    let cancelled = false;
+    // Reset to the loading state before refetching.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setLiveLoading(true);
+    setLiveLots(null);
+    fetch(`/api/crm/members/${member.id}/lots/?period=${lotsPeriod}`, { cache: "no-store" })
+      .then(async (response) => {
+        const payload = await response.json() as { ok?: boolean; lots?: number; requiredLots?: number; checkedAt?: string };
+        if (!cancelled && response.ok && payload.ok) {
+          setLiveLots({ lots: payload.lots ?? 0, required: payload.requiredLots ?? 0, checkedAt: payload.checkedAt ?? "" });
+        }
+      })
+      .catch(() => undefined)
+      .finally(() => { if (!cancelled) setLiveLoading(false); });
+    return () => { cancelled = true; };
+  }, [lotsPeriod, member?.id, backendLive]); // eslint-disable-line react-hooks/exhaustive-deps
 
   async function refreshLots() {
     if (!member || refreshing) return;
     setRefreshing(true);
     try {
-      const payload = await apiCall<{ member: Member }>(`/api/crm/members/${member.id}/lots/refresh/`, "POST");
+      const payload = await apiCall<{ member: Member }>(`/api/crm/members/${member.id}/lots/refresh/`, "POST", { period: lotsPeriod });
       setMembers((cur) => cur.map((m) => (m.id === member.id ? payload.member : m)));
+      // Pull the fresh snapshot summary so header and list converge.
+      await reloadFromDatabase();
+      if (lotsPeriod !== "cycle") setLotsPeriod("cycle");
       toast(t("members.detail.lotsRefreshed"));
     } catch (error) {
       toast(error instanceof Error ? error.message : "Unable to refresh lots");
@@ -188,15 +223,25 @@ function MemberDetailContent() {
   const label = accessLabel(access, settings);
   const telegram = telegramAccess.find((tg) => tg.memberId === member.id);
   const stage = customerStage(member, indicatorAccess);
-  const required = requiredLotsFor(member, settings);
+  const required = summary?.required ?? requiredLotsFor(member, settings);
+  const levelMonths = recentMonthKeys(PREMIUM_MONTHS);
+  const memberLevel = levelFromMonthlyLots(
+    monthlyLotsFromLogs(tradeLogs.filter((log) => log.memberId === member.id), levelMonths),
+    required,
+    levelMonths,
+  );
   const tone = progressTone(lots, required);
   const pct = Math.min(100, required > 0 ? (lots / required) * 100 : 100);
-  const snapshotFresh = member.currentPeriodLots !== undefined &&
-    member.currentPeriodLotsFrom === lotRange.from &&
-    member.currentPeriodLotsTo === lotRange.to;
-  const asOfText = snapshotFresh && member.currentPeriodLotsAt
-    ? t("members.detail.lotsAsOf", { when: fmtDateTime(member.currentPeriodLotsAt) })
-    : t("members.detail.lotsLedger");
+  const snapshotStale = lotsPeriod === "cycle" && (summary?.stale ?? true);
+  const asOfText = lotsPeriod !== "cycle"
+    ? liveLoading
+      ? t("members.detail.refreshing")
+      : liveLots
+        ? t("members.detail.lotsAsOf", { when: fmtDateTime(liveLots.checkedAt) })
+        : t("members.detail.lotsLedger")
+    : summary?.asOf && !summary.stale
+      ? t("members.detail.lotsAsOf", { when: fmtDateTime(summary.asOf) })
+      : t("members.detail.lotsLedger");
 
   async function handleSuspend(reasons: string[], note: string) {
     const id = member!.id;
@@ -263,6 +308,9 @@ function MemberDetailContent() {
               <div className="de">{member.email}</div>
               <span className={`plan-pill ${member.plan === "ib_partner" ? "elite" : "free"}`} style={{ marginTop: 8, display: "inline-flex" }}>
                 {PLAN_LABELS[member.plan]}
+              </span>
+              <span className={`badge ${memberLevel === "premium" ? "active" : memberLevel === "standard" ? "pending" : "suspended"}`} style={{ marginLeft: 8 }}>
+                {t(MEMBER_LEVEL_LABEL_KEYS[memberLevel])}
               </span>
             </div>
           </div>
@@ -338,13 +386,31 @@ function MemberDetailContent() {
           </div>
           <div style={{ marginTop: 4 }}>
             <span className={`badge ${accessBadgeClass(label)}`}>{t(accessLabelKey(label))}</span>
+            {snapshotStale && (
+              <span className="badge pending" style={{ marginLeft: 6 }}>
+                <Icon name="schedule" style={{ fontSize: 12 }} />
+                {t("members.lotsStaleBadge")}
+              </span>
+            )}
           </div>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, marginTop: 10, flexWrap: "wrap" }}>
             <span style={{ fontSize: 12, color: "var(--text-sub)" }}>{asOfText}</span>
-            <button className="btn btn-ghost" style={{ padding: "6px 12px" }} onClick={() => void refreshLots()} disabled={refreshing || !backendLive}>
-              <Icon name="sync" />
-              {refreshing ? t("members.detail.refreshing") : t("members.detail.refreshLots")}
-            </button>
+            <span style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
+              <select
+                className="filter-select"
+                aria-label={t("members.lotsPeriod.label")}
+                value={lotsPeriod}
+                onChange={(event) => setLotsPeriod(event.target.value as LotPeriod)}
+              >
+                <option value="cycle">{t("members.lotsPeriod.cycle")}</option>
+                <option value="entitlement">{t("members.lotsPeriod.entitlement")}</option>
+                <option value="month">{t("members.lotsPeriod.month")}</option>
+              </select>
+              <button className="btn btn-ghost" style={{ padding: "6px 12px" }} onClick={() => void refreshLots()} disabled={refreshing || !backendLive}>
+                <Icon name="sync" />
+                {refreshing ? t("members.detail.refreshing") : t("members.detail.refreshLots")}
+              </button>
+            </span>
           </div>
           <div style={{ marginTop: 16 }}>
             <LotOverrideCard member={member} />

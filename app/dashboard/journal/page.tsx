@@ -150,7 +150,7 @@ export default function TradingJournalPage() {
   const { member, accounts: registeredAccounts, brokerFor } = useCustomerData();
 
   const [accounts, setAccounts] = useState<JournalAccount[]>(INITIAL_ACCOUNTS);
-  const [selectedAccountId, setSelectedAccountId] = useState(INITIAL_ACCOUNTS[0].id);
+  const [selectedAccountId, setSelectedAccountId] = useState(INITIAL_ACCOUNTS[0]?.id ?? "");
   const account = accounts.find((a) => a.id === selectedAccountId) ?? accounts[0];
   const trades = account.trades;
 

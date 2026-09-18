@@ -1,14 +1,13 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { useCrm, initials, fmtDate, backfillRebateData, ROLE_DESC, ROLES, type Admin } from "../../../components/crm/CrmContext";
+import { useCrm, initials, ROLE_DESC, ROLES, type Admin } from "../../../components/crm/CrmContext";
 import { useLanguage } from "../../../components/crm/LanguageContext";
 import { apiCall } from "../../../lib/crmApi";
 import { SettingsSkeleton } from "../../../components/crm/Skeletons";
 import Icon from "../../../components/Icon";
 import Drawer from "../../../components/crm/Drawer";
 import AdminForm, { type AdminFormHandle } from "../../../components/crm/AdminForm";
-import DateRangePicker, { type DateRange } from "../../../components/crm/DateRangePicker";
 import type { Lang } from "../../../lib/i18n";
 
 function LanguageCard() {
@@ -108,105 +107,6 @@ function TelegramSettingsCard() {
   );
 }
 
-function RebateBackfillCard() {
-  const { brokers, tradeAccounts, tradeLogs, setTradeLogs, setTradeAccounts, log, toast } = useCrm();
-  const { t } = useLanguage();
-  const [brokerId, setBrokerId] = useState(brokers[0]?.id ?? 0);
-  const [tradeId, setTradeId] = useState("");
-  const [range, setRange] = useState<DateRange>({ from: "", to: "" });
-  const [lastResult, setLastResult] = useState<{ broker: string; tradeId: string; from: string; to: string; lots: number; rebate: number; n: number } | null>(null);
-
-  function pull() {
-    const trimmedTradeId = tradeId.trim();
-    if (!trimmedTradeId) {
-      toast(t("set.toast.rebateBackfillTradeIdRequired"));
-      return;
-    }
-    if (!range.from || !range.to) {
-      toast(t("set.toast.rebateBackfillRangeRequired"));
-      return;
-    }
-    const broker = brokers.find((b) => b.id === brokerId);
-    const brokerName = broker?.name ?? "";
-    const account = tradeAccounts.find((a) => a.brokerId === brokerId && a.tradeId === trimmedTradeId);
-    if (!account) {
-      toast(t("set.toast.rebateBackfillAccountNotFound", { broker: brokerName, tradeId: trimmedTradeId }));
-      return;
-    }
-    const startId = Math.max(0, ...tradeLogs.map((l) => l.id)) + 1;
-    const result = backfillRebateData([account], range.from, range.to, tradeLogs, startId);
-
-    if (!result.newLogs.length) {
-      toast(t("set.toast.rebateBackfillNone", { broker: brokerName, tradeId: trimmedTradeId }));
-      return;
-    }
-
-    setTradeLogs((cur) => [...cur, ...result.newLogs]);
-    const today = new Date().toISOString().slice(0, 10);
-    setTradeAccounts((cur) => cur.map((a) => (a.id === account.id ? { ...a, lastSync: today } : a)));
-
-    const n = result.newLogs.length;
-    log({
-      actor: "Alex Dean",
-      memberId: account.memberId,
-      action: "Rebate Backfill",
-      description: `Backfilled ${brokerName} · ${trimmedTradeId} rebate data for ${fmtDate(range.from)} – ${fmtDate(range.to)}: +${result.totalLots} lots / $${result.totalRebate.toFixed(2)} across ${n} day(s).`,
-    });
-
-    setLastResult({ broker: brokerName, tradeId: trimmedTradeId, from: range.from, to: range.to, lots: result.totalLots, rebate: result.totalRebate, n });
-    toast(t("set.toast.rebateBackfillFilled", { broker: brokerName, tradeId: trimmedTradeId, lots: result.totalLots, rebate: result.totalRebate.toFixed(2), n }));
-  }
-
-  return (
-    <div className="card" style={{ padding: 22, marginBottom: 22 }}>
-      <div className="settings-head">
-        <h3>{t("set.rebateBackfill")}</h3>
-        <div className="desc" style={{ fontSize: 12.5, color: "var(--text-sub)", marginTop: 2 }}>
-          {t("set.rebateBackfillDesc")}
-        </div>
-      </div>
-      <div className="form-grid3">
-        <div className="field">
-          <label>{t("set.rebateBackfill.broker")}</label>
-          <select className="input" value={brokerId} onChange={(e) => setBrokerId(Number(e.target.value))}>
-            {brokers.map((b) => (
-              <option key={b.id} value={b.id}>
-                {b.name}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div className="field">
-          <label>{t("set.rebateBackfill.tradeId")}</label>
-          <input className="input" value={tradeId} onChange={(e) => setTradeId(e.target.value)} placeholder={t("set.rebateBackfill.tradeIdPlaceholder")} />
-        </div>
-        <div className="field">
-          <label>{t("set.rebateBackfill.dateRange")}</label>
-          <DateRangePicker value={range} onChange={setRange} placeholder={t("set.rebateBackfill.selectRange")} />
-        </div>
-      </div>
-      {lastResult && (
-        <div style={{ fontSize: 12.5, color: "var(--text-sub)", marginBottom: 16 }}>
-          {t("set.rebateBackfill.lastResult", {
-            broker: lastResult.broker,
-            tradeId: lastResult.tradeId,
-            from: fmtDate(lastResult.from),
-            to: fmtDate(lastResult.to),
-            lots: lastResult.lots,
-            rebate: lastResult.rebate.toFixed(2),
-            n: lastResult.n,
-          })}
-        </div>
-      )}
-      <div style={{ display: "flex", justifyContent: "flex-end" }}>
-        <button className="btn btn-primary" onClick={pull}>
-          <Icon name="cloud_download" />
-          {t("set.rebateBackfill.pull")}
-        </button>
-      </div>
-    </div>
-  );
-}
 
 function TeamPermissions() {
   const { admins, setAdmins, toast, backendLive } = useCrm();
@@ -338,7 +238,6 @@ function TeamPermissions() {
 }
 
 export default function CrmSettingsPage() {
-  const { t } = useLanguage();
   const { crmDataStatus } = useCrm();
 
   if (crmDataStatus === "loading") return <SettingsSkeleton />;
@@ -346,70 +245,8 @@ export default function CrmSettingsPage() {
   return (
     <section className="panel is-active">
       <LanguageCard />
-
-      <div className="card" style={{ padding: 22, marginBottom: 22 }}>
-        <div className="settings-head">
-          <h3>{t("set.adminProfile")}</h3>
-        </div>
-        <div className="form-grid2">
-          <div className="field">
-            <label>{t("set.fullName")}</label>
-            <input className="input" defaultValue="Alex Dean" />
-          </div>
-          <div className="field">
-            <label>{t("set.email")}</label>
-            <input className="input" type="email" defaultValue="alex.dean@besight.com" />
-          </div>
-          <div className="field">
-            <label>{t("set.role")}</label>
-            <input className="input" defaultValue="Administrator" disabled />
-          </div>
-          <div className="field">
-            <label>{t("set.timezone")}</label>
-            <input className="input" defaultValue="GMT-5 (Eastern)" />
-          </div>
-        </div>
-      </div>
-
       <TelegramSettingsCard />
-      <RebateBackfillCard />
       <TeamPermissions />
-
-      <div className="card" style={{ padding: 22 }}>
-        <div className="settings-head">
-          <h3>{t("set.notifications")}</h3>
-        </div>
-        <div className="set-row">
-          <div>
-            <div className="t">{t("set.notif.newMembers")}</div>
-            <div className="d">{t("set.notif.newMembersDesc")}</div>
-          </div>
-          <label className="switch">
-            <input type="checkbox" defaultChecked />
-            <span className="track"></span>
-          </label>
-        </div>
-        <div className="set-row">
-          <div>
-            <div className="t">{t("set.notif.lotAlerts")}</div>
-            <div className="d">{t("set.notif.lotAlertsDesc")}</div>
-          </div>
-          <label className="switch">
-            <input type="checkbox" defaultChecked />
-            <span className="track"></span>
-          </label>
-        </div>
-        <div className="set-row">
-          <div>
-            <div className="t">{t("set.notif.expiredAccess")}</div>
-            <div className="d">{t("set.notif.expiredAccessDesc")}</div>
-          </div>
-          <label className="switch">
-            <input type="checkbox" defaultChecked />
-            <span className="track"></span>
-          </label>
-        </div>
-      </div>
     </section>
   );
 }

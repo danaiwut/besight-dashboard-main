@@ -1,5 +1,8 @@
 import { redirect } from "next/navigation";
+import { auth } from "@/auth";
 
-export default function RootPage() {
-  redirect("/crm");
+export default async function RootPage() {
+  const session = await auth();
+  if (!session?.user) redirect("/login");
+  redirect(session.user.role === "admin" ? "/crm" : "/dashboard");
 }

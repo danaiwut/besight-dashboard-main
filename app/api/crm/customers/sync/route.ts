@@ -1,9 +1,12 @@
 import { NextResponse } from "next/server";
 import { syncCustomerMembers } from "@/lib/server/customerSync";
+import { adminWriteGuard } from "@/lib/session";
 
 export const dynamic = "force-dynamic";
 
 export async function GET() {
+  const guard = await adminWriteGuard();
+  if (!guard.ok) return guard.response;
   try {
     const result = await syncCustomerMembers();
     return NextResponse.json({ ok: true, ...result });

@@ -92,3 +92,61 @@ export type Admin = Prisma.AdminModel
  * 
  */
 export type SystemSetting = Prisma.SystemSettingModel
+/**
+ * Model Activity
+ * * Customer-facing activity / monthly trading competition (the /dashboard/activities
+ *  *  feature). Distinct from ActivityLog, which is the admin audit trail. Managed
+ *  *  by admins in the CRM; the customer dashboard reads published rows only.
+ */
+export type Activity = Prisma.ActivityModel
+/**
+ * Model ActivityEnrollment
+ * * One member's registration for one activity (competition). A member joins at
+ *  *  most once per activity; admins can remove a registration in the CRM. The
+ *  *  displayed "traders" count is the number of these rows, never a hand-typed
+ *  *  number.
+ */
+export type ActivityEnrollment = Prisma.ActivityEnrollmentModel
+/**
+ * Model BecRate
+ * * Points per traded lot for one symbol. Symbols without a row use the
+ *  *  `defaultPointsPerLot` from the spin settings.
+ */
+export type BecRate = Prisma.BecRateModel
+/**
+ * Model SpinPrize
+ * * One wedge on the wheel / one possible award. `weight` is the relative
+ *  *  probability; `stock` null means unlimited.
+ */
+export type SpinPrize = Prisma.SpinPrizeModel
+/**
+ * Model BecGrant
+ * * BEC points materialized from trade logs that are about to be pruned, so a
+ *  *  member's earned points never shrink when history ages out.
+ */
+export type BecGrant = Prisma.BecGrantModel
+/**
+ * Model SpinResult
+ * 
+ */
+export type SpinResult = Prisma.SpinResultModel
+/**
+ * Model Course
+ * 
+ */
+export type Course = Prisma.CourseModel
+/**
+ * Model CourseLesson
+ * 
+ */
+export type CourseLesson = Prisma.CourseLessonModel
+/**
+ * Model CourseEnrollment
+ * 
+ */
+export type CourseEnrollment = Prisma.CourseEnrollmentModel
+/**
+ * Model LessonProgress
+ * 
+ */
+export type LessonProgress = Prisma.LessonProgressModel

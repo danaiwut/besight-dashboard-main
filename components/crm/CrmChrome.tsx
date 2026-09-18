@@ -3,7 +3,9 @@
 import { Fragment, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useCrm } from "./CrmContext";
+import { useCrm, initials } from "./CrmContext";
+import { signOut } from "next-auth/react";
+import DataUnavailable from "./DataUnavailable";
 import { useLanguage } from "./LanguageContext";
 import CrmNotifications from "./CrmNotifications";
 import AdminMenu from "./AdminMenu";
@@ -14,6 +16,9 @@ const TITLE_KEYS: Record<string, [string, string]> = {
   "/crm/members": ["title.members", "sub.members"],
   "/crm/members/detail": ["title.memberDetail", "sub.memberDetail"],
   "/crm/campaigns": ["title.campaigns", "sub.campaigns"],
+  "/crm/activities": ["title.activities", "sub.activities"],
+  "/crm/spin": ["title.spin", "sub.spin"],
+  "/crm/courses": ["title.courses", "sub.courses"],
   "/crm/indicators": ["title.indicators", "sub.indicators"],
   "/crm/brokers": ["title.brokers", "sub.brokers"],
   "/crm/telegram-access": ["title.telegramAccess", "sub.telegramAccess"],
@@ -37,6 +42,21 @@ const NAV_ITEMS = [
     href: "/crm/campaigns",
     labelKey: "nav.campaigns",
     icon: <Icon name="campaign" />,
+  },
+  {
+    href: "/crm/activities",
+    labelKey: "nav.activities",
+    icon: <Icon name="emoji_events" />,
+  },
+  {
+    href: "/crm/spin",
+    labelKey: "nav.spin",
+    icon: <Icon name="casino" />,
+  },
+  {
+    href: "/crm/courses",
+    labelKey: "nav.courses",
+    icon: <Icon name="school" />,
   },
   {
     href: "/crm/brokers",
@@ -69,7 +89,7 @@ const NAV_ITEMS = [
 function CrmChromeInner({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const { members } = useCrm();
+  const { members, viewer } = useCrm();
   const { t } = useLanguage();
   const normalizedPath = pathname.length > 1 ? pathname.replace(/\/$/, "") : pathname;
   const titleKeys = TITLE_KEYS[normalizedPath] ?? [null, null];
@@ -110,17 +130,17 @@ function CrmChromeInner({ children }: { children: ReactNode }) {
 
         <div className="sidebar-foot">
           <div className="admin-chip">
-            <span className="avatar">AD</span>
+            <span className="avatar">{initials(viewer.name || viewer.email || "AD")}</span>
             <span style={{ lineHeight: 1.2 }}>
-              <span className="an">Alex Dean</span>
+              <span className="an">{viewer.name || viewer.email}</span>
               <br />
               <span className="ar">{t("nav.administrator")}</span>
             </span>
           </div>
-          <Link className="logout-link" href="/">
+          <button type="button" className="logout-link" onClick={() => void signOut({ callbackUrl: "/login" })}>
             <Icon name="logout" />
             {t("nav.logOut")}
-          </Link>
+          </button>
         </div>
       </aside>
       <div className={`scrim side${sidebarOpen ? " show" : ""}`} onClick={closeSidebar}></div>
@@ -142,6 +162,7 @@ function CrmChromeInner({ children }: { children: ReactNode }) {
           </div>
         </header>
 
+        <DataUnavailable />
         {children}
       </main>
     </div>

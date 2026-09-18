@@ -5,6 +5,32 @@ managing BeSight traders, trade accounts, TradingView Indicator access and Teleg
 plus a demo customer-facing dashboard. Member data is synchronized from an existing
 Supabase Edge Function; lot qualification comes from the BeSight webhook service.
 
+## Authentication (Auth.js / NextAuth v5)
+
+- **Identity lives in Prisma** — signing in claims an existing `Admin` or
+  `Member` row by email; it never creates one (members are provisioned by the
+  CRM sync). No separate user store, no `Session`/`Account` tables: sessions are
+  stateless JWTs (`AUTH_SECRET`).
+- **Providers:** Google, Facebook and LINE (each registered only when its
+  client id/secret are present; LINE via its OpenID Connect endpoint) plus
+  email/password (scrypt via `node:crypto`; `Admin.passwordHash` /
+  `Member.passwordHash`). Seed creates the owner admin
+  (`admin@besight.com` unless `ADMIN_EMAIL`/`ADMIN_PASSWORD` override).
+  **Currently on hold:** Facebook + LINE are disabled by commenting their env
+  values in `.env` (code intact) — only Google + credentials are active.
+- **Roles:** `admin` (CRM) and `member` (dashboard). `/crm/**` requires admin,
+  `/dashboard/**` requires a signed-in member (or admin); the root page
+  redirects by role; unauthenticated pages redirect to `/login`.
+- **API protection is defence-in-depth, not middleware:** every handler calls
+  `adminGuard()` / `memberGuard()` (`lib/session.ts`) — admins use `/api/crm/*`,
+  members use `/api/me/*` (their own rows only, resolved from the session, never
+  a query param). A member calling `/api/crm/*` gets 403.
+- Config env: `AUTH_SECRET`, `AUTH_URL`, `GOOGLE_CLIENT_ID/SECRET`,
+  `FACEBOOK_CLIENT_ID/SECRET`, `LINE_CLIENT_ID/SECRET`. Redirect URIs:
+  `<AUTH_URL>/api/auth/callback/{google,facebook,line}`.
+- **No mock fallback:** a failed/401 read leaves the collection empty and surfaces
+  `crmDataError` via `<DataUnavailable>`; the CRM seeds nothing.
+
 ## Tech stack
 
 | Layer | Choice |
@@ -64,6 +90,10 @@ Supporting tables: **RenewalRecord** (one row per member/indicator/period — id
 **LotCheckRun/Result** (audit of every lot query), **TelegramAccess**, **ActivityLog**
 (doubles as the notification feed), **MemberAcquisitionChannel**, **Admin**,
 **SystemSetting** (automation config, general settings, data version).
+**Activity** holds the customer-facing activities/competitions shown on
+`/dashboard/activities` (title, status, dates, traders, prize pool, rules,
+published flag) and is managed from **`/crm/activities`** — distinct from
+`ActivityLog`, which is the admin audit trail.
 
 Enums: `Plan (free|ib_partner)`, `RecordStatus`, `VerificationStatus`,
 `IndicatorAccessStatus`, `AccessSource (Broker|Admin|SpecialAccess|Plan)`,
@@ -97,12 +127,20 @@ Enums: `Plan (free|ib_partner)`, `RecordStatus`, `VerificationStatus`,
 
 | Route | Methods | Purpose |
 |---|---|---|
-| `/api/crm/version` | GET | Realtime counter `{ version }` |
+| `/api/auth/[...nextauth]` | GET/POST | Auth.js sign-in/callback/session/sign-out |
+| `/api/me` | GET | Signed-in member's own dashboard payload (session-scoped) |
+| `/api/me/verify-identity` | POST | Member proves they are the CRM record (TradingView + email must match) |
+| `/api/me/trade-accounts` | POST | Member links / confirms a Trade ID (identity-checked; `claimed` when a CRM-synced row is claimed; 409 if another member's) |
+| `/api/me/trade-accounts/[id]` | DELETE | Member unlinks one of their own trade accounts (403 for someone else's) |
+| `/api/crm/version` | GET | Realtime counter `{ version }` (admin) |
 | `/api/crm/members` (+`/[id]`) | GET/POST, PUT/DELETE | Member CRUD (GET reads DB DTOs incl. channels/plan/overrides) |
 | `/api/crm/customers/sync` | GET/POST | Upstream Supabase replace-sync |
 | `/api/crm/trade-accounts` (+`/[id]`) | POST, PUT/DELETE | Trade account CRUD |
+| `/api/crm/trade-accounts/verify` | POST | Real Trade ID check against the lot webhook (12-month lookback); `accountId` optional to persist the outcome |
 | `/api/crm/brokers` (+`/[id]`) | GET/POST, PUT/DELETE | Broker CRUD |
 | `/api/crm/indicators` (+`/[id]`) | GET/POST, PUT/DELETE | Indicators + access + plan entitlements (GET) |
+| `/api/crm/activities` (+`/[id]`) | GET/POST, PUT/DELETE | Admin CRUD for customer activities/competitions |
+| `/api/activities` (+`/[slug]`) | GET | Customer-facing published activities / one by slug |
 | `/api/crm/indicator-access` (+`/[id]`) | POST, PATCH | Grant / extend / suspend / revoke access |
 | `/api/crm/renewal-history` | GET `?memberId=` | Grant/renew audit per member |
 | `/api/crm/telegram-access` (+`/[id]`) | GET, PATCH | Telegram access list / status change |

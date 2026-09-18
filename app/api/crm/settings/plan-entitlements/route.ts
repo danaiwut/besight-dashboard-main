@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { Plan } from "@/generated/prisma/client";
 import { getPrisma, isDatabaseConfigured } from "@/lib/server/prisma";
 import { bumpDataVersion } from "@/lib/server/dataVersion";
+import { adminSettingsGuard } from "@/lib/session";
+
 
 export const dynamic = "force-dynamic";
 
@@ -11,6 +13,8 @@ function idList(value: unknown): number[] {
 }
 
 export async function PUT(request: NextRequest) {
+  const guard = await adminSettingsGuard();
+  if (!guard.ok) return guard.response;
   if (!isDatabaseConfigured()) return NextResponse.json({ ok: false, error: "DATABASE_URL is not configured" }, { status: 503 });
   try {
     const body = await request.json() as Record<string, unknown>;

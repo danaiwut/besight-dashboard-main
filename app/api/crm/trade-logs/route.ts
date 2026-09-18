@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getPrisma, isDatabaseConfigured } from "@/lib/server/prisma";
+import { adminGuard } from "@/lib/session";
 
 export const dynamic = "force-dynamic";
 
@@ -16,6 +17,8 @@ function toDto(row: { id: bigint; tradeAccountId: number; memberId: number; symb
 }
 
 export async function GET(request: NextRequest) {
+  const guard = await adminGuard();
+  if (!guard.ok) return guard.response;
   if (!isDatabaseConfigured()) return NextResponse.json({ ok: false, error: "DATABASE_URL is not configured" }, { status: 503 });
 
   const rawAccountId = request.nextUrl.searchParams.get("tradeAccountId");

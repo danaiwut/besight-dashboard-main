@@ -4,6 +4,9 @@ import { getPrisma, isDatabaseConfigured } from "@/lib/server/prisma";
 import { bumpDataVersion } from "@/lib/server/dataVersion";
 import { readDatabaseDtos, upsertTelegramFromMember } from "@/lib/server/customerSync";
 import { toMemberDto } from "@/lib/server/crmDtos";
+import { summarizeMembers } from "@/lib/server/lotService";
+import { readIndicatorAutomationSettings } from "@/lib/server/indicatorSettings";
+import { adminGuard, adminWriteGuard } from "@/lib/session";
 
 export const dynamic = "force-dynamic";
 
@@ -35,16 +38,30 @@ async function generateCode(): Promise<string> {
 const ALLOWED_CHANNELS = ["facebook", "instagram", "tiktok"] as const;
 
 export async function GET() {
+  const guard = await adminGuard();
+  if (!guard.ok) return guard.response;
   if (!isDatabaseConfigured()) return NextResponse.json({ ok: false, error: "DATABASE_URL is not configured" }, { status: 503 });
   try {
     // Pure DB read (no upstream sync) — used by the realtime reload path.
-    return NextResponse.json({ ok: true, ...(await readDatabaseDtos()) });
+    // Enriched with snapshot-only lot summaries (current cycle window, no
+    // webhooks) so the members list/detail read one number per member.
+    const dtos = await readDatabaseDtos();
+    const automation = await readIndicatorAutomationSettings();
+    const { summaries, qualified, notQualified } = summarizeMembers(dtos.members, automation.requiredLots);
+    return NextResponse.json({
+      ok: true,
+      ...dtos,
+      lotSummaries: summaries,
+      lotOverview: { requiredLots: automation.requiredLots, qualified, notQualified },
+    });
   } catch (error) {
     return fail(error, "Unable to load members", 500);
   }
 }
 
 export async function POST(request: NextRequest) {
+  const guard = await adminWriteGuard();
+  if (!guard.ok) return guard.response;
   if (!isDatabaseConfigured()) return NextResponse.json({ ok: false, error: "DATABASE_URL is not configured" }, { status: 503 });
   try {
     const body = await request.json() as Record<string, unknown>;

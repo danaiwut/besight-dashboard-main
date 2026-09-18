@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { signOut } from "next-auth/react";
 import { useLanguage } from "../crm/LanguageContext";
 import { displayNameOf } from "../crm/CrmContext";
 import { useCustomerData } from "./useCustomerData";
@@ -62,10 +63,18 @@ export default function CustomerMenu() {
           {t("dash.nav.profile")}
         </Link>
         <div className="dd-divider"></div>
-        <Link className="dd-item danger" role="menuitem" href="/">
+        <button
+          type="button"
+          className="dd-item danger"
+          role="menuitem"
+          onClick={() => {
+            setOpen(false);
+            void signOut({ callbackUrl: "/login" });
+          }}
+        >
           <Icon name="logout" />
           {t("nav.logOut")}
-        </Link>
+        </button>
       </div>
     </div>
   );

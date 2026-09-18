@@ -71,8 +71,12 @@ export default function MemberIndicatorAccessPanel({ member }: { member: Member 
         startsAt: today,
         expiresAt: expiry,
       });
-      setIndicatorAccess((cur) => [payload.indicatorAccess, ...cur]);
-      log({ actor: "Alex Dean", memberId: member.id, memberName: member.name, action: "Indicator Granted", description: `${effectiveGrantName} granted by admin, expires ${expiry}.` });
+      // Server records the manual history row + activity log. The grant may
+      // have renewed an expired row (same id) or created a new one.
+      const fresh = payload.indicatorAccess;
+      setIndicatorAccess((cur) => (cur.some((a) => a.id === fresh.id)
+        ? cur.map((a) => (a.id === fresh.id ? fresh : a))
+        : [fresh, ...cur]));
       toast(t("ia.toast.granted", { name: member.name, indicator: effectiveGrantName }));
     } catch (error) {
       toast(error instanceof Error ? error.message : "Unable to grant indicator access");
@@ -80,15 +84,24 @@ export default function MemberIndicatorAccessPanel({ member }: { member: Member 
   }
 
   function extendAccess(access: IndicatorAccess) {
-    const oldExpiry = access.expiryDate;
-    const newExpiry = addMonths(oldExpiry, settings.renewalPeriodMonths);
-    void patchAccess(
-      access,
-      { status: "active", expiryDate: newExpiry, lastRenewalDate: new Date().toISOString().slice(0, 10) },
-      "Indicator Renewed",
-      `${access.indicator}: manually extended ${settings.renewalPeriodMonths} month(s). Expiry changed ${oldExpiry} → ${newExpiry}.`,
-      "ia.toast.extended",
-    );
+    // Manual renewal runs server-side: extends from max(expiry, now) and
+    // records a manual history row with the current cycle lots attached.
+    if (!backendLive) {
+      const oldExpiry = access.expiryDate;
+      const newExpiry = addMonths(oldExpiry, settings.renewalPeriodMonths);
+      applyAccess(access.id, { status: "active", expiryDate: newExpiry, lastRenewalDate: new Date().toISOString().slice(0, 10) });
+      log({ actor: "Alex Dean", memberId: member.id, memberName: member.name, action: "Indicator Renewed", description: `${access.indicator}: manually extended ${settings.renewalPeriodMonths} month(s). Expiry changed ${oldExpiry} → ${newExpiry}.` });
+      toast(t("ia.toast.extended", { name: member.name }));
+      return;
+    }
+    apiCall<{ indicatorAccess: IndicatorAccess }>(`/api/crm/indicator-access/${access.id}/`, "PATCH", { extend: true })
+      .then((payload) => {
+        applyAccess(access.id, payload.indicatorAccess);
+        toast(t("ia.toast.extended", { name: member.name }));
+      })
+      .catch((error) => {
+        toast(error instanceof Error ? error.message : "Unable to extend indicator access");
+      });
   }
 
   function suspendAccess(access: IndicatorAccess) {

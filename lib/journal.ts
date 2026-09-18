@@ -31,42 +31,10 @@ export type JournalAccount = {
   trades: JournalTrade[];
 };
 
-export const INITIAL_ACCOUNTS: JournalAccount[] = [
-  {
-    id: "10947454",
-    createdDate: "2025-11-05",
-    broker: "XM",
-    accountType: "Standard",
-    platform: "MetaTrader 5",
-    size: 5000,
-    startDate: "2025-11-05",
-    trades: [
-      { id: 1, symbol: "XAUUSD", side: "sell", openDate: "2025-11-05T14:58:00", closeDate: "2025-11-05T15:06:00", openPrice: 3973.52, closePrice: 3965.92, tp: 3972.32, sl: 3984.36, lots: 0.02, pnl: 15.20 },
-      { id: 2, symbol: "XAUUSD", side: "buy", openDate: "2025-11-05T16:25:00", closeDate: "2025-11-05T20:02:00", openPrice: 3967.48, closePrice: 3969.1, tp: 4000.0, sl: null, lots: 0.02, pnl: 3.24 },
-      { id: 3, symbol: "XAUUSD", side: "buy", openDate: "2025-11-05T15:27:00", closeDate: "2025-11-05T20:02:00", openPrice: 3980.63, closePrice: 3971.38, tp: 4000.0, sl: null, lots: 0.02, pnl: -18.50 },
-      { id: 4, symbol: "XAUUSD", side: "buy", openDate: "2025-11-05T16:21:00", closeDate: "2025-11-05T20:02:00", openPrice: 3971.81, closePrice: 3976.71, tp: 4000.0, sl: null, lots: 0.02, pnl: 9.80 },
-      { id: 5, symbol: "XAUUSD", side: "buy", openDate: "2025-11-05T17:08:00", closeDate: "2025-11-05T20:02:00", openPrice: 3959.91, closePrice: 3969.1, tp: 4000.0, sl: null, lots: 0.02, pnl: 18.38 },
-      { id: 6, symbol: "XAUUSD", side: "buy", openDate: "2025-11-05T16:14:00", closeDate: "2025-11-05T20:02:00", openPrice: 3975.97, closePrice: 3970.87, tp: 4000.0, sl: null, lots: 0.02, pnl: -10.20 },
-      { id: 7, symbol: "XAUUSD", side: "buy", openDate: "2025-11-06T09:46:00", closeDate: "2025-11-06T11:24:00", openPrice: 3981.24, closePrice: 3986.32, tp: 4022.3, sl: null, lots: 0.02, pnl: 10.16 },
-      { id: 8, symbol: "XAUUSD", side: "buy", openDate: "2025-11-06T12:25:00", closeDate: "2025-11-06T14:19:00", openPrice: 3989.67, closePrice: 3999.15, tp: null, sl: null, lots: 0.02, pnl: 18.96 },
-      { id: 9, symbol: "XAUUSD", side: "buy", openDate: "2025-11-06T22:03:00", closeDate: "2025-11-07T00:21:00", openPrice: 3985.04, closePrice: 3977.34, tp: null, sl: null, lots: 0.02, pnl: -15.40 },
-      { id: 10, symbol: "XAUUSD", side: "buy", openDate: "2025-11-06T21:21:00", closeDate: "2025-11-07T00:22:00", openPrice: 3998.43, closePrice: 4009.68, tp: null, sl: null, lots: 0.02, pnl: 22.50 },
-      { id: 11, symbol: "XAUUSD", side: "buy", openDate: "2025-11-06T16:37:00", closeDate: "2025-11-07T00:23:00", openPrice: 4013.14, closePrice: 3995.24, tp: null, sl: null, lots: 0.02, pnl: -35.80 },
-      { id: 12, symbol: "XAUUSD", side: "buy", openDate: "2025-11-06T21:08:00", closeDate: "2025-11-07T00:23:00", openPrice: 4009.59, closePrice: 3999.39, tp: null, sl: null, lots: 0.02, pnl: -20.40 },
-      { id: 13, symbol: "XAUUSD", side: "buy", openDate: "2025-11-06T21:16:00", closeDate: "2025-11-07T00:23:00", openPrice: 4005.67, closePrice: 4011.97, tp: null, sl: null, lots: 0.02, pnl: 12.60 },
-    ],
-  },
-  {
-    id: "20481193",
-    createdDate: "2025-09-12",
-    broker: "XM",
-    accountType: "Standard Cent",
-    platform: "MetaTrader 4",
-    size: 1000,
-    startDate: "2025-09-12",
-    trades: [],
-  },
-];
+/** Journal accounts are per-member and not persisted yet — the feature reads
+ *  nothing from here until a JournalEntry store exists, so this starts empty
+ *  (no fabricated demo accounts/trades). */
+export const INITIAL_ACCOUNTS: JournalAccount[] = [];
 
 /** Trade technique/strategy tags a member can attach to a journal note —
  *  common trading concepts plus BeSight's own named strategies. */

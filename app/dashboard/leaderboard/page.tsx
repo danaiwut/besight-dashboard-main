@@ -2,12 +2,21 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useLanguage } from "../../../components/crm/LanguageContext";
-import { useCrm, lot, currentMonthRange } from "../../../components/crm/CrmContext";
+import { lot, currentMonthRange } from "../../../components/crm/CrmContext";
 import { useCustomerData } from "../../../components/dashboard/useCustomerData";
+import { apiCall } from "../../../lib/crmApi";
 import Icon from "../../../components/Icon";
 
 type Period = "daily" | "monthly";
-type Row = { rank: number; member: { id: number; name: string; code: string }; rebate: number; lots: number };
+type Row = {
+  rank: number;
+  memberId: number;
+  name: string;
+  code: string;
+  lots: number;
+  rebate: number;
+  previousRank: number | null;
+};
 
 const PAGE_SIZE = 8;
 
@@ -38,15 +47,13 @@ function remainingParts(endIso: string) {
   return { days, hours, minutes, seconds };
 }
 
-// The mock trade logs live on fixed calendar days within "this month" (see
-// CrmContext), so the latest one isn't reliably the real current day — it
-// can even be later in the month than today. That's fine for deciding which
-// rows count as "today's" activity, but a daily countdown built from it
-// could show something nonsensical like 18 days left. This anchors the
-// countdown to the real end of today instead.
-function endOfTodayIso(): string {
-  const now = new Date();
-  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}T23:59:59`;
+/** End of the current period — month end for monthly, end of today for daily. */
+function periodEndIso(period: Period): string {
+  if (period === "daily") {
+    const now = new Date();
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}T23:59:59`;
+  }
+  return `${currentMonthRange().to}T23:59:59`;
 }
 
 function thaiPeriodLabel(dateIso: string, mode: "day" | "month"): string {
@@ -79,82 +86,45 @@ function avatarFor(id: number): string {
   return `/img/avatars/avatar-${((id - 1) % AVATAR_COUNT) + 1}.png`;
 }
 
-function rankMapOf(rows: Row[]) {
-  const map = new Map<number, number>();
-  rows.forEach((r) => map.set(r.member.id, r.rank));
-  return map;
-}
-
 export default function DashboardLeaderboardPage() {
   const { t } = useLanguage();
-  const { members, tradeLogs } = useCrm();
-  const { member, leaderboard: monthlyLeaderboard } = useCustomerData();
+  const { member } = useCustomerData();
   const [period, setPeriod] = useState<Period>("monthly");
   const [page, setPage] = useState(1);
+  const [board, setBoard] = useState<Row[]>([]);
+  const [me, setMe] = useState<Row | null>(null);
+  const [updatedAt, setUpdatedAt] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  const latestDate = useMemo(() => tradeLogs.reduce((max, l) => (l.tradeDate > max ? l.tradeDate : max), ""), [tradeLogs]);
-
-  const dailyLeaderboard: Row[] = useMemo(() => {
-    return members
-      .map((m) => {
-        const logs = tradeLogs.filter((l) => l.memberId === m.id && l.tradeDate === latestDate);
-        return { member: m, rebate: logs.reduce((s, l) => s + l.rebate, 0), lots: logs.reduce((s, l) => s + l.lots, 0) };
+  useEffect(() => {
+    let cancelled = false;
+    // Reset to the loading state when the period changes.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setLoading(true);
+    apiCall<{ rows: Row[]; me: Row | null; updatedAt: string }>(`/api/leaderboard/?period=${period}`, "GET")
+      .then((payload) => {
+        if (cancelled) return;
+        setBoard(payload.rows);
+        setMe(payload.me);
+        setUpdatedAt(payload.updatedAt);
+        setError("");
       })
-      .filter((row) => row.rebate > 0)
-      .sort((a, b) => b.rebate - a.rebate)
-      .map((row, i) => ({ rank: i + 1, ...row }));
-  }, [members, tradeLogs, latestDate]);
-
-  const board = period === "daily" ? dailyLeaderboard : monthlyLeaderboard;
-  const periodEnd = period === "daily" ? endOfTodayIso() : `${currentMonthRange().to}T23:59:59`;
-  const periodLabel =
-    period === "daily" ? thaiPeriodLabel(latestDate || endOfTodayIso(), "day") : thaiPeriodLabel(currentMonthRange().from ?? endOfTodayIso(), "month");
-
-  // "Change" needs a real prior snapshot to diff against — the mock trade
-  // logs span several distinct calendar days within this month, so the day
-  // just before the latest one stands in for "yesterday" and gives every
-  // period a genuine (not fabricated) rank-movement comparison: the daily
-  // board compares against that single day, the monthly/lifetime board
-  // compares against the same cumulative totals frozen at that day.
-  const distinctDates = useMemo(() => Array.from(new Set(tradeLogs.map((l) => l.tradeDate))).sort(), [tradeLogs]);
-  const prevDate = useMemo(() => {
-    const idx = distinctDates.indexOf(latestDate);
-    return idx > 0 ? distinctDates[idx - 1] : null;
-  }, [distinctDates, latestDate]);
-
-  const dailyPrevBoard: Row[] = useMemo(() => {
-    if (!prevDate) return [];
-    return members
-      .map((m) => {
-        const logs = tradeLogs.filter((l) => l.memberId === m.id && l.tradeDate === prevDate);
-        return { member: m, rebate: logs.reduce((s, l) => s + l.rebate, 0), lots: logs.reduce((s, l) => s + l.lots, 0) };
+      .catch((loadError) => {
+        if (!cancelled) setError(loadError instanceof Error ? loadError.message : "Unable to load leaderboard");
       })
-      .filter((row) => row.rebate > 0)
-      .sort((a, b) => b.rebate - a.rebate)
-      .map((row, i) => ({ rank: i + 1, ...row }));
-  }, [members, tradeLogs, prevDate]);
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => { cancelled = true; };
+  }, [period]);
 
-  const monthlyPrevBoard: Row[] = useMemo(() => {
-    if (!prevDate) return [];
-    return members
-      .map((m) => {
-        const logs = tradeLogs.filter((l) => l.memberId === m.id && l.tradeDate <= prevDate);
-        return { member: m, rebate: logs.reduce((s, l) => s + l.rebate, 0), lots: logs.reduce((s, l) => s + l.lots, 0) };
-      })
-      .filter((row) => row.rebate > 0)
-      .sort((a, b) => b.rebate - a.rebate)
-      .map((row, i) => ({ rank: i + 1, ...row }));
-  }, [members, tradeLogs, prevDate]);
-
-  const prevRankById = useMemo(
-    () => rankMapOf(period === "daily" ? dailyPrevBoard : monthlyPrevBoard),
-    [period, dailyPrevBoard, monthlyPrevBoard]
-  );
+  const periodEnd = useMemo(() => periodEndIso(period), [period]);
+  const periodLabel = period === "daily" ? thaiPeriodLabel(periodEnd, "day") : thaiPeriodLabel(periodEnd, "month");
 
   function changeFor(row: Row): number | null {
-    const prev = prevRankById.get(row.member.id);
-    if (prev == null) return null;
-    return prev - row.rank;
+    if (row.previousRank == null) return null;
+    return row.previousRank - row.rank;
   }
 
   // Starts at zero rather than computing from `new Date()` during the
@@ -175,11 +145,12 @@ export default function DashboardLeaderboardPage() {
   }
 
   const podium = [board[1], board[0], board[2]];
+  const leaderLots = board[0]?.lots ?? 0;
   const rest = board.slice(3);
   const totalPages = Math.max(1, Math.ceil(rest.length / PAGE_SIZE));
   const pageRows = rest.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
-  const lastUpdatedLabel = thaiPeriodLabel(latestDate || endOfTodayIso(), "day");
+  const lastUpdatedLabel = updatedAt ? thaiPeriodLabel(updatedAt, "day") : thaiPeriodLabel(periodEnd, "day");
 
   return (
     <div className="lbd">
@@ -200,25 +171,29 @@ export default function DashboardLeaderboardPage() {
         </div>
       </div>
 
-      {board.length ? (
+      {loading ? (
+        <div className="lbd-empty">…</div>
+      ) : error ? (
+        <div className="lbd-empty">{error}</div>
+      ) : board.length ? (
         <div className="lbd-main">
           <div className="lbd-podium">
               {podium.map((row, slot) => {
                 if (!row) return <div className="lbd-podium-slot" key={`empty-${slot}`} />;
                 const rank = row.rank;
                 return (
-                  <div className={`lbd-podium-card rank-${rank}${row.member.id === member.id ? " is-you" : ""}`} key={row.member.id}>
+                  <div className={`lbd-podium-card rank-${rank}${row.memberId === member.id ? " is-you" : ""}`} key={row.memberId}>
                     <div className="lbd-avatar-wrap">
                       <Icon name="emoji_events" className="lbd-crown" />
                       <div className="lbd-avatar">
                         {/* eslint-disable-next-line @next/next/no-img-element -- static export, small local demo avatar */}
-                        <img src={avatarFor(row.member.id)} alt={row.member.name} />
+                        <img src={avatarFor(row.memberId)} alt={row.name} />
                       </div>
                     </div>
                     <div className="lbd-rank-badge">#{rank}</div>
-                    <div className="lbd-name">{row.member.name}</div>
-                    <div className="lbd-code">{row.member.code}</div>
-                    <div className="lbd-amount">${row.rebate.toFixed(2)}</div>
+                    <div className="lbd-name">{row.name}</div>
+                    <div className="lbd-code">{row.code}</div>
+                    <div className="lbd-amount">{lot(row.lots)}</div>
                     {rank === 1 && (
                       <div className="lbd-top-pill">
                         <Icon name="bolt" />
@@ -240,6 +215,12 @@ export default function DashboardLeaderboardPage() {
               </div>
             )}
 
+            {me && me.rank > board.length && (
+              <div className="lbd-count-pill" style={{ marginBottom: 10 }}>
+                {t("dash.leaderboard.yourRank", { rank: me.rank, lots: lot(me.lots) })}
+              </div>
+            )}
+
             <h2 className="lbd-table-title">
               {t(period === "daily" ? "dash.leaderboard.tableTitleDaily" : "dash.leaderboard.tableTitleMonthly", { period: periodLabel })}
             </h2>
@@ -251,28 +232,28 @@ export default function DashboardLeaderboardPage() {
                 <span>{t("dash.leaderboard.colUsername")}</span>
                 <span>{t("dash.leaderboard.colTier")}</span>
                 <span>{t("dash.leaderboard.colLots")}</span>
-                <span>{t("dash.leaderboard.colRebateAccum")}</span>
+                <span>{t("dash.leaderboard.colGap")}</span>
                 <span>{t("dash.leaderboard.colChange")}</span>
               </div>
               {pageRows.length ? (
                 pageRows.map((row) => {
                   const chg = changeFor(row);
                   return (
-                    <div className={`lbd-row${row.member.id === member.id ? " is-you" : ""}`} key={row.member.id}>
+                    <div className={`lbd-row${row.memberId === member.id ? " is-you" : ""}`} key={row.memberId}>
                       <span className="lbd-place">{row.rank}</span>
                       <span className="lbd-member">
                         <span className="lbd-member-avatar">
                         {/* eslint-disable-next-line @next/next/no-img-element -- static export, small local demo avatar */}
-                        <img src={avatarFor(row.member.id)} alt={row.member.name} />
+                        <img src={avatarFor(row.memberId)} alt={row.name} />
                       </span>
                         <span className="lbd-member-info">
-                          <div className="lbd-member-name">{row.member.name}</div>
-                          <div className="lbd-member-code">{row.member.code}</div>
+                          <div className="lbd-member-name">{row.name}</div>
+                          <div className="lbd-member-code">{row.code}</div>
                         </span>
                       </span>
                       <span>{t(tierFor(row.lots).titleKey)}</span>
                       <span>{lot(row.lots)}</span>
-                      <span className="lbd-rebate-pill">${row.rebate.toFixed(2)}</span>
+                      <span className="lbd-rebate-pill">{leaderLots > 0 && row.lots < leaderLots ? `-${lot(leaderLots - row.lots)}` : "—"}</span>
                       <span className={`lbd-change${chg ? (chg > 0 ? " is-up" : " is-down") : " is-flat"}`}>
                         {!chg ? (
                           "–"

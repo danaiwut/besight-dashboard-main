@@ -194,7 +194,10 @@ function IndicatorSettingsCard() {
   const [renewalPeriodMonths, setRenewalPeriodMonths] = useState(settings.renewalPeriodMonths);
   const [expiringSoonDays, setExpiringSoonDays] = useState(settings.expiringSoonDays);
   const [autoRenewalEnabled, setAutoRenewalEnabled] = useState(settings.autoRenewalEnabled);
-  const [lotCalculationMode, setLotCalculationMode] = useState<LotCalculationMode>(settings.lotCalculationMode);
+  // Legacy stored value "sum_all_verified" counts the same as "sum_all_active".
+  const [lotCalculationMode, setLotCalculationMode] = useState<LotCalculationMode>(
+    settings.lotCalculationMode === "selected_only" ? "selected_only" : "sum_all_active",
+  );
   const [saving, setSaving] = useState(false);
 
   // Automation + general settings hydrate from the backend after mount (the
@@ -209,20 +212,23 @@ function IndicatorSettingsCard() {
 
   async function save() {
     setSaving(true);
+    const draft = { requiredLots, renewalPeriodMonths, expiringSoonDays, autoRenewalEnabled, lotCalculationMode };
     try {
       if (!backendLive) {
-        setSettings((current) => ({ ...current, requiredLots, renewalPeriodMonths, expiringSoonDays, autoRenewalEnabled, lotCalculationMode }));
+        setSettings((current) => ({ ...current, ...draft }));
         toast(t("set.toast.indicatorSaved"));
         return;
       }
-      const response = await fetch("/api/crm/settings/indicator-automation/", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ requiredLots, renewalMonths: renewalPeriodMonths, enabled: autoRenewalEnabled }),
+      // Automation fields live on the indicator-automation setting; the
+      // expiring window + lot-calc mode live on the general setting — both
+      // must be written or those two controls silently revert on refresh.
+      await apiCall("/api/crm/settings/indicator-automation/", "PUT", {
+        requiredLots,
+        renewalMonths: renewalPeriodMonths,
+        enabled: autoRenewalEnabled,
       });
-      const payload = await response.json() as { ok?: boolean; error?: string };
-      if (!response.ok || !payload.ok) throw new Error(payload.error || "Unable to save Indicator settings");
-      setSettings((current) => ({ ...current, requiredLots, renewalPeriodMonths, expiringSoonDays, autoRenewalEnabled, lotCalculationMode }));
+      await apiCall("/api/crm/settings/general/", "PUT", { expiringSoonDays, lotCalculationMode });
+      setSettings((current) => ({ ...current, ...draft }));
       toast(t("set.toast.indicatorSaved"));
     } catch (error) {
       toast(error instanceof Error ? error.message : "Unable to save Indicator settings");
@@ -255,7 +261,7 @@ function IndicatorSettingsCard() {
         <div className="field">
           <label>{t("set.lotCalculation")}</label>
           <select className="input" value={lotCalculationMode} onChange={(e) => setLotCalculationMode(e.target.value as LotCalculationMode)}>
-            <option value="sum_all_verified">{t("set.lotCalc.sumAll")}</option>
+            <option value="sum_all_active">{t("set.lotCalc.sumAll")}</option>
             <option value="selected_only">{t("set.lotCalc.selectedOnly")}</option>
           </select>
         </div>

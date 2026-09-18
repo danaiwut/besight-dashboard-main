@@ -1,46 +1,19 @@
 "use client";
 
-import { useEffect, useRef, useState, type CSSProperties } from "react";
+import { useCallback, useEffect, useRef, useState, type CSSProperties } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
 import { useLanguage } from "../../../components/crm/LanguageContext";
 import { useCrm } from "../../../components/crm/CrmContext";
-import { useCustomerData } from "../../../components/dashboard/useCustomerData";
+import { apiCall } from "../../../lib/crmApi";
+import type { SpinPageData, SpinPrizeDto, SpinResultDto } from "../../../lib/spin";
 import Icon from "../../../components/Icon";
 
-type Segment = {
-  key: string;
-  icon: string;
-  labelKey: string;
-  kind: "rebate" | "indicator" | "extraSpin" | "tryAgain" | "jackpot";
-  cashValue?: number; // USD credited to the spin wallet when this segment is won
-};
-
-// 8 equal 45° wedges — probability matches visual size (no hidden weighting).
-// This is the sole source of truth for both what's drawn on the wheel and
-// what a spin can actually award — the UI never invents a result the wheel
-// doesn't show.
-const SEGMENTS: Segment[] = [
-  { key: "r2", icon: "payments", labelKey: "dash.spin.prize.rebate2", kind: "rebate", cashValue: 2 },
-  { key: "again1", icon: "replay", labelKey: "dash.spin.prize.tryAgain", kind: "tryAgain" },
-  { key: "r5", icon: "payments", labelKey: "dash.spin.prize.rebate5", kind: "rebate", cashValue: 5 },
-  { key: "ind1", icon: "donut_large", labelKey: "dash.spin.prize.indicatorDay", kind: "indicator" },
-  { key: "r10", icon: "payments", labelKey: "dash.spin.prize.rebate10", kind: "rebate", cashValue: 10 },
-  { key: "extra", icon: "add_circle", labelKey: "dash.spin.prize.extraSpin", kind: "extraSpin" },
-  { key: "r20", icon: "payments", labelKey: "dash.spin.prize.rebate20", kind: "rebate", cashValue: 20 },
-  { key: "jackpot", icon: "emoji_events", labelKey: "dash.spin.prize.jackpot", kind: "jackpot", cashValue: 50 },
-];
-
-const SEG_ANGLE = 360 / SEGMENTS.length;
 const SPIN_MS = 5000; // must track the .spin-wheel transition-duration in dashboard.css
-const BEST_REWARD = SEGMENTS.find((s) => s.kind === "jackpot") ?? SEGMENTS[0];
-const WALLET_MIN_WITHDRAW = 15;
-
-type HistoryEntry = { key: string; labelKey: string; icon: string; at: number };
 type ConfettiVars = CSSProperties & { "--dx": string; "--dy": string; "--rot": string };
 
-function formatSpinTime(at: number, t: (key: string) => string) {
-  const d = new Date(at);
+function formatSpinTime(iso: string, t: (key: string) => string) {
+  const d = new Date(iso);
   const now = new Date();
   const sameDay = (a: Date, b: Date) => a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
   const yesterday = new Date(now);
@@ -54,15 +27,13 @@ function formatSpinTime(at: number, t: (key: string) => string) {
 export default function SpinWheelPage() {
   const { t } = useLanguage();
   const { toast } = useCrm();
-  const { totalLots } = useCustomerData();
 
-  const [spinsUsed, setSpinsUsed] = useState(0);
-  const [bonusSpins, setBonusSpins] = useState(0);
-  const [walletBalance, setWalletBalance] = useState(0);
+  const [data, setData] = useState<SpinPageData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const [rotation, setRotation] = useState(0);
   const [spinning, setSpinning] = useState(false);
-  const [history, setHistory] = useState<HistoryEntry[]>([]);
-  const [result, setResult] = useState<Segment | null>(null);
+  const [result, setResult] = useState<SpinPrizeDto | null>(null);
   const [showConfetti, setShowConfetti] = useState(false);
   const [confettiSeed, setConfettiSeed] = useState(0);
   const [mounted, setMounted] = useState(false);
@@ -71,11 +42,25 @@ export default function SpinWheelPage() {
   const spinBtnRef = useRef<HTMLButtonElement>(null);
   const modalBtnRef = useRef<HTMLButtonElement>(null);
 
-  useEffect(() => {
-    // createPortal needs a real document.body, which only exists client-side.
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setMounted(true);
+  const load = useCallback(async () => {
+    try {
+      const payload = await apiCall<SpinPageData & { ok: boolean }>("/api/me/spin/", "GET");
+      setData(payload);
+      setError("");
+    } catch (loadError) {
+      setError(loadError instanceof Error ? loadError.message : "โหลดข้อมูลไม่สำเร็จ");
+    } finally {
+      setLoading(false);
+    }
   }, []);
+
+  useEffect(() => {
+    // Initial load; the async fetch sets state in its callback.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    void load();
+    // createPortal needs a real document.body, which only exists client-side.
+    setMounted(true);
+  }, [load]);
 
   useEffect(() => {
     if (result) modalBtnRef.current?.focus();
@@ -90,54 +75,92 @@ export default function SpinWheelPage() {
     return () => document.removeEventListener("keydown", onKeyDown);
   }, [result]);
 
-  const earnedSpins = Math.floor(totalLots);
-  const availableSpins = Math.max(0, earnedSpins + bonusSpins - spinsUsed);
-  const canSpin = availableSpins > 0 && !spinning;
+  const prizes = data?.prizes ?? [];
+  const segAngle = prizes.length ? 360 / prizes.length : 360;
+  const balance = data?.balance ?? 0;
+  const cost = data?.settings.costPerSpin ?? 0;
+  const spinsAvailable = data?.spinsAvailable ?? 0;
+  const canSpin = Boolean(data?.settings.enabled) && cost > 0 && spinsAvailable > 0 && prizes.length > 1 && !spinning;
 
   function closeResult() {
     setResult(null);
     spinBtnRef.current?.focus();
   }
 
-  function requestWithdrawal() {
-    if (walletBalance < WALLET_MIN_WITHDRAW) return;
-    toast(t("dash.spin.wallet.withdrawToast", { amount: walletBalance.toFixed(2) }));
-    setWalletBalance(0);
+  function fireConfetti() {
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduceMotion) return;
+    setConfettiSeed((k) => k + 1);
+    setShowConfetti(true);
+    if (confettiTimeout.current) clearTimeout(confettiTimeout.current);
+    confettiTimeout.current = setTimeout(() => setShowConfetti(false), 1400);
   }
 
-  function spin() {
+  async function spin() {
     if (!canSpin) return;
     setSpinning(true);
-    setSpinsUsed((n) => n + 1);
+    try {
+      const outcome = await apiCall<{ prize: SpinPrizeDto; cost: number; balance: number; spinsAvailable: number }>("/api/me/spin/", "POST");
+      const index = prizes.findIndex((prize) => prize.id === outcome.prize.id);
+      const withinTurn = index >= 0 ? 360 - (index * segAngle + segAngle / 2) : Math.random() * 360;
+      setRotation((cur) => cur - (cur % 360) + 6 * 360 + withinTurn);
 
-    const index = Math.floor(Math.random() * SEGMENTS.length);
-    const jitter = (Math.random() - 0.5) * SEG_ANGLE * 0.6;
-    const targetWithinTurn = 360 - (index * SEG_ANGLE + SEG_ANGLE / 2) + jitter;
-    const extraTurns = 6;
-    setRotation((cur) => cur - (cur % 360) + extraTurns * 360 + targetWithinTurn);
-
-    if (spinTimeout.current) clearTimeout(spinTimeout.current);
-    spinTimeout.current = setTimeout(() => {
+      if (spinTimeout.current) clearTimeout(spinTimeout.current);
+      spinTimeout.current = setTimeout(() => {
+        setSpinning(false);
+        setResult(outcome.prize);
+        setData((cur) => {
+          if (!cur) return cur;
+          const entry: SpinResultDto = {
+            id: Date.now(),
+            prizeId: outcome.prize.id,
+            prizeName: outcome.prize.name,
+            prizeIcon: outcome.prize.icon,
+            prizeImage: outcome.prize.image,
+            cost: outcome.cost,
+            status: "pending",
+            spunAt: new Date().toISOString(),
+            memberId: 0,
+            memberName: "",
+            memberCode: "",
+          };
+          return {
+            ...cur,
+            balance: outcome.balance,
+            spent: cur.spent + outcome.cost,
+            spinsAvailable: outcome.spinsAvailable,
+            history: [entry, ...cur.history].slice(0, 12),
+          };
+        });
+        fireConfetti();
+        toast(t("dash.spin.resultToast", { prize: outcome.prize.name }));
+      }, SPIN_MS);
+    } catch (spinError) {
       setSpinning(false);
-      const seg = SEGMENTS[index];
-      setHistory((cur) => [{ key: `${seg.key}-${Date.now()}`, labelKey: seg.labelKey, icon: seg.icon, at: Date.now() }, ...cur].slice(0, 6));
-      if (seg.kind === "extraSpin") setBonusSpins((n) => n + 1);
-      if (seg.cashValue) setWalletBalance((n) => n + seg.cashValue!);
-      setResult(seg);
-
-      if (seg.kind !== "tryAgain") {
-        const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-        if (!reduceMotion) {
-          setConfettiSeed((k) => k + 1);
-          setShowConfetti(true);
-          if (confettiTimeout.current) clearTimeout(confettiTimeout.current);
-          confettiTimeout.current = setTimeout(() => setShowConfetti(false), 1400);
-        }
-      }
-    }, SPIN_MS);
+      toast(spinError instanceof Error ? spinError.message : t("dash.spin.noSpins"));
+    }
   }
 
-  const isTryAgain = result?.kind === "tryAgain";
+  if (loading) {
+    return (
+      <div className="card" style={{ padding: 24 }}>
+        <p className="modal-detail" style={{ textAlign: "left", margin: 0 }}>…</p>
+      </div>
+    );
+  }
+
+  if (error || !data) {
+    return (
+      <div className="card" style={{ padding: 24 }}>
+        <p>{error || "ไม่พบข้อมูล"}</p>
+        <button type="button" className="btn btn-ghost" style={{ marginTop: 12 }} onClick={() => void load()}>
+          {t("common.retry")}
+        </button>
+      </div>
+    );
+  }
+
+  const history = data.history;
 
   return (
     <div className="spin-shell">
@@ -154,15 +177,20 @@ export default function SpinWheelPage() {
             <div className="spin-wheel-wrap">
               <div className="spin-wheel-pointer" aria-hidden="true" />
               <div className="spin-wheel-rim" aria-hidden="true" />
-              <div className="spin-wheel" style={{ transform: `rotate(${rotation}deg)` }} role="img" aria-label={t("dash.title.spinWheel")}>
-                {SEGMENTS.map((seg, i) => {
-                  const angle = i * SEG_ANGLE + SEG_ANGLE / 2;
+              <div className="spin-wheel" style={{ transform: `rotate(${rotation}deg)`, visibility: prizes.length > 1 ? "visible" : "hidden" }} role="img" aria-label={t("dash.title.spinWheel")}>
+                {prizes.map((prize, i) => {
+                  const angle = i * segAngle + segAngle / 2;
                   const dark = i % 2 === 0;
                   return (
-                    <div className="spin-wheel-seg" style={{ transform: `rotate(${angle}deg)` }} key={seg.key}>
+                    <div className="spin-wheel-seg" style={{ transform: `rotate(${angle}deg)` }} key={prize.id}>
                       <span className={`spin-wheel-seg-label${dark ? " on-blue" : ""}`} style={{ transform: `rotate(${-angle}deg)` }}>
-                        <Icon name={seg.icon} />
-                        <span>{t(seg.labelKey)}</span>
+                        {prize.image ? (
+                          // eslint-disable-next-line @next/next/no-img-element -- admin-provided prize image
+                          <img src={prize.image} alt="" style={{ width: 26, height: 26, borderRadius: 6, objectFit: "cover" }} />
+                        ) : (
+                          <Icon name={prize.icon} />
+                        )}
+                        <span>{prize.name}</span>
                       </span>
                     </div>
                   );
@@ -186,28 +214,29 @@ export default function SpinWheelPage() {
               )}
             </div>
 
-            <button type="button" ref={spinBtnRef} className="btn btn-primary spin-btn" disabled={!canSpin} onClick={spin}>
+            <button type="button" ref={spinBtnRef} className="btn btn-primary spin-btn" disabled={!canSpin} onClick={() => void spin()}>
               <Icon name="casino" style={{ fontSize: 18 }} />
-              {spinning ? t("dash.spin.spinning") : availableSpins === 0 ? t("dash.spin.noSpins.title") : t("dash.spin.spinBtn")}
-              {!spinning && availableSpins > 0 && <Icon name="arrow_forward" style={{ fontSize: 16 }} />}
+              {spinning ? t("dash.spin.spinning") : spinsAvailable === 0 ? t("dash.spin.noSpins.title") : t("dash.spin.spinBtn")}
+              {!spinning && spinsAvailable > 0 && <Icon name="arrow_forward" style={{ fontSize: 16 }} />}
             </button>
 
             <div className="spin-availability">
               <Icon name="toll" />
-              <span className="spin-availability-num">{availableSpins}</span>
+              <span className="spin-availability-num">{spinsAvailable}</span>
               <span className="spin-availability-label">{t("dash.spin.available")}</span>
             </div>
-            <div className="spin-rule">{t("dash.spin.rule")}</div>
+            <div className="spin-rule">{t("dash.spin.rule", { cost })}</div>
 
-            {availableSpins === 0 && !spinning && (
+            {spinsAvailable === 0 && !spinning && (
               <div className="spin-empty-note">
-                {t("dash.spin.noSpins.body")}{" "}
+                {t("dash.spin.noSpins")}{" "}
                 <Link href="/dashboard/activities" className="spin-empty-cta">
                   {t("dash.spin.noSpins.cta")}
                   <Icon name="arrow_forward" />
                 </Link>
               </div>
             )}
+            {!data.settings.enabled && <div className="spin-empty-note">{t("dash.spin.disabled")}</div>}
           </div>
         </div>
       </div>
@@ -226,13 +255,13 @@ export default function SpinWheelPage() {
           ) : (
             <ul className="spin-history-list">
               {history.map((h) => (
-                <li key={h.key}>
+                <li key={h.id}>
                   <span className="spin-history-icon">
-                    <Icon name={h.icon} />
+                    <Icon name={h.prizeIcon} />
                   </span>
                   <span className="spin-history-text">
-                    {t(h.labelKey)}
-                    <span className="spin-history-time">{formatSpinTime(h.at, t)}</span>
+                    {h.prizeName}
+                    <span className="spin-history-time">{formatSpinTime(h.spunAt, t)}</span>
                   </span>
                 </li>
               ))}
@@ -272,35 +301,24 @@ export default function SpinWheelPage() {
 
       <div className="spin-stats">
         <div className="card spin-stat-card">
+          <div className="spin-stat-label">{t("dash.spin.stat.bec.label")}</div>
+          <div className="spin-stat-value">{balance.toFixed(2)}</div>
+          <div className="spin-stat-note">{t("dash.spin.earnedSpent", { earned: data.earned.toFixed(2), spent: data.spent.toFixed(2) })}</div>
+        </div>
+        <div className="card spin-stat-card">
           <div className="spin-stat-label">{t("dash.spin.stat.available.label")}</div>
-          <div className="spin-stat-value">{availableSpins}</div>
+          <div className="spin-stat-value">{spinsAvailable}</div>
           <div className="spin-stat-note">{t("dash.spin.stat.available.note")}</div>
         </div>
         <div className="card spin-stat-card">
+          <div className="spin-stat-label">{t("dash.spin.stat.cost.label")}</div>
+          <div className="spin-stat-value">{cost.toFixed(2)}</div>
+          <div className="spin-stat-note">{t("dash.spin.stat.cost.note")}</div>
+        </div>
+        <div className="card spin-stat-card">
           <div className="spin-stat-label">{t("dash.spin.stat.bestReward.label")}</div>
-          <div className="spin-stat-value">{t(BEST_REWARD.labelKey)}</div>
+          <div className="spin-stat-value">{prizes[0]?.name ?? "—"}</div>
           <div className="spin-stat-note">{t("dash.spin.stat.bestReward.note")}</div>
-        </div>
-        <div className="card spin-stat-card">
-          <div className="spin-stat-label">{t("dash.spin.stat.wallet.label")}</div>
-          <div className="spin-stat-value">
-            ${walletBalance.toFixed(2)} / ${WALLET_MIN_WITHDRAW.toFixed(2)}
-          </div>
-          <div className="spin-stat-note">{t("dash.spin.stat.wallet.note", { min: WALLET_MIN_WITHDRAW.toFixed(0) })}</div>
-          <button
-            type="button"
-            className={`btn ${walletBalance >= WALLET_MIN_WITHDRAW ? "btn-primary" : "btn-ghost"} spin-withdraw-btn`}
-            disabled={walletBalance < WALLET_MIN_WITHDRAW}
-            onClick={requestWithdrawal}
-          >
-            <Icon name="account_balance_wallet" style={{ fontSize: 15 }} />
-            {t("dash.spin.wallet.withdraw")}
-          </button>
-        </div>
-        <div className="card spin-stat-card">
-          <div className="spin-stat-label">{t("dash.spin.stat.bonusSpins.label")}</div>
-          <div className="spin-stat-value">{bonusSpins}</div>
-          <div className="spin-stat-note">{t("dash.spin.stat.bonusSpins.note")}</div>
         </div>
       </div>
 
@@ -309,11 +327,12 @@ export default function SpinWheelPage() {
         createPortal(
           <>
             <div className="modal-scrim spin-result-scrim show" onClick={closeResult} />
-            <div className="modal spin-result-modal show" role="dialog" aria-modal="true" aria-label={isTryAgain ? t("dash.spin.result.titleTryAgain") : t("dash.spin.result.title")}>
-              <div className="spin-result-emoji">{isTryAgain ? "😔" : "🎉"}</div>
-              <h3 className="spin-result-title">{isTryAgain ? t("dash.spin.result.titleTryAgain") : t("dash.spin.result.title")}</h3>
-              {!isTryAgain && <div className="spin-result-prize">{t(result.labelKey)}</div>}
-              <p className="spin-result-detail">{isTryAgain ? t("dash.spin.result.detailTryAgain") : t("dash.spin.result.detail")}</p>
+            <div className="modal spin-result-modal show" role="dialog" aria-modal="true" aria-label={t("dash.spin.result.title")}>
+              <div className="spin-result-emoji">🎉</div>
+              <h3 className="spin-result-title">{t("dash.spin.result.title")}</h3>
+              <div className="spin-result-prize">{result.name}</div>
+              {result.valueNote && <p className="spin-result-detail">{result.valueNote}</p>}
+              <p className="spin-result-detail">{t("dash.spin.result.detail")}</p>
               <button type="button" ref={modalBtnRef} className="btn btn-primary" onClick={closeResult}>
                 {t("dash.spin.result.continue")}
               </button>

@@ -1,32 +1,129 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useLanguage } from "../crm/LanguageContext";
-import { useCrm, fmtDate } from "../crm/CrmContext";
+import { useCrm, fmtDate, fmtDateTime, lot } from "../crm/CrmContext";
+import { apiCall } from "../../lib/crmApi";
 import Icon from "../Icon";
-import { competitionByKey, competitionLeaderboard, prizeForRank, PRIZE_POOL, PRIZE_TIERS, RULE_KEYS } from "../../lib/activities";
-
-// 12 placeholder portraits cycled by member id (or by rank, for the
-// anonymized ranks-11-to-20 rows that have no real member behind them) —
-// same local demo-avatar set used on the main Leaderboard page.
-const AVATAR_COUNT = 12;
-function avatarFor(id: number): string {
-  return `/img/avatars/avatar-${((id - 1) % AVATAR_COUNT) + 1}.png`;
-}
-
-const LB_PAGE_SIZE = 10;
+import { PRIZE_TIERS, RULE_KEYS, type AccountCheckResult, type ActivityDto, type ActivityLeaderboardRow, type ActivityStanding } from "../../lib/activities";
 
 export default function ActivityDetailView({ slug }: { slug: string }) {
   const { t } = useLanguage();
-  const { toast, members } = useCrm();
-  const [lbPage, setLbPage] = useState(1);
+  const { toast } = useCrm();
+  const [activity, setActivity] = useState<ActivityDto | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [tradeId, setTradeId] = useState("");
+  const [check, setCheck] = useState<AccountCheckResult | null>(null);
+  const [checking, setChecking] = useState(false);
+  const [confirmed, setConfirmed] = useState(false);
+  const [leaderboard, setLeaderboard] = useState<ActivityLeaderboardRow[]>([]);
+  const [me, setMe] = useState<ActivityStanding>(null);
+  const [updatedAt, setUpdatedAt] = useState<string | undefined>(undefined);
 
-  const competition = competitionByKey(slug);
-  if (!competition) {
+  const loadStandings = useCallback(async () => {
+    try {
+      const payload = await apiCall<{ leaderboard: ActivityLeaderboardRow[]; me: ActivityStanding; updatedAt?: string }>(
+        `/api/activities/${slug}/leaderboard/`,
+        "GET",
+      );
+      setLeaderboard(payload.leaderboard);
+      setMe(payload.me);
+      setUpdatedAt(payload.updatedAt);
+    } catch {
+      // Standings are informational — a failure must not hide the activity.
+    }
+  }, [slug]);
+
+  useEffect(() => {
+    let cancelled = false;
+    // Reset to the loading state when the slug changes.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setLoading(true);
+    apiCall<{ activity: ActivityDto }>(`/api/activities/${slug}/`, "GET")
+      .then((payload) => {
+        if (!cancelled) {
+          setActivity(payload.activity);
+          setError("");
+        }
+      })
+      .catch((loadError) => {
+        if (!cancelled) setError(loadError instanceof Error ? loadError.message : "Activity not found");
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => { cancelled = true; };
+  }, [slug]);
+
+  useEffect(() => {
+    // Standings load after mount and re-poll so the board tracks the latest
+    // score snapshots while the page is open.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    void loadStandings();
+    const timer = window.setInterval(() => void loadStandings(), 30_000);
+    return () => window.clearInterval(timer);
+  }, [loadStandings]);
+
+  async function checkAccount() {
+    if (!tradeId.trim()) return;
+    setChecking(true);
+    try {
+      const payload = await apiCall<AccountCheckResult & { ok: boolean }>(`/api/activities/${slug}/check-account/`, "POST", { tradeId: tradeId.trim() });
+      setCheck({ kind: payload.kind, allowed: payload.allowed, message: payload.message });
+    } catch (checkError) {
+      setCheck(null);
+      toast(checkError instanceof Error ? checkError.message : t("dash.activities.enrollFailed"));
+    } finally {
+      setChecking(false);
+    }
+  }
+
+  async function enroll() {
+    if (!tradeId.trim() || !confirmed || !check?.allowed) return;
+    setBusy(true);
+    try {
+      const payload = await apiCall<{ activity: ActivityDto }>(`/api/activities/${slug}/`, "POST", { tradeId: tradeId.trim() });
+      setActivity(payload.activity);
+      setConfirmed(false);
+      toast(t("dash.activities.enrollDone", { title: payload.activity.title }));
+      await loadStandings();
+    } catch (enrollError) {
+      toast(enrollError instanceof Error ? enrollError.message : t("dash.activities.enrollFailed"));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function cancelEnroll() {
+    if (!window.confirm(t("dash.activities.cancelConfirm"))) return;
+    setBusy(true);
+    try {
+      const payload = await apiCall<{ activity: ActivityDto }>(`/api/activities/${slug}/`, "DELETE");
+      setActivity(payload.activity);
+      toast(t("dash.activities.cancelDone"));
+      await loadStandings();
+    } catch (cancelError) {
+      toast(cancelError instanceof Error ? cancelError.message : t("dash.activities.enrollFailed"));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  if (loading) {
     return (
       <div className="card" style={{ padding: 24 }}>
-        <p>{t("dash.activities.empty")}</p>
+        <p className="modal-detail" style={{ textAlign: "left", margin: 0 }}>…</p>
+      </div>
+    );
+  }
+
+  if (error || !activity) {
+    return (
+      <div className="card" style={{ padding: 24 }}>
+        <p>{error || t("dash.activities.empty")}</p>
         <Link href="/dashboard/activities" className="btn btn-ghost" style={{ marginTop: 12 }}>
           {t("dash.activity.back")}
         </Link>
@@ -34,11 +131,7 @@ export default function ActivityDetailView({ slug }: { slug: string }) {
     );
   }
 
-  const monthName = t(`common.month.${competition.month}`);
-  const title = t("dash.activities.competitionTitle", { month: monthName, year: competition.year });
-  const leaderboardRows = competitionLeaderboard(competition);
-  const lbTotalPages = Math.max(1, Math.ceil(leaderboardRows.length / LB_PAGE_SIZE));
-  const lbPageRows = leaderboardRows.slice((lbPage - 1) * LB_PAGE_SIZE, lbPage * LB_PAGE_SIZE);
+  const rules = activity.rules.length ? activity.rules : RULE_KEYS.map((key) => t(key));
 
   return (
     <div>
@@ -50,38 +143,104 @@ export default function ActivityDetailView({ slug }: { slug: string }) {
       <div className="profile-grid activity-detail-grid">
         <div>
           <div className="card" style={{ padding: 0, overflow: "hidden" }}>
-            <div className="activity-detail-cover">
-              <span className={`comp-ribbon comp-ribbon-${competition.status}`}>
-                {competition.status === "upcoming" &&
-                  t("dash.activities.ribbon.upcoming", { start: fmtDate(competition.rangeStart), end: fmtDate(competition.rangeEnd) })}
-                {competition.status === "live" && t("dash.activities.liveBadge")}
-                {competition.status === "finished" && t("dash.activities.ribbon.finished", { date: fmtDate(competition.rangeEnd) })}
+            <div
+              className="activity-detail-cover"
+              style={activity.coverImage ? { backgroundImage: `url(${activity.coverImage})`, backgroundSize: "cover", backgroundPosition: "center" } : undefined}
+            >
+              <span className={`comp-ribbon comp-ribbon-${activity.status}`}>
+                {activity.status === "upcoming" &&
+                  t("dash.activities.ribbon.upcoming", { start: fmtDate(activity.startDate), end: fmtDate(activity.endDate) })}
+                {activity.status === "live" && t("dash.activities.liveBadge")}
+                {activity.status === "finished" && t("dash.activities.ribbon.finished", { date: fmtDate(activity.endDate) })}
               </span>
               <Icon name="emoji_events" className="activity-detail-cover-icon" />
             </div>
             <div className="activity-detail-body">
-              <h1 className="activity-detail-title">{title}</h1>
+              <h1 className="activity-detail-title">{activity.title}</h1>
               <div className="activity-detail-meta">
                 <span>
                   <Icon name="groups" style={{ fontSize: 15 }} />
-                  {t("dash.activities.traders", { n: competition.traders })}
+                  {t("dash.activities.traders", { n: activity.traders })}
                 </span>
                 <Link href="/dashboard/leaderboard">{t("dash.activities.leaderboard")}</Link>
               </div>
 
-              {competition.status === "upcoming" ? (
-                <button
-                  type="button"
-                  className="btn btn-primary"
-                  style={{ marginTop: 16, alignSelf: "flex-start" }}
-                  onClick={() => toast(t("dash.activities.enrollToast", { month: monthName }))}
-                >
-                  {t("dash.activities.enroll")}
-                  <Icon name="arrow_forward" style={{ fontSize: 15 }} />
-                </button>
-              ) : competition.status === "finished" ? (
+              {activity.description && (
+                <p className="comp-card-desc" style={{ marginTop: 12, whiteSpace: "pre-line" }}>
+                  {activity.description}
+                </p>
+              )}
+
+              {activity.status === "finished" ? (
                 <div className="activity-finished-note">{t("dash.activity.finishedNote")}</div>
-              ) : null}
+              ) : activity.enrolled ? (
+                <div style={{ marginTop: 16, display: "flex", flexDirection: "column", gap: 8 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+                    <span className="badge active">
+                      <Icon name="check_circle" style={{ fontSize: 14 }} />
+                      {t("dash.activities.enrolled")}
+                    </span>
+                    {me && (
+                      <span className={`badge ${me.verified ? "active" : "suspended"}`}>
+                        {me.verified ? t("act.participants.verified.yes") : t("act.participants.verified.pending")}
+                      </span>
+                    )}
+                    {me?.isDemo && <span className="badge pending">{t("act.participants.demo")}</span>}
+                    <button type="button" className="btn btn-ghost" disabled={busy} onClick={() => void cancelEnroll()}>
+                      {t("dash.activities.cancelEnroll")}
+                    </button>
+                  </div>
+                  {me && (
+                    <div style={{ fontSize: 13, color: "var(--text-sub)" }}>
+                      {t("dash.activities.myStanding", { rank: me.rank, lots: lot(me.lots) })}
+                      {me.verificationNote ? ` — ${me.verificationNote}` : ""}
+                    </div>
+                  )}
+                </div>
+              ) : !activity.registrationOpen ? (
+                <div className="activity-finished-note">
+                  {t("dash.activities.registrationSoon", { date: activity.registrationOpensAt ? fmtDate(activity.registrationOpensAt) : "—" })}
+                </div>
+              ) : (
+                <div style={{ marginTop: 16 }}>
+                  <div className="field" style={{ maxWidth: 340, marginBottom: 0 }}>
+                    <label>{t("dash.activities.demoAccount")}</label>
+                    <input
+                      className="input"
+                      value={tradeId}
+                      onChange={(e) => {
+                        setTradeId(e.target.value);
+                        setCheck(null);
+                      }}
+                      placeholder={t("dash.activities.demoAccountPlaceholder")}
+                      aria-label={t("dash.activities.demoAccount")}
+                    />
+                  </div>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 8, flexWrap: "wrap" }}>
+                    <button type="button" className="btn btn-ghost" disabled={checking || !tradeId.trim()} onClick={() => void checkAccount()}>
+                      {checking ? t("dash.activities.checking") : t("dash.activities.checkAccount")}
+                    </button>
+                    {check && <span className={`badge ${check.allowed ? "active" : "expired"}`}>{check.message}</span>}
+                  </div>
+                  <p style={{ fontSize: 12.5, color: "var(--text-sub)", margin: "8px 0 10px", maxWidth: 460 }}>
+                    {t("dash.activities.demoHint")}
+                  </p>
+                  <label style={{ display: "flex", alignItems: "flex-start", gap: 8, marginBottom: 12, maxWidth: 460 }}>
+                    <input type="checkbox" checked={confirmed} onChange={(e) => setConfirmed(e.target.checked)} style={{ marginTop: 3 }} />
+                    <span style={{ fontSize: 12.5 }}>{t("dash.activities.confirmAccount")}</span>
+                  </label>
+                  <button
+                    type="button"
+                    className="btn btn-primary"
+                    style={{ alignSelf: "flex-start" }}
+                    disabled={busy || !tradeId.trim() || !confirmed || !check?.allowed}
+                    onClick={() => void enroll()}
+                  >
+                    {busy ? t("dash.activities.enrolling") : t("dash.activities.enroll")}
+                    <Icon name="arrow_forward" style={{ fontSize: 15 }} />
+                  </button>
+                </div>
+              )}
             </div>
           </div>
 
@@ -110,7 +269,7 @@ export default function ActivityDetailView({ slug }: { slug: string }) {
             </div>
             <div className="drawer-row" style={{ marginTop: 4 }}>
               <span className="k">{t("dash.activity.prizePool.total")}</span>
-              <span className="v">${PRIZE_POOL.toFixed(2)}</span>
+              <span className="v">${activity.prizePool.toFixed(2)}</span>
             </div>
           </div>
 
@@ -128,72 +287,55 @@ export default function ActivityDetailView({ slug }: { slug: string }) {
                 {t("dash.activities.leaderboard")}
               </Link>
             </div>
-            {leaderboardRows.length === 0 ? (
-              <p className="comp-card-desc">{t("dash.activity.leaderboard.empty")}</p>
-            ) : (
+            {leaderboard.length ? (
               <>
-                <div className="activity-lb is-compact">
-                  <div className="activity-lb-row is-head">
-                    <span>{t("dash.leaderboard.colPlace")}</span>
-                    <span>{t("dash.leaderboard.colUsername")}</span>
-                    <span>{t("dash.activity.prizePool.reward")}</span>
-                  </div>
-                  {lbPageRows.map((row) => {
-                    const m = row.memberId != null ? members.find((mm) => mm.id === row.memberId) : undefined;
-                    const name = m?.name ?? t("dash.activity.leaderboard.anonTrader", { rank: row.rank });
-                    const prize = prizeForRank(row.rank);
-                    return (
-                      <div className="activity-lb-row" key={row.rank}>
-                        <span className="activity-lb-place">#{row.rank}</span>
-                        <span className="activity-lb-member">
-                          <span className="activity-lb-avatar">
-                            {/* eslint-disable-next-line @next/next/no-img-element -- static export, small local demo avatar */}
-                            <img src={avatarFor(row.memberId ?? row.rank)} alt={name} />
-                          </span>
-                          <span className="activity-lb-info">
-                            <span className="activity-lb-name">{name}</span>
-                            {m?.country && <span className="activity-lb-country">{m.country}</span>}
-                          </span>
-                        </span>
-                        <span style={{ color: prize ? "var(--green)" : "var(--text-sub)", fontWeight: prize ? 700 : 400 }}>
-                          {prize ? `$${prize.toFixed(2)}` : "—"}
-                        </span>
-                      </div>
-                    );
-                  })}
+                <div className="table-wrap">
+                  <table className="data">
+                    <thead>
+                      <tr>
+                        <th>#</th>
+                        <th>{t("act.participants.col.member")}</th>
+                        <th>{t("act.participants.col.lots")}</th>
+                        <th>{t("dash.activities.gapToLeader")}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {leaderboard.slice(0, 10).map((row) => {
+                        const leaderLots = leaderboard[0]?.lots ?? 0;
+                        const gap = Math.max(0, leaderLots - row.lots);
+                        return (
+                          <tr key={row.rank} style={row.isMe ? { background: "var(--bg-card2, rgba(0,0,0,0.03))" } : undefined}>
+                            <td className="mono">{row.rank}</td>
+                            <td>
+                              {row.memberName}
+                              {row.isMe ? ` · ${t("dash.activities.you")}` : ""}
+                            </td>
+                            <td className="mono">{lot(row.lots)}</td>
+                            <td className="mono">{gap > 0 ? `-${lot(gap)}` : "—"}</td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
                 </div>
-                {leaderboardRows.length > LB_PAGE_SIZE && (
-                  <div className="activity-lb-pagination">
-                    <button
-                      type="button"
-                      className="journal-cal-btn"
-                      disabled={lbPage === 1}
-                      onClick={() => setLbPage((p) => Math.max(1, p - 1))}
-                      aria-label={t("dash.activity.leaderboard.prevPage")}
-                    >
-                      <Icon name="chevron_left" />
-                    </button>
-                    <span className="activity-lb-page-label">{t("dash.activity.leaderboard.page", { page: lbPage, total: lbTotalPages })}</span>
-                    <button
-                      type="button"
-                      className="journal-cal-btn"
-                      disabled={lbPage === lbTotalPages}
-                      onClick={() => setLbPage((p) => Math.min(lbTotalPages, p + 1))}
-                      aria-label={t("dash.activity.leaderboard.nextPage")}
-                    >
-                      <Icon name="chevron_right" />
-                    </button>
-                  </div>
+                {updatedAt && (
+                  <p style={{ fontSize: 12, color: "var(--text-sub)", marginTop: 10 }}>
+                    {t("dash.activities.updatedAt", { when: fmtDateTime(updatedAt) })}
+                  </p>
                 )}
               </>
+            ) : (
+              <p className="comp-card-desc">
+                {activity.status === "upcoming" ? t("dash.activity.leaderboard.empty") : t("dash.activity.leaderboard.unavailable")}
+              </p>
             )}
           </div>
 
           <div className="card" style={{ padding: 24 }}>
             <div className="panel-section-title">{t("dash.activity.rules.title")}</div>
             <ul className="activity-rules-list">
-              {RULE_KEYS.map((key) => (
-                <li key={key}>{t(key)}</li>
+              {rules.map((rule, index) => (
+                <li key={index}>{rule}</li>
               ))}
             </ul>
           </div>

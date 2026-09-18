@@ -1,10 +1,13 @@
 import { NextResponse } from "next/server";
 import { getPrisma, isDatabaseConfigured } from "@/lib/server/prisma";
 import { toTelegramAccessDto } from "@/lib/server/crmDtos";
+import { adminGuard } from "@/lib/session";
 
 export const dynamic = "force-dynamic";
 
 export async function GET() {
+  const guard = await adminGuard();
+  if (!guard.ok) return guard.response;
   if (!isDatabaseConfigured()) return NextResponse.json({ ok: false, error: "DATABASE_URL is not configured" }, { status: 503 });
   try {
     const records = await getPrisma().telegramAccess.findMany({ orderBy: { id: "asc" } });

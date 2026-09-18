@@ -65,7 +65,17 @@ export const ModelName = {
   LotCheckResult: 'LotCheckResult',
   ActivityLog: 'ActivityLog',
   Admin: 'Admin',
-  SystemSetting: 'SystemSetting'
+  SystemSetting: 'SystemSetting',
+  Activity: 'Activity',
+  ActivityEnrollment: 'ActivityEnrollment',
+  BecRate: 'BecRate',
+  SpinPrize: 'SpinPrize',
+  BecGrant: 'BecGrant',
+  SpinResult: 'SpinResult',
+  Course: 'Course',
+  CourseLesson: 'CourseLesson',
+  CourseEnrollment: 'CourseEnrollment',
+  LessonProgress: 'LessonProgress'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -92,6 +102,8 @@ export const MemberScalarFieldEnum = {
   displayName: 'displayName',
   avatarUrl: 'avatarUrl',
   email: 'email',
+  passwordHash: 'passwordHash',
+  identityVerifiedAt: 'identityVerifiedAt',
   phone: 'phone',
   country: 'country',
   address: 'address',
@@ -153,6 +165,7 @@ export const TradeAccountScalarFieldEnum = {
   partnerIb: 'partnerIb',
   verification: 'verification',
   status: 'status',
+  memberConfirmed: 'memberConfirmed',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   lastSyncAt: 'lastSyncAt'
@@ -228,6 +241,8 @@ export const RenewalRecordScalarFieldEnum = {
   qualifiedLots: 'qualifiedLots',
   requiredLots: 'requiredLots',
   renewed: 'renewed',
+  origin: 'origin',
+  note: 'note',
   oldExpiry: 'oldExpiry',
   newExpiry: 'newExpiry',
   createdAt: 'createdAt'
@@ -322,6 +337,163 @@ export const SystemSettingScalarFieldEnum = {
 export type SystemSettingScalarFieldEnum = (typeof SystemSettingScalarFieldEnum)[keyof typeof SystemSettingScalarFieldEnum]
 
 
+export const ActivityScalarFieldEnum = {
+  id: 'id',
+  slug: 'slug',
+  title: 'title',
+  description: 'description',
+  status: 'status',
+  startDate: 'startDate',
+  endDate: 'endDate',
+  traders: 'traders',
+  prizePool: 'prizePool',
+  coverImage: 'coverImage',
+  visibleFrom: 'visibleFrom',
+  registrationOpensAt: 'registrationOpensAt',
+  rules: 'rules',
+  sortOrder: 'sortOrder',
+  published: 'published',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ActivityScalarFieldEnum = (typeof ActivityScalarFieldEnum)[keyof typeof ActivityScalarFieldEnum]
+
+
+export const ActivityEnrollmentScalarFieldEnum = {
+  id: 'id',
+  activityId: 'activityId',
+  memberId: 'memberId',
+  tradeAccountId: 'tradeAccountId',
+  tradeId: 'tradeId',
+  isDemo: 'isDemo',
+  verifiedAt: 'verifiedAt',
+  verificationNote: 'verificationNote',
+  lots: 'lots',
+  lotsAt: 'lotsAt',
+  lotsFrom: 'lotsFrom',
+  lotsTo: 'lotsTo',
+  checkError: 'checkError',
+  createdAt: 'createdAt'
+} as const
+
+export type ActivityEnrollmentScalarFieldEnum = (typeof ActivityEnrollmentScalarFieldEnum)[keyof typeof ActivityEnrollmentScalarFieldEnum]
+
+
+export const BecRateScalarFieldEnum = {
+  id: 'id',
+  symbol: 'symbol',
+  pointsPerLot: 'pointsPerLot',
+  active: 'active',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type BecRateScalarFieldEnum = (typeof BecRateScalarFieldEnum)[keyof typeof BecRateScalarFieldEnum]
+
+
+export const SpinPrizeScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  icon: 'icon',
+  image: 'image',
+  weight: 'weight',
+  stock: 'stock',
+  valueNote: 'valueNote',
+  active: 'active',
+  sortOrder: 'sortOrder',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type SpinPrizeScalarFieldEnum = (typeof SpinPrizeScalarFieldEnum)[keyof typeof SpinPrizeScalarFieldEnum]
+
+
+export const BecGrantScalarFieldEnum = {
+  id: 'id',
+  memberId: 'memberId',
+  lots: 'lots',
+  points: 'points',
+  note: 'note',
+  createdAt: 'createdAt'
+} as const
+
+export type BecGrantScalarFieldEnum = (typeof BecGrantScalarFieldEnum)[keyof typeof BecGrantScalarFieldEnum]
+
+
+export const SpinResultScalarFieldEnum = {
+  id: 'id',
+  memberId: 'memberId',
+  prizeId: 'prizeId',
+  cost: 'cost',
+  status: 'status',
+  spunAt: 'spunAt',
+  fulfilledAt: 'fulfilledAt',
+  note: 'note'
+} as const
+
+export type SpinResultScalarFieldEnum = (typeof SpinResultScalarFieldEnum)[keyof typeof SpinResultScalarFieldEnum]
+
+
+export const CourseScalarFieldEnum = {
+  id: 'id',
+  slug: 'slug',
+  title: 'title',
+  description: 'description',
+  category: 'category',
+  level: 'level',
+  minLevel: 'minLevel',
+  coverImage: 'coverImage',
+  instructor: 'instructor',
+  durationMin: 'durationMin',
+  published: 'published',
+  sortOrder: 'sortOrder',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type CourseScalarFieldEnum = (typeof CourseScalarFieldEnum)[keyof typeof CourseScalarFieldEnum]
+
+
+export const CourseLessonScalarFieldEnum = {
+  id: 'id',
+  courseId: 'courseId',
+  title: 'title',
+  sectionTitle: 'sectionTitle',
+  videoId: 'videoId',
+  videoStart: 'videoStart',
+  videoEnd: 'videoEnd',
+  durationMin: 'durationMin',
+  script: 'script',
+  sortOrder: 'sortOrder',
+  isPreview: 'isPreview',
+  createdAt: 'createdAt'
+} as const
+
+export type CourseLessonScalarFieldEnum = (typeof CourseLessonScalarFieldEnum)[keyof typeof CourseLessonScalarFieldEnum]
+
+
+export const CourseEnrollmentScalarFieldEnum = {
+  id: 'id',
+  courseId: 'courseId',
+  memberId: 'memberId',
+  startedAt: 'startedAt',
+  completedAt: 'completedAt'
+} as const
+
+export type CourseEnrollmentScalarFieldEnum = (typeof CourseEnrollmentScalarFieldEnum)[keyof typeof CourseEnrollmentScalarFieldEnum]
+
+
+export const LessonProgressScalarFieldEnum = {
+  id: 'id',
+  lessonId: 'lessonId',
+  memberId: 'memberId',
+  completedAt: 'completedAt'
+} as const
+
+export type LessonProgressScalarFieldEnum = (typeof LessonProgressScalarFieldEnum)[keyof typeof LessonProgressScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -345,6 +517,7 @@ export const MemberOrderByRelevanceFieldEnum = {
   displayName: 'displayName',
   avatarUrl: 'avatarUrl',
   email: 'email',
+  passwordHash: 'passwordHash',
   phone: 'phone',
   country: 'country',
   address: 'address',
@@ -407,7 +580,9 @@ export type IndicatorOrderByRelevanceFieldEnum = (typeof IndicatorOrderByRelevan
 
 
 export const RenewalRecordOrderByRelevanceFieldEnum = {
-  period: 'period'
+  period: 'period',
+  origin: 'origin',
+  note: 'note'
 } as const
 
 export type RenewalRecordOrderByRelevanceFieldEnum = (typeof RenewalRecordOrderByRelevanceFieldEnum)[keyof typeof RenewalRecordOrderByRelevanceFieldEnum]
@@ -466,4 +641,77 @@ export const SystemSettingOrderByRelevanceFieldEnum = {
 } as const
 
 export type SystemSettingOrderByRelevanceFieldEnum = (typeof SystemSettingOrderByRelevanceFieldEnum)[keyof typeof SystemSettingOrderByRelevanceFieldEnum]
+
+
+export const ActivityOrderByRelevanceFieldEnum = {
+  slug: 'slug',
+  title: 'title',
+  description: 'description',
+  coverImage: 'coverImage',
+  rules: 'rules'
+} as const
+
+export type ActivityOrderByRelevanceFieldEnum = (typeof ActivityOrderByRelevanceFieldEnum)[keyof typeof ActivityOrderByRelevanceFieldEnum]
+
+
+export const ActivityEnrollmentOrderByRelevanceFieldEnum = {
+  tradeId: 'tradeId',
+  verificationNote: 'verificationNote',
+  checkError: 'checkError'
+} as const
+
+export type ActivityEnrollmentOrderByRelevanceFieldEnum = (typeof ActivityEnrollmentOrderByRelevanceFieldEnum)[keyof typeof ActivityEnrollmentOrderByRelevanceFieldEnum]
+
+
+export const BecRateOrderByRelevanceFieldEnum = {
+  symbol: 'symbol'
+} as const
+
+export type BecRateOrderByRelevanceFieldEnum = (typeof BecRateOrderByRelevanceFieldEnum)[keyof typeof BecRateOrderByRelevanceFieldEnum]
+
+
+export const SpinPrizeOrderByRelevanceFieldEnum = {
+  name: 'name',
+  icon: 'icon',
+  image: 'image',
+  valueNote: 'valueNote'
+} as const
+
+export type SpinPrizeOrderByRelevanceFieldEnum = (typeof SpinPrizeOrderByRelevanceFieldEnum)[keyof typeof SpinPrizeOrderByRelevanceFieldEnum]
+
+
+export const BecGrantOrderByRelevanceFieldEnum = {
+  note: 'note'
+} as const
+
+export type BecGrantOrderByRelevanceFieldEnum = (typeof BecGrantOrderByRelevanceFieldEnum)[keyof typeof BecGrantOrderByRelevanceFieldEnum]
+
+
+export const SpinResultOrderByRelevanceFieldEnum = {
+  note: 'note'
+} as const
+
+export type SpinResultOrderByRelevanceFieldEnum = (typeof SpinResultOrderByRelevanceFieldEnum)[keyof typeof SpinResultOrderByRelevanceFieldEnum]
+
+
+export const CourseOrderByRelevanceFieldEnum = {
+  slug: 'slug',
+  title: 'title',
+  description: 'description',
+  category: 'category',
+  coverImage: 'coverImage',
+  instructor: 'instructor'
+} as const
+
+export type CourseOrderByRelevanceFieldEnum = (typeof CourseOrderByRelevanceFieldEnum)[keyof typeof CourseOrderByRelevanceFieldEnum]
+
+
+export const CourseLessonOrderByRelevanceFieldEnum = {
+  title: 'title',
+  sectionTitle: 'sectionTitle',
+  videoId: 'videoId',
+  script: 'script'
+} as const
+
+export type CourseLessonOrderByRelevanceFieldEnum = (typeof CourseLessonOrderByRelevanceFieldEnum)[keyof typeof CourseLessonOrderByRelevanceFieldEnum]
 

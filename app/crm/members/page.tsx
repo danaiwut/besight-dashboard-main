@@ -1,6 +1,6 @@
 "use client";
 
-import { Fragment, useEffect, useMemo, useRef, useState } from "react";
+import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   useCrm,
@@ -34,13 +34,15 @@ import Drawer from "../../../components/crm/Drawer";
 import MemberForm from "../../../components/crm/MemberForm";
 import DateRangePicker from "../../../components/crm/DateRangePicker";
 import Pagination from "../../../components/crm/Pagination";
+import { apiCall } from "../../../lib/crmApi";
 import { exportCsv } from "../../../lib/exportCsv";
+import { MEMBER_LEVEL_LABEL_KEYS, PREMIUM_MONTHS, levelFromMonthlyLots, recentMonthKeys, type MemberLevel } from "../../../lib/memberLevel";
 
 type DrawerMode = { kind: "form"; member: Member | null } | null;
 const PAGE_SIZE = 50;
 
 export default function MembersPage() {
-  const { members, tradeAccounts, tradeLogs, indicatorAccess, brokers, settings, toast, memberSyncStatus, memberSyncError, refreshMembers, crmDataStatus } = useCrm();
+  const { members, tradeAccounts, tradeLogs, indicatorAccess, brokers, settings, toast, memberSyncStatus, memberSyncError, refreshMembers, crmDataStatus, reloadFromDatabase, lotSummaries, lotOverview, backendLive } = useCrm();
   const { t } = useLanguage();
   const router = useRouter();
   const [statusFilter, setStatusFilter] = useState("all");
@@ -54,10 +56,13 @@ export default function MembersPage() {
   const [lookupBroker, setLookupBroker] = useState(() => String(brokers.find((b) => b.name === "XM")?.id ?? "all"));
   const [lookupQuery, setLookupQuery] = useState("");
   const [lookupResult, setLookupResult] = useState<"idle" | "not_found" | number>("idle");
+  const [webhookPreview, setWebhookPreview] = useState<null | { loading: boolean; lots?: number; message?: string; verification?: string; error?: string }>(null);
   const [page, setPage] = useState(1);
   const [sortKey, setSortKey] = useState<"lots" | "startDate" | "expiryDate" | null>(null);
   const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
   const [filtersOpen, setFiltersOpen] = useState(false);
+  const [lotRefreshBusy, setLotRefreshBusy] = useState(false);
+  const staleLotsChecked = useRef(false);
   const formRef = useRef<{ save: () => void }>(null);
   const filtersRef = useRef<HTMLDivElement>(null);
 
@@ -77,13 +82,90 @@ export default function MembersPage() {
     };
   }, [filtersOpen]);
 
+  /** Recomputes lot snapshots for members whose entitlement window moved since
+   *  they were stamped, so the list shows the current period's real lots. */
+  const refreshStaleLots = useCallback(async (silent = false) => {
+    setLotRefreshBusy(true);
+    try {
+      const payload = await apiCall<{ refreshed: number; stale: number; remaining: number }>("/api/crm/members/lots/refresh-stale/", "POST");
+      if (payload.refreshed > 0) {
+        await reloadFromDatabase();
+        if (!silent) toast(t("members.lotsRefreshed", { n: payload.refreshed }));
+      } else if (!silent) {
+        toast(t("members.lotsUpToDate"));
+      }
+    } catch (error) {
+      if (!silent) toast(error instanceof Error ? error.message : "Unable to refresh lots");
+    } finally {
+      setLotRefreshBusy(false);
+    }
+  }, [reloadFromDatabase, t, toast]);
+
+  useEffect(() => {
+    if (crmDataStatus !== "ready" || staleLotsChecked.current) return;
+    staleLotsChecked.current = true;
+    void refreshStaleLots(true);
+  }, [crmDataStatus, refreshStaleLots]);
+
+  const snapshotStale = (m: Member) => lotSummaries[m.id]?.stale ?? Boolean(m.crmStartDate && m.crmExpiryDate && (m.currentPeriodLotsFrom !== m.crmStartDate || m.currentPeriodLotsTo !== m.crmExpiryDate));
+
+  /** Snapshot-only lots from the server (current cycle, no webhooks). Falls
+   *  back to local ledger math in demo mode when summaries are absent. */
+  const summaryLots = (m: Member): number =>
+    lotSummaries[m.id]?.lots ?? memberLots(m, tradeAccounts, tradeLogs, settings, memberLotRange(m));
+  const summaryRequired = (m: Member): number =>
+    lotSummaries[m.id]?.required ?? requiredLotsFor(m, settings);
+
   const accessOf = (memberId: number) => primaryIndicatorAccess(memberId, indicatorAccess);
+
+  /** Member level (basic/standard/premium) from the CRM's monthly lot totals —
+   *  same rule the course level gate uses, computed once for the whole page. */
+  const memberLevels = useMemo(() => {
+    const months = recentMonthKeys(PREMIUM_MONTHS);
+    const byMember = new Map<number, Record<string, number>>();
+    for (const log of tradeLogs) {
+      const key = log.tradeDate.slice(0, 7);
+      if (!months.includes(key)) continue;
+      let monthly = byMember.get(log.memberId);
+      if (!monthly) {
+        monthly = {};
+        byMember.set(log.memberId, monthly);
+      }
+      monthly[key] = (monthly[key] ?? 0) + log.lots;
+    }
+    const map = new Map<number, MemberLevel>();
+    for (const member of members) {
+      map.set(member.id, levelFromMonthlyLots(byMember.get(member.id) ?? {}, requiredLotsFor(member, settings), months));
+    }
+    return map;
+  }, [members, tradeLogs, settings]);
 
   function lookupTradeId() {
     const q = lookupQuery.trim().toLowerCase();
     if (!q) return;
     const found = tradeAccounts.find((a) => a.tradeId.toLowerCase() === q && (lookupBroker === "all" || a.brokerId === Number(lookupBroker)));
     setLookupResult(found ? found.id : "not_found");
+    setWebhookPreview(null);
+  }
+
+  /** Live webhook preview for a Trade ID with no local row — answers "has this
+   *  ID ever traded?" without persisting anything. */
+  async function checkWebhook() {
+    const q = lookupQuery.trim();
+    if (!q || webhookPreview?.loading) return;
+    setWebhookPreview({ loading: true });
+    try {
+      const response = await fetch("/api/crm/trade-accounts/verify/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ tradeId: q }),
+      });
+      const payload = await response.json() as { ok?: boolean; error?: string; verification?: string; totalLots?: number; message?: string };
+      if (!response.ok || !payload.ok) throw new Error(payload.error || "ตรวจ webhook ไม่สำเร็จ");
+      setWebhookPreview({ loading: false, lots: payload.totalLots ?? 0, message: payload.message, verification: payload.verification });
+    } catch (error) {
+      setWebhookPreview({ loading: false, error: error instanceof Error ? error.message : "ตรวจ webhook ไม่สำเร็จ" });
+    }
   }
 
   const lookupAccount = typeof lookupResult === "number" ? tradeAccounts.find((a) => a.id === lookupResult) ?? null : null;
@@ -109,14 +191,16 @@ export default function MembersPage() {
   }
 
   const qualificationCounts = useMemo(() => {
+    // Server-computed overview (snapshot-only, current cycle) — no per-row
+    // ledger scan on every render. Falls back to local math in demo mode.
+    if (lotOverview) return { qualified: lotOverview.qualified, notQualified: lotOverview.notQualified };
     let qualified = 0;
     for (const m of members) {
-      const lots = memberLots(m, tradeAccounts, tradeLogs, settings, memberLotRange(m));
-      const required = requiredLotsFor(m, settings);
-      if (qualification(lots, required) === "qualified") qualified++;
+      if (qualification(summaryLots(m), summaryRequired(m)) === "qualified") qualified++;
     }
     return { qualified, notQualified: members.length - qualified };
-  }, [members, tradeAccounts, tradeLogs, settings]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [members, lotOverview, lotSummaries, tradeAccounts, tradeLogs, settings]);
 
   const list = useMemo(() => {
     const q = query.toLowerCase();
@@ -130,20 +214,29 @@ export default function MembersPage() {
       .filter((m) => stageFilter === "all" || customerStage(m, indicatorAccess) === stageFilter)
       .filter((m) => !dateRange.from || m.joinedDate >= dateRange.from)
       .filter((m) => !dateRange.to || m.joinedDate <= dateRange.to)
-      .filter((m) => !q || (m.name + " " + m.email + " " + m.tv + " " + (m.telegramUsername ?? "") + " " + m.code).toLowerCase().includes(q));
+      .filter((m) => {
+        if (!q) return true;
+        // Search every column the table shows — including each Trade ID, so
+        // pasting an account number finds its member.
+        const haystack = [
+          m.name, m.email, m.tv, m.telegramUsername ?? "", m.code, m.phone ?? "", m.country ?? "",
+          ...memberTradeAccounts(m.id, tradeAccounts).map((account) => account.tradeId),
+        ].join(" ").toLowerCase();
+        return haystack.includes(q);
+      });
 
     if (!sortKey) return filtered;
     const dir = sortDir === "asc" ? 1 : -1;
     return [...filtered].sort((a, b) => {
       if (sortKey === "lots") {
-        return (memberLots(a, tradeAccounts, tradeLogs, settings, memberLotRange(a)) - memberLots(b, tradeAccounts, tradeLogs, settings, memberLotRange(b))) * dir;
+        return (summaryLots(a) - summaryLots(b)) * dir;
       }
       const av = (sortKey === "startDate" ? accessOf(a.id)?.startDate ?? a.crmStartDate : accessOf(a.id)?.expiryDate ?? a.crmExpiryDate) ?? "";
       const bv = (sortKey === "startDate" ? accessOf(b.id)?.startDate ?? b.crmStartDate : accessOf(b.id)?.expiryDate ?? b.crmExpiryDate) ?? "";
       return av.localeCompare(bv) * dir;
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [members, statusFilter, brokerFilter, planFilter, stageFilter, dateRange, query, tradeAccounts, tradeLogs, indicatorAccess, settings, sortKey, sortDir]);
+  }, [members, statusFilter, brokerFilter, planFilter, stageFilter, dateRange, query, tradeAccounts, tradeLogs, indicatorAccess, settings, lotSummaries, sortKey, sortDir]);
 
   const paged = list.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
@@ -184,7 +277,7 @@ export default function MembersPage() {
       const base = [m.code, m.name, m.email, m.phone, m.country ?? "", PLAN_LABELS[m.plan]];
       const tail = [
         m.tv, m.telegramUsername ?? "",
-        access?.indicator ?? "", memberLots(m, tradeAccounts, tradeLogs, settings, memberLotRange(m)), requiredLotsFor(m, settings),
+        access?.indicator ?? "", summaryLots(m), summaryRequired(m),
         accessLabel(access, settings), fmtDate(access?.startDate ?? m.crmStartDate), fmtDate(access?.expiryDate ?? m.crmExpiryDate), fmtDate(m.joinedDate),
         m.channels?.map((c) => ACQUISITION_CHANNEL_LABELS[c]).join(" / ") ?? "",
       ];
@@ -213,13 +306,22 @@ export default function MembersPage() {
           <strong>{memberSyncStatus === "live" ? "ข้อมูลสมาชิกจาก CRM" : memberSyncStatus === "loading" ? "กำลังซิงก์ข้อมูลสมาชิก" : memberSyncStatus === "error" ? "ยังใช้ข้อมูลตัวอย่างอยู่" : "ข้อมูลสมาชิก"}</strong>
           <span>{memberSyncStatus === "live" ? `ซิงก์แล้ว ${members.length.toLocaleString()} คน` : memberSyncStatus === "error" ? memberSyncError : "กำลังเชื่อมต่อ CRM"}</span>
         </div>
+        <button
+          className="kebab"
+          aria-label={t("members.refreshLotsBtn")}
+          title={t("members.refreshLotsBtn")}
+          onClick={() => void refreshStaleLots()}
+          disabled={lotRefreshBusy}
+        >
+          <Icon name="speed" />
+        </button>
         <button className="kebab" aria-label="ซิงก์ข้อมูลสมาชิกใหม่" title="ซิงก์ข้อมูลสมาชิกใหม่" onClick={() => void refreshMembers()} disabled={memberSyncStatus === "loading"}>
           <Icon name="sync" />
         </button>
       </div>
       <div className="stat-grid cols-3">
         <div className="stat-card">
-          <div className="value">{settings.requiredLots.toFixed(2)}</div>
+          <div className="value">{(lotOverview?.requiredLots ?? settings.requiredLots).toFixed(2)}</div>
           <div className="label">{t("lm.requiredLotsCard")}</div>
         </div>
         <div className="stat-card">
@@ -239,7 +341,7 @@ export default function MembersPage() {
             className="filter-select lookup-broker-select"
             aria-label={t("members.allBrokers")}
             value={lookupBroker}
-            onChange={(e) => { setLookupBroker(e.target.value); setLookupResult("idle"); }}
+            onChange={(e) => { setLookupBroker(e.target.value); setLookupResult("idle"); setWebhookPreview(null); }}
           >
             <option value="all">{t("members.allBrokers")}</option>
             {brokers.map((b) => (
@@ -254,7 +356,7 @@ export default function MembersPage() {
               style={{ flex: 1, minWidth: 0 }}
               placeholder={t("members.lookup.placeholder")}
               value={lookupQuery}
-              onChange={(e) => { setLookupQuery(e.target.value); setLookupResult("idle"); }}
+              onChange={(e) => { setLookupQuery(e.target.value); setLookupResult("idle"); setWebhookPreview(null); }}
               onKeyDown={(e) => { if (e.key === "Enter") lookupTradeId(); }}
             />
             <button className="btn btn-primary" style={{ flexShrink: 0 }} aria-label={t("members.lookup.check")} onClick={lookupTradeId}>
@@ -263,7 +365,19 @@ export default function MembersPage() {
           </div>
         </div>
         {lookupResult === "not_found" && (
-          <div style={{ marginTop: 12, fontSize: 13, color: "var(--text-sub)" }}>{t("members.lookup.notFound")}</div>
+          <div style={{ marginTop: 12, fontSize: 13, color: "var(--text-sub)" }}>
+            <div>{t("members.lookup.notFound")}</div>
+            <div style={{ marginTop: 6, fontSize: 12.5 }}>{t("members.lookup.webhookHint")}</div>
+            <button className="btn btn-ghost" style={{ marginTop: 8, padding: "6px 12px" }} onClick={() => void checkWebhook()} disabled={webhookPreview?.loading || !backendLive}>
+              <Icon name="query_stats" />
+              {webhookPreview?.loading ? t("members.lookup.checkingWebhook") : t("members.lookup.checkWebhook")}
+            </button>
+            {webhookPreview && !webhookPreview.loading && (
+              <div style={{ marginTop: 8, fontSize: 13, color: "var(--text)" }}>
+                {webhookPreview.error ?? `${webhookPreview.message} (${lot(webhookPreview.lots ?? 0)} lots)`}
+              </div>
+            )}
+          </div>
         )}
         {lookupAccount && (
           <div
@@ -407,8 +521,8 @@ export default function MembersPage() {
                   const isOpen = expanded.has(m.id);
                   const access = accessOf(m.id);
                   const label = accessLabel(access, settings);
-                  const lots = memberLots(m, tradeAccounts, tradeLogs, settings, memberLotRange(m));
-                  const required = requiredLotsFor(m, settings);
+                  const lots = summaryLots(m);
+                  const required = summaryRequired(m);
                   const stage = customerStage(m, indicatorAccess);
                   const primaryBroker = accts[0] ? brokers.find((b) => b.id === accts[0].brokerId)?.name ?? "—" : "—";
                   return (
@@ -428,6 +542,10 @@ export default function MembersPage() {
                           <br />
                           <span className={`badge ${customerStageBadgeClass(stage)}`} style={{ marginTop: 6 }}>
                             {t(`members.stage.${stage}`)}
+                          </span>
+                          <br />
+                          <span className={`badge ${memberLevels.get(m.id) === "premium" ? "active" : memberLevels.get(m.id) === "standard" ? "pending" : "suspended"}`} style={{ marginTop: 6 }}>
+                            {t(MEMBER_LEVEL_LABEL_KEYS[memberLevels.get(m.id) ?? "basic"])}
                           </span>
                         </td>
                         <td className="mono">{m.phone || "—"}</td>
@@ -463,9 +581,15 @@ export default function MembersPage() {
                           )}
                         </td>
                         <td>
-                          <span className={`lots ${lots >= required ? "met" : "risk"}`}>
+                          <span className={`lots ${lots >= required ? "met" : "risk"}`} title={snapshotStale(m) ? t("members.lotsStale") : undefined}>
                             {lot(lots)}
                             <span className="req">/ {lot(required)}</span>
+                            {snapshotStale(m) && (
+                              <span className="badge pending" style={{ marginLeft: 6 }}>
+                                <Icon name="schedule" style={{ fontSize: 12 }} />
+                                {t("members.lotsStaleBadge")}
+                              </span>
+                            )}
                             {m.requiredLotsOverride != null && (
                               <span className="badge suspended" style={{ marginLeft: 6 }} title={m.requiredLotsOverrideNote || undefined}>
                                 {t("members.customTarget")}

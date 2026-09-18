@@ -64,6 +64,12 @@ model Member {
   displayName              String?                    @db.VarChar(191)
   avatarUrl                String?                    @db.Text
   email                    String?                    @unique @db.VarChar(191)
+  /** scrypt hash for email/password sign-in (null = social-login only). */
+  passwordHash             String?                    @db.VarChar(255)
+  /** When the member last passed the identity check (TradingView + email vs
+   *  the CRM-synced record). Once set, the dashboard stops asking them to
+   *  verify again — the check is only needed to claim/add a trade account. */
+  identityVerifiedAt       DateTime?
   phone                    String?                    @db.VarChar(64)
   country                  String?                    @db.VarChar(96)
   address                  String?                    @db.Text
@@ -99,6 +105,11 @@ model Member {
   renewalHistory           RenewalRecord[]
   activityLogs             ActivityLog[]
   lotCheckRuns             LotCheckRun[]
+  activityEnrollments      ActivityEnrollment[]
+  spinResults              SpinResult[]
+  courseEnrollments        CourseEnrollment[]
+  lessonProgress           LessonProgress[]
+  becGrants                BecGrant[]
 
   @@index([joinedAt])
   @@index([plan])
@@ -136,6 +147,11 @@ model TradeAccount {
   partnerIb         String?            @db.VarChar(96)
   verification      VerificationStatus @default(pending)
   status            RecordStatus       @default(active)
+  /** Whether the MEMBER has confirmed this account is theirs. Accounts created
+   *  by the CRM sync start false and stay hidden from the customer dashboard
+   *  until the member claims them; self-added accounts are true from the start.
+   *  The CRM always sees every account regardless. */
+  memberConfirmed   Boolean            @default(false)
   createdAt         DateTime           @default(now())
   updatedAt         DateTime           @updatedAt
   lastSyncAt        DateTime?
@@ -144,6 +160,7 @@ model TradeAccount {
   primaryForMembers Member[]           @relation("PrimaryTradeAccount")
   tradeLogs         TradeLog[]
   lotCheckRuns      LotCheckRun[]
+  activityEnrollments ActivityEnrollment[]
 
   @@index([brokerId, tradeId])
   @@index([memberId, tradeId])
@@ -222,6 +239,10 @@ model RenewalRecord {
   qualifiedLots     Decimal                @db.Decimal(18, 8)
   requiredLots      Decimal                @db.Decimal(18, 8)
   renewed           Boolean
+  /** Who performed it: lot-check automation/cron (`auto`) or an admin action
+   *  such as Grant/Extend (`manual`). Pre-existing rows are all automation. */
+  origin            String                 @default("auto") @db.VarChar(16)
+  note              String?                @db.Text
   oldExpiry         DateTime?
   newExpiry         DateTime?
   createdAt         DateTime               @default(now())
@@ -317,4 +338,254 @@ model SystemSetting {
   valueJson   String   @db.Text
   description String?  @db.Text
   updatedAt   DateTime @updatedAt
+}
+
+enum ActivityStatus {
+  upcoming
+  live
+  finished
+}
+
+/** Customer-facing activity / monthly trading competition (the /dashboard/activities
+ *  feature). Distinct from ActivityLog, which is the admin audit trail. Managed
+ *  by admins in the CRM; the customer dashboard reads published rows only. */
+model Activity {
+  id          Int            @id @default(autoincrement())
+  slug        String         @unique @db.VarChar(64)
+  title       String         @db.VarChar(191)
+  description String?        @db.Text
+  status      ActivityStatus @default(upcoming)
+  startDate   DateTime
+  endDate     DateTime
+  traders     Int            @default(0)
+  prizePool   Decimal        @default(0) @db.Decimal(12, 2)
+  /** Cover image — a URL or data URL, stored whole so no file storage is needed. */
+  coverImage  String?        @db.Text
+  /** When customers first see the activity (null = as soon as it's published). */
+  visibleFrom DateTime?
+  /** When registration opens (null = immediately). */
+  registrationOpensAt DateTime?
+  /** One rule per line — the customer detail page renders them as a list. */
+  rules       String?        @db.Text
+  /** Manual ordering; lower shows first. Ties fall back to startDate desc. */
+  sortOrder   Int            @default(0)
+  published   Boolean        @default(true)
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  enrollments ActivityEnrollment[]
+
+  @@index([published, status, startDate])
+}
+
+/** One member's registration for one activity (competition). A member joins at
+ *  most once per activity; admins can remove a registration in the CRM. The
+ *  displayed "traders" count is the number of these rows, never a hand-typed
+ *  number. */
+model ActivityEnrollment {
+  id             Int           @id @default(autoincrement())
+  activityId     Int
+  memberId       Int
+  /** The competition account the member registered with — usually their own
+   *  verified XM account (then `tradeAccountId` points at the CRM row), but a
+   *  demo account declared for the competition is kept here too (snapshot of
+   *  `tradeId` survives the CRM account later being unlinked). */
+  tradeAccountId Int?
+  tradeId        String?       @db.VarChar(64)
+  /** Declared by the member at registration; demo accounts need their own lot
+   *  provider before they can be scored (see activityScoring.ts). */
+  isDemo         Boolean       @default(false)
+  verifiedAt     DateTime?
+  verificationNote String?     @db.Text
+  /* ── Result snapshot ──
+     Lots counted for THIS activity's window only, refreshed by the cron/admin.
+     Deliberately separate from the CRM's Member.currentPeriodLots: competition
+     results never feed rebate, indicator renewal, or member lot totals. */
+  lots           Decimal       @default(0) @db.Decimal(18, 8)
+  lotsAt         DateTime?
+  lotsFrom       DateTime?
+  lotsTo         DateTime?
+  checkError     String?       @db.Text
+  createdAt      DateTime      @default(now())
+  activity       Activity      @relation(fields: [activityId], references: [id], onDelete: Cascade)
+  member         Member        @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  tradeAccount   TradeAccount? @relation(fields: [tradeAccountId], references: [id], onDelete: SetNull)
+
+  @@unique([activityId, memberId])
+  /** One competition account belongs to a single member per activity — the
+   *  DB enforces it so two concurrent registrations can't slip through. */
+  @@unique([activityId, tradeId])
+  @@index([memberId, createdAt])
+  @@index([activityId, createdAt])
+  @@index([activityId, lots])
+}
+
+/* ── BEC points & Spin & Win ──
+   Members earn BEC points from their REAL traded lots (TradeLog), converted by
+   a per-symbol rate (e.g. 1 lot of gold = 3 BEC). Points are never written to
+   the trade logs or to CRM lot totals: the balance is computed on read as
+   "earned from trades − spent on spins". Spins persist a SpinResult row that
+   the CRM fulfils. */
+
+/** Points per traded lot for one symbol. Symbols without a row use the
+ *  `defaultPointsPerLot` from the spin settings. */
+model BecRate {
+  id           Int      @id @default(autoincrement())
+  symbol       String   @unique @db.VarChar(32)
+  pointsPerLot Decimal  @db.Decimal(12, 4)
+  active       Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+/** One wedge on the wheel / one possible award. `weight` is the relative
+ *  probability; `stock` null means unlimited. */
+model SpinPrize {
+  id        Int          @id @default(autoincrement())
+  name      String       @db.VarChar(120)
+  icon      String       @default("redeem") @db.VarChar(48)
+  /** Optional image (URL or data URL) shown instead of the icon. */
+  image     String?      @db.Text
+  weight    Int          @default(1)
+  stock     Int?
+  /** Free-text value shown to customers, e.g. "$5 Bonus Rebate". */
+  valueNote String?      @db.Text
+  active    Boolean      @default(true)
+  sortOrder Int          @default(0)
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+  results   SpinResult[]
+}
+
+/** BEC points materialized from trade logs that are about to be pruned, so a
+ *  member's earned points never shrink when history ages out. */
+model BecGrant {
+  id        Int      @id @default(autoincrement())
+  memberId  Int
+  lots      Decimal  @db.Decimal(18, 8)
+  points    Decimal  @db.Decimal(18, 8)
+  note      String?  @db.Text
+  createdAt DateTime @default(now())
+  member    Member   @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  @@index([memberId, createdAt])
+}
+
+enum SpinResultStatus {
+  pending
+  fulfilled
+  cancelled
+}
+
+model SpinResult {
+  id          Int              @id @default(autoincrement())
+  memberId    Int
+  prizeId     Int
+  /** BEC spent on this spin — refunded automatically while status is cancelled. */
+  cost        Decimal          @default(0) @db.Decimal(18, 4)
+  status      SpinResultStatus @default(pending)
+  spunAt      DateTime         @default(now())
+  fulfilledAt DateTime?
+  note        String?          @db.Text
+  member      Member           @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  prize       SpinPrize        @relation(fields: [prizeId], references: [id], onDelete: Cascade)
+
+  @@index([memberId, spunAt])
+  @@index([status, spunAt])
+}
+
+/* ── Course Online (LMS) ──
+   Admin-authored courses with ordered lessons; members enroll and tick lessons
+   off. Progress is derived entirely from LessonProgress rows — nothing is
+   stored as a percentage, so the numbers can never drift from the lessons. */
+
+enum CourseLevel {
+  beginner
+  intermediate
+  advanced
+}
+
+/** Customer standing derived from monthly traded lots:
+ *  - standard: traded >= requiredLots in the current month
+ *  - premium:  traded >= requiredLots in each of the last 3 consecutive months
+ *  - basic:    anything below that */
+enum MemberLevel {
+  basic
+  standard
+  premium
+}
+
+model Course {
+  id          Int              @id @default(autoincrement())
+  slug        String           @unique @db.VarChar(64)
+  title       String           @db.VarChar(191)
+  description String?          @db.Text
+  /** Free-form category key shown as a filter tab (beginner/technical/risk/psychology/strategy). */
+  category    String           @default("beginner") @db.VarChar(32)
+  level       CourseLevel      @default(beginner)
+  /** Minimum member level allowed to study this course. */
+  minLevel    MemberLevel      @default(basic)
+  /** Cover image URL or data URL (empty = the default gradient card). */
+  coverImage  String?          @db.Text
+  instructor  String?          @db.VarChar(120)
+  /** Total runtime label shown on the card (sum of the lessons' minutes). */
+  durationMin Int              @default(0)
+  published   Boolean          @default(true)
+  sortOrder   Int              @default(0)
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  lessons     CourseLesson[]
+  enrollments CourseEnrollment[]
+
+  @@index([published, sortOrder])
+}
+
+model CourseLesson {
+  id          Int       @id @default(autoincrement())
+  courseId    Int
+  title       String    @db.VarChar(191)
+  /** Optional section this lesson belongs to (FutureSkill-style curriculum
+   *  grouping). Empty = rendered in one default group. */
+  sectionTitle String?  @db.VarChar(191)
+  /** YouTube video id embedded by the player. */
+  videoId     String?   @db.VarChar(64)
+  /** Chapter range inside the video (seconds) — lets one long video be split
+   *  into lessons. `videoEnd` null = play to the end. */
+  videoStart  Int       @default(0)
+  videoEnd    Int?
+  durationMin Int       @default(0)
+  /** Lesson script / notes shown under the video on the watch page. */
+  script      String?   @db.Text
+  sortOrder   Int       @default(0)
+  /** Free-preview lesson (visible before enrolling). */
+  isPreview   Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+  course      Course    @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  progress    LessonProgress[]
+
+  @@index([courseId, sortOrder])
+}
+
+model CourseEnrollment {
+  id          Int      @id @default(autoincrement())
+  courseId    Int
+  memberId    Int
+  startedAt   DateTime @default(now())
+  completedAt DateTime?
+  course      Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  member      Member   @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  @@unique([courseId, memberId])
+  @@index([memberId, startedAt])
+}
+
+model LessonProgress {
+  id          Int          @id @default(autoincrement())
+  lessonId    Int
+  memberId    Int
+  completedAt DateTime     @default(now())
+  lesson      CourseLesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  member      Member       @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  @@unique([lessonId, memberId])
+  @@index([memberId, completedAt])
 }

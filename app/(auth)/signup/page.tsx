@@ -1,12 +1,7 @@
-import type { Metadata } from "next";
-import SignupView from "../../../components/auth/SignupView";
+import { redirect } from "next/navigation";
 
-export const metadata: Metadata = {
-  title: "Sign Up — BeSight",
-  description:
-    "Create your BeSight account to link trade accounts and unlock indicator access.",
-};
-
+/** Members are provisioned by the CRM sync — there is no public self-signup.
+ *  A visitor can only sign in to an existing account. */
 export default function SignupPage() {
-  return <SignupView />;
+  redirect("/login");
 }

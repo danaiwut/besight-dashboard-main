@@ -2,7 +2,7 @@
 
 import { useRef, useState } from "react";
 import { useLanguage } from "../../../components/crm/LanguageContext";
-import { useCrm, accessLabel, accessBadgeClass, accessLabelKey, progressTone, currentMonthRange, fmtDate, lot } from "../../../components/crm/CrmContext";
+import { useCrm, accessLabel, accessBadgeClass, accessLabelKey, progressTone, memberLotRange, fmtDate, lot } from "../../../components/crm/CrmContext";
 import { useCustomerData } from "../../../components/dashboard/useCustomerData";
 import VerifyResultModal, { type VerifyResult } from "../../../components/crm/VerifyResultModal";
 import Icon from "../../../components/Icon";
@@ -14,20 +14,21 @@ export default function DashboardIndicatorsPage() {
   const myAccess = indicatorAccess.filter((a) => a.memberId === member.id);
   const lotTone = progressTone(thisMonthLots, requiredLots);
   const lotPct = Math.min(100, requiredLots > 0 ? (thisMonthLots / requiredLots) * 100 : 100);
-  const lotPeriod = currentMonthRange();
+  // The lot cycle follows the member's CRM entitlement dates (same window the
+  // CRM member detail uses) — not the calendar month, which would label a
+  // multi-month entitlement window as "this month".
+  const lotPeriod = memberLotRange(member);
   const remainingLots = Math.max(0, requiredLots - thisMonthLots);
 
+  // Every indicator is free for every member — access status comes straight
+  // from the CRM grant, never from the member's lot progress. Missing lots can
+  // postpone a renewal in the CRM, but it never hides access the member holds.
   const rows = myAccess.map((a) => {
     const indicator = indicators.find((i) => i.name === a.indicator);
-    const isFree = indicator !== undefined && settings.planEntitlements.free.includes(indicator.id);
-    // BeSight ONE's broker-sourced access depends on this month's lot
-    // quota — falling short locks it immediately rather than waiting for
-    // the CRM's periodic renewal check to expire it.
-    const isLotLocked = a.indicator === "BeSight ONE" && thisMonthLots < requiredLots;
     const label = accessLabel(a, settings);
-    return { access: a, indicator, isFree, isLotLocked, label };
+    return { access: a, indicator, label };
   });
-  const activeCount = rows.filter((r) => !r.isLotLocked && r.label === "Active").length;
+  const activeCount = rows.filter((r) => r.label === "Active").length;
 
   const [query, setQuery] = useState("");
   const filteredRows = query.trim() ? rows.filter((r) => r.access.indicator.toLowerCase().includes(query.trim().toLowerCase())) : rows;
@@ -156,35 +157,19 @@ export default function DashboardIndicatorsPage() {
             </thead>
             <tbody>
               {filteredRows.length ? (
-                filteredRows.map(({ access: a, indicator, isFree, isLotLocked, label }) => {
+                filteredRows.map(({ access: a, indicator, label }) => {
                   const pubId = indicator?.pubId;
                   return (
-                    <tr key={a.id} style={isLotLocked ? { opacity: 0.6 } : undefined}>
+                    <tr key={a.id}>
+                      <td>{a.indicator}</td>
                       <td>
-                        <span style={{ display: "inline-flex", alignItems: "center", gap: 10 }}>
-                          {a.indicator}
-                          <span className={`plan-pill ${isFree ? "free" : "pro"}`} style={{ fontSize: 11, padding: "2px 8px" }}>
-                            {isFree ? t("dash.indicators.plan.free") : t("dash.indicators.plan.premium")}
-                          </span>
-                        </span>
-                      </td>
-                      <td>
-                        {isLotLocked ? (
-                          <span className="badge suspended">
-                            <Icon name="lock" style={{ fontSize: 13 }} />
-                            {t("dash.indicators.status.locked")}
-                          </span>
-                        ) : (
-                          <span className={`badge ${accessBadgeClass(label)}`}>{t(accessLabelKey(label))}</span>
-                        )}
+                        <span className={`badge ${accessBadgeClass(label)}`}>{t(accessLabelKey(label))}</span>
                       </td>
                       <td>{a.source}</td>
                       <td>{fmtDate(a.startDate)}</td>
                       <td>{fmtDate(a.expiryDate)}</td>
                       <td>
-                        {isLotLocked ? (
-                          <span style={{ fontSize: 12, color: "var(--text-sub)" }}>{t("dash.indicators.lockedNote", { required: lot(requiredLots) })}</span>
-                        ) : pubId ? (
+                        {pubId ? (
                           <a
                             className="btn btn-ghost"
                             style={{ padding: "6px 12px", minWidth: "auto", display: "inline-flex" }}

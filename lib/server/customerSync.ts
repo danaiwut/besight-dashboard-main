@@ -90,6 +90,9 @@ export type CustomerTradeAccountDto = {
   createdDate: string;
   lastSync: string;
   status: "active" | "inactive";
+  /** True when another account row (any member) carries the same Trade ID —
+   *  upstream data can duplicate one account across members. */
+  duplicateTradeId?: boolean;
 };
 
 type NormalizedCustomer = {
@@ -429,7 +432,18 @@ export async function readDatabaseDtos() {
     orderBy: { joinedAt: "desc" },
   });
   const members: CustomerMemberDto[] = records.map(toMemberDto);
-  const tradeAccounts: CustomerTradeAccountDto[] = records.flatMap((member) => member.tradeAccounts.map(toTradeAccountDto));
+  // Flag Trade IDs that appear on more than one account so the CRM can show it.
+  const tradeIdCounts = new Map<string, number>();
+  for (const member of records) {
+    for (const account of member.tradeAccounts) {
+      tradeIdCounts.set(account.tradeId, (tradeIdCounts.get(account.tradeId) ?? 0) + 1);
+    }
+  }
+  const tradeAccounts: CustomerTradeAccountDto[] = records.flatMap((member) =>
+    member.tradeAccounts.map((account) => (tradeIdCounts.get(account.tradeId) ?? 0) > 1
+      ? { ...toTradeAccountDto(account), duplicateTradeId: true }
+      : toTradeAccountDto(account)),
+  );
   return { members, tradeAccounts };
 }
 
@@ -449,6 +463,12 @@ async function syncCustomerMembersOnce() {
   const customers = await fetchCustomers();
   if (isDatabaseConfigured()) {
     if (!customers.length) throw new Error("CRM customers returned no rows; refusing to clear existing data");
+    // A truncated/partial upstream response must not cascade-delete live data:
+    // refuse the cleanup when the payload lost an implausible share of members.
+    const existingMembers = await getPrisma().member.count();
+    if (existingMembers > 20 && customers.length < existingMembers * 0.7) {
+      throw new Error(`CRM customers returned ${customers.length} of ${existingMembers} members; refusing to delete data`);
+    }
     const cleanup = await saveCustomers(customers);
     return { ...(await readDatabaseDtos()), ...cleanup, saved: customers.length, database: true };
   }

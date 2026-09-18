@@ -47,6 +47,7 @@ export type TradeAccountMinAggregateOutputType = {
   partnerIb: string | null
   verification: $Enums.VerificationStatus | null
   status: $Enums.RecordStatus | null
+  memberConfirmed: boolean | null
   createdAt: Date | null
   updatedAt: Date | null
   lastSyncAt: Date | null
@@ -61,6 +62,7 @@ export type TradeAccountMaxAggregateOutputType = {
   partnerIb: string | null
   verification: $Enums.VerificationStatus | null
   status: $Enums.RecordStatus | null
+  memberConfirmed: boolean | null
   createdAt: Date | null
   updatedAt: Date | null
   lastSyncAt: Date | null
@@ -75,6 +77,7 @@ export type TradeAccountCountAggregateOutputType = {
   partnerIb: number
   verification: number
   status: number
+  memberConfirmed: number
   createdAt: number
   updatedAt: number
   lastSyncAt: number
@@ -103,6 +106,7 @@ export type TradeAccountMinAggregateInputType = {
   partnerIb?: true
   verification?: true
   status?: true
+  memberConfirmed?: true
   createdAt?: true
   updatedAt?: true
   lastSyncAt?: true
@@ -117,6 +121,7 @@ export type TradeAccountMaxAggregateInputType = {
   partnerIb?: true
   verification?: true
   status?: true
+  memberConfirmed?: true
   createdAt?: true
   updatedAt?: true
   lastSyncAt?: true
@@ -131,6 +136,7 @@ export type TradeAccountCountAggregateInputType = {
   partnerIb?: true
   verification?: true
   status?: true
+  memberConfirmed?: true
   createdAt?: true
   updatedAt?: true
   lastSyncAt?: true
@@ -232,6 +238,7 @@ export type TradeAccountGroupByOutputType = {
   partnerIb: string | null
   verification: $Enums.VerificationStatus
   status: $Enums.RecordStatus
+  memberConfirmed: boolean
   createdAt: Date
   updatedAt: Date
   lastSyncAt: Date | null
@@ -269,6 +276,7 @@ export type TradeAccountWhereInput = {
   partnerIb?: Prisma.StringNullableFilter<"TradeAccount"> | string | null
   verification?: Prisma.EnumVerificationStatusFilter<"TradeAccount"> | $Enums.VerificationStatus
   status?: Prisma.EnumRecordStatusFilter<"TradeAccount"> | $Enums.RecordStatus
+  memberConfirmed?: Prisma.BoolFilter<"TradeAccount"> | boolean
   createdAt?: Prisma.DateTimeFilter<"TradeAccount"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"TradeAccount"> | Date | string
   lastSyncAt?: Prisma.DateTimeNullableFilter<"TradeAccount"> | Date | string | null
@@ -277,6 +285,7 @@ export type TradeAccountWhereInput = {
   primaryForMembers?: Prisma.MemberListRelationFilter
   tradeLogs?: Prisma.TradeLogListRelationFilter
   lotCheckRuns?: Prisma.LotCheckRunListRelationFilter
+  activityEnrollments?: Prisma.ActivityEnrollmentListRelationFilter
 }
 
 export type TradeAccountOrderByWithRelationInput = {
@@ -288,6 +297,7 @@ export type TradeAccountOrderByWithRelationInput = {
   partnerIb?: Prisma.SortOrderInput | Prisma.SortOrder
   verification?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  memberConfirmed?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   lastSyncAt?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -296,6 +306,7 @@ export type TradeAccountOrderByWithRelationInput = {
   primaryForMembers?: Prisma.MemberOrderByRelationAggregateInput
   tradeLogs?: Prisma.TradeLogOrderByRelationAggregateInput
   lotCheckRuns?: Prisma.LotCheckRunOrderByRelationAggregateInput
+  activityEnrollments?: Prisma.ActivityEnrollmentOrderByRelationAggregateInput
   _relevance?: Prisma.TradeAccountOrderByRelevanceInput
 }
 
@@ -311,6 +322,7 @@ export type TradeAccountWhereUniqueInput = Prisma.AtLeast<{
   partnerIb?: Prisma.StringNullableFilter<"TradeAccount"> | string | null
   verification?: Prisma.EnumVerificationStatusFilter<"TradeAccount"> | $Enums.VerificationStatus
   status?: Prisma.EnumRecordStatusFilter<"TradeAccount"> | $Enums.RecordStatus
+  memberConfirmed?: Prisma.BoolFilter<"TradeAccount"> | boolean
   createdAt?: Prisma.DateTimeFilter<"TradeAccount"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"TradeAccount"> | Date | string
   lastSyncAt?: Prisma.DateTimeNullableFilter<"TradeAccount"> | Date | string | null
@@ -319,6 +331,7 @@ export type TradeAccountWhereUniqueInput = Prisma.AtLeast<{
   primaryForMembers?: Prisma.MemberListRelationFilter
   tradeLogs?: Prisma.TradeLogListRelationFilter
   lotCheckRuns?: Prisma.LotCheckRunListRelationFilter
+  activityEnrollments?: Prisma.ActivityEnrollmentListRelationFilter
 }, "id">
 
 export type TradeAccountOrderByWithAggregationInput = {
@@ -330,6 +343,7 @@ export type TradeAccountOrderByWithAggregationInput = {
   partnerIb?: Prisma.SortOrderInput | Prisma.SortOrder
   verification?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  memberConfirmed?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   lastSyncAt?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -352,6 +366,7 @@ export type TradeAccountScalarWhereWithAggregatesInput = {
   partnerIb?: Prisma.StringNullableWithAggregatesFilter<"TradeAccount"> | string | null
   verification?: Prisma.EnumVerificationStatusWithAggregatesFilter<"TradeAccount"> | $Enums.VerificationStatus
   status?: Prisma.EnumRecordStatusWithAggregatesFilter<"TradeAccount"> | $Enums.RecordStatus
+  memberConfirmed?: Prisma.BoolWithAggregatesFilter<"TradeAccount"> | boolean
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"TradeAccount"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"TradeAccount"> | Date | string
   lastSyncAt?: Prisma.DateTimeNullableWithAggregatesFilter<"TradeAccount"> | Date | string | null
@@ -363,6 +378,7 @@ export type TradeAccountCreateInput = {
   partnerIb?: string | null
   verification?: $Enums.VerificationStatus
   status?: $Enums.RecordStatus
+  memberConfirmed?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   lastSyncAt?: Date | string | null
@@ -371,6 +387,7 @@ export type TradeAccountCreateInput = {
   primaryForMembers?: Prisma.MemberCreateNestedManyWithoutPrimaryTradeAccountInput
   tradeLogs?: Prisma.TradeLogCreateNestedManyWithoutTradeAccountInput
   lotCheckRuns?: Prisma.LotCheckRunCreateNestedManyWithoutTradeAccountInput
+  activityEnrollments?: Prisma.ActivityEnrollmentCreateNestedManyWithoutTradeAccountInput
 }
 
 export type TradeAccountUncheckedCreateInput = {
@@ -382,12 +399,14 @@ export type TradeAccountUncheckedCreateInput = {
   partnerIb?: string | null
   verification?: $Enums.VerificationStatus
   status?: $Enums.RecordStatus
+  memberConfirmed?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   lastSyncAt?: Date | string | null
   primaryForMembers?: Prisma.MemberUncheckedCreateNestedManyWithoutPrimaryTradeAccountInput
   tradeLogs?: Prisma.TradeLogUncheckedCreateNestedManyWithoutTradeAccountInput
   lotCheckRuns?: Prisma.LotCheckRunUncheckedCreateNestedManyWithoutTradeAccountInput
+  activityEnrollments?: Prisma.ActivityEnrollmentUncheckedCreateNestedManyWithoutTradeAccountInput
 }
 
 export type TradeAccountUpdateInput = {
@@ -396,6 +415,7 @@ export type TradeAccountUpdateInput = {
   partnerIb?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   verification?: Prisma.EnumVerificationStatusFieldUpdateOperationsInput | $Enums.VerificationStatus
   status?: Prisma.EnumRecordStatusFieldUpdateOperationsInput | $Enums.RecordStatus
+  memberConfirmed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lastSyncAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -404,6 +424,7 @@ export type TradeAccountUpdateInput = {
   primaryForMembers?: Prisma.MemberUpdateManyWithoutPrimaryTradeAccountNestedInput
   tradeLogs?: Prisma.TradeLogUpdateManyWithoutTradeAccountNestedInput
   lotCheckRuns?: Prisma.LotCheckRunUpdateManyWithoutTradeAccountNestedInput
+  activityEnrollments?: Prisma.ActivityEnrollmentUpdateManyWithoutTradeAccountNestedInput
 }
 
 export type TradeAccountUncheckedUpdateInput = {
@@ -415,12 +436,14 @@ export type TradeAccountUncheckedUpdateInput = {
   partnerIb?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   verification?: Prisma.EnumVerificationStatusFieldUpdateOperationsInput | $Enums.VerificationStatus
   status?: Prisma.EnumRecordStatusFieldUpdateOperationsInput | $Enums.RecordStatus
+  memberConfirmed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lastSyncAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   primaryForMembers?: Prisma.MemberUncheckedUpdateManyWithoutPrimaryTradeAccountNestedInput
   tradeLogs?: Prisma.TradeLogUncheckedUpdateManyWithoutTradeAccountNestedInput
   lotCheckRuns?: Prisma.LotCheckRunUncheckedUpdateManyWithoutTradeAccountNestedInput
+  activityEnrollments?: Prisma.ActivityEnrollmentUncheckedUpdateManyWithoutTradeAccountNestedInput
 }
 
 export type TradeAccountCreateManyInput = {
@@ -432,6 +455,7 @@ export type TradeAccountCreateManyInput = {
   partnerIb?: string | null
   verification?: $Enums.VerificationStatus
   status?: $Enums.RecordStatus
+  memberConfirmed?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   lastSyncAt?: Date | string | null
@@ -443,6 +467,7 @@ export type TradeAccountUpdateManyMutationInput = {
   partnerIb?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   verification?: Prisma.EnumVerificationStatusFieldUpdateOperationsInput | $Enums.VerificationStatus
   status?: Prisma.EnumRecordStatusFieldUpdateOperationsInput | $Enums.RecordStatus
+  memberConfirmed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lastSyncAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -457,6 +482,7 @@ export type TradeAccountUncheckedUpdateManyInput = {
   partnerIb?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   verification?: Prisma.EnumVerificationStatusFieldUpdateOperationsInput | $Enums.VerificationStatus
   status?: Prisma.EnumRecordStatusFieldUpdateOperationsInput | $Enums.RecordStatus
+  memberConfirmed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lastSyncAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -492,6 +518,7 @@ export type TradeAccountCountOrderByAggregateInput = {
   partnerIb?: Prisma.SortOrder
   verification?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  memberConfirmed?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   lastSyncAt?: Prisma.SortOrder
@@ -512,6 +539,7 @@ export type TradeAccountMaxOrderByAggregateInput = {
   partnerIb?: Prisma.SortOrder
   verification?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  memberConfirmed?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   lastSyncAt?: Prisma.SortOrder
@@ -526,6 +554,7 @@ export type TradeAccountMinOrderByAggregateInput = {
   partnerIb?: Prisma.SortOrder
   verification?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  memberConfirmed?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   lastSyncAt?: Prisma.SortOrder
@@ -646,6 +675,10 @@ export type EnumVerificationStatusFieldUpdateOperationsInput = {
   set?: $Enums.VerificationStatus
 }
 
+export type BoolFieldUpdateOperationsInput = {
+  set?: boolean
+}
+
 export type TradeAccountCreateNestedOneWithoutTradeLogsInput = {
   create?: Prisma.XOR<Prisma.TradeAccountCreateWithoutTradeLogsInput, Prisma.TradeAccountUncheckedCreateWithoutTradeLogsInput>
   connectOrCreate?: Prisma.TradeAccountCreateOrConnectWithoutTradeLogsInput
@@ -676,12 +709,29 @@ export type TradeAccountUpdateOneWithoutLotCheckRunsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.TradeAccountUpdateToOneWithWhereWithoutLotCheckRunsInput, Prisma.TradeAccountUpdateWithoutLotCheckRunsInput>, Prisma.TradeAccountUncheckedUpdateWithoutLotCheckRunsInput>
 }
 
+export type TradeAccountCreateNestedOneWithoutActivityEnrollmentsInput = {
+  create?: Prisma.XOR<Prisma.TradeAccountCreateWithoutActivityEnrollmentsInput, Prisma.TradeAccountUncheckedCreateWithoutActivityEnrollmentsInput>
+  connectOrCreate?: Prisma.TradeAccountCreateOrConnectWithoutActivityEnrollmentsInput
+  connect?: Prisma.TradeAccountWhereUniqueInput
+}
+
+export type TradeAccountUpdateOneWithoutActivityEnrollmentsNestedInput = {
+  create?: Prisma.XOR<Prisma.TradeAccountCreateWithoutActivityEnrollmentsInput, Prisma.TradeAccountUncheckedCreateWithoutActivityEnrollmentsInput>
+  connectOrCreate?: Prisma.TradeAccountCreateOrConnectWithoutActivityEnrollmentsInput
+  upsert?: Prisma.TradeAccountUpsertWithoutActivityEnrollmentsInput
+  disconnect?: Prisma.TradeAccountWhereInput | boolean
+  delete?: Prisma.TradeAccountWhereInput | boolean
+  connect?: Prisma.TradeAccountWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.TradeAccountUpdateToOneWithWhereWithoutActivityEnrollmentsInput, Prisma.TradeAccountUpdateWithoutActivityEnrollmentsInput>, Prisma.TradeAccountUncheckedUpdateWithoutActivityEnrollmentsInput>
+}
+
 export type TradeAccountCreateWithoutPrimaryForMembersInput = {
   tradeId: string
   accountType?: string | null
   partnerIb?: string | null
   verification?: $Enums.VerificationStatus
   status?: $Enums.RecordStatus
+  memberConfirmed?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   lastSyncAt?: Date | string | null
@@ -689,6 +739,7 @@ export type TradeAccountCreateWithoutPrimaryForMembersInput = {
   broker?: Prisma.BrokerCreateNestedOneWithoutAccountsInput
   tradeLogs?: Prisma.TradeLogCreateNestedManyWithoutTradeAccountInput
   lotCheckRuns?: Prisma.LotCheckRunCreateNestedManyWithoutTradeAccountInput
+  activityEnrollments?: Prisma.ActivityEnrollmentCreateNestedManyWithoutTradeAccountInput
 }
 
 export type TradeAccountUncheckedCreateWithoutPrimaryForMembersInput = {
@@ -700,11 +751,13 @@ export type TradeAccountUncheckedCreateWithoutPrimaryForMembersInput = {
   partnerIb?: string | null
   verification?: $Enums.VerificationStatus
   status?: $Enums.RecordStatus
+  memberConfirmed?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   lastSyncAt?: Date | string | null
   tradeLogs?: Prisma.TradeLogUncheckedCreateNestedManyWithoutTradeAccountInput
   lotCheckRuns?: Prisma.LotCheckRunUncheckedCreateNestedManyWithoutTradeAccountInput
+  activityEnrollments?: Prisma.ActivityEnrollmentUncheckedCreateNestedManyWithoutTradeAccountInput
 }
 
 export type TradeAccountCreateOrConnectWithoutPrimaryForMembersInput = {
@@ -718,6 +771,7 @@ export type TradeAccountCreateWithoutMemberInput = {
   partnerIb?: string | null
   verification?: $Enums.VerificationStatus
   status?: $Enums.RecordStatus
+  memberConfirmed?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   lastSyncAt?: Date | string | null
@@ -725,6 +779,7 @@ export type TradeAccountCreateWithoutMemberInput = {
   primaryForMembers?: Prisma.MemberCreateNestedManyWithoutPrimaryTradeAccountInput
   tradeLogs?: Prisma.TradeLogCreateNestedManyWithoutTradeAccountInput
   lotCheckRuns?: Prisma.LotCheckRunCreateNestedManyWithoutTradeAccountInput
+  activityEnrollments?: Prisma.ActivityEnrollmentCreateNestedManyWithoutTradeAccountInput
 }
 
 export type TradeAccountUncheckedCreateWithoutMemberInput = {
@@ -735,12 +790,14 @@ export type TradeAccountUncheckedCreateWithoutMemberInput = {
   partnerIb?: string | null
   verification?: $Enums.VerificationStatus
   status?: $Enums.RecordStatus
+  memberConfirmed?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   lastSyncAt?: Date | string | null
   primaryForMembers?: Prisma.MemberUncheckedCreateNestedManyWithoutPrimaryTradeAccountInput
   tradeLogs?: Prisma.TradeLogUncheckedCreateNestedManyWithoutTradeAccountInput
   lotCheckRuns?: Prisma.LotCheckRunUncheckedCreateNestedManyWithoutTradeAccountInput
+  activityEnrollments?: Prisma.ActivityEnrollmentUncheckedCreateNestedManyWithoutTradeAccountInput
 }
 
 export type TradeAccountCreateOrConnectWithoutMemberInput = {
@@ -770,6 +827,7 @@ export type TradeAccountUpdateWithoutPrimaryForMembersInput = {
   partnerIb?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   verification?: Prisma.EnumVerificationStatusFieldUpdateOperationsInput | $Enums.VerificationStatus
   status?: Prisma.EnumRecordStatusFieldUpdateOperationsInput | $Enums.RecordStatus
+  memberConfirmed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lastSyncAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -777,6 +835,7 @@ export type TradeAccountUpdateWithoutPrimaryForMembersInput = {
   broker?: Prisma.BrokerUpdateOneWithoutAccountsNestedInput
   tradeLogs?: Prisma.TradeLogUpdateManyWithoutTradeAccountNestedInput
   lotCheckRuns?: Prisma.LotCheckRunUpdateManyWithoutTradeAccountNestedInput
+  activityEnrollments?: Prisma.ActivityEnrollmentUpdateManyWithoutTradeAccountNestedInput
 }
 
 export type TradeAccountUncheckedUpdateWithoutPrimaryForMembersInput = {
@@ -788,11 +847,13 @@ export type TradeAccountUncheckedUpdateWithoutPrimaryForMembersInput = {
   partnerIb?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   verification?: Prisma.EnumVerificationStatusFieldUpdateOperationsInput | $Enums.VerificationStatus
   status?: Prisma.EnumRecordStatusFieldUpdateOperationsInput | $Enums.RecordStatus
+  memberConfirmed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lastSyncAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   tradeLogs?: Prisma.TradeLogUncheckedUpdateManyWithoutTradeAccountNestedInput
   lotCheckRuns?: Prisma.LotCheckRunUncheckedUpdateManyWithoutTradeAccountNestedInput
+  activityEnrollments?: Prisma.ActivityEnrollmentUncheckedUpdateManyWithoutTradeAccountNestedInput
 }
 
 export type TradeAccountUpsertWithWhereUniqueWithoutMemberInput = {
@@ -823,6 +884,7 @@ export type TradeAccountScalarWhereInput = {
   partnerIb?: Prisma.StringNullableFilter<"TradeAccount"> | string | null
   verification?: Prisma.EnumVerificationStatusFilter<"TradeAccount"> | $Enums.VerificationStatus
   status?: Prisma.EnumRecordStatusFilter<"TradeAccount"> | $Enums.RecordStatus
+  memberConfirmed?: Prisma.BoolFilter<"TradeAccount"> | boolean
   createdAt?: Prisma.DateTimeFilter<"TradeAccount"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"TradeAccount"> | Date | string
   lastSyncAt?: Prisma.DateTimeNullableFilter<"TradeAccount"> | Date | string | null
@@ -834,6 +896,7 @@ export type TradeAccountCreateWithoutBrokerInput = {
   partnerIb?: string | null
   verification?: $Enums.VerificationStatus
   status?: $Enums.RecordStatus
+  memberConfirmed?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   lastSyncAt?: Date | string | null
@@ -841,6 +904,7 @@ export type TradeAccountCreateWithoutBrokerInput = {
   primaryForMembers?: Prisma.MemberCreateNestedManyWithoutPrimaryTradeAccountInput
   tradeLogs?: Prisma.TradeLogCreateNestedManyWithoutTradeAccountInput
   lotCheckRuns?: Prisma.LotCheckRunCreateNestedManyWithoutTradeAccountInput
+  activityEnrollments?: Prisma.ActivityEnrollmentCreateNestedManyWithoutTradeAccountInput
 }
 
 export type TradeAccountUncheckedCreateWithoutBrokerInput = {
@@ -851,12 +915,14 @@ export type TradeAccountUncheckedCreateWithoutBrokerInput = {
   partnerIb?: string | null
   verification?: $Enums.VerificationStatus
   status?: $Enums.RecordStatus
+  memberConfirmed?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   lastSyncAt?: Date | string | null
   primaryForMembers?: Prisma.MemberUncheckedCreateNestedManyWithoutPrimaryTradeAccountInput
   tradeLogs?: Prisma.TradeLogUncheckedCreateNestedManyWithoutTradeAccountInput
   lotCheckRuns?: Prisma.LotCheckRunUncheckedCreateNestedManyWithoutTradeAccountInput
+  activityEnrollments?: Prisma.ActivityEnrollmentUncheckedCreateNestedManyWithoutTradeAccountInput
 }
 
 export type TradeAccountCreateOrConnectWithoutBrokerInput = {
@@ -891,6 +957,7 @@ export type TradeAccountCreateWithoutTradeLogsInput = {
   partnerIb?: string | null
   verification?: $Enums.VerificationStatus
   status?: $Enums.RecordStatus
+  memberConfirmed?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   lastSyncAt?: Date | string | null
@@ -898,6 +965,7 @@ export type TradeAccountCreateWithoutTradeLogsInput = {
   broker?: Prisma.BrokerCreateNestedOneWithoutAccountsInput
   primaryForMembers?: Prisma.MemberCreateNestedManyWithoutPrimaryTradeAccountInput
   lotCheckRuns?: Prisma.LotCheckRunCreateNestedManyWithoutTradeAccountInput
+  activityEnrollments?: Prisma.ActivityEnrollmentCreateNestedManyWithoutTradeAccountInput
 }
 
 export type TradeAccountUncheckedCreateWithoutTradeLogsInput = {
@@ -909,11 +977,13 @@ export type TradeAccountUncheckedCreateWithoutTradeLogsInput = {
   partnerIb?: string | null
   verification?: $Enums.VerificationStatus
   status?: $Enums.RecordStatus
+  memberConfirmed?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   lastSyncAt?: Date | string | null
   primaryForMembers?: Prisma.MemberUncheckedCreateNestedManyWithoutPrimaryTradeAccountInput
   lotCheckRuns?: Prisma.LotCheckRunUncheckedCreateNestedManyWithoutTradeAccountInput
+  activityEnrollments?: Prisma.ActivityEnrollmentUncheckedCreateNestedManyWithoutTradeAccountInput
 }
 
 export type TradeAccountCreateOrConnectWithoutTradeLogsInput = {
@@ -938,6 +1008,7 @@ export type TradeAccountUpdateWithoutTradeLogsInput = {
   partnerIb?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   verification?: Prisma.EnumVerificationStatusFieldUpdateOperationsInput | $Enums.VerificationStatus
   status?: Prisma.EnumRecordStatusFieldUpdateOperationsInput | $Enums.RecordStatus
+  memberConfirmed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lastSyncAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -945,6 +1016,7 @@ export type TradeAccountUpdateWithoutTradeLogsInput = {
   broker?: Prisma.BrokerUpdateOneWithoutAccountsNestedInput
   primaryForMembers?: Prisma.MemberUpdateManyWithoutPrimaryTradeAccountNestedInput
   lotCheckRuns?: Prisma.LotCheckRunUpdateManyWithoutTradeAccountNestedInput
+  activityEnrollments?: Prisma.ActivityEnrollmentUpdateManyWithoutTradeAccountNestedInput
 }
 
 export type TradeAccountUncheckedUpdateWithoutTradeLogsInput = {
@@ -956,11 +1028,13 @@ export type TradeAccountUncheckedUpdateWithoutTradeLogsInput = {
   partnerIb?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   verification?: Prisma.EnumVerificationStatusFieldUpdateOperationsInput | $Enums.VerificationStatus
   status?: Prisma.EnumRecordStatusFieldUpdateOperationsInput | $Enums.RecordStatus
+  memberConfirmed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lastSyncAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   primaryForMembers?: Prisma.MemberUncheckedUpdateManyWithoutPrimaryTradeAccountNestedInput
   lotCheckRuns?: Prisma.LotCheckRunUncheckedUpdateManyWithoutTradeAccountNestedInput
+  activityEnrollments?: Prisma.ActivityEnrollmentUncheckedUpdateManyWithoutTradeAccountNestedInput
 }
 
 export type TradeAccountCreateWithoutLotCheckRunsInput = {
@@ -969,6 +1043,7 @@ export type TradeAccountCreateWithoutLotCheckRunsInput = {
   partnerIb?: string | null
   verification?: $Enums.VerificationStatus
   status?: $Enums.RecordStatus
+  memberConfirmed?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   lastSyncAt?: Date | string | null
@@ -976,6 +1051,7 @@ export type TradeAccountCreateWithoutLotCheckRunsInput = {
   broker?: Prisma.BrokerCreateNestedOneWithoutAccountsInput
   primaryForMembers?: Prisma.MemberCreateNestedManyWithoutPrimaryTradeAccountInput
   tradeLogs?: Prisma.TradeLogCreateNestedManyWithoutTradeAccountInput
+  activityEnrollments?: Prisma.ActivityEnrollmentCreateNestedManyWithoutTradeAccountInput
 }
 
 export type TradeAccountUncheckedCreateWithoutLotCheckRunsInput = {
@@ -987,11 +1063,13 @@ export type TradeAccountUncheckedCreateWithoutLotCheckRunsInput = {
   partnerIb?: string | null
   verification?: $Enums.VerificationStatus
   status?: $Enums.RecordStatus
+  memberConfirmed?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   lastSyncAt?: Date | string | null
   primaryForMembers?: Prisma.MemberUncheckedCreateNestedManyWithoutPrimaryTradeAccountInput
   tradeLogs?: Prisma.TradeLogUncheckedCreateNestedManyWithoutTradeAccountInput
+  activityEnrollments?: Prisma.ActivityEnrollmentUncheckedCreateNestedManyWithoutTradeAccountInput
 }
 
 export type TradeAccountCreateOrConnectWithoutLotCheckRunsInput = {
@@ -1016,6 +1094,7 @@ export type TradeAccountUpdateWithoutLotCheckRunsInput = {
   partnerIb?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   verification?: Prisma.EnumVerificationStatusFieldUpdateOperationsInput | $Enums.VerificationStatus
   status?: Prisma.EnumRecordStatusFieldUpdateOperationsInput | $Enums.RecordStatus
+  memberConfirmed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lastSyncAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1023,6 +1102,7 @@ export type TradeAccountUpdateWithoutLotCheckRunsInput = {
   broker?: Prisma.BrokerUpdateOneWithoutAccountsNestedInput
   primaryForMembers?: Prisma.MemberUpdateManyWithoutPrimaryTradeAccountNestedInput
   tradeLogs?: Prisma.TradeLogUpdateManyWithoutTradeAccountNestedInput
+  activityEnrollments?: Prisma.ActivityEnrollmentUpdateManyWithoutTradeAccountNestedInput
 }
 
 export type TradeAccountUncheckedUpdateWithoutLotCheckRunsInput = {
@@ -1034,11 +1114,99 @@ export type TradeAccountUncheckedUpdateWithoutLotCheckRunsInput = {
   partnerIb?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   verification?: Prisma.EnumVerificationStatusFieldUpdateOperationsInput | $Enums.VerificationStatus
   status?: Prisma.EnumRecordStatusFieldUpdateOperationsInput | $Enums.RecordStatus
+  memberConfirmed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lastSyncAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   primaryForMembers?: Prisma.MemberUncheckedUpdateManyWithoutPrimaryTradeAccountNestedInput
   tradeLogs?: Prisma.TradeLogUncheckedUpdateManyWithoutTradeAccountNestedInput
+  activityEnrollments?: Prisma.ActivityEnrollmentUncheckedUpdateManyWithoutTradeAccountNestedInput
+}
+
+export type TradeAccountCreateWithoutActivityEnrollmentsInput = {
+  tradeId: string
+  accountType?: string | null
+  partnerIb?: string | null
+  verification?: $Enums.VerificationStatus
+  status?: $Enums.RecordStatus
+  memberConfirmed?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  lastSyncAt?: Date | string | null
+  member: Prisma.MemberCreateNestedOneWithoutTradeAccountsInput
+  broker?: Prisma.BrokerCreateNestedOneWithoutAccountsInput
+  primaryForMembers?: Prisma.MemberCreateNestedManyWithoutPrimaryTradeAccountInput
+  tradeLogs?: Prisma.TradeLogCreateNestedManyWithoutTradeAccountInput
+  lotCheckRuns?: Prisma.LotCheckRunCreateNestedManyWithoutTradeAccountInput
+}
+
+export type TradeAccountUncheckedCreateWithoutActivityEnrollmentsInput = {
+  id?: number
+  memberId: number
+  brokerId?: number | null
+  tradeId: string
+  accountType?: string | null
+  partnerIb?: string | null
+  verification?: $Enums.VerificationStatus
+  status?: $Enums.RecordStatus
+  memberConfirmed?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  lastSyncAt?: Date | string | null
+  primaryForMembers?: Prisma.MemberUncheckedCreateNestedManyWithoutPrimaryTradeAccountInput
+  tradeLogs?: Prisma.TradeLogUncheckedCreateNestedManyWithoutTradeAccountInput
+  lotCheckRuns?: Prisma.LotCheckRunUncheckedCreateNestedManyWithoutTradeAccountInput
+}
+
+export type TradeAccountCreateOrConnectWithoutActivityEnrollmentsInput = {
+  where: Prisma.TradeAccountWhereUniqueInput
+  create: Prisma.XOR<Prisma.TradeAccountCreateWithoutActivityEnrollmentsInput, Prisma.TradeAccountUncheckedCreateWithoutActivityEnrollmentsInput>
+}
+
+export type TradeAccountUpsertWithoutActivityEnrollmentsInput = {
+  update: Prisma.XOR<Prisma.TradeAccountUpdateWithoutActivityEnrollmentsInput, Prisma.TradeAccountUncheckedUpdateWithoutActivityEnrollmentsInput>
+  create: Prisma.XOR<Prisma.TradeAccountCreateWithoutActivityEnrollmentsInput, Prisma.TradeAccountUncheckedCreateWithoutActivityEnrollmentsInput>
+  where?: Prisma.TradeAccountWhereInput
+}
+
+export type TradeAccountUpdateToOneWithWhereWithoutActivityEnrollmentsInput = {
+  where?: Prisma.TradeAccountWhereInput
+  data: Prisma.XOR<Prisma.TradeAccountUpdateWithoutActivityEnrollmentsInput, Prisma.TradeAccountUncheckedUpdateWithoutActivityEnrollmentsInput>
+}
+
+export type TradeAccountUpdateWithoutActivityEnrollmentsInput = {
+  tradeId?: Prisma.StringFieldUpdateOperationsInput | string
+  accountType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  partnerIb?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  verification?: Prisma.EnumVerificationStatusFieldUpdateOperationsInput | $Enums.VerificationStatus
+  status?: Prisma.EnumRecordStatusFieldUpdateOperationsInput | $Enums.RecordStatus
+  memberConfirmed?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  lastSyncAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  member?: Prisma.MemberUpdateOneRequiredWithoutTradeAccountsNestedInput
+  broker?: Prisma.BrokerUpdateOneWithoutAccountsNestedInput
+  primaryForMembers?: Prisma.MemberUpdateManyWithoutPrimaryTradeAccountNestedInput
+  tradeLogs?: Prisma.TradeLogUpdateManyWithoutTradeAccountNestedInput
+  lotCheckRuns?: Prisma.LotCheckRunUpdateManyWithoutTradeAccountNestedInput
+}
+
+export type TradeAccountUncheckedUpdateWithoutActivityEnrollmentsInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  memberId?: Prisma.IntFieldUpdateOperationsInput | number
+  brokerId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  tradeId?: Prisma.StringFieldUpdateOperationsInput | string
+  accountType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  partnerIb?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  verification?: Prisma.EnumVerificationStatusFieldUpdateOperationsInput | $Enums.VerificationStatus
+  status?: Prisma.EnumRecordStatusFieldUpdateOperationsInput | $Enums.RecordStatus
+  memberConfirmed?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  lastSyncAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  primaryForMembers?: Prisma.MemberUncheckedUpdateManyWithoutPrimaryTradeAccountNestedInput
+  tradeLogs?: Prisma.TradeLogUncheckedUpdateManyWithoutTradeAccountNestedInput
+  lotCheckRuns?: Prisma.LotCheckRunUncheckedUpdateManyWithoutTradeAccountNestedInput
 }
 
 export type TradeAccountCreateManyMemberInput = {
@@ -1049,6 +1217,7 @@ export type TradeAccountCreateManyMemberInput = {
   partnerIb?: string | null
   verification?: $Enums.VerificationStatus
   status?: $Enums.RecordStatus
+  memberConfirmed?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   lastSyncAt?: Date | string | null
@@ -1060,6 +1229,7 @@ export type TradeAccountUpdateWithoutMemberInput = {
   partnerIb?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   verification?: Prisma.EnumVerificationStatusFieldUpdateOperationsInput | $Enums.VerificationStatus
   status?: Prisma.EnumRecordStatusFieldUpdateOperationsInput | $Enums.RecordStatus
+  memberConfirmed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lastSyncAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1067,6 +1237,7 @@ export type TradeAccountUpdateWithoutMemberInput = {
   primaryForMembers?: Prisma.MemberUpdateManyWithoutPrimaryTradeAccountNestedInput
   tradeLogs?: Prisma.TradeLogUpdateManyWithoutTradeAccountNestedInput
   lotCheckRuns?: Prisma.LotCheckRunUpdateManyWithoutTradeAccountNestedInput
+  activityEnrollments?: Prisma.ActivityEnrollmentUpdateManyWithoutTradeAccountNestedInput
 }
 
 export type TradeAccountUncheckedUpdateWithoutMemberInput = {
@@ -1077,12 +1248,14 @@ export type TradeAccountUncheckedUpdateWithoutMemberInput = {
   partnerIb?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   verification?: Prisma.EnumVerificationStatusFieldUpdateOperationsInput | $Enums.VerificationStatus
   status?: Prisma.EnumRecordStatusFieldUpdateOperationsInput | $Enums.RecordStatus
+  memberConfirmed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lastSyncAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   primaryForMembers?: Prisma.MemberUncheckedUpdateManyWithoutPrimaryTradeAccountNestedInput
   tradeLogs?: Prisma.TradeLogUncheckedUpdateManyWithoutTradeAccountNestedInput
   lotCheckRuns?: Prisma.LotCheckRunUncheckedUpdateManyWithoutTradeAccountNestedInput
+  activityEnrollments?: Prisma.ActivityEnrollmentUncheckedUpdateManyWithoutTradeAccountNestedInput
 }
 
 export type TradeAccountUncheckedUpdateManyWithoutMemberInput = {
@@ -1093,6 +1266,7 @@ export type TradeAccountUncheckedUpdateManyWithoutMemberInput = {
   partnerIb?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   verification?: Prisma.EnumVerificationStatusFieldUpdateOperationsInput | $Enums.VerificationStatus
   status?: Prisma.EnumRecordStatusFieldUpdateOperationsInput | $Enums.RecordStatus
+  memberConfirmed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lastSyncAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1106,6 +1280,7 @@ export type TradeAccountCreateManyBrokerInput = {
   partnerIb?: string | null
   verification?: $Enums.VerificationStatus
   status?: $Enums.RecordStatus
+  memberConfirmed?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   lastSyncAt?: Date | string | null
@@ -1117,6 +1292,7 @@ export type TradeAccountUpdateWithoutBrokerInput = {
   partnerIb?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   verification?: Prisma.EnumVerificationStatusFieldUpdateOperationsInput | $Enums.VerificationStatus
   status?: Prisma.EnumRecordStatusFieldUpdateOperationsInput | $Enums.RecordStatus
+  memberConfirmed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lastSyncAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1124,6 +1300,7 @@ export type TradeAccountUpdateWithoutBrokerInput = {
   primaryForMembers?: Prisma.MemberUpdateManyWithoutPrimaryTradeAccountNestedInput
   tradeLogs?: Prisma.TradeLogUpdateManyWithoutTradeAccountNestedInput
   lotCheckRuns?: Prisma.LotCheckRunUpdateManyWithoutTradeAccountNestedInput
+  activityEnrollments?: Prisma.ActivityEnrollmentUpdateManyWithoutTradeAccountNestedInput
 }
 
 export type TradeAccountUncheckedUpdateWithoutBrokerInput = {
@@ -1134,12 +1311,14 @@ export type TradeAccountUncheckedUpdateWithoutBrokerInput = {
   partnerIb?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   verification?: Prisma.EnumVerificationStatusFieldUpdateOperationsInput | $Enums.VerificationStatus
   status?: Prisma.EnumRecordStatusFieldUpdateOperationsInput | $Enums.RecordStatus
+  memberConfirmed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lastSyncAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   primaryForMembers?: Prisma.MemberUncheckedUpdateManyWithoutPrimaryTradeAccountNestedInput
   tradeLogs?: Prisma.TradeLogUncheckedUpdateManyWithoutTradeAccountNestedInput
   lotCheckRuns?: Prisma.LotCheckRunUncheckedUpdateManyWithoutTradeAccountNestedInput
+  activityEnrollments?: Prisma.ActivityEnrollmentUncheckedUpdateManyWithoutTradeAccountNestedInput
 }
 
 export type TradeAccountUncheckedUpdateManyWithoutBrokerInput = {
@@ -1150,6 +1329,7 @@ export type TradeAccountUncheckedUpdateManyWithoutBrokerInput = {
   partnerIb?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   verification?: Prisma.EnumVerificationStatusFieldUpdateOperationsInput | $Enums.VerificationStatus
   status?: Prisma.EnumRecordStatusFieldUpdateOperationsInput | $Enums.RecordStatus
+  memberConfirmed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lastSyncAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1164,12 +1344,14 @@ export type TradeAccountCountOutputType = {
   primaryForMembers: number
   tradeLogs: number
   lotCheckRuns: number
+  activityEnrollments: number
 }
 
 export type TradeAccountCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   primaryForMembers?: boolean | TradeAccountCountOutputTypeCountPrimaryForMembersArgs
   tradeLogs?: boolean | TradeAccountCountOutputTypeCountTradeLogsArgs
   lotCheckRuns?: boolean | TradeAccountCountOutputTypeCountLotCheckRunsArgs
+  activityEnrollments?: boolean | TradeAccountCountOutputTypeCountActivityEnrollmentsArgs
 }
 
 /**
@@ -1203,6 +1385,13 @@ export type TradeAccountCountOutputTypeCountLotCheckRunsArgs<ExtArgs extends run
   where?: Prisma.LotCheckRunWhereInput
 }
 
+/**
+ * TradeAccountCountOutputType without action
+ */
+export type TradeAccountCountOutputTypeCountActivityEnrollmentsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ActivityEnrollmentWhereInput
+}
+
 
 export type TradeAccountSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -1213,6 +1402,7 @@ export type TradeAccountSelect<ExtArgs extends runtime.Types.Extensions.Internal
   partnerIb?: boolean
   verification?: boolean
   status?: boolean
+  memberConfirmed?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   lastSyncAt?: boolean
@@ -1221,6 +1411,7 @@ export type TradeAccountSelect<ExtArgs extends runtime.Types.Extensions.Internal
   primaryForMembers?: boolean | Prisma.TradeAccount$primaryForMembersArgs<ExtArgs>
   tradeLogs?: boolean | Prisma.TradeAccount$tradeLogsArgs<ExtArgs>
   lotCheckRuns?: boolean | Prisma.TradeAccount$lotCheckRunsArgs<ExtArgs>
+  activityEnrollments?: boolean | Prisma.TradeAccount$activityEnrollmentsArgs<ExtArgs>
   _count?: boolean | Prisma.TradeAccountCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["tradeAccount"]>
 
@@ -1235,18 +1426,20 @@ export type TradeAccountSelectScalar = {
   partnerIb?: boolean
   verification?: boolean
   status?: boolean
+  memberConfirmed?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   lastSyncAt?: boolean
 }
 
-export type TradeAccountOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "memberId" | "brokerId" | "tradeId" | "accountType" | "partnerIb" | "verification" | "status" | "createdAt" | "updatedAt" | "lastSyncAt", ExtArgs["result"]["tradeAccount"]>
+export type TradeAccountOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "memberId" | "brokerId" | "tradeId" | "accountType" | "partnerIb" | "verification" | "status" | "memberConfirmed" | "createdAt" | "updatedAt" | "lastSyncAt", ExtArgs["result"]["tradeAccount"]>
 export type TradeAccountInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   member?: boolean | Prisma.MemberDefaultArgs<ExtArgs>
   broker?: boolean | Prisma.TradeAccount$brokerArgs<ExtArgs>
   primaryForMembers?: boolean | Prisma.TradeAccount$primaryForMembersArgs<ExtArgs>
   tradeLogs?: boolean | Prisma.TradeAccount$tradeLogsArgs<ExtArgs>
   lotCheckRuns?: boolean | Prisma.TradeAccount$lotCheckRunsArgs<ExtArgs>
+  activityEnrollments?: boolean | Prisma.TradeAccount$activityEnrollmentsArgs<ExtArgs>
   _count?: boolean | Prisma.TradeAccountCountOutputTypeDefaultArgs<ExtArgs>
 }
 
@@ -1258,6 +1451,7 @@ export type $TradeAccountPayload<ExtArgs extends runtime.Types.Extensions.Intern
     primaryForMembers: Prisma.$MemberPayload<ExtArgs>[]
     tradeLogs: Prisma.$TradeLogPayload<ExtArgs>[]
     lotCheckRuns: Prisma.$LotCheckRunPayload<ExtArgs>[]
+    activityEnrollments: Prisma.$ActivityEnrollmentPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: number
@@ -1268,6 +1462,13 @@ export type $TradeAccountPayload<ExtArgs extends runtime.Types.Extensions.Intern
     partnerIb: string | null
     verification: $Enums.VerificationStatus
     status: $Enums.RecordStatus
+    /**
+     * * Whether the MEMBER has confirmed this account is theirs. Accounts created
+     *    *  by the CRM sync start false and stay hidden from the customer dashboard
+     *    *  until the member claims them; self-added accounts are true from the start.
+     *    *  The CRM always sees every account regardless.
+     */
+    memberConfirmed: boolean
     createdAt: Date
     updatedAt: Date
     lastSyncAt: Date | null
@@ -1616,6 +1817,7 @@ export interface Prisma__TradeAccountClient<T, Null = never, ExtArgs extends run
   primaryForMembers<T extends Prisma.TradeAccount$primaryForMembersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.TradeAccount$primaryForMembersArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MemberPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   tradeLogs<T extends Prisma.TradeAccount$tradeLogsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.TradeAccount$tradeLogsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TradeLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   lotCheckRuns<T extends Prisma.TradeAccount$lotCheckRunsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.TradeAccount$lotCheckRunsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$LotCheckRunPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  activityEnrollments<T extends Prisma.TradeAccount$activityEnrollmentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.TradeAccount$activityEnrollmentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ActivityEnrollmentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1653,6 +1855,7 @@ export interface TradeAccountFieldRefs {
   readonly partnerIb: Prisma.FieldRef<"TradeAccount", 'String'>
   readonly verification: Prisma.FieldRef<"TradeAccount", 'VerificationStatus'>
   readonly status: Prisma.FieldRef<"TradeAccount", 'RecordStatus'>
+  readonly memberConfirmed: Prisma.FieldRef<"TradeAccount", 'Boolean'>
   readonly createdAt: Prisma.FieldRef<"TradeAccount", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"TradeAccount", 'DateTime'>
   readonly lastSyncAt: Prisma.FieldRef<"TradeAccount", 'DateTime'>
@@ -2092,6 +2295,30 @@ export type TradeAccount$lotCheckRunsArgs<ExtArgs extends runtime.Types.Extensio
   take?: number
   skip?: number
   distinct?: Prisma.LotCheckRunScalarFieldEnum | Prisma.LotCheckRunScalarFieldEnum[]
+}
+
+/**
+ * TradeAccount.activityEnrollments
+ */
+export type TradeAccount$activityEnrollmentsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ActivityEnrollment
+   */
+  select?: Prisma.ActivityEnrollmentSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the ActivityEnrollment
+   */
+  omit?: Prisma.ActivityEnrollmentOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ActivityEnrollmentInclude<ExtArgs> | null
+  where?: Prisma.ActivityEnrollmentWhereInput
+  orderBy?: Prisma.ActivityEnrollmentOrderByWithRelationInput | Prisma.ActivityEnrollmentOrderByWithRelationInput[]
+  cursor?: Prisma.ActivityEnrollmentWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ActivityEnrollmentScalarFieldEnum | Prisma.ActivityEnrollmentScalarFieldEnum[]
 }
 
 /**

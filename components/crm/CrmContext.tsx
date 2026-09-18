@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from "react";
+import { currentLotCycle } from "../../lib/lotCycle";
 import { apiCall } from "../../lib/crmApi";
 import { formatDay, getDateLang } from "../../lib/dateLocale";
 
@@ -27,6 +28,9 @@ export type TradeAccount = {
   createdDate: string;
   lastSync: string;
   status: TradeAccountStatus;
+  /** CRM-only: another account row carries the same Trade ID (upstream data
+   *  can duplicate one account across members). */
+  duplicateTradeId?: boolean;
 };
 
 /** One row per individual trade a member's account logs — symbol, lot size,
@@ -94,6 +98,8 @@ export type RenewalRecord = {
   period: string;
   qualifiedLots: number;
   renewed: boolean;
+  origin?: string;
+  note?: string;
   oldExpiry: string;
   newExpiry?: string;
   createdDate: string;
@@ -160,6 +166,11 @@ export type Member = {
 
 export type Admin = { id: number; name: string; email: string; role: string; owner?: boolean };
 
+/** Account types an admin can assign to a trade account. The upstream CRM
+ *  payload carries no account type yet (see Phase 2 of the plan), so this is
+ *  chosen manually rather than guessed. */
+export const ACCOUNT_TYPES = ["Standard", "Raw Spread", "Ultra Low"];
+
 export const SUSPEND_REASON_LABELS: Record<string, string> = {
   fraud: "Fraudulent trade accounts",
   inactive: "Inactive / not trading",
@@ -176,12 +187,23 @@ export const ROLE_DESC: Record<string, string> = {
 };
 export const ROLES = ["Admin", "Support", "Viewer"];
 
-/** The customer-facing dashboard (app/dashboard) has no real login session
- *  yet, so it demos as this one member — swap for the authenticated
- *  member's id once auth exists. */
-export const CURRENT_MEMBER_ID = 1;
+export type LotCalculationMode = "sum_all_active" | "selected_only";
 
-export type LotCalculationMode = "sum_all_verified" | "selected_only";
+/** Server-computed lot summary per member (snapshot-only, current cycle window).
+ *  Hydrated with the members payload so list/detail read one number instead of
+ *  recomputing ledger math per row. Absent in demo mode — callers fall back to
+ *  the local memberLots() math. */
+export type LotSummary = {
+  lots: number;
+  required: number;
+  qualified: boolean;
+  stale: boolean;
+  from: string;
+  to: string;
+  asOf?: string;
+};
+
+export type LotOverview = { requiredLots: number; qualified: number; notQualified: number };
 
 export type Settings = {
   requiredLots: number;
@@ -198,277 +220,26 @@ export type Settings = {
   planEntitlements: Record<Plan, number[]>;
 };
 
-/* ── Mock seed data ──
-   Placeholder members for building/reviewing the UI — Phase 2 swaps this
-   array for a real query. Dates are anchored around "today" so the
-   Expiring Soon / Expired states in the demo are actually visible. */
-
-const HANDWRITTEN_MEMBERS: Member[] = [
-  { id: 1, code: "BS-0001", name: "Somchai Wattana", email: "somchai.w@gmail.com", phone: "+66 81 234 5671", country: "Thailand", tv: "somchaifx", telegramUsername: "somchai_trade", telegramUserId: "5501234", createdDate: "2026-01-09", joinedDate: "2026-01-09", channels: ["facebook"], plan: "ib_partner" },
-  { id: 2, code: "BS-0002", name: "Aisha Rahman", email: "aisha.rahman@gmail.com", phone: "+60 12 345 6782", country: "Malaysia", tv: "aisharfx", telegramUsername: "aisha_r", telegramUserId: "5501235", createdDate: "2025-11-20", joinedDate: "2025-11-20", channels: ["instagram", "tiktok"], plan: "ib_partner" },
-  { id: 3, code: "BS-0003", name: "Marco Rossi", email: "marco.rossi@gmail.com", phone: "+39 345 123 4567", country: "Italy", tv: "marcofx", telegramUsername: "marco_r", telegramUserId: "5501236", createdDate: "2025-11-18", joinedDate: "2025-11-18", plan: "ib_partner" },
-  { id: 4, code: "BS-0004", name: "Nina Patel", email: "nina.patel@gmail.com", phone: "+91 98765 43210", country: "India", tv: "ninap", telegramUsername: "nina_p", telegramUserId: "5501237", createdDate: "2026-01-30", joinedDate: "2026-01-30", channels: ["tiktok"], plan: "free" },
-  { id: 5, code: "BS-0005", name: "Carlos Gomez", email: "c.gomez@gmail.com", phone: "+34 611 222 333", country: "Spain", tv: "carlosg", createdDate: "2026-03-05", joinedDate: "2026-03-05", plan: "free" },
-  { id: 6, code: "BS-0006", name: "Priya Nair", email: "priya.nair@gmail.com", phone: "+91 90000 11122", country: "India", tv: "priyafx", telegramUsername: "priya_n", telegramUserId: "5501238", createdDate: "2025-12-04", joinedDate: "2025-12-04", channels: ["facebook", "instagram", "tiktok"], plan: "ib_partner" },
-  { id: 7, code: "BS-0007", name: "Tom Becker", email: "tom.becker@web.de", phone: "+49 151 234 5678", country: "Germany", tv: "tbecker", createdDate: "2025-09-27", joinedDate: "2025-09-27", plan: "free" },
-  { id: 8, code: "BS-0008", name: "Emma Chen", email: "emma.chen@gmail.com", phone: "+1 415 555 0142", country: "United States", tv: "emmac", telegramUsername: "emma_c", telegramUserId: "5501239", createdDate: "2026-08-01", joinedDate: "2026-08-01", channels: ["instagram"], plan: "free" },
-  { id: 9, code: "BS-0009", name: "Liam O'Connor", email: "liam.oc@gmail.com", phone: "+353 87 123 4567", country: "Ireland", tv: "liamtrades", telegramUsername: "liam_oc", telegramUserId: "5501240", createdDate: "2025-12-02", joinedDate: "2025-12-02", plan: "ib_partner" },
-  { id: 10, code: "BS-0010", name: "Daniel Reyes", email: "d.reyes@proton.me", phone: "+52 55 1234 5678", country: "Mexico", tv: "danreyes", telegramUsername: "dan_r", telegramUserId: "5501241", createdDate: "2026-02-14", joinedDate: "2026-02-14", channels: ["facebook", "tiktok"], plan: "free" },
-];
-
-/* ── Bulk demo data (deterministic, not random) ──
-   Generates ~90 additional members + one trade account each, spread evenly
-   across a 20-month window, so the Overview charts can be previewed at a
-   realistic hundred-member scale instead of just the 10 handwritten rows. */
-const BULK_FIRST_NAMES = [
-  "James", "Mary", "John", "Patricia", "Robert", "Jennifer", "Michael", "Linda", "William", "Elizabeth",
-  "David", "Barbara", "Richard", "Susan", "Joseph", "Jessica", "Thomas", "Sarah", "Charles", "Karen",
-  "Chalermchai", "Siriporn", "Anand", "Priyanka", "Wei", "Mei", "Haruto", "Yuki", "Fatima", "Omar",
-  "Layla", "Ahmed", "Sofia", "Lucas", "Isabella", "Mateo", "Valentina", "Diego", "Camila", "Andres",
-  "Elena", "Nikolai", "Olga", "Piotr", "Katarzyna", "Erik", "Freya", "Lars", "Ingrid", "Kwame",
-];
-const BULK_LAST_NAMES = [
-  "Smith", "Johnson", "Williams", "Brown", "Jones", "Garcia", "Miller", "Davis", "Rodriguez", "Martinez",
-  "Hernandez", "Lopez", "Gonzalez", "Wilson", "Anderson", "Thomas", "Taylor", "Moore", "Jackson", "Martin",
-  "Lee", "Perez", "Thompson", "White", "Harris", "Sanchez", "Clark", "Ramirez", "Lewis", "Robinson",
-  "Walker", "Young", "Allen", "King", "Wright", "Scott", "Torres", "Nguyen", "Hill", "Flores",
-];
-const BULK_PHONE_CODES = ["+66", "+60", "+39", "+91", "+34", "+49", "+353", "+52", "+1", "+81", "+82", "+65", "+61", "+44", "+33", "+971", "+27", "+55", "+7", "+48"];
-const PHONE_CODE_COUNTRY: Record<string, string> = {
-  "+66": "Thailand", "+60": "Malaysia", "+39": "Italy", "+91": "India", "+34": "Spain",
-  "+49": "Germany", "+353": "Ireland", "+52": "Mexico", "+1": "United States", "+81": "Japan",
-  "+82": "South Korea", "+65": "Singapore", "+61": "Australia", "+44": "United Kingdom", "+33": "France",
-  "+971": "United Arab Emirates", "+27": "South Africa", "+55": "Brazil", "+7": "Russia", "+48": "Poland",
-};
-const BULK_MONTHS = [
-  "2025-01", "2025-02", "2025-03", "2025-04", "2025-05", "2025-06", "2025-07", "2025-08", "2025-09", "2025-10", "2025-11", "2025-12",
-  "2026-01", "2026-02", "2026-03", "2026-04", "2026-05", "2026-06", "2026-07", "2026-08",
-];
-
-/** Whatever "this month" resolves to when the app loads — seed trade-log
- *  dates are stamped against this (not a hardcoded month) so "lots this
- *  month" demo numbers stay non-zero regardless of when the app is run. */
-const CURRENT_MONTH = new Date().toISOString().slice(0, 7);
-export const SYMBOLS = ["GOLD", "EURUSD", "GBPUSD", "USDJPY", "AUDUSD", "USDCAD", "NZDUSD", "USDCHF", "EURJPY", "GBPJPY"];
-
-function generateBulkMembers(count: number, startId: number): Member[] {
-  return Array.from({ length: count }, (_, i) => {
-    const id = startId + i;
-    const first = BULK_FIRST_NAMES[i % BULK_FIRST_NAMES.length];
-    const last = BULK_LAST_NAMES[(i * 3 + 7) % BULK_LAST_NAMES.length];
-    const mo = BULK_MONTHS[i % BULK_MONTHS.length];
-    const day = String(((i * 7) % 27) + 1).padStart(2, "0");
-    const joinedDate = `${mo}-${day}`;
-    const phoneCode = BULK_PHONE_CODES[i % BULK_PHONE_CODES.length];
-    const phoneDigits = String(1000000 + ((i * 9137) % 8999999));
-    const channels: AcquisitionChannel[] = [];
-    if (i % 3 === 0) channels.push("facebook");
-    if (i % 4 === 0) channels.push("instagram");
-    if (i % 5 === 0) channels.push("tiktok");
-    return {
-      id,
-      code: `BS-${String(id).padStart(4, "0")}`,
-      name: `${first} ${last}`,
-      email: `${first.toLowerCase()}.${last.toLowerCase()}${id}@gmail.com`,
-      phone: `${phoneCode} ${phoneDigits.slice(0, 3)} ${phoneDigits.slice(3)}`,
-      country: PHONE_CODE_COUNTRY[phoneCode],
-      tv: `${first.toLowerCase()}${last.toLowerCase()}${id}`,
-      createdDate: joinedDate,
-      joinedDate,
-      channels: channels.length ? channels : undefined,
-      plan: i % 3 === 0 ? "ib_partner" : "free",
-    } satisfies Member;
-  });
-}
-
-const BULK_LOG_DAYS = ["04", "14", "24"];
-
-function generateBulkTradeAccounts(bulkMembers: Member[], startId: number): { accounts: TradeAccount[]; logs: TradeLog[] } {
-  const accounts: TradeAccount[] = [];
-  const logs: TradeLog[] = [];
-  let logId = 0;
-  bulkMembers.forEach((m, i) => {
-    const brokerId = (i % 2) + 1;
-    const broker = INITIAL_BROKERS[brokerId - 1];
-    const lots = Math.round((((i * 37) % 1500) / 100) * 10) / 10;
-    const verification: VerificationStatus = i % 9 === 0 ? "pending" : "verified";
-    const accountId = startId + i;
-    accounts.push({
-      id: accountId,
-      memberId: m.id,
-      brokerId,
-      tradeId: String(70000000 + i * 91),
-      accountType: "Standard",
-      partnerIb: broker.code,
-      verification,
-      createdDate: m.joinedDate,
-      lastSync: "2026-08-26",
-      status: "active",
-    } satisfies TradeAccount);
-    if (lots > 0) {
-      // Split each account's monthly total across 1-3 pairs/dates (more
-      // pairs the more a member trades) so the demo data reads like a real
-      // rebate ledger instead of one lump entry — while still summing back
-      // to the exact same account totals other pages already rely on.
-      const totalRebate = Math.round(lots * 20 * 10) / 10;
-      const splitCount = lots >= 3 ? 3 : lots >= 1 ? 2 : 1;
-      const weights = splitCount === 3 ? [0.45, 0.33, 0.22] : splitCount === 2 ? [0.6, 0.4] : [1];
-      let lotsAcc = 0;
-      let rebateAcc = 0;
-      for (let k = 0; k < splitCount; k++) {
-        const isLast = k === splitCount - 1;
-        const l = isLast ? Math.round((lots - lotsAcc) * 100) / 100 : Math.round(lots * weights[k] * 100) / 100;
-        const r = isLast ? Math.round((totalRebate - rebateAcc) * 100) / 100 : Math.round(totalRebate * weights[k] * 100) / 100;
-        lotsAcc += l;
-        rebateAcc += r;
-        logId++;
-        logs.push({
-          id: logId,
-          tradeAccountId: accountId,
-          memberId: m.id,
-          symbol: SYMBOLS[(i + k) % SYMBOLS.length],
-          lots: l,
-          rebate: r,
-          tradeDate: `${CURRENT_MONTH}-${BULK_LOG_DAYS[k % BULK_LOG_DAYS.length]}`,
-        } satisfies TradeLog);
-      }
-    }
-  });
-  return { accounts, logs };
-}
-
-const BULK_MEMBERS = generateBulkMembers(90, 11);
-const INITIAL_MEMBERS: Member[] = [...HANDWRITTEN_MEMBERS, ...BULK_MEMBERS];
-
-const INITIAL_BROKERS: Broker[] = [
-  { id: 1, name: "Exness", logo: "/img/broker/logo_exness_white.svg", code: "BS-EX2049", url: "https://www.exness.com/", status: "active", importMethod: "CSV Import" },
-  { id: 2, name: "XM", logo: "/img/broker/XM-Logo-White-RGB.png", code: "BSIMX", url: "https://www.xm.com/", status: "active", importMethod: "API" },
-];
-
-const HANDWRITTEN_TRADE_ACCOUNTS: TradeAccount[] = [
-  { id: 1, memberId: 1, brokerId: 4, tradeId: "390894526", accountType: "Standard", partnerIb: "BSIMX", verification: "verified", createdDate: "2026-01-09", lastSync: "2026-08-26", status: "active" },
-  { id: 2, memberId: 1, brokerId: 4, tradeId: "82707281", accountType: "Ultra Low", partnerIb: "BSIMX", verification: "verified", createdDate: "2026-02-11", lastSync: "2026-08-26", status: "active" },
-  { id: 3, memberId: 2, brokerId: 2, tradeId: "41200981", accountType: "Raw Spread", partnerIb: "BS-IC7781", verification: "verified", createdDate: "2025-11-20", lastSync: "2026-08-25", status: "active" },
-  { id: 4, memberId: 3, brokerId: 1, tradeId: "50491120", accountType: "Standard", partnerIb: "BS-EX2049", verification: "verified", createdDate: "2025-11-18", lastSync: "2026-08-26", status: "active" },
-  { id: 5, memberId: 3, brokerId: 2, tradeId: "41200982", accountType: "Raw Spread", partnerIb: "BS-IC7781", verification: "verified", createdDate: "2025-12-01", lastSync: "2026-08-26", status: "active" },
-  { id: 6, memberId: 3, brokerId: 4, tradeId: "82045514", accountType: "Standard", partnerIb: "BSIMX", verification: "pending", createdDate: "2026-06-10", lastSync: "2026-08-24", status: "active" },
-  { id: 7, memberId: 4, brokerId: 4, tradeId: "82045513", accountType: "Standard", partnerIb: "BSIMX", verification: "verified", createdDate: "2026-01-30", lastSync: "2026-08-26", status: "active" },
-  { id: 8, memberId: 5, brokerId: 5, tradeId: "10294455", accountType: "Standard", partnerIb: "BS-HF1029", verification: "not_found", createdDate: "2026-03-05", lastSync: "2026-08-20", status: "inactive" },
-  { id: 9, memberId: 6, brokerId: 2, tradeId: "41200999", accountType: "Raw Spread", partnerIb: "BS-IC7781", verification: "verified", createdDate: "2025-12-04", lastSync: "2026-08-26", status: "active" },
-  { id: 10, memberId: 7, brokerId: 3, tradeId: "61200945", accountType: "Standard", partnerIb: "BS-PS6120", verification: "not_found", createdDate: "2025-09-27", lastSync: "2026-08-10", status: "inactive" },
-  { id: 11, memberId: 8, brokerId: 5, tradeId: "10294400", accountType: "Standard", partnerIb: "BS-HF1029", verification: "verified", createdDate: "2026-08-01", lastSync: "2026-08-26", status: "active" },
-  { id: 12, memberId: 9, brokerId: 3, tradeId: "61200950", accountType: "Standard", partnerIb: "BS-PS6120", verification: "verified", createdDate: "2025-12-02", lastSync: "2026-08-26", status: "active" },
-  { id: 13, memberId: 10, brokerId: 4, tradeId: "82045520", accountType: "Standard", partnerIb: "BSIMX", verification: "verified", createdDate: "2026-02-14", lastSync: "2026-08-26", status: "active" },
-];
-
-/** id: [tradeAccountId, memberId, lots, rebate] — one seed trade-log entry
- *  per handwritten account above, dated this month so existing "lots this
- *  month" demo numbers are unchanged now that they're derived, not stored. */
-const HANDWRITTEN_TRADE_LOGS: TradeLog[] = [
-  { id: 1, tradeAccountId: 1, memberId: 1, symbol: "GOLD", lots: 1.54, rebate: 30.78, tradeDate: `${CURRENT_MONTH}-05` },
-  { id: 2, tradeAccountId: 1, memberId: 1, symbol: "EURUSD", lots: 1.13, rebate: 22.57, tradeDate: `${CURRENT_MONTH}-12` },
-  { id: 3, tradeAccountId: 1, memberId: 1, symbol: "GBPUSD", lots: 0.75, rebate: 15.05, tradeDate: `${CURRENT_MONTH}-20` },
-  { id: 4, tradeAccountId: 2, memberId: 1, symbol: "EURUSD", lots: 0.75, rebate: 11.25, tradeDate: `${CURRENT_MONTH}-05` },
-  { id: 5, tradeAccountId: 2, memberId: 1, symbol: "GBPUSD", lots: 0.5, rebate: 7.5, tradeDate: `${CURRENT_MONTH}-12` },
-  { id: 6, tradeAccountId: 3, memberId: 2, symbol: "GBPUSD", lots: 1.26, rebate: 18.9, tradeDate: `${CURRENT_MONTH}-05` },
-  { id: 7, tradeAccountId: 3, memberId: 2, symbol: "USDJPY", lots: 0.84, rebate: 12.6, tradeDate: `${CURRENT_MONTH}-12` },
-  { id: 8, tradeAccountId: 4, memberId: 3, symbol: "USDJPY", lots: 5.4, rebate: 108, tradeDate: `${CURRENT_MONTH}-05` },
-  { id: 9, tradeAccountId: 4, memberId: 3, symbol: "AUDUSD", lots: 3.96, rebate: 79.2, tradeDate: `${CURRENT_MONTH}-12` },
-  { id: 10, tradeAccountId: 4, memberId: 3, symbol: "USDCAD", lots: 2.64, rebate: 52.8, tradeDate: `${CURRENT_MONTH}-20` },
-  { id: 11, tradeAccountId: 5, memberId: 3, symbol: "AUDUSD", lots: 2.93, rebate: 43.88, tradeDate: `${CURRENT_MONTH}-05` },
-  { id: 12, tradeAccountId: 5, memberId: 3, symbol: "USDCAD", lots: 2.15, rebate: 32.18, tradeDate: `${CURRENT_MONTH}-12` },
-  { id: 13, tradeAccountId: 5, memberId: 3, symbol: "NZDUSD", lots: 1.42, rebate: 21.44, tradeDate: `${CURRENT_MONTH}-20` },
-  { id: 14, tradeAccountId: 6, memberId: 3, symbol: "USDCAD", lots: 1.58, rebate: 0, tradeDate: `${CURRENT_MONTH}-05` },
-  { id: 15, tradeAccountId: 6, memberId: 3, symbol: "NZDUSD", lots: 1.16, rebate: 0, tradeDate: `${CURRENT_MONTH}-12` },
-  { id: 16, tradeAccountId: 6, memberId: 3, symbol: "USDCHF", lots: 0.76, rebate: 0, tradeDate: `${CURRENT_MONTH}-20` },
-  { id: 17, tradeAccountId: 7, memberId: 4, symbol: "EURJPY", lots: 2.52, rebate: 50.4, tradeDate: `${CURRENT_MONTH}-05` },
-  { id: 18, tradeAccountId: 7, memberId: 4, symbol: "GBPJPY", lots: 1.85, rebate: 36.96, tradeDate: `${CURRENT_MONTH}-12` },
-  { id: 19, tradeAccountId: 7, memberId: 4, symbol: "GOLD", lots: 1.23, rebate: 24.64, tradeDate: `${CURRENT_MONTH}-20` },
-  { id: 20, tradeAccountId: 9, memberId: 6, symbol: "GBPJPY", lots: 1.8, rebate: 27, tradeDate: `${CURRENT_MONTH}-05` },
-  { id: 21, tradeAccountId: 9, memberId: 6, symbol: "GOLD", lots: 1.32, rebate: 19.8, tradeDate: `${CURRENT_MONTH}-12` },
-  { id: 22, tradeAccountId: 9, memberId: 6, symbol: "EURUSD", lots: 0.88, rebate: 13.2, tradeDate: `${CURRENT_MONTH}-20` },
-  { id: 23, tradeAccountId: 11, memberId: 8, symbol: "NZDUSD", lots: 1.08, rebate: 16.2, tradeDate: `${CURRENT_MONTH}-05` },
-  { id: 24, tradeAccountId: 11, memberId: 8, symbol: "USDCHF", lots: 0.72, rebate: 10.8, tradeDate: `${CURRENT_MONTH}-12` },
-  { id: 25, tradeAccountId: 12, memberId: 9, symbol: "USDCHF", lots: 2.93, rebate: 58.5, tradeDate: `${CURRENT_MONTH}-05` },
-  { id: 26, tradeAccountId: 12, memberId: 9, symbol: "EURJPY", lots: 2.15, rebate: 42.9, tradeDate: `${CURRENT_MONTH}-12` },
-  { id: 27, tradeAccountId: 12, memberId: 9, symbol: "GBPJPY", lots: 1.42, rebate: 28.6, tradeDate: `${CURRENT_MONTH}-20` },
-  { id: 28, tradeAccountId: 13, memberId: 10, symbol: "GOLD", lots: 1.14, rebate: 17.1, tradeDate: `${CURRENT_MONTH}-05` },
-  { id: 29, tradeAccountId: 13, memberId: 10, symbol: "EURUSD", lots: 0.76, rebate: 11.4, tradeDate: `${CURRENT_MONTH}-12` },
-  // Extra activity on member 1's two XM accounts — the customer-facing
-  // dashboard (app/dashboard) is demoed as this member, so it needs a
-  // fuller trade history than the 3-4 rows every other seed member has.
-  { id: 30, tradeAccountId: 1, memberId: 1, symbol: "USDJPY", lots: 2.10, rebate: 42.00, tradeDate: `${CURRENT_MONTH}-02` },
-  { id: 31, tradeAccountId: 1, memberId: 1, symbol: "AUDUSD", lots: 1.85, rebate: 37.00, tradeDate: `${CURRENT_MONTH}-07` },
-  { id: 32, tradeAccountId: 1, memberId: 1, symbol: "GOLD", lots: 3.20, rebate: 64.00, tradeDate: `${CURRENT_MONTH}-15` },
-  { id: 33, tradeAccountId: 1, memberId: 1, symbol: "EURJPY", lots: 1.40, rebate: 28.00, tradeDate: `${CURRENT_MONTH}-23` },
-  { id: 34, tradeAccountId: 1, memberId: 1, symbol: "GBPUSD", lots: 2.65, rebate: 53.00, tradeDate: `${CURRENT_MONTH}-27` },
-  { id: 35, tradeAccountId: 2, memberId: 1, symbol: "NZDUSD", lots: 1.20, rebate: 24.00, tradeDate: `${CURRENT_MONTH}-03` },
-  { id: 36, tradeAccountId: 2, memberId: 1, symbol: "USDCHF", lots: 0.95, rebate: 19.00, tradeDate: `${CURRENT_MONTH}-09` },
-  { id: 37, tradeAccountId: 2, memberId: 1, symbol: "GOLD", lots: 1.75, rebate: 35.00, tradeDate: `${CURRENT_MONTH}-16` },
-  { id: 38, tradeAccountId: 2, memberId: 1, symbol: "EURUSD", lots: 1.10, rebate: 22.00, tradeDate: `${CURRENT_MONTH}-24` },
-  { id: 39, tradeAccountId: 2, memberId: 1, symbol: "GBPJPY", lots: 1.35, rebate: 27.00, tradeDate: `${CURRENT_MONTH}-28` },
-];
-
-const BULK_TRADE_DATA = generateBulkTradeAccounts(BULK_MEMBERS, 14);
-const INITIAL_TRADE_ACCOUNTS: TradeAccount[] = [...HANDWRITTEN_TRADE_ACCOUNTS, ...BULK_TRADE_DATA.accounts];
-const INITIAL_TRADE_LOGS: TradeLog[] = [
-  ...HANDWRITTEN_TRADE_LOGS,
-  ...BULK_TRADE_DATA.logs.map((l) => ({ ...l, id: l.id + HANDWRITTEN_TRADE_LOGS.length })),
-];
-
-const INITIAL_INDICATORS: Indicator[] = [
-  { id: 1, name: "BeSight One STR", pubId: "75ee20d5bee6431c9bdef0282d58fdd3", status: "active" },
-  { id: 2, name: "Besight Orca", pubId: "341c1526463b46f198b3f2ee63d9bf4a", status: "active" },
-];
-
-const INITIAL_INDICATOR_ACCESS: IndicatorAccess[] = [
-  // Live access records are loaded from the database on provider mount.
-];
-
-const INITIAL_TELEGRAM_ACCESS: TelegramAccess[] = [
-  { id: 1, memberId: 1, username: "somchai_trade", userId: "5501234", room: "BeSight VIP Signals", status: "active", grantedDate: "2026-01-09" },
-  { id: 2, memberId: 2, username: "aisha_r", userId: "5501235", room: "BeSight VIP Signals", status: "expired", grantedDate: "2025-11-20", expiryDate: "2026-06-20" },
-  { id: 3, memberId: 3, username: "marco_r", userId: "5501236", room: "BeSight VIP Signals", status: "active", grantedDate: "2025-11-18" },
-  { id: 4, memberId: 4, username: "nina_p", userId: "5501237", room: "BeSight VIP Signals", status: "active", grantedDate: "2026-01-30" },
-  { id: 5, memberId: 6, username: "priya_n", userId: "5501238", room: "BeSight VIP Signals", status: "banned", grantedDate: "2025-12-04" },
-  { id: 6, memberId: 8, username: "emma_c", userId: "5501239", room: "BeSight VIP Signals", status: "pending", grantedDate: "2026-08-01" },
-  { id: 7, memberId: 9, username: "liam_oc", userId: "5501240", room: "BeSight VIP Signals", status: "active", grantedDate: "2025-12-02" },
-  { id: 8, memberId: 10, username: "dan_r", userId: "5501241", room: "BeSight VIP Signals", status: "active", grantedDate: "2026-02-14" },
-];
-
-const INITIAL_RENEWAL_HISTORY: RenewalRecord[] = [
-  { id: 1, memberId: 1, indicator: "BeSight ONE", period: "2026-07", qualifiedLots: 3.82, renewed: true, oldExpiry: "2026-07-31", newExpiry: "2026-08-31", createdDate: "2026-07-31" },
-  { id: 2, memberId: 3, indicator: "BeSight ONE", period: "2026-08", qualifiedLots: 21.5, renewed: true, oldExpiry: "2026-08-18", newExpiry: "2027-01-18", createdDate: "2026-08-18" },
-  { id: 3, memberId: 9, indicator: "BeSight ONE", period: "2026-08", qualifiedLots: 6.5, renewed: true, oldExpiry: "2026-08-02", newExpiry: "2027-02-02", createdDate: "2026-08-02" },
-  { id: 4, memberId: 2, indicator: "BeSight ONE", period: "2026-06", qualifiedLots: 1.4, renewed: false, oldExpiry: "2026-06-20", createdDate: "2026-06-20" },
-  { id: 5, memberId: 3, indicator: "BeSight Orca", period: "2026-09", qualifiedLots: 21.5, renewed: true, oldExpiry: "2026-09-01", newExpiry: "2026-10-01", createdDate: "2026-09-01" },
-];
-
-const INITIAL_ACTIVITY_LOGS: ActivityLog[] = [];
-
 const DEFAULT_SETTINGS: Settings = {
   requiredLots: 3.0,
   renewalPeriodMonths: 1,
   expiringSoonDays: 7,
   autoRenewalEnabled: true,
-  lotCalculationMode: "sum_all_verified",
+  lotCalculationMode: "sum_all_active",
   telegramBotToken: "",
   telegramPrivateRoomId: "",
   telegramAutoRemove: true,
   planEntitlements: { free: [2, 3], ib_partner: [1, 2] },
 };
 
-const INITIAL_ADMINS: Admin[] = [
-  { id: 1, name: "Alex Dean", email: "alex.dean@besight.com", role: "Owner", owner: true },
-  { id: 2, name: "Maria Lopez", email: "maria@besight.com", role: "Admin" },
-  { id: 3, name: "Sam Wright", email: "sam@besight.com", role: "Support" },
-];
-
 type CrmContextValue = {
   members: Member[];
   setMembers: React.Dispatch<React.SetStateAction<Member[]>>;
   tradeAccounts: TradeAccount[];
   setTradeAccounts: React.Dispatch<React.SetStateAction<TradeAccount[]>>;
+  /** CRM-synced accounts the member hasn't confirmed yet (member dashboard only). */
+  pendingTradeAccounts: TradeAccount[];
+  setPendingTradeAccounts: React.Dispatch<React.SetStateAction<TradeAccount[]>>;
   tradeLogs: TradeLog[];
   setTradeLogs: React.Dispatch<React.SetStateAction<TradeLog[]>>;
   brokers: Broker[];
@@ -487,11 +258,14 @@ type CrmContextValue = {
   setAdmins: React.Dispatch<React.SetStateAction<Admin[]>>;
   settings: Settings;
   setSettings: React.Dispatch<React.SetStateAction<Settings>>;
+  /** Server-computed lot summaries keyed by member id (snapshot-only, current
+   *  cycle). Empty in demo mode — pages fall back to local ledger math. */
+  lotSummaries: Record<number, LotSummary>;
+  lotOverview: LotOverview | null;
   toast: (msg: string) => void;
   toastMsg: string;
   toastShow: boolean;
   log: (entry: Omit<ActivityLog, "id" | "timestamp">) => void;
-  runRenewalCheck: () => { renewed: number; expired: number };
   syncPlanAccess: (memberId: number, plan: Plan, memberName: string) => Promise<number>;
   memberSyncStatus: "idle" | "loading" | "live" | "error";
   memberSyncError: string;
@@ -499,6 +273,13 @@ type CrmContextValue = {
   /** "loading" until every initial backend read has settled (success or
    *  failure) — pages render skeletons while this is "loading". */
   crmDataStatus: "loading" | "ready";
+  /** Non-empty when one or more backend reads failed. The affected collections
+   *  are empty rather than seeded, so pages must surface this instead of
+   *  rendering as if there were genuinely no records. */
+  crmDataError: string;
+  /** True when the access gate rejected the reads — the session ended, so the
+   *  only useful action is signing in again. */
+  gateRequired: boolean;
   /** Last seen realtime counter (see ADR-001) — detail views refetch their
    *  own slices when this moves. */
   dataVersion: number;
@@ -507,6 +288,13 @@ type CrmContextValue = {
   backendLive: boolean;
   /** Re-read every dataset from DB-read endpoints (no upstream sync). */
   reloadFromDatabase: () => Promise<void>;
+  /** The signed-in account, passed from the server layout. */
+  viewer: { name: string; email: string; role: "admin" | "member" };
+  /** Member dashboard: the TradingView username + email that matched the CRM
+   *  record, once the member has verified their identity. Required before a
+   *  trade account can be claimed. */
+  identity: { tradingView: string; email: string } | null;
+  verifyIdentity: (tradingView: string, email: string) => Promise<{ ok: boolean; error?: string }>;
 };
 
 const CrmContext = createContext<CrmContextValue | null>(null);
@@ -518,20 +306,32 @@ const CrmContext = createContext<CrmContextValue | null>(null);
 let lastSyncFinishedAt = 0;
 const SYNC_COOLDOWN_MS = 120_000;
 
-async function loadJson<T>(url: string): Promise<(T & { ok?: boolean }) | null> {
+/* A failed read and an empty table must never look alike: returning null for both
+   is what let a 401 silently repaint the UI with seed data. Callers get an
+   explicit outcome instead. */
+type LoadResult<T> = { ok: true; data: T } | { ok: false; error: string; gateRequired: boolean };
+
+async function loadJson<T>(url: string): Promise<LoadResult<T & { ok?: boolean }>> {
   try {
     const response = await fetch(url, { cache: "no-store" });
-    const payload = await response.json() as T & { ok?: boolean };
-    return response.ok && payload.ok ? payload : null;
-  } catch {
-    return null;
+    const payload = await response.json().catch(() => ({})) as T & { ok?: boolean; error?: string; code?: string };
+    if (!response.ok || !payload.ok) {
+      return {
+        ok: false,
+        error: payload.error || `${url} failed (${response.status})`,
+        gateRequired: response.status === 401,
+      };
+    }
+    return { ok: true, data: payload };
+  } catch (error) {
+    return { ok: false, error: error instanceof Error ? error.message : `${url} failed`, gateRequired: false };
   }
 }
 
 /* One fetch per backend dataset — DB reads only, never the slow upstream
    Supabase sync. Shared by initial load and the realtime reload path. */
 type DatabasePayloads = {
-  members?: { members?: Member[]; tradeAccounts?: TradeAccount[] } | null;
+  members?: { members?: Member[]; tradeAccounts?: TradeAccount[]; pendingTradeAccounts?: TradeAccount[]; lotSummaries?: Record<number, LotSummary>; lotOverview?: LotOverview } | null;
   brokers?: { brokers?: Broker[] } | null;
   indicators?: { indicators?: Indicator[]; indicatorAccess?: IndicatorAccess[]; planEntitlements?: Record<Plan, number[]> } | null;
   activity?: { activityLogs?: ActivityLog[] } | null;
@@ -539,13 +339,19 @@ type DatabasePayloads = {
   admins?: { admins?: Admin[] } | null;
   tradeLogs?: { tradeLogs?: TradeLog[] } | null;
   automation?: { requiredLots?: number; renewalMonths?: number; enabled?: boolean } | null;
-  general?: { telegramBotToken?: string; telegramPrivateRoomId?: string; telegramAutoRemove?: boolean; expiringSoonDays?: number; lotCalculationMode?: LotCalculationMode } | null;
+  general?: { telegramBotToken?: string; telegramPrivateRoomId?: string; telegramAutoRemove?: boolean; expiringSoonDays?: number; lotCalculationMode?: LotCalculationMode | "sum_all_verified" } | null;
+  renewals?: { renewalHistory?: RenewalRecord[] } | null;
   version?: { version?: number } | null;
+  /** Member dashboard only: set once the member has passed the identity check,
+   *  so the verify card stays hidden on later visits. */
+  identity?: { tradingView: string; email: string } | null;
 };
 
-async function fetchDatabasePayloads(): Promise<DatabasePayloads> {
+type HydrationOutcome = { payloads: DatabasePayloads; failures: string[]; gateRequired: boolean };
+
+async function fetchDatabasePayloads(): Promise<HydrationOutcome> {
   const [members, brokers, indicators, activity, telegram, admins, tradeLogs, automation, general, version] = await Promise.all([
-    loadJson<{ members?: Member[]; tradeAccounts?: TradeAccount[] }>("/api/crm/members/"),
+    loadJson<{ members?: Member[]; tradeAccounts?: TradeAccount[]; lotSummaries?: Record<number, LotSummary>; lotOverview?: LotOverview }>("/api/crm/members/"),
     loadJson<{ brokers?: Broker[] }>("/api/crm/brokers/"),
     loadJson<{ indicators?: Indicator[]; indicatorAccess?: IndicatorAccess[]; planEntitlements?: Record<Plan, number[]> }>("/api/crm/indicators/"),
     loadJson<{ activityLogs?: ActivityLog[] }>("/api/crm/activity-logs/?limit=2000"),
@@ -556,47 +362,117 @@ async function fetchDatabasePayloads(): Promise<DatabasePayloads> {
     loadJson<{ settings?: DatabasePayloads["general"] }>("/api/crm/settings/general/"),
     loadJson<{ version?: number }>("/api/crm/version/"),
   ]);
+  const results = { members, brokers, indicators, activity, telegram, admins, tradeLogs, automation, general, version };
+  const failures = Object.entries(results).filter(([, r]) => !r.ok).map(([name]) => name);
+  const gateRequired = Object.values(results).some((r) => !r.ok && r.gateRequired);
+  const value = <T,>(result: LoadResult<T>) => (result.ok ? result.data : undefined);
+
   return {
-    members, brokers, indicators, activity, telegram, admins, tradeLogs,
-    automation: automation?.settings,
-    general: general?.settings ?? undefined,
-    version,
+    payloads: {
+      members: value(members),
+      brokers: value(brokers),
+      indicators: value(indicators),
+      activity: value(activity),
+      telegram: value(telegram),
+      admins: value(admins),
+      tradeLogs: value(tradeLogs),
+      automation: value(automation)?.settings,
+      general: value(general)?.settings ?? undefined,
+      version: value(version),
+    },
+    failures,
+    gateRequired,
   };
 }
 
-export function CrmProvider({ children }: { children: ReactNode }) {
-  const [members, setMembers] = useState<Member[]>(INITIAL_MEMBERS);
-  const [tradeAccounts, setTradeAccounts] = useState<TradeAccount[]>(INITIAL_TRADE_ACCOUNTS);
-  const [tradeLogs, setTradeLogs] = useState<TradeLog[]>(INITIAL_TRADE_LOGS);
-  const [brokers, setBrokers] = useState<Broker[]>(INITIAL_BROKERS);
-  const [indicators, setIndicators] = useState<Indicator[]>(INITIAL_INDICATORS);
-  const [indicatorAccess, setIndicatorAccess] = useState<IndicatorAccess[]>(INITIAL_INDICATOR_ACCESS);
-  const [telegramAccess, setTelegramAccess] = useState<TelegramAccess[]>(INITIAL_TELEGRAM_ACCESS);
-  const [renewalHistory, setRenewalHistory] = useState<RenewalRecord[]>(INITIAL_RENEWAL_HISTORY);
-  const [activityLogs, setActivityLogs] = useState<ActivityLog[]>(INITIAL_ACTIVITY_LOGS);
-  const [admins, setAdmins] = useState<Admin[]>(INITIAL_ADMINS);
+/* Member dashboard payload — one request scoped to the signed-in member. */
+async function fetchMemberPayloads(): Promise<HydrationOutcome> {
+  const result = await loadJson<{
+    member?: Member;
+    tradeAccounts?: TradeAccount[];
+    pendingTradeAccounts?: TradeAccount[];
+    tradeLogs?: TradeLog[];
+    indicatorAccess?: IndicatorAccess[];
+    telegramAccess?: TelegramAccess[];
+    renewalHistory?: RenewalRecord[];
+    indicators?: Indicator[];
+    planEntitlements?: Record<Plan, number[]>;
+    brokers?: Broker[];
+    identity?: { tradingView: string; email: string } | null;
+    settings?: { requiredLots?: number; renewalPeriodMonths?: number; autoRenewalEnabled?: boolean };
+  }>("/api/me/");
+  if (!result.ok) return { payloads: {}, failures: ["me"], gateRequired: result.gateRequired };
+  const d = result.data;
+  return {
+    payloads: {
+      members: d.member ? { members: [d.member], tradeAccounts: d.tradeAccounts, pendingTradeAccounts: d.pendingTradeAccounts } : undefined,
+      brokers: d.brokers ? { brokers: d.brokers } : undefined,
+      indicators: d.indicators ? { indicators: d.indicators, indicatorAccess: d.indicatorAccess, planEntitlements: d.planEntitlements } : undefined,
+      telegram: d.telegramAccess ? { telegramAccess: d.telegramAccess } : undefined,
+      tradeLogs: d.tradeLogs ? { tradeLogs: d.tradeLogs } : undefined,
+      renewals: d.renewalHistory ? { renewalHistory: d.renewalHistory } : undefined,
+      identity: d.identity ?? null,
+      automation: d.settings,
+    },
+    failures: [],
+    gateRequired: false,
+  };
+}
+
+export function CrmProvider({ children, mode = "admin", viewer }: { children: ReactNode; mode?: "admin" | "member"; viewer?: { name: string; email: string; role: "admin" | "member" } }) {
+  /* Empty until the database answers. Seeding these with sample rows is what
+     allowed a failed read to render as plausible-looking content. */
+  const [members, setMembers] = useState<Member[]>([]);
+  const [tradeAccounts, setTradeAccounts] = useState<TradeAccount[]>([]);
+  const [pendingTradeAccounts, setPendingTradeAccounts] = useState<TradeAccount[]>([]);
+  const [tradeLogs, setTradeLogs] = useState<TradeLog[]>([]);
+  const [brokers, setBrokers] = useState<Broker[]>([]);
+  const [indicators, setIndicators] = useState<Indicator[]>([]);
+  const [indicatorAccess, setIndicatorAccess] = useState<IndicatorAccess[]>([]);
+  const [telegramAccess, setTelegramAccess] = useState<TelegramAccess[]>([]);
+  const [renewalHistory, setRenewalHistory] = useState<RenewalRecord[]>([]);
+  const [activityLogs, setActivityLogs] = useState<ActivityLog[]>([]);
+  const [admins, setAdmins] = useState<Admin[]>([]);
   const [settings, setSettings] = useState<Settings>(DEFAULT_SETTINGS);
+  const [lotSummaries, setLotSummaries] = useState<Record<number, LotSummary>>({});
+  const [lotOverview, setLotOverview] = useState<LotOverview | null>(null);
   const [toastMsg, setToastMsg] = useState("");
   const [toastShow, setToastShow] = useState(false);
   const [memberSyncStatus, setMemberSyncStatus] = useState<"idle" | "loading" | "live" | "error">("idle");
   const [memberSyncError, setMemberSyncError] = useState("");
   const [crmDataStatus, setCrmDataStatus] = useState<"loading" | "ready">("loading");
+  const [crmDataError, setCrmDataError] = useState("");
+  const [gateRequired, setGateRequired] = useState(false);
   const [dataVersion, setDataVersion] = useState(0);
   const [backendLive, setBackendLive] = useState(false);
+  const [identity, setIdentity] = useState<{ tradingView: string; email: string } | null>(null);
 
-  /* Applies one full set of backend payloads to state. Rules per resource:
-     - members/brokers/admins/telegram: replace only when non-empty (their DB
-       tables may legitimately be empty while still demo-backed).
-     - indicators/access/activity/tradeLogs/automation/general: the DB wins,
-       even when empty (populated by seed/sync/cron flows).
-     A failed/503 source keeps its mock seed (demo-mode fallback). */
+  const verifyIdentity = useCallback(async (tradingView: string, email: string) => {
+    try {
+      await apiCall("/api/me/verify-identity/", "POST", { tradingView, email });
+      setIdentity({ tradingView, email });
+      return { ok: true };
+    } catch (error) {
+      setIdentity(null);
+      return { ok: false, error: error instanceof Error ? error.message : "ยืนยันตัวตนไม่สำเร็จ" };
+    }
+  }, []);
+
+  /* Applies one full set of backend payloads to state. The database always wins,
+     including when it legitimately returns nothing — an empty table must render
+     as empty, never as leftover seed data. Sources that FAILED are absent from
+     the payload and are reported separately as an error, so a 401 or an outage
+     can no longer masquerade as real content. */
   const applyHydration = useCallback((p: DatabasePayloads) => {
     if (Object.values(p).some((v) => v !== null && v !== undefined)) setBackendLive(true);
-    if (p.members?.members?.length) setMembers(p.members.members);
-    if (p.members?.tradeAccounts) setTradeAccounts(p.members.tradeAccounts);
-    if (p.brokers?.brokers?.length) setBrokers(p.brokers.brokers);
-    if (p.admins?.admins?.length) setAdmins(p.admins.admins);
-    if (p.telegram?.telegramAccess?.length) setTelegramAccess(p.telegram.telegramAccess);
+  if (p.members?.members) setMembers(p.members.members);
+  if (p.members?.tradeAccounts) setTradeAccounts(p.members.tradeAccounts);
+  if (p.members?.pendingTradeAccounts) setPendingTradeAccounts(p.members.pendingTradeAccounts);
+  if (p.members?.lotSummaries) setLotSummaries(p.members.lotSummaries);
+  if (p.members?.lotOverview) setLotOverview(p.members.lotOverview);
+    if (p.brokers?.brokers) setBrokers(p.brokers.brokers);
+    if (p.admins?.admins) setAdmins(p.admins.admins);
+    if (p.telegram?.telegramAccess) setTelegramAccess(p.telegram.telegramAccess);
     if (p.indicators) {
       if (p.indicators.indicators) setIndicators(p.indicators.indicators);
       if (p.indicators.indicatorAccess) setIndicatorAccess(p.indicators.indicatorAccess);
@@ -607,6 +483,9 @@ export function CrmProvider({ children }: { children: ReactNode }) {
     }
     if (p.activity?.activityLogs) setActivityLogs(p.activity.activityLogs);
     if (p.tradeLogs?.tradeLogs) setTradeLogs(p.tradeLogs.tradeLogs);
+    if (p.renewals?.renewalHistory) setRenewalHistory(p.renewals.renewalHistory);
+    // Member dashboard: a remembered verification keeps the verify card hidden.
+    if (p.identity !== undefined) setIdentity(p.identity);
     if (p.automation) {
       const automation = p.automation;
       setSettings((current) => ({
@@ -624,8 +503,9 @@ export function CrmProvider({ children }: { children: ReactNode }) {
         ...(typeof general.telegramPrivateRoomId === "string" ? { telegramPrivateRoomId: general.telegramPrivateRoomId } : {}),
         ...(typeof general.telegramAutoRemove === "boolean" ? { telegramAutoRemove: general.telegramAutoRemove } : {}),
         ...(typeof general.expiringSoonDays === "number" ? { expiringSoonDays: general.expiringSoonDays } : {}),
-        ...(general.lotCalculationMode === "sum_all_verified" || general.lotCalculationMode === "selected_only"
-          ? { lotCalculationMode: general.lotCalculationMode }
+        // Legacy stored value "sum_all_verified" counts the same as "sum_all_active".
+        ...(general.lotCalculationMode === "selected_only" || general.lotCalculationMode === "sum_all_active" || general.lotCalculationMode === "sum_all_verified"
+          ? { lotCalculationMode: general.lotCalculationMode === "selected_only" ? "selected_only" as const : "sum_all_active" as const }
           : {}),
       }));
     }
@@ -638,17 +518,29 @@ export function CrmProvider({ children }: { children: ReactNode }) {
      Overlapping reloads are skipped — every reload reads full state, so a
      skipped one loses nothing. */
   const reloadInFlight = useRef(false);
+  /* Once the gate rejects us there is nothing to retry until the user signs in
+     again — without this latch the 10s poller and the sync retry keep firing
+     against a 401 forever, which floods the log and exhausts the browser's
+     connection pool (it starved the gate page's own sign-in request). */
+  const gateBlocked = useRef(false);
   const reloadFromDatabase = useCallback(async () => {
-    if (reloadInFlight.current) return;
+    if (reloadInFlight.current || gateBlocked.current) return;
     reloadInFlight.current = true;
     try {
-      applyHydration(await fetchDatabasePayloads());
+      const { payloads, failures, gateRequired } = mode === "member"
+        ? await fetchMemberPayloads()
+        : await fetchDatabasePayloads();
+      if (gateRequired) gateBlocked.current = true;
+      applyHydration(payloads);
+      setGateRequired(gateRequired);
+      setCrmDataError(failures.length ? `โหลดข้อมูลไม่สำเร็จ: ${failures.join(", ")}` : "");
     } finally {
       reloadInFlight.current = false;
     }
-  }, [applyHydration]);
+  }, [applyHydration, mode]);
 
   const refreshMembers = useCallback(async () => {
+    if (gateBlocked.current) return;
     setMemberSyncStatus("loading");
     setMemberSyncError("");
     try {
@@ -679,15 +571,12 @@ export function CrmProvider({ children }: { children: ReactNode }) {
       await reloadFromDatabase();
       if (cancelled) return;
       setCrmDataStatus("ready");
-      // Non-blocking: the sync response merges in via refreshMembers' own
-      // reload (plus the version poll), so this is never awaited here.
-      // Skipped when a sync finished recently — mounts minutes apart don't
-      // each need another full replace-sync storm.
-      if (Date.now() - lastSyncFinishedAt > SYNC_COOLDOWN_MS) void refreshMembers();
+      // Admin only: the member dashboard has no upstream sync.
+      if (mode === "admin" && Date.now() - lastSyncFinishedAt > SYNC_COOLDOWN_MS) void refreshMembers();
     }
     const timer = window.setTimeout(() => void initialLoad(), 0);
     return () => { cancelled = true; window.clearTimeout(timer); };
-  }, [refreshMembers, reloadFromDatabase]);
+  }, [refreshMembers, reloadFromDatabase, mode]);
 
   /* ── Realtime refresh (see ADR-001) ──
      Poll the version counter every 10s (skipped while the tab is hidden) and
@@ -695,20 +584,30 @@ export function CrmProvider({ children }: { children: ReactNode }) {
      reload all datasets. Starts only after the initial load settles. */
   const lastSeenVersion = useRef(-1);
   useEffect(() => {
-    if (crmDataStatus !== "ready") return;
+    // Admin-only: the version counter lives behind /api/crm (member sessions
+    // must not read it). The member dashboard reloads on focus instead.
+    if (mode !== "admin") return;
+    if (crmDataStatus !== "ready" || gateRequired) return;
     let cancelled = false;
     async function checkVersion() {
       if (document.hidden) return;
-      const payload = await loadJson<{ version?: number }>("/api/crm/version/");
-      if (cancelled || typeof payload?.version !== "number") return;
-      if (lastSeenVersion.current === -1) {
-        lastSeenVersion.current = payload.version;
-        setDataVersion(payload.version);
+      const result = await loadJson<{ version?: number }>("/api/crm/version/");
+      if (cancelled) return;
+      if (!result.ok) {
+        // A gate rejection mid-session must surface, not fail silently in a poll.
+        if (result.gateRequired) setGateRequired(true);
         return;
       }
-      if (payload.version !== lastSeenVersion.current) {
-        lastSeenVersion.current = payload.version;
-        setDataVersion(payload.version);
+      const version = result.data.version;
+      if (typeof version !== "number") return;
+      if (lastSeenVersion.current === -1) {
+        lastSeenVersion.current = version;
+        setDataVersion(version);
+        return;
+      }
+      if (version !== lastSeenVersion.current) {
+        lastSeenVersion.current = version;
+        setDataVersion(version);
         await reloadFromDatabase();
       }
     }
@@ -717,7 +616,16 @@ export function CrmProvider({ children }: { children: ReactNode }) {
     const onVisibility = () => { if (!document.hidden) void checkVersion(); };
     document.addEventListener("visibilitychange", onVisibility);
     return () => { cancelled = true; window.clearInterval(timer); document.removeEventListener("visibilitychange", onVisibility); };
-  }, [crmDataStatus, reloadFromDatabase]);
+  }, [crmDataStatus, gateRequired, reloadFromDatabase, mode]);
+
+  /* Member dashboards have no version counter to poll — reload on focus so a
+     background sync or cron is reflected without a manual refresh. */
+  useEffect(() => {
+    if (mode !== "member") return;
+    const onVisibility = () => { if (!document.hidden) void reloadFromDatabase(); };
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => document.removeEventListener("visibilitychange", onVisibility);
+  }, [mode, reloadFromDatabase]);
 
   function toast(msg: string) {
     setToastMsg(msg);
@@ -735,70 +643,6 @@ export function CrmProvider({ children }: { children: ReactNode }) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(entry),
     }).catch(() => undefined);
-  }
-
-  /* Idempotent by design: a renewal is only written once per (memberId,
-     indicator, period) — re-running this (e.g. a cron firing twice) just
-     no-ops for grants already renewed this period, matching the "unique
-     member + qualification month" rule from the spec. Keyed by indicator
-     too since one member can hold access to more than one indicator
-     (e.g. both BeSight ONE and BeSight Orca) with independent renewal
-     clocks. New history rows are accumulated locally (not read back via
-     the `renewalHistory` closure) so two grants for the same member
-     renewing in the same pass don't race each other. */
-  function runRenewalCheck() {
-    const period = new Date().toISOString().slice(0, 7);
-    let renewed = 0;
-    let expired = 0;
-    const newHistory: RenewalRecord[] = [];
-    const newLogs: Omit<ActivityLog, "id" | "timestamp">[] = [];
-    const today = new Date().toISOString().slice(0, 10);
-
-    setIndicatorAccess((curAccess) =>
-      curAccess.map((access) => {
-        if (access.status !== "active") return access;
-        const member = members.find((m) => m.id === access.memberId);
-        if (!member) return access;
-
-        const alreadyDone =
-          renewalHistory.some((r) => r.memberId === member.id && r.indicator === access.indicator && r.period === period) ||
-          newHistory.some((r) => r.memberId === member.id && r.indicator === access.indicator && r.period === period);
-        if (alreadyDone) return access;
-
-        const lots = memberLots(member, tradeAccounts, tradeLogs, settings);
-        const required = requiredLotsFor(member, settings);
-        const qualifies = lots >= required;
-        const daysLeft = daysUntil(access.expiryDate);
-
-        if (qualifies && settings.autoRenewalEnabled) {
-          const oldExpiry = access.expiryDate;
-          const newExpiry = addMonths(oldExpiry, settings.renewalPeriodMonths);
-          newHistory.push({ id: 0, memberId: member.id, indicator: access.indicator, period, qualifiedLots: lots, renewed: true, oldExpiry, newExpiry, createdDate: today });
-          newLogs.push({ actor: "System", memberId: member.id, memberName: member.name, action: "Indicator Renewed", description: `${access.indicator}: qualified ${lot(lots)} / ${lot(required)} lots. Expiry changed ${oldExpiry} → ${newExpiry}.` });
-          renewed++;
-          return { ...access, expiryDate: newExpiry, lastRenewalDate: today };
-        }
-
-        if (!qualifies && daysLeft < 0) {
-          newHistory.push({ id: 0, memberId: member.id, indicator: access.indicator, period, qualifiedLots: lots, renewed: false, oldExpiry: access.expiryDate, createdDate: today });
-          newLogs.push({ actor: "System", memberId: member.id, memberName: member.name, action: "Indicator Expired", description: `${access.indicator}: lots ${lot(lots)} / ${lot(required)} not met by expiry. Access expired.` });
-          expired++;
-          return { ...access, status: "expired" as const };
-        }
-
-        return access;
-      })
-    );
-
-    if (newHistory.length) {
-      setRenewalHistory((cur) => {
-        let nextId = Math.max(0, ...cur.map((r) => r.id));
-        return [...newHistory.map((r) => ({ ...r, id: ++nextId })), ...cur];
-      });
-    }
-    newLogs.forEach((entry) => log(entry));
-
-    return { renewed, expired };
   }
 
   /* Plan → indicator entitlement is additive only: it fills in access the
@@ -860,6 +704,7 @@ export function CrmProvider({ children }: { children: ReactNode }) {
       value={{
         members, setMembers,
         tradeAccounts, setTradeAccounts,
+        pendingTradeAccounts, setPendingTradeAccounts,
         tradeLogs, setTradeLogs,
         brokers, setBrokers,
         indicators, setIndicators,
@@ -869,10 +714,13 @@ export function CrmProvider({ children }: { children: ReactNode }) {
         activityLogs, setActivityLogs,
         admins, setAdmins,
         settings, setSettings,
+        lotSummaries, lotOverview,
         toast, toastMsg, toastShow,
-        log, runRenewalCheck, syncPlanAccess,
+        log, syncPlanAccess,
         memberSyncStatus, memberSyncError, refreshMembers,
-        crmDataStatus, dataVersion, backendLive, reloadFromDatabase,
+        crmDataStatus, crmDataError, gateRequired, dataVersion, backendLive, reloadFromDatabase,
+        viewer: viewer ?? { name: "", email: "", role: mode },
+        identity, verifyIdentity,
       }}
     >
       {children}
@@ -940,13 +788,11 @@ export function currentMonthRange(): { from: string; to: string } {
   return { from, to };
 }
 
-/** The lot cycle follows the member's CRM entitlement dates when available. */
+/** The member's CURRENT monthly lot cycle: anchored on the access start day
+ *  (started Feb 10 → Feb 10–Mar 10, then Mar 10–Apr 10, …). Falls back to the
+ *  calendar month for members with no CRM entitlement dates. */
 export function memberLotRange(member: Member): { from: string; to: string } {
-  const fallback = currentMonthRange();
-  return {
-    from: member.crmStartDate || fallback.from,
-    to: member.crmExpiryDate || fallback.to,
-  };
+  return currentLotCycle({ crmStartDate: member.crmStartDate, crmExpiryDate: member.crmExpiryDate }) ?? currentMonthRange();
 }
 
 export function memberTradeAccounts(memberId: number, accounts: TradeAccount[]) {
@@ -976,66 +822,10 @@ export function accountRebate(accountId: number, logs: TradeLog[], range?: DateR
   return logs.filter((l) => l.tradeAccountId === accountId && matches(l.tradeDate)).reduce((s, l) => s + l.rebate, 0);
 }
 
-function backfillHash(seed: string): number {
-  let h = 0;
-  for (let i = 0; i < seed.length; i++) h = (h * 31 + seed.charCodeAt(i)) >>> 0;
-  return h;
-}
-
-/** Calendar days (YYYY-MM-DD) from `from` through `to`, inclusive. */
-function daysInRange(from: string, to: string): string[] {
-  const days: string[] = [];
-  const cursor = new Date(from + "T00:00:00");
-  const end = new Date(to + "T00:00:00");
-  while (cursor <= end) {
-    days.push(cursor.toISOString().slice(0, 10));
-    cursor.setDate(cursor.getDate() + 1);
-  }
-  return days;
-}
-
-export type BackfillResult = { newLogs: TradeLog[]; totalLots: number; totalRebate: number };
-
-/** Stands in for a broker's real historical-data API — fills only days that
- *  genuinely have no trade-log entry yet for a given account (a day the sync
- *  already picked up is left untouched, so re-running this never double-
- *  counts). Deterministic per account+day so the same backfill always
- *  produces the same numbers. */
-export function backfillRebateData(accounts: TradeAccount[], from: string, to: string, existingLogs: TradeLog[], startId: number): BackfillResult {
-  const today = new Date().toISOString().slice(0, 10);
-  const clampedTo = to > today ? today : to;
-  const days = from <= clampedTo ? daysInRange(from, clampedTo) : [];
-  const existingKeys = new Set(existingLogs.map((l) => `${l.tradeAccountId}|${l.tradeDate}`));
-  const newLogs: TradeLog[] = [];
-  let nextId = startId;
-  for (const account of accounts) {
-    for (const day of days) {
-      const key = `${account.id}|${day}`;
-      if (existingKeys.has(key)) continue;
-      const h = backfillHash(key);
-      if (h % 6 === 0) continue; // some days genuinely had no trades
-      const lots = Math.round((((h % 250) / 100 + 0.05)) * 100) / 100;
-      const rebate = Math.round(lots * 20 * 100) / 100;
-      newLogs.push({
-        id: nextId++,
-        tradeAccountId: account.id,
-        memberId: account.memberId,
-        symbol: SYMBOLS[h % SYMBOLS.length],
-        lots,
-        rebate,
-        tradeDate: day,
-      });
-    }
-  }
-  return {
-    newLogs,
-    totalLots: Math.round(newLogs.reduce((s, l) => s + l.lots, 0) * 100) / 100,
-    totalRebate: Math.round(newLogs.reduce((s, l) => s + l.rebate, 0) * 100) / 100,
-  };
-}
-
-/** Respects Settings.lotCalculationMode — sum every verified account, or
- *  only the member's designated primary account (Mode B in the spec).
+/** Respects Settings.lotCalculationMode — sums EVERY active account regardless
+ *  of verification, or only the member's designated primary account
+ *  (`selected_only`). Verification answers "has this account ever traded?"
+ *  (per account); qualification counts everything registered (per member).
  *  Prefers the real, persisted `currentPeriodLots` (from the CRM lot-check
  *  webhook via the member-lots-snapshot cron) — but ONLY when its stamped
  *  window matches the member's current qualification window. A later sync can
@@ -1056,9 +846,9 @@ export function memberLots(member: Member, accounts: TradeAccount[], logs: Trade
   const windowRange = { from: window.from, to: window.to };
   if (settings.lotCalculationMode === "selected_only") {
     const primary = mine.find((a) => a.id === member.primaryTradeAccountId) ?? mine[0];
-    return primary && primary.verification === "verified" ? accountLots(primary.id, logs, windowRange) : 0;
+    return primary && primary.status === "active" ? accountLots(primary.id, logs, windowRange) : 0;
   }
-  return mine.filter((a) => a.verification === "verified" && a.status === "active").reduce((s, a) => s + accountLots(a.id, logs, windowRange), 0);
+  return mine.filter((a) => a.status === "active").reduce((s, a) => s + accountLots(a.id, logs, windowRange), 0);
 }
 
 /** Same shape as memberLots, but sums accountRebate instead — this month's
@@ -1068,12 +858,15 @@ export function memberRebate(member: Member, accounts: TradeAccount[], logs: Tra
   const mine = memberTradeAccounts(member.id, accounts);
   if (settings.lotCalculationMode === "selected_only") {
     const primary = mine.find((a) => a.id === member.primaryTradeAccountId) ?? mine[0];
-    return primary && primary.verification === "verified" ? accountRebate(primary.id, logs, range) : 0;
+    return primary && primary.status === "active" ? accountRebate(primary.id, logs, range) : 0;
   }
-  return mine.filter((a) => a.verification === "verified" && a.status === "active").reduce((s, a) => s + accountRebate(a.id, logs, range), 0);
+  return mine.filter((a) => a.status === "active").reduce((s, a) => s + accountRebate(a.id, logs, range), 0);
 }
 
-/** Case-by-case admin override of the monthly lot requirement, falling back to the global Settings value. */
+/** Case-by-case admin override of the lot requirement, falling back to the
+ *  global Settings value. The requirement is a flat lot count for the member's
+ *  whole qualification window — a longer entitlement period does not raise it
+ *  (3 lots stays 3 lots); use the per-member override in the CRM to differ. */
 export function requiredLotsFor(member: Member, settings: Settings): number {
   return member.requiredLotsOverride ?? settings.requiredLots;
 }
@@ -1099,8 +892,8 @@ export function useRealMemberLots(member: Member | undefined, accounts: TradeAcc
   const [lots, setLots] = useState<number | null>(null);
   const mine = member ? memberTradeAccounts(member.id, accounts) : [];
   const targets = member && settings.lotCalculationMode === "selected_only"
-    ? [mine.find((a) => a.id === member.primaryTradeAccountId) ?? mine[0]].filter((a): a is TradeAccount => Boolean(a) && a!.verification === "verified")
-    : mine.filter((a) => a.verification === "verified" && a.status === "active");
+    ? [mine.find((a) => a.id === member.primaryTradeAccountId) ?? mine[0]].filter((a): a is TradeAccount => Boolean(a) && a!.status === "active")
+    : mine.filter((a) => a.status === "active");
   const tradeIds = targets.map((a) => a.tradeId).join(",");
 
   useEffect(() => {
@@ -1227,27 +1020,6 @@ export function customerStageBadgeClass(stage: CustomerStage): string {
     case "new": return "suspended";
     case "existing": return "active";
   }
-}
-
-/** Deterministic stand-in for a broker's real Trade ID verification API — the
- *  same Trade ID always resolves the same way. A match returns "verified"; a
- *  miss returns "pending" (not a hard rejection) since the account may still
- *  turn up on a later check — an admin can also correct it manually via
- *  TradeAccountForm. */
-export function simulateTradeIdVerification(tradeId: string): VerificationStatus {
-  let h = 0;
-  for (let i = 0; i < tradeId.length; i++) h = (h * 31 + tradeId.charCodeAt(i)) >>> 0;
-  return h % 10 === 0 ? "pending" : "verified";
-}
-
-export const ACCOUNT_TYPES = ["Standard", "Raw Spread", "Ultra Low"];
-
-/** Deterministic mock account type a passed Trade ID check "returns" — stands
- *  in for the account type field a real broker verification API would report. */
-export function simulateAccountType(tradeId: string): string {
-  let h = 0;
-  for (let i = 0; i < tradeId.length; i++) h = (h * 31 + tradeId.charCodeAt(i)) >>> 0;
-  return ACCOUNT_TYPES[Math.floor(h / 7) % ACCOUNT_TYPES.length];
 }
 
 export function verificationBadgeClass(v: VerificationStatus): string {

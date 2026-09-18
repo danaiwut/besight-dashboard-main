@@ -1,13 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useLanguage } from "../../../components/crm/LanguageContext";
 import { useCrm, fmtDate } from "../../../components/crm/CrmContext";
-import { COMPETITIONS, type CompStatus } from "../../../lib/activities";
+import { apiCall } from "../../../lib/crmApi";
+import type { ActivityDto, ActivityStatus } from "../../../lib/activities";
 import Icon from "../../../components/Icon";
 
-const TABS: { key: "all" | CompStatus; labelKey: string }[] = [
+const TABS: { key: "all" | ActivityStatus; labelKey: string }[] = [
   { key: "all", labelKey: "dash.activities.tabs.all" },
   { key: "upcoming", labelKey: "dash.activities.tabs.upcoming" },
   { key: "live", labelKey: "dash.activities.tabs.live" },
@@ -18,8 +19,30 @@ export default function DashboardActivitiesPage() {
   const { t } = useLanguage();
   const { toast } = useCrm();
   const [tab, setTab] = useState<(typeof TABS)[number]["key"]>("all");
+  const [activities, setActivities] = useState<ActivityDto[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  const list = tab === "all" ? COMPETITIONS : COMPETITIONS.filter((c) => c.status === tab);
+  useEffect(() => {
+    let cancelled = false;
+    apiCall<{ activities: ActivityDto[] }>("/api/activities/", "GET")
+      .then((payload) => {
+        if (!cancelled) {
+          setActivities(payload.activities);
+          setError("");
+        }
+      })
+      .catch((loadError) => {
+        if (!cancelled) setError(loadError instanceof Error ? loadError.message : t("act.toast.loadFailed"));
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const list = tab === "all" ? activities : activities.filter((c) => c.status === tab);
 
   return (
     <>
@@ -44,7 +67,7 @@ export default function DashboardActivitiesPage() {
               <Icon name="storefront" /> {t("dash.activities.hero.tag.brokers")}
             </span>
             <span className="comp-tag">
-              <Icon name="emoji_events" /> {t("dash.activities.hero.tag.count", { n: COMPETITIONS.length })}
+              <Icon name="emoji_events" /> {t("dash.activities.hero.tag.count", { n: activities.length })}
             </span>
           </div>
         </div>
@@ -68,54 +91,74 @@ export default function DashboardActivitiesPage() {
 
       <h2 className="rewards-programs-title">{t("dash.activities.listTitle")}</h2>
 
-      {list.length === 0 ? (
+      {loading ? (
+        <div className="comp-empty">…</div>
+      ) : error ? (
+        <div className="comp-empty">{error}</div>
+      ) : list.length === 0 ? (
         <div className="comp-empty">{t("dash.activities.empty")}</div>
       ) : (
         <div className="comp-grid">
-          {list.map((c) => {
-            const monthName = t(`common.month.${c.month}`);
-            return (
-              <div className="comp-card" key={c.key}>
-                <div className="comp-card-banner">
-                  <span className={`comp-ribbon comp-ribbon-${c.status}`}>
-                    {c.status === "upcoming" && t("dash.activities.ribbon.upcoming", { start: fmtDate(c.rangeStart), end: fmtDate(c.rangeEnd) })}
-                    {c.status === "live" && t("dash.activities.liveBadge")}
-                    {c.status === "finished" && t("dash.activities.ribbon.finished", { date: fmtDate(c.rangeEnd) })}
-                  </span>
-                  <Icon name="emoji_events" className="comp-card-icon" />
+          {list.map((c) => (
+            <div className="comp-card" key={c.id}>
+              <div className="comp-card-banner">
+                {c.coverImage && (
+                  // eslint-disable-next-line @next/next/no-img-element -- admin-provided cover image
+                  <img
+                    src={c.coverImage}
+                    alt=""
+                    style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }}
+                  />
+                )}
+                <span className={`comp-ribbon comp-ribbon-${c.status}`}>
+                  {c.status === "upcoming" && t("dash.activities.ribbon.upcoming", { start: fmtDate(c.startDate), end: fmtDate(c.endDate) })}
+                  {c.status === "live" && t("dash.activities.liveBadge")}
+                  {c.status === "finished" && t("dash.activities.ribbon.finished", { date: fmtDate(c.endDate) })}
+                </span>
+                <Icon name="emoji_events" className="comp-card-icon" />
+              </div>
+              <div className="comp-card-body">
+                <div className="comp-card-meta">
+                  <Icon name="groups" style={{ fontSize: 15 }} />
+                  {t("dash.activities.traders", { n: c.traders })}
+                  <Link href="/dashboard/leaderboard">{t("dash.activities.leaderboard")}</Link>
+                  {c.status === "live" && <span className="comp-live-dot">{t("dash.activities.liveBadge")}</span>}
                 </div>
-                <div className="comp-card-body">
-                  <div className="comp-card-meta">
-                    <Icon name="groups" style={{ fontSize: 15 }} />
-                    {t("dash.activities.traders", { n: c.traders })}
-                    <Link href="/dashboard/leaderboard">{t("dash.activities.leaderboard")}</Link>
-                    {c.status === "live" && <span className="comp-live-dot">{t("dash.activities.liveBadge")}</span>}
-                  </div>
-                  <div className="comp-card-title">{t("dash.activities.competitionTitle", { month: monthName, year: c.year })}</div>
-                  <p className="comp-card-desc">
-                    {t("dash.activities.prizeText")}{" "}
-                    <button type="button" className="comp-rules-link" onClick={() => toast(t("dash.activities.rulesToast"))}>
-                      {t("dash.activities.rulesLink")}
+                <div className="comp-card-title">{c.title}</div>
+                <p className="comp-card-desc">
+                  {t("dash.activities.prizeText")}{" "}
+                  <button type="button" className="comp-rules-link" onClick={() => toast(t("dash.activities.rulesToast"))}>
+                    {t("dash.activities.rulesLink")}
+                  </button>
+                </p>
+                <div className="comp-card-actions">
+                  <Link href={`/dashboard/activities/${c.slug}`} className="btn btn-ghost">
+                    {t("dash.activity.viewDetails")}
+                  </Link>
+                  {c.enrolled ? (
+                    <button type="button" className="btn btn-ghost" disabled>
+                      <Icon name="check_circle" style={{ fontSize: 15 }} />
+                      {t("dash.activities.enrolled")}
                     </button>
-                  </p>
-                  <div className="comp-card-actions">
-                    <Link href={`/dashboard/activities/${c.key}`} className="btn btn-ghost">
-                      {t("dash.activity.viewDetails")}
-                    </Link>
-                    <button
-                      type="button"
+                  ) : !c.registrationOpen ? (
+                    <button type="button" className="btn btn-ghost" disabled>
+                      {t("dash.activities.registrationSoon", { date: c.registrationOpensAt ? fmtDate(c.registrationOpensAt) : "—" })}
+                    </button>
+                  ) : (
+                    <Link
+                      href={`/dashboard/activities/${c.slug}`}
                       className={`btn ${c.status === "upcoming" ? "btn-primary" : "btn-ghost"}`}
-                      disabled={c.status !== "upcoming"}
-                      onClick={() => toast(t("dash.activities.enrollToast", { month: monthName }))}
+                      style={c.status === "finished" ? { pointerEvents: "none", opacity: 0.5 } : undefined}
+                      aria-disabled={c.status === "finished"}
                     >
                       {t("dash.activities.enroll")}
                       <Icon name="arrow_forward" style={{ fontSize: 15 }} />
-                    </button>
-                  </div>
+                    </Link>
+                  )}
                 </div>
               </div>
-            );
-          })}
+            </div>
+          ))}
         </div>
       )}
     </>

@@ -3,10 +3,13 @@ import { RecordStatus } from "@/generated/prisma/client";
 import { getPrisma, isDatabaseConfigured } from "@/lib/server/prisma";
 import { bumpDataVersion } from "@/lib/server/dataVersion";
 import { toBrokerDto } from "@/lib/server/crmDtos";
+import { adminGuard, adminWriteGuard } from "@/lib/session";
 
 export const dynamic = "force-dynamic";
 
 export async function GET() {
+  const guard = await adminGuard();
+  if (!guard.ok) return guard.response;
   if (!isDatabaseConfigured()) return NextResponse.json({ ok: false, error: "DATABASE_URL is not configured" }, { status: 503 });
   try {
     const records = await getPrisma().broker.findMany({ orderBy: { id: "asc" } });
@@ -27,6 +30,8 @@ async function generateCode(name: string): Promise<string> {
 }
 
 export async function POST(request: NextRequest) {
+  const guard = await adminWriteGuard();
+  if (!guard.ok) return guard.response;
   if (!isDatabaseConfigured()) return NextResponse.json({ ok: false, error: "DATABASE_URL is not configured" }, { status: 503 });
   try {
     const body = await request.json() as Record<string, unknown>;

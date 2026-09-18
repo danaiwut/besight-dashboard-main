@@ -3,6 +3,7 @@
 import { Fragment, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { signOut } from "next-auth/react";
 import { useCrm, displayNameOf } from "../crm/CrmContext";
 import { useLanguage } from "../crm/LanguageContext";
 import { useCustomerData } from "./useCustomerData";
@@ -26,6 +27,7 @@ const NAV_GROUPS = [
         children: [
           { href: "/dashboard/activities", labelKey: "dash.nav.activities" },
           { href: "/dashboard/spin-wheel", labelKey: "dash.nav.spinWheel" },
+          { href: "/dashboard/bec-rates", labelKey: "dash.nav.becRates" },
           { href: "/dashboard/rewards", labelKey: "dash.nav.rewardsPrograms" },
         ],
       },
@@ -50,6 +52,7 @@ const TITLE_KEYS: Record<string, [string, string | null]> = {
   "/dashboard/rewards": ["dash.title.rewards", "dash.sub.rewards"],
   "/dashboard/activities": ["dash.title.activities", "dash.sub.activities"],
   "/dashboard/spin-wheel": ["dash.title.spinWheel", "dash.sub.spinWheel"],
+  "/dashboard/bec-rates": ["dash.title.becRates", "dash.sub.becRates"],
   "/dashboard/leaderboard": ["dash.title.leaderboard", "dash.sub.leaderboard"],
   "/dashboard/courses": ["dash.title.courses", "dash.sub.courses"],
   "/dashboard/journal": ["dash.title.journal", "dash.sub.journal"],
@@ -214,10 +217,18 @@ export default function DashboardChrome({ children }: { children: ReactNode }) {
               <Icon name={theme === "dark" ? "dark_mode" : "light_mode"} />
             </span>
           </button>
-          <Link href="/" className="logout-link" title={t("nav.logOut")} onClick={closeNav}>
+          <button
+            type="button"
+            className="logout-link"
+            title={t("nav.logOut")}
+            onClick={() => {
+              closeNav();
+              void signOut({ callbackUrl: "/login" });
+            }}
+          >
             <Icon name="logout" />
             <span className="nav-label">{t("nav.logOut")}</span>
-          </Link>
+          </button>
         </div>
       </aside>
       <div className={`scrim side${navOpen ? " show" : ""}`} onClick={closeNav}></div>

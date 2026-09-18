@@ -3,10 +3,12 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useLanguage } from "./LanguageContext";
+import { useCrm, initials } from "./CrmContext";
 import Icon from "../Icon";
 
 export default function AdminMenu() {
   const { t } = useLanguage();
+  const { viewer } = useCrm();
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -37,10 +39,10 @@ export default function AdminMenu() {
         }}
       >
         <span className="avatar" style={{ width: 38, height: 38 }}>
-          AD
+          {initials(viewer.name || viewer.email || "AD")}
         </span>
         <span className="utext">
-          <span className="uname">Alex Dean</span>
+          <span className="uname">{viewer.name || viewer.email}</span>
           <br />
           <span className="uhandle">{t("nav.administrator")}</span>
         </span>
@@ -49,12 +51,12 @@ export default function AdminMenu() {
       <div className="user-dropdown" role="menu" aria-label="Account">
         <div className="user-dropdown-head">
           <span className="avatar" style={{ width: 38, height: 38 }}>
-            AD
+            {initials(viewer.name || viewer.email || "AD")}
           </span>
           <span style={{ lineHeight: 1.2 }}>
-            <span className="dd-name">Alex Dean</span>
+            <span className="dd-name">{viewer.name || viewer.email}</span>
             <br />
-            <span className="dd-mail">alex.dean@besight.com</span>
+            <span className="dd-mail">{viewer.email}</span>
           </span>
         </div>
         <Link className="dd-item" role="menuitem" href="/crm/settings" onClick={() => setOpen(false)}>
@@ -66,10 +68,19 @@ export default function AdminMenu() {
           {t("nav.settings")}
         </Link>
         <div className="dd-divider"></div>
-        <Link className="dd-item danger" role="menuitem" href="/">
+        <button
+          type="button"
+          className="dd-item danger"
+          role="menuitem"
+          onClick={async () => {
+            setOpen(false);
+            const { signOut } = await import("next-auth/react");
+            await signOut({ callbackUrl: "/login" });
+          }}
+        >
           <Icon name="logout" />
           {t("nav.logOut")}
-        </Link>
+        </button>
       </div>
     </div>
   );

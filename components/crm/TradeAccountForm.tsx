@@ -1,7 +1,7 @@
 "use client";
 
 import { forwardRef, useImperativeHandle, useState } from "react";
-import { useCrm, simulateTradeIdVerification, simulateAccountType, memberLotRange, currentMonthRange, type TradeAccount, type VerificationStatus } from "./CrmContext";
+import { useCrm, ACCOUNT_TYPES, memberLotRange, currentMonthRange, type TradeAccount, type VerificationStatus } from "./CrmContext";
 import { useLanguage } from "./LanguageContext";
 import { apiCall } from "../../lib/crmApi";
 import Icon from "../Icon";
@@ -21,15 +21,33 @@ const TradeAccountForm = forwardRef<TradeAccountFormHandle, { account: TradeAcco
     const [verification, setVerification] = useState<VerificationStatus>(account?.verification ?? "pending");
     const [status, setStatus] = useState<TradeAccount["status"]>(account?.status ?? "active");
     const [checkResult, setCheckResult] = useState<VerificationStatus | null>(null);
-    const [accountType, setAccountType] = useState(account?.accountType ?? "");
+    const [checkMessage, setCheckMessage] = useState("");
+    const [checking, setChecking] = useState(false);
+    const [accountType, setAccountType] = useState(account?.accountType ?? "Standard");
 
-    function checkTradeId() {
+    /* Real verification: asks the lot-check webhook whether this Trade ID has
+       traded in the last 12 months. Preview only — the outcome is saved when
+       the admin saves the account. */
+    async function checkTradeId() {
       const id = tradeId.trim();
       if (!id) return;
-      const result = simulateTradeIdVerification(id);
-      setCheckResult(result);
-      setVerification(result);
-      setAccountType(result === "verified" ? simulateAccountType(id) : "");
+      setChecking(true);
+      setCheckMessage("");
+      try {
+        const payload = await apiCall<{ verification: VerificationStatus; message: string }>(
+          "/api/crm/trade-accounts/verify/",
+          "POST",
+          { tradeId: id },
+        );
+        setCheckResult(payload.verification);
+        setVerification(payload.verification);
+        setCheckMessage(payload.message);
+      } catch (error) {
+        setCheckResult(null);
+        setCheckMessage(error instanceof Error ? error.message : "Unable to verify Trade ID");
+      } finally {
+        setChecking(false);
+      }
     }
 
     useImperativeHandle(ref, () => ({
@@ -142,25 +160,36 @@ const TradeAccountForm = forwardRef<TradeAccountFormHandle, { account: TradeAcco
               className="input"
               style={{ flex: 1, minWidth: 0 }}
               value={tradeId}
-              onChange={(e) => { setTradeId(e.target.value); setCheckResult(null); setAccountType(""); }}
+              onChange={(e) => { setTradeId(e.target.value); setCheckResult(null); setCheckMessage(""); }}
               placeholder="e.g. 390894526"
             />
-            <button type="button" className="br-check" aria-label={t("ta.form.checkTradeId")} onClick={checkTradeId}>
-              <Icon name="search" />
+            <button type="button" className="br-check" aria-label={t("ta.form.checkTradeId")} onClick={() => void checkTradeId()} disabled={checking}>
+              <Icon name={checking ? "progress_activity" : "search"} />
             </button>
           </div>
-          {checkResult && (
+          {(checkResult || checkMessage) && (
             <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 8 }}>
-              <Icon
-                name={checkResult === "verified" ? "check_circle" : "cancel"}
-                style={{ color: checkResult === "verified" ? "var(--green)" : "var(--red)", fontSize: 16 }}
-              />
-              <span className={`badge ${checkResult === "verified" ? "active" : "expired"}`}>
-                {checkResult === "verified" ? t("ta.form.checkPassed") : t("ta.form.checkFailed")}
+              {checkResult && (
+                <Icon
+                  name={checkResult === "verified" ? "check_circle" : "schedule"}
+                  style={{ color: checkResult === "verified" ? "var(--green)" : "var(--amber)", fontSize: 16 }}
+                />
+              )}
+              <span className={`badge ${checkResult === "verified" ? "active" : checkResult ? "pending" : "expired"}`}>
+                {checkMessage || (checkResult === "verified" ? t("ta.form.checkPassed") : t("ta.form.checkFailed"))}
               </span>
-              {checkResult === "verified" && accountType && <span style={{ fontSize: 12.5, color: "var(--text-sub)" }}>{accountType}</span>}
             </div>
           )}
+        </div>
+        <div className="field">
+          <label>{t("ta.form.accountType")}</label>
+          <select className="input" value={accountType} onChange={(e) => setAccountType(e.target.value)}>
+            {ACCOUNT_TYPES.map((type) => (
+              <option key={type} value={type}>
+                {type}
+              </option>
+            ))}
+          </select>
         </div>
         <div className="field">
           <label>{t("ta.form.verificationStatus")}</label>

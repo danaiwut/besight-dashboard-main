@@ -1,24 +1,37 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
+import { signIn } from "next-auth/react";
 import AuthSocialButtons from "./AuthSocialButtons";
 import BackgroundVideo from "../BackgroundVideo";
 import AuthLanguageMenu from "./AuthLanguageMenu";
 import PasswordToggleInput from "./PasswordToggleInput";
 import { useLanguage } from "../crm/LanguageContext";
-import { completeAuth } from "../../lib/auth";
 import Icon from "../Icon";
 
 const BG_VIDEO_SRC = "https://stream.mux.com/QgTir2Bu4u6d01CqyKEBCks68PIm2nCM7vhwXgenS00tw.m3u8";
 
-export default function LoginView() {
+export default function LoginView({ google, facebook, line }: { google: boolean; facebook: boolean; line: boolean }) {
   const { t } = useLanguage();
+  const [error, setError] = useState("");
+  const [busy, setBusy] = useState(false);
 
-  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    setError("");
+    setBusy(true);
     const form = e.currentTarget;
     const email = (form.elements.namedItem("email") as HTMLInputElement).value.trim();
-    completeAuth({ email });
+    const password = (form.elements.namedItem("password") as HTMLInputElement).value;
+    const result = await signIn("credentials", { email, password, redirect: false });
+    if (!result || result.error) {
+      setError(t("auth.login.invalid"));
+      setBusy(false);
+      return;
+    }
+    // Full reload so every provider re-reads behind the new session.
+    window.location.href = "/";
   }
 
   return (
@@ -45,7 +58,7 @@ export default function LoginView() {
           <div className="auth-cinema-body">
             <p>{t("auth.login.subtitle")}</p>
 
-            <AuthSocialButtons />
+            <AuthSocialButtons google={google} facebook={facebook} line={line} />
 
             <div className="auth-divider">{t("auth.login.or")}</div>
 
@@ -59,6 +72,7 @@ export default function LoginView() {
                   name="email"
                   placeholder={t("auth.login.emailPlaceholder")}
                   autoComplete="email"
+                  required
                 />
               </div>
 
@@ -67,23 +81,12 @@ export default function LoginView() {
                 <PasswordToggleInput id="password" name="password" placeholder={t("auth.login.passwordPlaceholder")} autoComplete="current-password" />
               </div>
 
-              <div className="auth-inline">
-                <label className="auth-check">
-                  <input type="checkbox" name="remember" /> {t("auth.login.remember")}
-                </label>
-                <a className="auth-link" href="#">
-                  {t("auth.login.forgot")}
-                </a>
-              </div>
+              {error && <p className="auth-error" role="alert">{error}</p>}
 
-              <button type="submit" className="auth-cinema-submit">
-                {t("auth.login.submit")}
+              <button type="submit" className="auth-cinema-submit" disabled={busy}>
+                {busy ? t("auth.login.submitting") : t("auth.login.submit")}
               </button>
             </form>
-
-            <p className="auth-cinema-alt">
-              {t("auth.login.noAccount")} <Link href="/signup">{t("auth.login.signUp")}</Link>
-            </p>
           </div>
         </div>
       </div>

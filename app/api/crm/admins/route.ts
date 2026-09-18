@@ -2,12 +2,16 @@ import { NextRequest, NextResponse } from "next/server";
 import { getPrisma, isDatabaseConfigured } from "@/lib/server/prisma";
 import { bumpDataVersion } from "@/lib/server/dataVersion";
 import { toAdminDto } from "@/lib/server/crmDtos";
+import { adminSettingsGuard } from "@/lib/session";
+
 
 export const dynamic = "force-dynamic";
 
 const ROLES = ["Admin", "Support", "Viewer"];
 
 export async function GET() {
+  const guard = await adminSettingsGuard();
+  if (!guard.ok) return guard.response;
   if (!isDatabaseConfigured()) return NextResponse.json({ ok: false, error: "DATABASE_URL is not configured" }, { status: 503 });
   try {
     const records = await getPrisma().admin.findMany({ orderBy: { id: "asc" } });
@@ -19,6 +23,8 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
+  const guard = await adminSettingsGuard();
+  if (!guard.ok) return guard.response;
   if (!isDatabaseConfigured()) return NextResponse.json({ ok: false, error: "DATABASE_URL is not configured" }, { status: 503 });
   try {
     const body = await request.json() as Record<string, unknown>;

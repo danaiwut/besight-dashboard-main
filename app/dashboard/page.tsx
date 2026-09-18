@@ -3,11 +3,13 @@
 import { useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useLanguage } from "../../components/crm/LanguageContext";
-import { fmtDate, lot, useCrm, accountLots, accountRebate, type DateRange } from "../../components/crm/CrmContext";
+import { fmtDate, lot, useCrm, accountLots, accountRebate, type DateRange, type TradeAccount } from "../../components/crm/CrmContext";
+import { apiCall } from "../../lib/crmApi";
 import { useCustomerData } from "../../components/dashboard/useCustomerData";
 import DateRangePicker from "../../components/crm/DateRangePicker";
 import TradeIdInline from "../../components/dashboard/TradeIdInline";
 import OpenAccountButton from "../../components/dashboard/OpenAccountButton";
+import IdentityVerifyCard from "../../components/dashboard/IdentityVerifyCard";
 import WalletGlow from "../../components/dashboard/WalletGlow";
 import { useTheme } from "../../components/dashboard/ThemeContext";
 import Icon from "../../components/Icon";
@@ -46,12 +48,51 @@ export default function DashboardOverviewPage() {
     requiredLots,
     goalPct,
   } = useCustomerData();
-  const { tradeLogs } = useCrm();
+  const { tradeLogs, setTradeAccounts, pendingTradeAccounts, setPendingTradeAccounts, identity, toast } = useCrm();
   const { theme } = useTheme();
   const [copied, setCopied] = useState(false);
   const [historyRange, setHistoryRange] = useState<HistoryRange>("all");
   const [accountsRange, setAccountsRange] = useState({ from: "", to: "" });
+  const [removingId, setRemovingId] = useState<number | null>(null);
+  const [confirmingId, setConfirmingId] = useState<number | null>(null);
   const historyListRef = useRef<HTMLDivElement>(null);
+
+  /** Confirm a CRM-synced account is the member's — claims it into the visible
+   *  list (the row was hidden until now). */
+  async function confirmAccount(account: TradeAccount) {
+    if (!identity) {
+      toast(t("dash.identity.required"));
+      return;
+    }
+    setConfirmingId(account.id);
+    try {
+      const payload = await apiCall<{ tradeAccount: TradeAccount }>("/api/me/trade-accounts/", "POST", {
+        tradeId: account.tradeId,
+        ...identity,
+      });
+      setPendingTradeAccounts((cur) => cur.filter((a) => a.id !== account.id));
+      setTradeAccounts((cur) => (cur.some((a) => a.id === payload.tradeAccount.id) ? cur : [payload.tradeAccount, ...cur]));
+      toast(t("dash.accounts.pendingDone", { tradeId: account.tradeId }));
+    } catch (error) {
+      toast(error instanceof Error ? error.message : t("dash.accounts.pendingFailed"));
+    } finally {
+      setConfirmingId(null);
+    }
+  }
+
+  async function removeAccount(account: TradeAccount) {
+    if (!window.confirm(t("dash.accounts.removeConfirm", { tradeId: account.tradeId }))) return;
+    setRemovingId(account.id);
+    try {
+      await apiCall(`/api/me/trade-accounts/${account.id}/`, "DELETE");
+      setTradeAccounts((cur) => cur.filter((a) => a.id !== account.id));
+      toast(t("dash.accounts.removeDone", { tradeId: account.tradeId }));
+    } catch (error) {
+      toast(error instanceof Error ? error.message : t("dash.accounts.removeFailed"));
+    } finally {
+      setRemovingId(null);
+    }
+  }
 
   function scrollHistory(dir: 1 | -1) {
     historyListRef.current?.scrollBy({ top: dir * 168, behavior: "smooth" });
@@ -146,6 +187,27 @@ export default function DashboardOverviewPage() {
             <h2>{t("dash.accounts.title")}</h2>
             <DateRangePicker value={accountsRange} onChange={setAccountsRange} placeholder={t("dash.history.filter.label")} />
           </div>
+          <IdentityVerifyCard />
+          {pendingTradeAccounts.length > 0 && (
+            <div style={{ margin: "0 0 14px", padding: "12px 14px", border: "1px solid var(--border)", borderRadius: 10, background: "var(--bg-card2, rgba(0,0,0,0.03))" }}>
+              <div className="panel-section-title" style={{ marginBottom: 4 }}>{t("dash.accounts.pendingTitle")}</div>
+              <p style={{ fontSize: 12.5, color: "var(--text-sub)", marginBottom: 10 }}>{t("dash.accounts.pendingHint")}</p>
+              {pendingTradeAccounts.map((a) => (
+                <div key={a.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, padding: "8px 0", borderTop: "1px solid var(--border)" }}>
+                  <span className="mono">{a.tradeId}</span>
+                  <button
+                    className="btn btn-primary"
+                    style={{ padding: "6px 14px" }}
+                    disabled={confirmingId === a.id || !identity}
+                    title={identity ? undefined : t("dash.identity.required")}
+                    onClick={() => void confirmAccount(a)}
+                  >
+                    {t("dash.accounts.pendingConfirm")}
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
           <div className="table-wrap">
             <table className="data">
               <thead>
@@ -155,6 +217,7 @@ export default function DashboardOverviewPage() {
                   <th>{t("dash.accounts.col.type")}</th>
                   <th>{t("dash.accounts.col.lots")}</th>
                   <th>{t("dash.accounts.col.rebate")}</th>
+                  <th></th>
                 </tr>
               </thead>
               <tbody>
@@ -166,11 +229,22 @@ export default function DashboardOverviewPage() {
                       <td>{account.accountType}</td>
                       <td>{lot(lots)}</td>
                       <td style={{ color: "var(--green)", fontWeight: 600 }}>${rebate.toFixed(2)}</td>
+                      <td className="row-actions">
+                        <button
+                          type="button"
+                          className="kebab"
+                          aria-label={t("dash.accounts.remove")}
+                          disabled={removingId === account.id}
+                          onClick={() => void removeAccount(account)}
+                        >
+                          <Icon name="delete" />
+                        </button>
+                      </td>
                     </tr>
                   ))
                 ) : (
                   <tr>
-                    <td colSpan={5} className="table-empty">
+                    <td colSpan={6} className="table-empty">
                       {t("dash.accounts.empty")}
                     </td>
                   </tr>

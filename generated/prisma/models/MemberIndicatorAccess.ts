@@ -614,10 +614,6 @@ export type EnumAccessSourceFieldUpdateOperationsInput = {
   set?: $Enums.AccessSource
 }
 
-export type BoolFieldUpdateOperationsInput = {
-  set?: boolean
-}
-
 export type MemberIndicatorAccessCreateNestedOneWithoutRenewalHistoryInput = {
   create?: Prisma.XOR<Prisma.MemberIndicatorAccessCreateWithoutRenewalHistoryInput, Prisma.MemberIndicatorAccessUncheckedCreateWithoutRenewalHistoryInput>
   connectOrCreate?: Prisma.MemberIndicatorAccessCreateOrConnectWithoutRenewalHistoryInput

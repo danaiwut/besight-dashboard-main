@@ -3,6 +3,8 @@ import { TelegramStatus } from "@/generated/prisma/client";
 import { getPrisma, isDatabaseConfigured } from "@/lib/server/prisma";
 import { bumpDataVersion } from "@/lib/server/dataVersion";
 import { toTelegramAccessDto } from "@/lib/server/crmDtos";
+import { adminWriteGuard } from "@/lib/session";
+
 
 export const dynamic = "force-dynamic";
 
@@ -15,6 +17,8 @@ function parseDate(value: unknown): Date | undefined {
 }
 
 export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const guard = await adminWriteGuard();
+  if (!guard.ok) return guard.response;
   if (!isDatabaseConfigured()) return NextResponse.json({ ok: false, error: "DATABASE_URL is not configured" }, { status: 503 });
   try {
     const id = Number((await params).id);

@@ -4,6 +4,8 @@ import { getPrisma, isDatabaseConfigured } from "@/lib/server/prisma";
 import { bumpDataVersion } from "@/lib/server/dataVersion";
 import { upsertTelegramFromMember } from "@/lib/server/customerSync";
 import { toMemberDto } from "@/lib/server/crmDtos";
+import { adminWriteGuard } from "@/lib/session";
+
 
 export const dynamic = "force-dynamic";
 
@@ -35,6 +37,8 @@ async function findMember(id: number) {
 }
 
 export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const guard = await adminWriteGuard();
+  if (!guard.ok) return guard.response;
   if (!isDatabaseConfigured()) return NextResponse.json({ ok: false, error: "DATABASE_URL is not configured" }, { status: 503 });
   try {
     const id = Number((await params).id);
@@ -84,7 +88,14 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     if (body.crmExpiryDate !== undefined) data.crmExpiryDate = optionalDate(body.crmExpiryDate) || null;
     if (body.primaryTradeAccountId !== undefined) {
       const accountId = Number(body.primaryTradeAccountId);
-      data.primaryTradeAccountId = Number.isInteger(accountId) && accountId > 0 ? accountId : null;
+      if (Number.isInteger(accountId) && accountId > 0) {
+        // The primary account must be one of THIS member's own accounts.
+        const owned = await prisma.tradeAccount.findFirst({ where: { id: accountId, memberId: id }, select: { id: true } });
+        if (!owned) return NextResponse.json({ ok: false, error: "บัญชีนี้ไม่ใช่ของสมาชิกคนนี้" }, { status: 400 });
+        data.primaryTradeAccountId = accountId;
+      } else {
+        data.primaryTradeAccountId = null;
+      }
     }
 
     await prisma.$transaction(async (tx) => {
@@ -111,6 +122,8 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
 }
 
 export async function DELETE(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const guard = await adminWriteGuard();
+  if (!guard.ok) return guard.response;
   if (!isDatabaseConfigured()) return NextResponse.json({ ok: false, error: "DATABASE_URL is not configured" }, { status: 503 });
   try {
     const id = Number((await params).id);

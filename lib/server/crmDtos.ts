@@ -1,5 +1,6 @@
-import { Prisma, type Admin, type Broker, type Indicator, type MemberIndicatorAccess, type RenewalRecord, type TelegramAccess, type TradeAccount } from "@/generated/prisma/client";
+import { Prisma, type Activity, type ActivityEnrollment, type Admin, type Broker, type Indicator, type MemberIndicatorAccess, type RenewalRecord, type TelegramAccess, type TradeAccount } from "@/generated/prisma/client";
 import type { CustomerMemberDto, CustomerTradeAccountDto } from "./customerSync";
+import type { ActivityDto, ActivityEnrollmentDto } from "../activities";
 
 /* ── Single source of truth for CRM API ⇄ UI shapes ──
    Every read AND write route maps Prisma rows through these helpers so a row
@@ -177,6 +178,9 @@ export type RenewalRecordDto = {
   qualifiedLots: number;
   requiredLots: number;
   renewed: boolean;
+  /** `auto` = lot-check automation/cron, `manual` = admin Grant/Extend. */
+  origin: string;
+  note?: string;
   oldExpiry?: string;
   newExpiry?: string;
   createdDate: string;
@@ -194,8 +198,59 @@ export function toRenewalRecordDto(
     qualifiedLots: record.qualifiedLots.toNumber(),
     requiredLots: record.requiredLots.toNumber(),
     renewed: record.renewed,
+    origin: record.origin,
+    note: record.note || undefined,
     oldExpiry: record.oldExpiry?.toISOString().slice(0, 10),
     newExpiry: record.newExpiry?.toISOString().slice(0, 10),
     createdDate: record.createdAt.toISOString().slice(0, 10),
+  };
+}
+
+export function toActivityDto(
+  activity: Activity & { _count?: { enrollments: number } },
+  enrolled = false,
+  registrationOpen?: boolean,
+): ActivityDto {
+  return {
+    id: activity.id,
+    slug: activity.slug,
+    title: activity.title,
+    description: activity.description || "",
+    status: activity.status,
+    startDate: activity.startDate.toISOString().slice(0, 10),
+    endDate: activity.endDate.toISOString().slice(0, 10),
+    // Real registration count — the hand-typed column is only a fallback for
+    // rows created before enrollments existed.
+    traders: activity._count?.enrollments ?? activity.traders,
+    prizePool: activity.prizePool.toNumber(),
+    coverImage: activity.coverImage || undefined,
+    visibleFrom: activity.visibleFrom?.toISOString().slice(0, 10),
+    registrationOpensAt: activity.registrationOpensAt?.toISOString().slice(0, 10),
+    registrationOpen,
+    rules: (activity.rules || "").split("\n").map((line) => line.trim()).filter(Boolean),
+    published: activity.published,
+    sortOrder: activity.sortOrder,
+    enrolled,
+  };
+}
+
+export type { ActivityEnrollmentDto };
+
+export function toActivityEnrollmentDto(
+  row: ActivityEnrollment & { member: { code: string; name: string; displayName: string | null; email: string | null } },
+): ActivityEnrollmentDto {
+  return {
+    id: row.id,
+    memberId: row.memberId,
+    memberCode: row.member.code,
+    memberName: row.member.displayName?.trim() || row.member.name,
+    email: row.member.email || "",
+    tradeId: row.tradeId || "",
+    isDemo: row.isDemo,
+    verified: Boolean(row.verifiedAt),
+    verificationNote: row.verificationNote || undefined,
+    lots: row.lots.toNumber(),
+    lotsAt: row.lotsAt?.toISOString(),
+    joinedAt: row.createdAt.toISOString().slice(0, 10),
   };
 }

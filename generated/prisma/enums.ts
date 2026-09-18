@@ -80,3 +80,39 @@ export const LotCheckKind = {
 } as const
 
 export type LotCheckKind = (typeof LotCheckKind)[keyof typeof LotCheckKind]
+
+
+export const ActivityStatus = {
+  upcoming: 'upcoming',
+  live: 'live',
+  finished: 'finished'
+} as const
+
+export type ActivityStatus = (typeof ActivityStatus)[keyof typeof ActivityStatus]
+
+
+export const SpinResultStatus = {
+  pending: 'pending',
+  fulfilled: 'fulfilled',
+  cancelled: 'cancelled'
+} as const
+
+export type SpinResultStatus = (typeof SpinResultStatus)[keyof typeof SpinResultStatus]
+
+
+export const CourseLevel = {
+  beginner: 'beginner',
+  intermediate: 'intermediate',
+  advanced: 'advanced'
+} as const
+
+export type CourseLevel = (typeof CourseLevel)[keyof typeof CourseLevel]
+
+
+export const MemberLevel = {
+  basic: 'basic',
+  standard: 'standard',
+  premium: 'premium'
+} as const
+
+export type MemberLevel = (typeof MemberLevel)[keyof typeof MemberLevel]

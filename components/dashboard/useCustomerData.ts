@@ -11,7 +11,6 @@ import {
   requiredLotsFor,
   accountLots,
   accountRebate,
-  CURRENT_MEMBER_ID,
   type Member,
   type Broker,
   type TradeAccount,
@@ -26,19 +25,39 @@ export type HistoryRow = { id: number; tradeDate: string; symbol: string; lots: 
 // is given — passing this wide range instead gets their all-time total.
 const ALL_TIME: DateRange = { from: "2000-01-01", to: "2999-12-31" };
 
+/** A blank member for "nothing loaded yet" — id 0 matches no trade account, so
+ *  every derived total naturally comes out empty instead of borrowed. */
+const EMPTY_MEMBER: Member = {
+  id: 0,
+  code: "",
+  name: "",
+  email: "",
+  phone: "",
+  tv: "",
+  createdDate: "",
+  joinedDate: "",
+  plan: "free",
+};
+
 /** Everything the customer-facing dashboard (app/dashboard) needs, scoped to
- *  the one member it's demoed as (see CURRENT_MEMBER_ID) — trade accounts,
- *  lifetime totals, a wallet-style settled/pending split, transaction
- *  history and standing on the all-member leaderboard. Built entirely on
- *  top of the existing CrmContext mock data so the admin CRM and the
- *  customer dashboard stay a single source of truth. */
+ *  the signed-in member — the member provider loads exactly one member, so
+ *  this is that member. Built on the CrmContext store the member layout
+ *  hydrates from /api/me. */
 export function useCustomerData() {
   const { members, tradeAccounts, tradeLogs, brokers, settings, indicatorAccess, indicators } = useCrm();
 
-  const member = members.find((m) => m.id === CURRENT_MEMBER_ID) ?? members[0];
-  const accounts = memberTradeAccounts(member.id, tradeAccounts);
+  /* No member until /api/me answers. Fall back to a genuinely blank record
+     rather than a sample one: the page then renders zeros and empty strings,
+     which is true, instead of someone else's numbers. */
+  const loadedMember = members[0];
+  const member: Member = loadedMember ?? EMPTY_MEMBER;
+  const hasMember = Boolean(loadedMember);
+  /* The customer dashboard lists only REAL, verified accounts. Competition
+     (demo) accounts live in the activities feature and never appear here, and
+     an account still awaiting verification stays hidden until it passes. */
+  const accounts = memberTradeAccounts(member.id, tradeAccounts).filter((a) => a.verification === "verified" && a.status === "active");
   const accountIds = useMemo(() => new Set(accounts.map((a) => a.id)), [accounts]);
-  const verifiedCount = accounts.filter((a) => a.verification === "verified").length;
+  const verifiedCount = accounts.length;
   const activeIndicatorCount = memberIndicatorAccess(member.id, indicatorAccess).filter((a) => a.status === "active").length;
   const totalIndicatorCount = indicators.length;
   const indicatorAccessPct = totalIndicatorCount > 0 ? Math.min(100, Math.round((activeIndicatorCount / totalIndicatorCount) * 100)) : 0;
@@ -98,6 +117,7 @@ export function useCustomerData() {
 
   return {
     member,
+    hasMember,
     accounts,
     accountsWithStats,
     brokerFor,

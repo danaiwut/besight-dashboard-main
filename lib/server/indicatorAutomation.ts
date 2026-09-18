@@ -25,12 +25,17 @@ function addMonths(date: Date, months: number) {
 
 export async function persistLotCheckAndAutomate(input: {
   tradeId?: string;
+  memberId?: number;
   dateFrom: string;
   dateTo: string;
   data: LotData;
   autoGrant: boolean;
   period?: string;
   indicatorIds?: number[];
+  /** Member-level total across EVERY active account (see lib/lotEngine.ts).
+   *  When provided, qualification/renewal records use it instead of the
+   *  single-tradeId total in `data.totalLots`. */
+  memberTotalLots?: number;
 }) {
   if (!isDatabaseConfigured()) {
     return { database: false, linkedMember: null, qualified: null, requiredLots: null, granted: 0, renewed: 0, skipped: "DATABASE_URL is not configured" };
@@ -42,16 +47,25 @@ export async function persistLotCheckAndAutomate(input: {
     const account = input.tradeId
       ? await tx.tradeAccount.findFirst({ where: { tradeId: input.tradeId }, include: { member: true } })
       : null;
-    const requiredLots = account?.member.requiredLotsOverride?.toNumber() ?? settings.requiredLots;
-    const qualified = Boolean(account && input.data.totalLots >= requiredLots);
+    // The qualifying member: explicit memberId wins, else the linked account's
+    // owner. Qualification always uses the MEMBER total (all active accounts),
+    // never a single tradeId in isolation.
+    const directMember = input.memberId && input.memberId !== account?.memberId
+      ? await tx.member.findUnique({ where: { id: input.memberId } })
+      : null;
+    const qualMember = directMember ?? account?.member ?? null;
+    const qualMemberId = qualMember?.id ?? account?.memberId ?? null;
+    const effectiveTotal = input.memberTotalLots ?? input.data.totalLots;
+    const requiredLots = qualMember?.requiredLotsOverride?.toNumber() ?? settings.requiredLots;
+    const qualified = Boolean(qualMember && effectiveTotal >= requiredLots);
     const run = await tx.lotCheckRun.create({
       data: {
-        memberId: account?.memberId,
+        memberId: qualMemberId,
         tradeAccountId: account?.id,
         tradeId: input.tradeId,
         dateFrom: new Date(`${input.dateFrom}T00:00:00Z`),
         dateTo: new Date(`${input.dateTo}T23:59:59Z`),
-        totalLots: input.data.totalLots,
+        totalLots: effectiveTotal,
         qualified,
       },
     });
@@ -67,37 +81,38 @@ export async function persistLotCheckAndAutomate(input: {
     let granted = 0;
     let renewed = 0;
     let skipped: string | null = null;
-    if (!account) {
-      skipped = input.tradeId ? "Trade ID is not linked to a member" : "Trade ID is required for automatic access";
+    if (!qualMember || qualMemberId == null) {
+      skipped = input.tradeId ? "Trade ID is not linked to a member" : "A member or Trade ID is required for automatic access";
     } else if (!input.autoGrant) {
       skipped = "Automatic Indicator access was disabled for this check";
     } else if (!settings.enabled) {
       skipped = "Automatic Indicator renewal is disabled in settings";
     } else if (!qualified) {
-      skipped = `Member has ${input.data.totalLots.toFixed(4)} of ${requiredLots.toFixed(4)} required lots`;
+      skipped = `Member has ${effectiveTotal.toFixed(4)} of ${requiredLots.toFixed(4)} required lots (all active accounts)`;
     } else {
+      const qualPlan = qualMember.plan;
       const entitlements = await tx.planIndicatorEntitlement.findMany({
         where: {
-          plan: account.member.plan,
+          plan: qualPlan,
           indicator: { status: RecordStatus.active },
           ...(input.indicatorIds?.length ? { indicatorId: { in: input.indicatorIds } } : {}),
         },
         include: { indicator: true },
       });
       if (!entitlements.length) {
-        skipped = `No active Indicator entitlement is configured for plan ${account.member.plan}`;
+        skipped = `No active Indicator entitlement is configured for plan ${qualPlan}`;
       } else {
         const renewalMonths = settings.renewalMonths;
         const now = new Date();
         const period = input.period || `${input.dateFrom}_${input.dateTo}`;
         for (const entitlement of entitlements) {
           const alreadyProcessed = await tx.renewalRecord.findUnique({
-            where: { memberId_indicatorId_period: { memberId: account.memberId, indicatorId: entitlement.indicatorId, period } },
+            where: { memberId_indicatorId_period: { memberId: qualMemberId, indicatorId: entitlement.indicatorId, period } },
           });
           if (alreadyProcessed) continue;
 
           const existing = await tx.memberIndicatorAccess.findUnique({
-            where: { memberId_indicatorId: { memberId: account.memberId, indicatorId: entitlement.indicatorId } },
+            where: { memberId_indicatorId: { memberId: qualMemberId, indicatorId: entitlement.indicatorId } },
           });
           if (existing?.manualLock || existing?.status === IndicatorAccessStatus.suspended) continue;
 
@@ -111,7 +126,7 @@ export async function persistLotCheckAndAutomate(input: {
               })
             : await tx.memberIndicatorAccess.create({
                 data: {
-                  memberId: account.memberId,
+                  memberId: qualMemberId,
                   indicatorId: entitlement.indicatorId,
                   status: IndicatorAccessStatus.active,
                   source: AccessSource.Plan,
@@ -123,11 +138,11 @@ export async function persistLotCheckAndAutomate(input: {
 
           await tx.renewalRecord.create({
             data: {
-              memberId: account.memberId,
+              memberId: qualMemberId,
               indicatorId: entitlement.indicatorId,
               indicatorAccessId: access.id,
               period,
-              qualifiedLots: input.data.totalLots,
+              qualifiedLots: effectiveTotal,
               requiredLots,
               renewed: Boolean(existing),
               oldExpiry,
@@ -136,10 +151,10 @@ export async function persistLotCheckAndAutomate(input: {
           });
           await tx.activityLog.create({
             data: {
-              memberId: account.memberId,
+              memberId: qualMemberId,
               actor: "System",
               action: existing ? "Indicator Renewed" : "Indicator Granted",
-              description: `${entitlement.indicator.name}: ${input.data.totalLots.toFixed(4)} / ${requiredLots.toFixed(4)} lots for ${period}; access expires ${newExpiry.toISOString().slice(0, 10)}.`,
+              description: `${entitlement.indicator.name}: ${effectiveTotal.toFixed(4)} / ${requiredLots.toFixed(4)} lots for ${period}; access expires ${newExpiry.toISOString().slice(0, 10)}.`,
             },
           });
           if (existing) renewed += 1;
@@ -148,11 +163,12 @@ export async function persistLotCheckAndAutomate(input: {
       }
     }
 
-    await tx.lotCheckRun.update({ where: { id: run.id }, data: { autoProcessed: Boolean(account && input.autoGrant) } });
+    await tx.lotCheckRun.update({ where: { id: run.id }, data: { autoProcessed: Boolean(qualMember && input.autoGrant) } });
+    const linked = account?.member ?? directMember;
     return {
       database: true,
       runId: run.id.toString(),
-      linkedMember: account ? { id: account.member.id, code: account.member.code, name: account.member.name } : null,
+      linkedMember: linked ? { id: linked.id, code: linked.code, name: linked.name } : null,
       qualified,
       requiredLots,
       granted,

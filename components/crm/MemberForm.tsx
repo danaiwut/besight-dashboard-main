@@ -4,8 +4,6 @@ import { forwardRef, useImperativeHandle, useState } from "react";
 import {
   useCrm,
   PLAN_LABELS,
-  simulateTradeIdVerification,
-  simulateAccountType,
   verificationLabelKey,
   ACQUISITION_CHANNELS,
   ACQUISITION_CHANNEL_LABELS,
@@ -26,25 +24,24 @@ type Row = {
   tradeId: string;
   existingVerification?: VerificationStatus;
   checkResult?: VerificationStatus;
-  checkAccountType?: string;
+  checkMessage?: string;
 };
 
 function makeRow(brokerId: number, tradeId = "", existingVerification?: VerificationStatus): Row {
   return { key: Math.random().toString(36).slice(2), brokerId, tradeId, existingVerification };
 }
 
-type RowBadge = { icon: string; color: string; badgeClass: string; label: string; accountType?: string };
+type RowBadge = { icon: string; color: string; badgeClass: string; label: string };
 
-/** A fresh Check always wins (icon/color/wording specific to a pass/fail
- *  check result, plus the account type a pass "returns"); otherwise an
- *  existing account shows whatever verification status it already has (an
+/** A fresh Check always wins (with the real webhook's own wording); otherwise
+ *  an existing account shows whatever verification status it already has (an
  *  admin may have manually corrected it) — a new, unchecked row shows
  *  nothing, no live-typing guesswork. */
 function rowBadge(r: Row, t: (key: string) => string): RowBadge | null {
   if (r.checkResult) {
     return r.checkResult === "verified"
-      ? { icon: "check_circle", color: "var(--green)", badgeClass: "active", label: t("members.form.checkPassed"), accountType: r.checkAccountType }
-      : { icon: "cancel", color: "var(--red)", badgeClass: "expired", label: t("members.form.checkFailed") };
+      ? { icon: "check_circle", color: "var(--green)", badgeClass: "active", label: r.checkMessage || t("members.form.checkPassed") }
+      : { icon: "schedule", color: "var(--amber)", badgeClass: "pending", label: r.checkMessage || t("members.form.checkFailed") };
   }
   const v = r.existingVerification;
   if (!v) return null;
@@ -53,14 +50,11 @@ function rowBadge(r: Row, t: (key: string) => string): RowBadge | null {
   return { icon: "cancel", color: "var(--red)", badgeClass: "expired", label: t(verificationLabelKey(v)) };
 }
 
-/** Reuses whatever the Check button already found for this row; if the admin
- *  never clicked Check, resolves the same way on save so a row that would
- *  pass isn't left with a blank account type just because it wasn't checked. */
+/** Uses the Check button's real result when present; an unchecked new row is
+ *  saved as "pending" (never a guessed pass) with the default account type. */
 function resolveNewAccountFields(r: Row) {
   const trimmedId = r.tradeId.trim();
-  const verification = simulateTradeIdVerification(trimmedId);
-  const accountType = r.checkAccountType ?? (verification === "verified" ? simulateAccountType(trimmedId) : "");
-  return { trimmedId, verification, accountType };
+  return { trimmedId, verification: r.checkResult ?? "pending" as VerificationStatus, accountType: "Standard" };
 }
 
 export type MemberFormHandle = { save: () => void };
@@ -94,20 +88,26 @@ const MemberForm = forwardRef<MemberFormHandle, { member: Member | null; onDone:
       setRows((cur) =>
         cur.map((r) =>
           r.key === key
-            ? { ...r, ...patch, ...(patch.tradeId !== undefined ? { checkResult: undefined, checkAccountType: undefined } : {}) }
+            ? { ...r, ...patch, ...(patch.tradeId !== undefined ? { checkResult: undefined, checkMessage: undefined } : {}) }
             : r
         )
       );
     }
-    function checkTradeId(key: string) {
-      setRows((cur) =>
-        cur.map((r) => {
-          if (r.key !== key || !r.tradeId.trim()) return r;
-          const id = r.tradeId.trim();
-          const result = simulateTradeIdVerification(id);
-          return { ...r, checkResult: result, checkAccountType: result === "verified" ? simulateAccountType(id) : undefined };
-        })
-      );
+    /** Real verification against the lot-check webhook (last 12 months). */
+    async function checkTradeId(key: string) {
+      const row = rows.find((r) => r.key === key);
+      const id = row?.tradeId.trim();
+      if (!id) return;
+      try {
+        const payload = await apiCall<{ verification: VerificationStatus; message: string }>(
+          "/api/crm/trade-accounts/verify/",
+          "POST",
+          { tradeId: id },
+        );
+        setRows((cur) => cur.map((r) => (r.key === key ? { ...r, checkResult: payload.verification, checkMessage: payload.message } : r)));
+      } catch (error) {
+        toast(error instanceof Error ? error.message : "Unable to verify Trade ID");
+      }
     }
     function removeRow(key: string) {
       if (rows.length <= 1) {
@@ -398,7 +398,7 @@ const MemberForm = forwardRef<MemberFormHandle, { member: Member | null; onDone:
                       value={r.tradeId}
                       onChange={(e) => updateRow(r.key, { tradeId: e.target.value })}
                     />
-                    <button type="button" className="br-check" aria-label={t("members.form.checkTradeId")} onClick={() => checkTradeId(r.key)}>
+                    <button type="button" className="br-check" aria-label={t("members.form.checkTradeId")} onClick={() => void checkTradeId(r.key)}>
                       <Icon name="search" />
                     </button>
                   </div>
@@ -406,7 +406,6 @@ const MemberForm = forwardRef<MemberFormHandle, { member: Member | null; onDone:
                     <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 8 }}>
                       <Icon name={badge.icon} style={{ color: badge.color, fontSize: 16 }} />
                       <span className={`badge ${badge.badgeClass}`}>{badge.label}</span>
-                      {badge.accountType && <span style={{ fontSize: 12.5, color: "var(--text-sub)" }}>{badge.accountType}</span>}
                     </div>
                   )}
                 </div>

@@ -53,6 +53,8 @@ export type RenewalRecordMinAggregateOutputType = {
   qualifiedLots: runtime.Decimal | null
   requiredLots: runtime.Decimal | null
   renewed: boolean | null
+  origin: string | null
+  note: string | null
   oldExpiry: Date | null
   newExpiry: Date | null
   createdAt: Date | null
@@ -67,6 +69,8 @@ export type RenewalRecordMaxAggregateOutputType = {
   qualifiedLots: runtime.Decimal | null
   requiredLots: runtime.Decimal | null
   renewed: boolean | null
+  origin: string | null
+  note: string | null
   oldExpiry: Date | null
   newExpiry: Date | null
   createdAt: Date | null
@@ -81,6 +85,8 @@ export type RenewalRecordCountAggregateOutputType = {
   qualifiedLots: number
   requiredLots: number
   renewed: number
+  origin: number
+  note: number
   oldExpiry: number
   newExpiry: number
   createdAt: number
@@ -115,6 +121,8 @@ export type RenewalRecordMinAggregateInputType = {
   qualifiedLots?: true
   requiredLots?: true
   renewed?: true
+  origin?: true
+  note?: true
   oldExpiry?: true
   newExpiry?: true
   createdAt?: true
@@ -129,6 +137,8 @@ export type RenewalRecordMaxAggregateInputType = {
   qualifiedLots?: true
   requiredLots?: true
   renewed?: true
+  origin?: true
+  note?: true
   oldExpiry?: true
   newExpiry?: true
   createdAt?: true
@@ -143,6 +153,8 @@ export type RenewalRecordCountAggregateInputType = {
   qualifiedLots?: true
   requiredLots?: true
   renewed?: true
+  origin?: true
+  note?: true
   oldExpiry?: true
   newExpiry?: true
   createdAt?: true
@@ -244,6 +256,8 @@ export type RenewalRecordGroupByOutputType = {
   qualifiedLots: runtime.Decimal
   requiredLots: runtime.Decimal
   renewed: boolean
+  origin: string
+  note: string | null
   oldExpiry: Date | null
   newExpiry: Date | null
   createdAt: Date
@@ -281,6 +295,8 @@ export type RenewalRecordWhereInput = {
   qualifiedLots?: Prisma.DecimalFilter<"RenewalRecord"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   requiredLots?: Prisma.DecimalFilter<"RenewalRecord"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   renewed?: Prisma.BoolFilter<"RenewalRecord"> | boolean
+  origin?: Prisma.StringFilter<"RenewalRecord"> | string
+  note?: Prisma.StringNullableFilter<"RenewalRecord"> | string | null
   oldExpiry?: Prisma.DateTimeNullableFilter<"RenewalRecord"> | Date | string | null
   newExpiry?: Prisma.DateTimeNullableFilter<"RenewalRecord"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"RenewalRecord"> | Date | string
@@ -298,6 +314,8 @@ export type RenewalRecordOrderByWithRelationInput = {
   qualifiedLots?: Prisma.SortOrder
   requiredLots?: Prisma.SortOrder
   renewed?: Prisma.SortOrder
+  origin?: Prisma.SortOrder
+  note?: Prisma.SortOrderInput | Prisma.SortOrder
   oldExpiry?: Prisma.SortOrderInput | Prisma.SortOrder
   newExpiry?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -320,6 +338,8 @@ export type RenewalRecordWhereUniqueInput = Prisma.AtLeast<{
   qualifiedLots?: Prisma.DecimalFilter<"RenewalRecord"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   requiredLots?: Prisma.DecimalFilter<"RenewalRecord"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   renewed?: Prisma.BoolFilter<"RenewalRecord"> | boolean
+  origin?: Prisma.StringFilter<"RenewalRecord"> | string
+  note?: Prisma.StringNullableFilter<"RenewalRecord"> | string | null
   oldExpiry?: Prisma.DateTimeNullableFilter<"RenewalRecord"> | Date | string | null
   newExpiry?: Prisma.DateTimeNullableFilter<"RenewalRecord"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"RenewalRecord"> | Date | string
@@ -337,6 +357,8 @@ export type RenewalRecordOrderByWithAggregationInput = {
   qualifiedLots?: Prisma.SortOrder
   requiredLots?: Prisma.SortOrder
   renewed?: Prisma.SortOrder
+  origin?: Prisma.SortOrder
+  note?: Prisma.SortOrderInput | Prisma.SortOrder
   oldExpiry?: Prisma.SortOrderInput | Prisma.SortOrder
   newExpiry?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -359,6 +381,8 @@ export type RenewalRecordScalarWhereWithAggregatesInput = {
   qualifiedLots?: Prisma.DecimalWithAggregatesFilter<"RenewalRecord"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   requiredLots?: Prisma.DecimalWithAggregatesFilter<"RenewalRecord"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   renewed?: Prisma.BoolWithAggregatesFilter<"RenewalRecord"> | boolean
+  origin?: Prisma.StringWithAggregatesFilter<"RenewalRecord"> | string
+  note?: Prisma.StringNullableWithAggregatesFilter<"RenewalRecord"> | string | null
   oldExpiry?: Prisma.DateTimeNullableWithAggregatesFilter<"RenewalRecord"> | Date | string | null
   newExpiry?: Prisma.DateTimeNullableWithAggregatesFilter<"RenewalRecord"> | Date | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"RenewalRecord"> | Date | string
@@ -370,6 +394,8 @@ export type RenewalRecordCreateInput = {
   qualifiedLots: runtime.Decimal | runtime.DecimalJsLike | number | string
   requiredLots: runtime.Decimal | runtime.DecimalJsLike | number | string
   renewed: boolean
+  origin?: string
+  note?: string | null
   oldExpiry?: Date | string | null
   newExpiry?: Date | string | null
   createdAt?: Date | string
@@ -387,6 +413,8 @@ export type RenewalRecordUncheckedCreateInput = {
   qualifiedLots: runtime.Decimal | runtime.DecimalJsLike | number | string
   requiredLots: runtime.Decimal | runtime.DecimalJsLike | number | string
   renewed: boolean
+  origin?: string
+  note?: string | null
   oldExpiry?: Date | string | null
   newExpiry?: Date | string | null
   createdAt?: Date | string
@@ -398,6 +426,8 @@ export type RenewalRecordUpdateInput = {
   qualifiedLots?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   requiredLots?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   renewed?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  origin?: Prisma.StringFieldUpdateOperationsInput | string
+  note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   oldExpiry?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   newExpiry?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -415,6 +445,8 @@ export type RenewalRecordUncheckedUpdateInput = {
   qualifiedLots?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   requiredLots?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   renewed?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  origin?: Prisma.StringFieldUpdateOperationsInput | string
+  note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   oldExpiry?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   newExpiry?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -429,6 +461,8 @@ export type RenewalRecordCreateManyInput = {
   qualifiedLots: runtime.Decimal | runtime.DecimalJsLike | number | string
   requiredLots: runtime.Decimal | runtime.DecimalJsLike | number | string
   renewed: boolean
+  origin?: string
+  note?: string | null
   oldExpiry?: Date | string | null
   newExpiry?: Date | string | null
   createdAt?: Date | string
@@ -440,6 +474,8 @@ export type RenewalRecordUpdateManyMutationInput = {
   qualifiedLots?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   requiredLots?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   renewed?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  origin?: Prisma.StringFieldUpdateOperationsInput | string
+  note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   oldExpiry?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   newExpiry?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -454,6 +490,8 @@ export type RenewalRecordUncheckedUpdateManyInput = {
   qualifiedLots?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   requiredLots?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   renewed?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  origin?: Prisma.StringFieldUpdateOperationsInput | string
+  note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   oldExpiry?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   newExpiry?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -490,6 +528,8 @@ export type RenewalRecordCountOrderByAggregateInput = {
   qualifiedLots?: Prisma.SortOrder
   requiredLots?: Prisma.SortOrder
   renewed?: Prisma.SortOrder
+  origin?: Prisma.SortOrder
+  note?: Prisma.SortOrder
   oldExpiry?: Prisma.SortOrder
   newExpiry?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -513,6 +553,8 @@ export type RenewalRecordMaxOrderByAggregateInput = {
   qualifiedLots?: Prisma.SortOrder
   requiredLots?: Prisma.SortOrder
   renewed?: Prisma.SortOrder
+  origin?: Prisma.SortOrder
+  note?: Prisma.SortOrder
   oldExpiry?: Prisma.SortOrder
   newExpiry?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -527,6 +569,8 @@ export type RenewalRecordMinOrderByAggregateInput = {
   qualifiedLots?: Prisma.SortOrder
   requiredLots?: Prisma.SortOrder
   renewed?: Prisma.SortOrder
+  origin?: Prisma.SortOrder
+  note?: Prisma.SortOrder
   oldExpiry?: Prisma.SortOrder
   newExpiry?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -673,6 +717,8 @@ export type RenewalRecordCreateWithoutMemberInput = {
   qualifiedLots: runtime.Decimal | runtime.DecimalJsLike | number | string
   requiredLots: runtime.Decimal | runtime.DecimalJsLike | number | string
   renewed: boolean
+  origin?: string
+  note?: string | null
   oldExpiry?: Date | string | null
   newExpiry?: Date | string | null
   createdAt?: Date | string
@@ -688,6 +734,8 @@ export type RenewalRecordUncheckedCreateWithoutMemberInput = {
   qualifiedLots: runtime.Decimal | runtime.DecimalJsLike | number | string
   requiredLots: runtime.Decimal | runtime.DecimalJsLike | number | string
   renewed: boolean
+  origin?: string
+  note?: string | null
   oldExpiry?: Date | string | null
   newExpiry?: Date | string | null
   createdAt?: Date | string
@@ -731,6 +779,8 @@ export type RenewalRecordScalarWhereInput = {
   qualifiedLots?: Prisma.DecimalFilter<"RenewalRecord"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   requiredLots?: Prisma.DecimalFilter<"RenewalRecord"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   renewed?: Prisma.BoolFilter<"RenewalRecord"> | boolean
+  origin?: Prisma.StringFilter<"RenewalRecord"> | string
+  note?: Prisma.StringNullableFilter<"RenewalRecord"> | string | null
   oldExpiry?: Prisma.DateTimeNullableFilter<"RenewalRecord"> | Date | string | null
   newExpiry?: Prisma.DateTimeNullableFilter<"RenewalRecord"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"RenewalRecord"> | Date | string
@@ -742,6 +792,8 @@ export type RenewalRecordCreateWithoutIndicatorInput = {
   qualifiedLots: runtime.Decimal | runtime.DecimalJsLike | number | string
   requiredLots: runtime.Decimal | runtime.DecimalJsLike | number | string
   renewed: boolean
+  origin?: string
+  note?: string | null
   oldExpiry?: Date | string | null
   newExpiry?: Date | string | null
   createdAt?: Date | string
@@ -757,6 +809,8 @@ export type RenewalRecordUncheckedCreateWithoutIndicatorInput = {
   qualifiedLots: runtime.Decimal | runtime.DecimalJsLike | number | string
   requiredLots: runtime.Decimal | runtime.DecimalJsLike | number | string
   renewed: boolean
+  origin?: string
+  note?: string | null
   oldExpiry?: Date | string | null
   newExpiry?: Date | string | null
   createdAt?: Date | string
@@ -794,6 +848,8 @@ export type RenewalRecordCreateWithoutIndicatorAccessInput = {
   qualifiedLots: runtime.Decimal | runtime.DecimalJsLike | number | string
   requiredLots: runtime.Decimal | runtime.DecimalJsLike | number | string
   renewed: boolean
+  origin?: string
+  note?: string | null
   oldExpiry?: Date | string | null
   newExpiry?: Date | string | null
   createdAt?: Date | string
@@ -809,6 +865,8 @@ export type RenewalRecordUncheckedCreateWithoutIndicatorAccessInput = {
   qualifiedLots: runtime.Decimal | runtime.DecimalJsLike | number | string
   requiredLots: runtime.Decimal | runtime.DecimalJsLike | number | string
   renewed: boolean
+  origin?: string
+  note?: string | null
   oldExpiry?: Date | string | null
   newExpiry?: Date | string | null
   createdAt?: Date | string
@@ -848,6 +906,8 @@ export type RenewalRecordCreateManyMemberInput = {
   qualifiedLots: runtime.Decimal | runtime.DecimalJsLike | number | string
   requiredLots: runtime.Decimal | runtime.DecimalJsLike | number | string
   renewed: boolean
+  origin?: string
+  note?: string | null
   oldExpiry?: Date | string | null
   newExpiry?: Date | string | null
   createdAt?: Date | string
@@ -859,6 +919,8 @@ export type RenewalRecordUpdateWithoutMemberInput = {
   qualifiedLots?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   requiredLots?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   renewed?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  origin?: Prisma.StringFieldUpdateOperationsInput | string
+  note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   oldExpiry?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   newExpiry?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -874,6 +936,8 @@ export type RenewalRecordUncheckedUpdateWithoutMemberInput = {
   qualifiedLots?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   requiredLots?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   renewed?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  origin?: Prisma.StringFieldUpdateOperationsInput | string
+  note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   oldExpiry?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   newExpiry?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -887,6 +951,8 @@ export type RenewalRecordUncheckedUpdateManyWithoutMemberInput = {
   qualifiedLots?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   requiredLots?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   renewed?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  origin?: Prisma.StringFieldUpdateOperationsInput | string
+  note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   oldExpiry?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   newExpiry?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -900,6 +966,8 @@ export type RenewalRecordCreateManyIndicatorInput = {
   qualifiedLots: runtime.Decimal | runtime.DecimalJsLike | number | string
   requiredLots: runtime.Decimal | runtime.DecimalJsLike | number | string
   renewed: boolean
+  origin?: string
+  note?: string | null
   oldExpiry?: Date | string | null
   newExpiry?: Date | string | null
   createdAt?: Date | string
@@ -911,6 +979,8 @@ export type RenewalRecordUpdateWithoutIndicatorInput = {
   qualifiedLots?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   requiredLots?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   renewed?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  origin?: Prisma.StringFieldUpdateOperationsInput | string
+  note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   oldExpiry?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   newExpiry?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -926,6 +996,8 @@ export type RenewalRecordUncheckedUpdateWithoutIndicatorInput = {
   qualifiedLots?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   requiredLots?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   renewed?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  origin?: Prisma.StringFieldUpdateOperationsInput | string
+  note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   oldExpiry?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   newExpiry?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -939,6 +1011,8 @@ export type RenewalRecordUncheckedUpdateManyWithoutIndicatorInput = {
   qualifiedLots?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   requiredLots?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   renewed?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  origin?: Prisma.StringFieldUpdateOperationsInput | string
+  note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   oldExpiry?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   newExpiry?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -952,6 +1026,8 @@ export type RenewalRecordCreateManyIndicatorAccessInput = {
   qualifiedLots: runtime.Decimal | runtime.DecimalJsLike | number | string
   requiredLots: runtime.Decimal | runtime.DecimalJsLike | number | string
   renewed: boolean
+  origin?: string
+  note?: string | null
   oldExpiry?: Date | string | null
   newExpiry?: Date | string | null
   createdAt?: Date | string
@@ -963,6 +1039,8 @@ export type RenewalRecordUpdateWithoutIndicatorAccessInput = {
   qualifiedLots?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   requiredLots?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   renewed?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  origin?: Prisma.StringFieldUpdateOperationsInput | string
+  note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   oldExpiry?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   newExpiry?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -978,6 +1056,8 @@ export type RenewalRecordUncheckedUpdateWithoutIndicatorAccessInput = {
   qualifiedLots?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   requiredLots?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   renewed?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  origin?: Prisma.StringFieldUpdateOperationsInput | string
+  note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   oldExpiry?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   newExpiry?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -991,6 +1071,8 @@ export type RenewalRecordUncheckedUpdateManyWithoutIndicatorAccessInput = {
   qualifiedLots?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   requiredLots?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   renewed?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  origin?: Prisma.StringFieldUpdateOperationsInput | string
+  note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   oldExpiry?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   newExpiry?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1007,6 +1089,8 @@ export type RenewalRecordSelect<ExtArgs extends runtime.Types.Extensions.Interna
   qualifiedLots?: boolean
   requiredLots?: boolean
   renewed?: boolean
+  origin?: boolean
+  note?: boolean
   oldExpiry?: boolean
   newExpiry?: boolean
   createdAt?: boolean
@@ -1026,12 +1110,14 @@ export type RenewalRecordSelectScalar = {
   qualifiedLots?: boolean
   requiredLots?: boolean
   renewed?: boolean
+  origin?: boolean
+  note?: boolean
   oldExpiry?: boolean
   newExpiry?: boolean
   createdAt?: boolean
 }
 
-export type RenewalRecordOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "memberId" | "indicatorId" | "indicatorAccessId" | "period" | "qualifiedLots" | "requiredLots" | "renewed" | "oldExpiry" | "newExpiry" | "createdAt", ExtArgs["result"]["renewalRecord"]>
+export type RenewalRecordOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "memberId" | "indicatorId" | "indicatorAccessId" | "period" | "qualifiedLots" | "requiredLots" | "renewed" | "origin" | "note" | "oldExpiry" | "newExpiry" | "createdAt", ExtArgs["result"]["renewalRecord"]>
 export type RenewalRecordInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   member?: boolean | Prisma.MemberDefaultArgs<ExtArgs>
   indicator?: boolean | Prisma.IndicatorDefaultArgs<ExtArgs>
@@ -1054,6 +1140,12 @@ export type $RenewalRecordPayload<ExtArgs extends runtime.Types.Extensions.Inter
     qualifiedLots: runtime.Decimal
     requiredLots: runtime.Decimal
     renewed: boolean
+    /**
+     * * Who performed it: lot-check automation/cron (`auto`) or an admin action
+     *    *  such as Grant/Extend (`manual`). Pre-existing rows are all automation.
+     */
+    origin: string
+    note: string | null
     oldExpiry: Date | null
     newExpiry: Date | null
     createdAt: Date
@@ -1437,6 +1529,8 @@ export interface RenewalRecordFieldRefs {
   readonly qualifiedLots: Prisma.FieldRef<"RenewalRecord", 'Decimal'>
   readonly requiredLots: Prisma.FieldRef<"RenewalRecord", 'Decimal'>
   readonly renewed: Prisma.FieldRef<"RenewalRecord", 'Boolean'>
+  readonly origin: Prisma.FieldRef<"RenewalRecord", 'String'>
+  readonly note: Prisma.FieldRef<"RenewalRecord", 'String'>
   readonly oldExpiry: Prisma.FieldRef<"RenewalRecord", 'DateTime'>
   readonly newExpiry: Prisma.FieldRef<"RenewalRecord", 'DateTime'>
   readonly createdAt: Prisma.FieldRef<"RenewalRecord", 'DateTime'>

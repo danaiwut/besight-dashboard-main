@@ -3,6 +3,8 @@ import { RecordStatus, VerificationStatus } from "@/generated/prisma/client";
 import { getPrisma, isDatabaseConfigured } from "@/lib/server/prisma";
 import { bumpDataVersion } from "@/lib/server/dataVersion";
 import { toTradeAccountDto } from "@/lib/server/crmDtos";
+import { adminWriteGuard } from "@/lib/session";
+
 
 export const dynamic = "force-dynamic";
 
@@ -14,6 +16,8 @@ const VERIFICATIONS = ["verified", "pending", "not_found"] as const;
 const STATUSES = ["active", "inactive"] as const;
 
 export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const guard = await adminWriteGuard();
+  if (!guard.ok) return guard.response;
   if (!isDatabaseConfigured()) return NextResponse.json({ ok: false, error: "DATABASE_URL is not configured" }, { status: 503 });
   try {
     const id = Number((await params).id);
@@ -60,7 +64,16 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
       data.status = body.status as RecordStatus;
     }
 
-    const account = await prisma.tradeAccount.update({ where: { id }, data });
+    const nextMemberId = typeof data.memberId === "number" ? data.memberId : current.memberId;
+    const account = await prisma.$transaction(async (tx) => {
+      const updated = await tx.tradeAccount.update({ where: { id }, data });
+      // TradeLog carries a denormalized memberId — keep it in step with the
+      // account, or every lot/rebate/level computation credits the old member.
+      if (nextMemberId !== current.memberId) {
+        await tx.tradeLog.updateMany({ where: { tradeAccountId: id }, data: { memberId: nextMemberId } });
+      }
+      return updated;
+    });
     await bumpDataVersion();
     return NextResponse.json({ ok: true, tradeAccount: toTradeAccountDto(account) });
   } catch (error) {
@@ -69,6 +82,8 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
 }
 
 export async function DELETE(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const guard = await adminWriteGuard();
+  if (!guard.ok) return guard.response;
   if (!isDatabaseConfigured()) return NextResponse.json({ ok: false, error: "DATABASE_URL is not configured" }, { status: 503 });
   try {
     const id = Number((await params).id);

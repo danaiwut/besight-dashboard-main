@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getPrisma, isDatabaseConfigured } from "@/lib/server/prisma";
+import { adminGuard } from "@/lib/session";
 
 export const dynamic = "force-dynamic";
 
@@ -20,6 +21,8 @@ function notificationHtml(action: string, memberName: string, description: strin
 }
 
 export async function GET() {
+  const guard = await adminGuard();
+  if (!guard.ok) return guard.response;
   if (!isDatabaseConfigured()) return NextResponse.json({ ok: false, error: "DATABASE_URL is not configured" }, { status: 503 });
   try {
     const records = await getPrisma().activityLog.findMany({

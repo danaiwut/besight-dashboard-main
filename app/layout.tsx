@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Open_Sans } from "next/font/google";
 import "../styles/tokens.css";
-import { CrmProvider } from "../components/crm/CrmContext";
 import { LanguageProvider } from "../components/crm/LanguageContext";
 
 const openSans = Open_Sans({
@@ -32,9 +31,7 @@ export default function RootLayout({
         />
       </head>
       <body suppressHydrationWarning>
-        <LanguageProvider>
-          <CrmProvider>{children}</CrmProvider>
-        </LanguageProvider>
+        <LanguageProvider>{children}</LanguageProvider>
       </body>
     </html>
   );

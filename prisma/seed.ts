@@ -1,12 +1,47 @@
 import "dotenv/config";
 import { PrismaMariaDb } from "@prisma/adapter-mariadb";
-import { Plan, PrismaClient, RecordStatus } from "../generated/prisma/client";
+import { ActivityStatus, Plan, PrismaClient, RecordStatus } from "../generated/prisma/client";
+import { hashPassword } from "../lib/server/password";
+import { DEFAULT_BEC_RATES } from "../lib/becRates";
+import { COURSE_SEED, seedLessonsFor } from "../lib/courses";
 
 const databaseUrl = process.env.DATABASE_URL;
 if (!databaseUrl) throw new Error("DATABASE_URL is not configured");
   const prisma = new PrismaClient({ adapter: new PrismaMariaDb(databaseUrl) });
 
+const MONTH_NAMES = [
+  "January", "February", "March", "April", "May", "June",
+  "July", "August", "September", "October", "November", "December",
+];
+
+/** Standard competition rules, stored as admin-entered plain text (the rules
+ *  column is single-language by design; the customer page renders one per line). */
+const COMPETITION_RULES = [
+  "Open to all verified BeSight members with an active linked trading account.",
+  "Rankings are calculated from total lots traded on your linked account during the competition period.",
+  "A minimum of 5 lots is required during the period to qualify for a prize.",
+  "One trading account per member — duplicate or shared accounts will be disqualified.",
+  "Prizes are credited as bonus rebate to your wallet within 7 business days after the competition ends.",
+  "BeSight reserves the right to disqualify accounts showing abusive trading patterns (e.g. arbitrage or latency exploitation).",
+].join("\n");
+
 async function main() {
+  /* Owner admin for email/password sign-in. Override with ADMIN_EMAIL /
+     ADMIN_PASSWORD; the password is only hashed when the row has none yet, so
+     re-running the seed never resets a changed password. */
+  const adminEmail = process.env.ADMIN_EMAIL || "admin@besight.com";
+  const adminPassword = process.env.ADMIN_PASSWORD || "besight-admin";
+  const existingAdmin = await prisma.admin.findUnique({ where: { email: adminEmail } });
+  if (!existingAdmin) {
+    await prisma.admin.create({
+      data: { name: "BeSight Owner", email: adminEmail, role: "Owner", isOwner: true, passwordHash: await hashPassword(adminPassword) },
+    });
+    console.log(`👤  Seeded owner admin ${adminEmail} (set ADMIN_PASSWORD to change the password)`);
+  } else if (!existingAdmin.passwordHash) {
+    await prisma.admin.update({ where: { id: existingAdmin.id }, data: { passwordHash: await hashPassword(adminPassword) } });
+    console.log(`👤  Set a password for existing admin ${adminEmail}`);
+  }
+
   await prisma.broker.upsert({
     where: { code: "EXNESS" },
     update: { name: "Exness", url: "https://www.exness.com/", status: RecordStatus.active, importMethod: "API" },
@@ -47,6 +82,109 @@ async function main() {
       key: "indicator_automation",
       valueJson: JSON.stringify({ requiredLots: 3, renewalMonths: 1, enabled: true }),
       description: "Defaults for automatic Indicator access after lot qualification.",
+    },
+  });
+
+  /* ── BEC points & Spin & Win ── */
+  await prisma.systemSetting.upsert({
+    where: { key: "spin" },
+    update: {},
+    create: {
+      key: "spin",
+      valueJson: JSON.stringify({ enabled: true, costPerSpin: 100, defaultPointsPerLot: 0.1, minWithdraw: 15 }),
+      description: "BEC points & Spin & Win settings.",
+    },
+  });
+  // The loyalty sheet's points table — admins can override any row in the CRM.
+  for (const [symbol, pointsPerLot] of DEFAULT_BEC_RATES) {
+    await prisma.becRate.upsert({
+      where: { symbol },
+      update: {},
+      create: { symbol, pointsPerLot, active: true },
+    });
+  }
+  // Wheel prizes from the rewards sheet. Weight = relative chance.
+  const prizes = [
+    { name: 'Apple iPad 11" หรือเงินสด $300', icon: "emoji_events", valueNote: "$300.00", weight: 1, sortOrder: 0 },
+    { name: "เงินสด $200", icon: "payments", valueNote: "$200.00", weight: 2, sortOrder: 1 },
+    { name: "เงินสด $120", icon: "payments", valueNote: "$120.00", weight: 4, sortOrder: 2 },
+    { name: "เงินสด $40", icon: "payments", valueNote: "$40.00", weight: 10, sortOrder: 3 },
+    { name: "เงินสด $15", icon: "card_giftcard", valueNote: "$15.00", weight: 20, sortOrder: 4 },
+  ];
+  for (const prize of prizes) {
+    const existing = await prisma.spinPrize.findFirst({ where: { name: prize.name }, select: { id: true } });
+    if (!existing) await prisma.spinPrize.create({ data: { ...prize, active: true } });
+  }
+
+  /* ── Course Online (LMS): one course per curriculum in lib/courses.ts ── */
+  for (const [index, seed] of COURSE_SEED.entries()) {
+    const course = await prisma.course.upsert({
+      where: { slug: seed.slug },
+      update: {},
+      create: {
+        slug: seed.slug,
+        title: seed.title,
+        description: seed.description,
+        category: seed.category,
+        level: seed.level,
+        instructor: seed.instructor,
+        sortOrder: index,
+        published: true,
+      },
+    });
+    const lessons = await prisma.courseLesson.count({ where: { courseId: course.id } });
+    const seeds = seedLessonsFor(seed, index);
+    if (!lessons) {
+      for (const lesson of seeds) {
+        await prisma.courseLesson.create({ data: { courseId: course.id, ...lesson } });
+      }
+    } else {
+      // Backfill section titles for lessons created before sections existed.
+      const existing = await prisma.courseLesson.findMany({ where: { courseId: course.id }, orderBy: [{ sortOrder: "asc" }, { id: "asc" }] });
+      for (const [i, lesson] of existing.entries()) {
+        if (!lesson.sectionTitle && seeds[i]) {
+          await prisma.courseLesson.update({ where: { id: lesson.id }, data: { sectionTitle: seeds[i].sectionTitle } });
+        }
+      }
+    }
+  }
+
+  /* One real activity so the customer /dashboard/activities page has content
+     out of the box. Dates track the current calendar month (stable slug), so a
+     freshly seeded database always shows the month in progress. These are the
+     live competition's real terms — the only placeholder is `traders`, which
+     stays 0 until participant tracking exists. */
+  const now = new Date();
+  const year = now.getUTCFullYear();
+  const month = now.getUTCMonth();
+  const monthStart = new Date(Date.UTC(year, month, 1));
+  const monthEnd = new Date(Date.UTC(year, month + 1, 0));
+  const activitySlug = `${year}-${String(month + 1).padStart(2, "0")}`;
+  const activityTitle = `${MONTH_NAMES[month]} Competition ${year}`;
+
+  await prisma.activity.upsert({
+    where: { slug: activitySlug },
+    update: {
+      title: activityTitle,
+      status: ActivityStatus.live,
+      startDate: monthStart,
+      endDate: monthEnd,
+      prizePool: 2000,
+      rules: COMPETITION_RULES,
+      published: true,
+    },
+    create: {
+      slug: activitySlug,
+      title: activityTitle,
+      description: "Trade your linked BeSight account during the competition window — the Top 20 traders by total lots share a $2,000 cash prize pool plus bonus rebate credit.",
+      status: ActivityStatus.live,
+      startDate: monthStart,
+      endDate: monthEnd,
+      traders: 0,
+      prizePool: 2000,
+      rules: COMPETITION_RULES,
+      sortOrder: 0,
+      published: true,
     },
   });
 }
