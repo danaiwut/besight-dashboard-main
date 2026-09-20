@@ -113,6 +113,12 @@ export default function CrmActivitiesPage() {
                     </td>
                     <td>
                       <span className={`badge ${STATUS_BADGE[a.status]}`}>{t(`act.status.${a.status}`)}</span>
+                      {a.mode !== "registered" && (
+                        <span className="badge pending" style={{ marginLeft: 6 }} title={t("act.mode.legacyHint")}>{t("act.mode.legacy")}</span>
+                      )}
+                      {a.winnersFinalizedAt && (
+                        <span className="badge active" style={{ marginLeft: 6 }}>{t("act.finalized")}</span>
+                      )}
                     </td>
                     <td className="mono">
                       {fmtDate(a.startDate)} – {fmtDate(a.endDate)}

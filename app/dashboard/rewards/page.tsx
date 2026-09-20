@@ -1,44 +1,48 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import { useLanguage } from "../../../components/crm/LanguageContext";
 import { useCrm, fmtDate, lot } from "../../../components/crm/CrmContext";
 import { useCustomerData } from "../../../components/dashboard/useCustomerData";
+import { apiCall } from "../../../lib/crmApi";
+import type { RewardClaimDto, RewardTierDto } from "../../../lib/activities";
 import Icon from "../../../components/Icon";
 
-type Tier = {
-  key: string;
-  icon: string;
-  accent: string;
-  lotsRequired: number;
-  titleKey: string;
-  rewardKey: string;
-  rewardIcon: string;
-  rewardImage?: string;
-};
+type ClaimState = "locked" | "available" | "pending" | "fulfilled";
 
-const TIERS: Tier[] = [
-  { key: "nonActive", icon: "hourglass_empty", accent: "#6B7280", lotsRequired: 0, titleKey: "dash.rewards.tier.nonActive", rewardKey: "", rewardIcon: "" },
-  { key: "bronze", icon: "military_tech", accent: "#A3673F", lotsRequired: 1, titleKey: "dash.rewards.tier.bronze", rewardKey: "dash.rewards.reward.bronze", rewardIcon: "payments", rewardImage: "/img/Loyalty/rebate-boost.jpg" },
-  { key: "silver", icon: "military_tech", accent: "#9AA3B0", lotsRequired: 50, titleKey: "dash.rewards.tier.silver", rewardKey: "dash.rewards.reward.silver", rewardIcon: "card_giftcard", rewardImage: "/img/Loyalty/cash-bonus.jpg" },
-  { key: "gold", icon: "military_tech", accent: "#D4AF37", lotsRequired: 150, titleKey: "dash.rewards.tier.gold", rewardKey: "dash.rewards.reward.gold", rewardIcon: "visibility", rewardImage: "/img/Loyalty/orca-indicator.jpg" },
-  { key: "beyond", icon: "rocket_launch", accent: "#2F6FED", lotsRequired: 500, titleKey: "dash.rewards.tier.beyond", rewardKey: "dash.rewards.reward.beyond", rewardIcon: "smartphone", rewardImage: "/img/Loyalty/flagship-phone.jpg" },
-  { key: "exclusive", icon: "diamond", accent: "#8B3FE0", lotsRequired: 2000, titleKey: "dash.rewards.tier.exclusive", rewardKey: "dash.rewards.reward.exclusive", rewardIcon: "directions_car", rewardImage: "/img/Loyalty/geely20ex2-1775018889656.webp" },
-];
-
-// Standard-ladder tiers (silver/gold) collapse to a plain lock glyph until
-// reached; the two aspirational tiers keep their own icon even locked so
-// they stay recognisable/enticing further up the ladder.
-const ALWAYS_OWN_ICON = new Set(["nonActive", "bronze", "beyond", "exclusive"]);
-
-const REWARD_TIERS = TIERS.slice(1);
-
+/** Loyalty ladder — tiers come from the CRM (/crm/reward-tiers), progress from
+ *  lifetime traded lots, and Claim creates a real fulfilment-queue row. */
 export default function DashboardRewardsPage() {
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
   const { toast } = useCrm();
   const { member, totalLots, history } = useCustomerData();
+  const [tiers, setTiers] = useState<RewardTierDto[]>([]);
+  const [claims, setClaims] = useState<RewardClaimDto[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [claimingKey, setClaimingKey] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const rewardsRef = useRef<HTMLDivElement>(null);
+
+  const load = useCallback(async () => {
+    try {
+      const [tiersPayload, claimsPayload] = await Promise.all([
+        apiCall<{ tiers: RewardTierDto[] }>("/api/reward-tiers/", "GET"),
+        apiCall<{ claims: RewardClaimDto[] }>("/api/me/rewards/", "GET"),
+      ]);
+      setTiers(tiersPayload.tiers);
+      setClaims(claimsPayload.claims.filter((c) => c.kind === "tier"));
+    } catch {
+      // Ladder stays empty rather than fake — the page renders the locked state.
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    void load();
+  }, [load]);
 
   function copyCode() {
     navigator.clipboard
@@ -54,17 +58,40 @@ export default function DashboardRewardsPage() {
     ref.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
-  let currentIndex = 0;
-  for (let i = TIERS.length - 1; i >= 0; i--) {
-    if (totalLots >= TIERS[i].lotsRequired) {
+  async function claim(tierKey: string) {
+    if (claimingKey) return;
+    setClaimingKey(tierKey);
+    try {
+      const payload = await apiCall<{ claim: RewardClaimDto }>("/api/me/rewards/", "POST", { tierKey });
+      setClaims((cur) => [payload.claim, ...cur]);
+      toast(t("dash.rewards.claimSent"));
+    } catch (claimError) {
+      toast(claimError instanceof Error ? claimError.message : t("dash.rewards.claimFailed"));
+    } finally {
+      setClaimingKey(null);
+    }
+  }
+
+  const titleOf = (tier: RewardTierDto) => (lang === "th" ? tier.title : tier.titleEn || tier.title);
+  const rewardOf = (tier: RewardTierDto) => (lang === "th" ? tier.reward : tier.rewardEn || tier.reward);
+  const claimOf = (key: string) => claims.find((c) => c.refKey === `tier:${key}`);
+
+  let currentIndex = -1;
+  for (let i = tiers.length - 1; i >= 0; i--) {
+    if (totalLots >= tiers[i].threshold) {
       currentIndex = i;
       break;
     }
   }
-  const currentTier = TIERS[currentIndex];
-  const nextTier = TIERS[currentIndex + 1];
+  const nextTier = tiers[currentIndex + 1];
   const lastUpdated = history[0]?.tradeDate;
   const periodYear = (lastUpdated ?? "2026").slice(0, 4);
+
+  function claimState(tier: RewardTierDto): ClaimState {
+    const claim = claimOf(tier.key);
+    if (claim) return claim.status === "fulfilled" ? "fulfilled" : "pending";
+    return totalLots >= tier.threshold ? "available" : "locked";
+  }
 
   return (
     <>
@@ -105,44 +132,62 @@ export default function DashboardRewardsPage() {
               <div className="rewards-member-date">{lastUpdated ? fmtDate(lastUpdated) : t("dash.rewards.notUpdated")}</div>
             </div>
           </div>
+
+          <Link href="/dashboard/my-rewards" className="btn btn-ghost" style={{ width: "100%", marginTop: 12 }}>
+            <Icon name="card_giftcard" style={{ fontSize: 16 }} />
+            {t("dash.rewards.myRewardsCta")}
+          </Link>
         </div>
 
         <div className="card rewards-hero-card">
           <div className="rewards-hero-top">
             <div className="rewards-hero-title-row">
-              <span className="rewards-hero-medal" style={{ background: `${currentTier.accent}33`, borderColor: `${currentTier.accent}99` }}>
-                <Icon name={currentTier.icon} style={{ color: currentTier.accent === "#6B7280" ? "#fff" : currentTier.accent }} />
+              <span
+                className="rewards-hero-medal"
+                style={
+                  currentIndex >= 0
+                    ? { background: `${tiers[currentIndex].accent}33`, borderColor: `${tiers[currentIndex].accent}99` }
+                    : undefined
+                }
+              >
+                <Icon
+                  name={currentIndex >= 0 ? tiers[currentIndex].icon : "hourglass_empty"}
+                  style={currentIndex >= 0 ? { color: tiers[currentIndex].accent } : { color: "#fff" }}
+                />
               </span>
               <div>
                 <div className="rewards-hero-eyebrow">{t("dash.rewards.currentTierLabel")}</div>
-                <div className="rewards-hero-tier">{t(currentTier.titleKey)}</div>
+                <div className="rewards-hero-tier">
+                  {loading ? "…" : currentIndex >= 0 ? titleOf(tiers[currentIndex]) : t("dash.rewards.tier.nonActive")}
+                </div>
                 <div className="rewards-hero-subtitle">{t("dash.rewards.tierSubtitle")}</div>
               </div>
             </div>
             {nextTier && (
               <div className="rewards-hero-fraction">
-                {lot(totalLots)} / {lot(nextTier.lotsRequired)} Lot
+                {lot(totalLots)} / {lot(nextTier.threshold)} Lot
                 <div className="l">{t("dash.rewards.nextTierLabel")}</div>
               </div>
             )}
           </div>
 
-          <div className="rewards-stepper">
-            {TIERS.map((tier, i) => {
-              const reached = i <= currentIndex;
-              const isCurrent = i === currentIndex;
-              const showLock = !reached && !ALWAYS_OWN_ICON.has(tier.key);
-              return (
-                <div className={`step${reached ? " done" : ""}${isCurrent ? " current" : ""}`} key={tier.key}>
-                  <div className="line" />
-                  <span className="dot">
-                    <Icon name={showLock ? "lock" : tier.icon} />
-                  </span>
-                  <span className="label">{t(tier.titleKey)}</span>
-                </div>
-              );
-            })}
-          </div>
+          {!!tiers.length && (
+            <div className="rewards-stepper">
+              {tiers.map((tier, i) => {
+                const reached = i <= currentIndex;
+                const isCurrent = i === currentIndex;
+                return (
+                  <div className={`step${reached ? " done" : ""}${isCurrent ? " current" : ""}`} key={tier.key}>
+                    <div className="line" />
+                    <span className="dot">
+                      <Icon name={reached ? tier.icon : "lock"} />
+                    </span>
+                    <span className="label">{titleOf(tier)}</span>
+                  </div>
+                );
+              })}
+            </div>
+          )}
 
           <div className="rewards-hero-bottom">
             <span>
@@ -163,37 +208,49 @@ export default function DashboardRewardsPage() {
       <div className="rewards-programs-period">{t("dash.rewards.programsPeriod", { year: periodYear })}</div>
 
       <div className="rewards-cards-row">
-        {REWARD_TIERS.map((tier, i) => {
-          const number = REWARD_TIERS.length - i;
-          const achieved = totalLots >= tier.lotsRequired;
-          const pct = Math.min(100, Math.round((totalLots / tier.lotsRequired) * 100));
+        {tiers.map((tier, i) => {
+          const number = tiers.length - i;
+          const state = claimState(tier);
+          const pct = Math.min(100, Math.round((totalLots / Math.max(tier.threshold, 0.0001)) * 100));
           return (
-            <div className={`reward-card${achieved ? " achieved" : ""}`} key={tier.key}>
+            <div className={`reward-card${state === "fulfilled" || state === "available" ? " achieved" : ""}`} key={tier.key}>
               <span className="reward-card-badge">{t("dash.rewards.rewardBadge", { n: number })}</span>
               <span className="reward-card-icon">
-                {tier.rewardImage ? (
-                  // eslint-disable-next-line @next/next/no-img-element -- reward photo, sized/cropped by CSS
-                  <img src={tier.rewardImage} alt="" />
+                {tier.image ? (
+                  // eslint-disable-next-line @next/next/no-img-element -- admin-provided reward photo, sized/cropped by CSS
+                  <img src={tier.image} alt="" />
                 ) : (
-                  <Icon name={tier.rewardIcon} />
+                  <Icon name={tier.icon} />
                 )}
               </span>
-              <div className="reward-card-title">{t(tier.rewardKey)}</div>
+              <div className="reward-card-title">{rewardOf(tier)}</div>
               <div className="reward-card-pct">{pct}%</div>
               <div className="reward-card-track">
                 <span className="reward-card-fill" style={{ width: `${pct}%` }} />
               </div>
               <div className="reward-card-frac">
-                {lot(totalLots)}/{lot(tier.lotsRequired)} {t("dash.rewards.lotsUnit")}
+                {lot(totalLots)}/{lot(tier.threshold)} {t("dash.rewards.lotsUnit")}
               </div>
-              <button
-                className={`btn ${achieved ? "btn-primary" : "btn-ghost"}`}
-                disabled={!achieved}
-                onClick={() => toast(t("dash.rewards.claimToast", { reward: t(tier.rewardKey) }))}
-              >
-                {t("dash.rewards.claim")}
-                <Icon name="arrow_forward" style={{ fontSize: 15 }} />
-              </button>
+              {state === "fulfilled" ? (
+                <button className="btn btn-ghost" disabled>
+                  <Icon name="check_circle" style={{ fontSize: 15 }} />
+                  {t("dash.rewards.claimed")}
+                </button>
+              ) : state === "pending" ? (
+                <button className="btn btn-ghost" disabled>
+                  <Icon name="schedule" style={{ fontSize: 15 }} />
+                  {t("dash.rewards.claimPending")}
+                </button>
+              ) : (
+                <button
+                  className={`btn ${state === "available" ? "btn-primary" : "btn-ghost"}`}
+                  disabled={state !== "available" || claimingKey !== null}
+                  onClick={() => void claim(tier.key)}
+                >
+                  {claimingKey === tier.key ? t("dash.rewards.claiming") : t("dash.rewards.claim")}
+                  <Icon name="arrow_forward" style={{ fontSize: 15 }} />
+                </button>
+              )}
             </div>
           );
         })}

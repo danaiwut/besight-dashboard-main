@@ -5,13 +5,15 @@ import { useCrm, fmtDate, PLAN_LABELS } from "../../../components/crm/CrmContext
 import { useLanguage } from "../../../components/crm/LanguageContext";
 import { useCustomerData } from "../../../components/dashboard/useCustomerData";
 import { useTheme } from "../../../components/dashboard/ThemeContext";
+import { useSocialStatus } from "../../../components/dashboard/useSocialStatus";
 import { WORLD_COUNTRIES } from "../../../lib/countries";
 import Avatar from "../../../components/Avatar";
 import Icon from "../../../components/Icon";
+import Link from "next/link";
 
 const MAX_AVATAR_BYTES = 4 * 1024 * 1024;
 
-type SocialProvider = "google" | "line" | "facebook";
+type SocialProvider = "google" | "facebook";
 
 const SOCIAL_PROVIDERS: { key: SocialProvider; label: string; icon: ReactNode }[] = [
   {
@@ -27,12 +29,6 @@ const SOCIAL_PROVIDERS: { key: SocialProvider; label: string; icon: ReactNode }[
     ),
   },
   {
-    key: "line",
-    label: "LINE",
-    // eslint-disable-next-line @next/next/no-img-element -- static export, brand logo asset
-    icon: <img src="/img/Social/LINE_logo.svg.webp" alt="LINE" style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: 6 }} />,
-  },
-  {
     key: "facebook",
     label: "Facebook",
     icon: (
@@ -46,8 +42,39 @@ const SOCIAL_PROVIDERS: { key: SocialProvider; label: string; icon: ReactNode }[
   },
 ];
 
-export default function DashboardProfilePage() {
-  const { t, lang } = useLanguage();
+/** Verified channel link (real OAuth/Login flow) — managed on the VIP page. */
+function VerifiedSocialRow({
+  icon,
+  label,
+  linked,
+}: {
+  icon: ReactNode;
+  label: string;
+  linked: { linked: boolean; username: string | null } | undefined;
+}) {
+  const { t } = useLanguage();
+  return (
+    <div className="drawer-row">
+      <span className="k social-link-name">
+        <span className="social-link-icon">{icon}</span>
+        {label}
+      </span>      <span className="v social-link-action">
+        {linked?.linked ? (
+          <span className="social-link-value" style={{ color: "var(--green)" }}>
+            {linked.username ?? t("dash.profile.social.connected")}
+          </span>
+        ) : (
+          <span className="social-link-value">{t("dash.profile.notLinked")}</span>
+        )}
+        <Link href="/dashboard/vip/" className="btn btn-ghost btn-sm">
+          {t("dash.profile.social.manage")}
+        </Link>
+      </span>
+    </div>
+  );
+}
+
+export default function DashboardProfilePage() {  const { t, lang } = useLanguage();
   const { setMembers, toast } = useCrm();
   const { member } = useCustomerData();
   const { theme } = useTheme();
@@ -62,13 +89,10 @@ export default function DashboardProfilePage() {
   const [address, setAddress] = useState(member.address ?? "");
   const [tv, setTv] = useState(member.tv);
   const [editingTv, setEditingTv] = useState(false);
-  const [telegramUsername, setTelegramUsername] = useState(member.telegramUsername ?? "");
-  const [editingTelegram, setEditingTelegram] = useState(false);
-  const [discordUsername, setDiscordUsername] = useState(member.discordUsername ?? "");
-  const [editingDiscord, setEditingDiscord] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState(member.avatarUrl);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const social = member.socialLinks ?? {};
+  const { data: verifiedSocial } = useSocialStatus();
 
   function toggleSocial(provider: SocialProvider) {
     const connected = !social[provider];
@@ -84,22 +108,6 @@ export default function DashboardProfilePage() {
     setTv(trimmed);
     setMembers((cur) => cur.map((m) => (m.id === member.id ? { ...m, tv: trimmed } : m)));
     setEditingTv(false);
-    toast(t("dash.profile.toast.saved"));
-  }
-
-  function confirmTelegram() {
-    const trimmed = telegramUsername.trim();
-    setTelegramUsername(trimmed);
-    setMembers((cur) => cur.map((m) => (m.id === member.id ? { ...m, telegramUsername: trimmed || undefined } : m)));
-    setEditingTelegram(false);
-    toast(t("dash.profile.toast.saved"));
-  }
-
-  function confirmDiscord() {
-    const trimmed = discordUsername.trim();
-    setDiscordUsername(trimmed);
-    setMembers((cur) => cur.map((m) => (m.id === member.id ? { ...m, discordUsername: trimmed || undefined } : m)));
-    setEditingDiscord(false);
     toast(t("dash.profile.toast.saved"));
   }
 
@@ -283,36 +291,14 @@ export default function DashboardProfilePage() {
             </span>
             {t("dash.profile.section.telegram")}
           </h4>
-          {editingTelegram ? (
-            <div className="field">
-              <label>{t("dash.profile.field.username")}</label>
-              <div className="inline-edit-row">
-                <input
-                  className="input"
-                  autoFocus
-                  value={telegramUsername}
-                  onChange={(e) => setTelegramUsername(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && confirmTelegram()}
-                  placeholder={t("dash.profile.notLinked")}
-                />
-                <button type="button" className="btn btn-primary btn-sm" onClick={confirmTelegram} aria-label={t("common.confirm")}>
-                  <Icon name="check" />
-                  {t("common.confirm")}
-                </button>
-              </div>
-            </div>
-          ) : (
-            <div className="drawer-row">
-              <span className="k">{t("dash.profile.field.username")}</span>
-              <span className="v social-link-action">
-                <span className="social-link-value">{telegramUsername || t("dash.profile.notLinked")}</span>
-                <button type="button" className="btn btn-ghost btn-sm" onClick={() => setEditingTelegram(true)}>
-                  <Icon name="edit" />
-                  {t("common.edit")}
-                </button>
-              </span>
-            </div>
-          )}
+          <VerifiedSocialRow
+            icon={<>
+              {/* eslint-disable-next-line @next/next/no-img-element -- static export, brand logo asset */}
+              <img src="/img/Social/telegram-logo.svg" alt="" />
+            </>}
+            label={t("dash.profile.section.telegram")}
+            linked={verifiedSocial?.status.telegram}
+          />
         </div>
 
         <div className="drawer-section">
@@ -323,36 +309,14 @@ export default function DashboardProfilePage() {
             </span>
             {t("dash.profile.section.discord")}
           </h4>
-          {editingDiscord ? (
-            <div className="field">
-              <label>{t("dash.profile.field.username")}</label>
-              <div className="inline-edit-row">
-                <input
-                  className="input"
-                  autoFocus
-                  value={discordUsername}
-                  onChange={(e) => setDiscordUsername(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && confirmDiscord()}
-                  placeholder={t("dash.profile.notLinked")}
-                />
-                <button type="button" className="btn btn-primary btn-sm" onClick={confirmDiscord} aria-label={t("common.confirm")}>
-                  <Icon name="check" />
-                  {t("common.confirm")}
-                </button>
-              </div>
-            </div>
-          ) : (
-            <div className="drawer-row">
-              <span className="k">{t("dash.profile.field.username")}</span>
-              <span className="v social-link-action">
-                <span className="social-link-value">{discordUsername || t("dash.profile.notLinked")}</span>
-                <button type="button" className="btn btn-ghost btn-sm" onClick={() => setEditingDiscord(true)}>
-                  <Icon name="edit" />
-                  {t("common.edit")}
-                </button>
-              </span>
-            </div>
-          )}
+          <VerifiedSocialRow
+            icon={<>
+              {/* eslint-disable-next-line @next/next/no-img-element -- static export, brand logo asset */}
+              <img src="/img/Social/discoard-logo.svg" alt="" />
+            </>}
+            label={t("dash.profile.section.discord")}
+            linked={verifiedSocial?.status.discord}
+          />
         </div>
 
         <div className="drawer-section">
@@ -363,15 +327,14 @@ export default function DashboardProfilePage() {
             </span>
             {t("dash.profile.section.line")}
           </h4>
-          <div className="drawer-row">
-            <span className="k">{t("dash.profile.field.username")}</span>
-            <span className="v social-link-action">
-              {social.line ? <span style={{ color: "var(--green)" }}>{t("dash.profile.social.connected")}</span> : t("dash.profile.notLinked")}
-              <button type="button" className="btn btn-ghost btn-sm" onClick={() => toggleSocial("line")}>
-                {social.line ? t("dash.profile.social.disconnect") : t("dash.profile.social.connect")}
-              </button>
-            </span>
-          </div>
+          <VerifiedSocialRow
+            icon={<>
+              {/* eslint-disable-next-line @next/next/no-img-element -- static export, brand logo asset */}
+              <img src="/img/Social/LINE_logo.svg.webp" alt="" />
+            </>}
+            label={t("dash.profile.section.line")}
+            linked={verifiedSocial?.status.line}
+          />
         </div>
       </div>
     </div>

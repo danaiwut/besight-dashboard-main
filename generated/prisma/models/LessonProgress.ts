@@ -30,12 +30,16 @@ export type LessonProgressAvgAggregateOutputType = {
   id: number | null
   lessonId: number | null
   memberId: number | null
+  maxPositionSec: number | null
+  durationSec: number | null
 }
 
 export type LessonProgressSumAggregateOutputType = {
   id: number | null
   lessonId: number | null
   memberId: number | null
+  maxPositionSec: number | null
+  durationSec: number | null
 }
 
 export type LessonProgressMinAggregateOutputType = {
@@ -43,6 +47,9 @@ export type LessonProgressMinAggregateOutputType = {
   lessonId: number | null
   memberId: number | null
   completedAt: Date | null
+  maxPositionSec: number | null
+  durationSec: number | null
+  updatedAt: Date | null
 }
 
 export type LessonProgressMaxAggregateOutputType = {
@@ -50,6 +57,9 @@ export type LessonProgressMaxAggregateOutputType = {
   lessonId: number | null
   memberId: number | null
   completedAt: Date | null
+  maxPositionSec: number | null
+  durationSec: number | null
+  updatedAt: Date | null
 }
 
 export type LessonProgressCountAggregateOutputType = {
@@ -57,6 +67,9 @@ export type LessonProgressCountAggregateOutputType = {
   lessonId: number
   memberId: number
   completedAt: number
+  maxPositionSec: number
+  durationSec: number
+  updatedAt: number
   _all: number
 }
 
@@ -65,12 +78,16 @@ export type LessonProgressAvgAggregateInputType = {
   id?: true
   lessonId?: true
   memberId?: true
+  maxPositionSec?: true
+  durationSec?: true
 }
 
 export type LessonProgressSumAggregateInputType = {
   id?: true
   lessonId?: true
   memberId?: true
+  maxPositionSec?: true
+  durationSec?: true
 }
 
 export type LessonProgressMinAggregateInputType = {
@@ -78,6 +95,9 @@ export type LessonProgressMinAggregateInputType = {
   lessonId?: true
   memberId?: true
   completedAt?: true
+  maxPositionSec?: true
+  durationSec?: true
+  updatedAt?: true
 }
 
 export type LessonProgressMaxAggregateInputType = {
@@ -85,6 +105,9 @@ export type LessonProgressMaxAggregateInputType = {
   lessonId?: true
   memberId?: true
   completedAt?: true
+  maxPositionSec?: true
+  durationSec?: true
+  updatedAt?: true
 }
 
 export type LessonProgressCountAggregateInputType = {
@@ -92,6 +115,9 @@ export type LessonProgressCountAggregateInputType = {
   lessonId?: true
   memberId?: true
   completedAt?: true
+  maxPositionSec?: true
+  durationSec?: true
+  updatedAt?: true
   _all?: true
 }
 
@@ -185,7 +211,10 @@ export type LessonProgressGroupByOutputType = {
   id: number
   lessonId: number
   memberId: number
-  completedAt: Date
+  completedAt: Date | null
+  maxPositionSec: number
+  durationSec: number | null
+  updatedAt: Date
   _count: LessonProgressCountAggregateOutputType | null
   _avg: LessonProgressAvgAggregateOutputType | null
   _sum: LessonProgressSumAggregateOutputType | null
@@ -215,7 +244,10 @@ export type LessonProgressWhereInput = {
   id?: Prisma.IntFilter<"LessonProgress"> | number
   lessonId?: Prisma.IntFilter<"LessonProgress"> | number
   memberId?: Prisma.IntFilter<"LessonProgress"> | number
-  completedAt?: Prisma.DateTimeFilter<"LessonProgress"> | Date | string
+  completedAt?: Prisma.DateTimeNullableFilter<"LessonProgress"> | Date | string | null
+  maxPositionSec?: Prisma.IntFilter<"LessonProgress"> | number
+  durationSec?: Prisma.IntNullableFilter<"LessonProgress"> | number | null
+  updatedAt?: Prisma.DateTimeFilter<"LessonProgress"> | Date | string
   lesson?: Prisma.XOR<Prisma.CourseLessonScalarRelationFilter, Prisma.CourseLessonWhereInput>
   member?: Prisma.XOR<Prisma.MemberScalarRelationFilter, Prisma.MemberWhereInput>
 }
@@ -224,7 +256,10 @@ export type LessonProgressOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   lessonId?: Prisma.SortOrder
   memberId?: Prisma.SortOrder
-  completedAt?: Prisma.SortOrder
+  completedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  maxPositionSec?: Prisma.SortOrder
+  durationSec?: Prisma.SortOrderInput | Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
   lesson?: Prisma.CourseLessonOrderByWithRelationInput
   member?: Prisma.MemberOrderByWithRelationInput
 }
@@ -237,7 +272,10 @@ export type LessonProgressWhereUniqueInput = Prisma.AtLeast<{
   NOT?: Prisma.LessonProgressWhereInput | Prisma.LessonProgressWhereInput[]
   lessonId?: Prisma.IntFilter<"LessonProgress"> | number
   memberId?: Prisma.IntFilter<"LessonProgress"> | number
-  completedAt?: Prisma.DateTimeFilter<"LessonProgress"> | Date | string
+  completedAt?: Prisma.DateTimeNullableFilter<"LessonProgress"> | Date | string | null
+  maxPositionSec?: Prisma.IntFilter<"LessonProgress"> | number
+  durationSec?: Prisma.IntNullableFilter<"LessonProgress"> | number | null
+  updatedAt?: Prisma.DateTimeFilter<"LessonProgress"> | Date | string
   lesson?: Prisma.XOR<Prisma.CourseLessonScalarRelationFilter, Prisma.CourseLessonWhereInput>
   member?: Prisma.XOR<Prisma.MemberScalarRelationFilter, Prisma.MemberWhereInput>
 }, "id" | "lessonId_memberId">
@@ -246,7 +284,10 @@ export type LessonProgressOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   lessonId?: Prisma.SortOrder
   memberId?: Prisma.SortOrder
-  completedAt?: Prisma.SortOrder
+  completedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  maxPositionSec?: Prisma.SortOrder
+  durationSec?: Prisma.SortOrderInput | Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
   _count?: Prisma.LessonProgressCountOrderByAggregateInput
   _avg?: Prisma.LessonProgressAvgOrderByAggregateInput
   _max?: Prisma.LessonProgressMaxOrderByAggregateInput
@@ -261,11 +302,17 @@ export type LessonProgressScalarWhereWithAggregatesInput = {
   id?: Prisma.IntWithAggregatesFilter<"LessonProgress"> | number
   lessonId?: Prisma.IntWithAggregatesFilter<"LessonProgress"> | number
   memberId?: Prisma.IntWithAggregatesFilter<"LessonProgress"> | number
-  completedAt?: Prisma.DateTimeWithAggregatesFilter<"LessonProgress"> | Date | string
+  completedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"LessonProgress"> | Date | string | null
+  maxPositionSec?: Prisma.IntWithAggregatesFilter<"LessonProgress"> | number
+  durationSec?: Prisma.IntNullableWithAggregatesFilter<"LessonProgress"> | number | null
+  updatedAt?: Prisma.DateTimeWithAggregatesFilter<"LessonProgress"> | Date | string
 }
 
 export type LessonProgressCreateInput = {
-  completedAt?: Date | string
+  completedAt?: Date | string | null
+  maxPositionSec?: number
+  durationSec?: number | null
+  updatedAt?: Date | string
   lesson: Prisma.CourseLessonCreateNestedOneWithoutProgressInput
   member: Prisma.MemberCreateNestedOneWithoutLessonProgressInput
 }
@@ -274,11 +321,17 @@ export type LessonProgressUncheckedCreateInput = {
   id?: number
   lessonId: number
   memberId: number
-  completedAt?: Date | string
+  completedAt?: Date | string | null
+  maxPositionSec?: number
+  durationSec?: number | null
+  updatedAt?: Date | string
 }
 
 export type LessonProgressUpdateInput = {
-  completedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  maxPositionSec?: Prisma.IntFieldUpdateOperationsInput | number
+  durationSec?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lesson?: Prisma.CourseLessonUpdateOneRequiredWithoutProgressNestedInput
   member?: Prisma.MemberUpdateOneRequiredWithoutLessonProgressNestedInput
 }
@@ -287,25 +340,37 @@ export type LessonProgressUncheckedUpdateInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   lessonId?: Prisma.IntFieldUpdateOperationsInput | number
   memberId?: Prisma.IntFieldUpdateOperationsInput | number
-  completedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  maxPositionSec?: Prisma.IntFieldUpdateOperationsInput | number
+  durationSec?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type LessonProgressCreateManyInput = {
   id?: number
   lessonId: number
   memberId: number
-  completedAt?: Date | string
+  completedAt?: Date | string | null
+  maxPositionSec?: number
+  durationSec?: number | null
+  updatedAt?: Date | string
 }
 
 export type LessonProgressUpdateManyMutationInput = {
-  completedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  maxPositionSec?: Prisma.IntFieldUpdateOperationsInput | number
+  durationSec?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type LessonProgressUncheckedUpdateManyInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   lessonId?: Prisma.IntFieldUpdateOperationsInput | number
   memberId?: Prisma.IntFieldUpdateOperationsInput | number
-  completedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  maxPositionSec?: Prisma.IntFieldUpdateOperationsInput | number
+  durationSec?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type LessonProgressListRelationFilter = {
@@ -328,12 +393,17 @@ export type LessonProgressCountOrderByAggregateInput = {
   lessonId?: Prisma.SortOrder
   memberId?: Prisma.SortOrder
   completedAt?: Prisma.SortOrder
+  maxPositionSec?: Prisma.SortOrder
+  durationSec?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
 }
 
 export type LessonProgressAvgOrderByAggregateInput = {
   id?: Prisma.SortOrder
   lessonId?: Prisma.SortOrder
   memberId?: Prisma.SortOrder
+  maxPositionSec?: Prisma.SortOrder
+  durationSec?: Prisma.SortOrder
 }
 
 export type LessonProgressMaxOrderByAggregateInput = {
@@ -341,6 +411,9 @@ export type LessonProgressMaxOrderByAggregateInput = {
   lessonId?: Prisma.SortOrder
   memberId?: Prisma.SortOrder
   completedAt?: Prisma.SortOrder
+  maxPositionSec?: Prisma.SortOrder
+  durationSec?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
 }
 
 export type LessonProgressMinOrderByAggregateInput = {
@@ -348,12 +421,17 @@ export type LessonProgressMinOrderByAggregateInput = {
   lessonId?: Prisma.SortOrder
   memberId?: Prisma.SortOrder
   completedAt?: Prisma.SortOrder
+  maxPositionSec?: Prisma.SortOrder
+  durationSec?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
 }
 
 export type LessonProgressSumOrderByAggregateInput = {
   id?: Prisma.SortOrder
   lessonId?: Prisma.SortOrder
   memberId?: Prisma.SortOrder
+  maxPositionSec?: Prisma.SortOrder
+  durationSec?: Prisma.SortOrder
 }
 
 export type LessonProgressCreateNestedManyWithoutMemberInput = {
@@ -441,14 +519,20 @@ export type LessonProgressUncheckedUpdateManyWithoutLessonNestedInput = {
 }
 
 export type LessonProgressCreateWithoutMemberInput = {
-  completedAt?: Date | string
+  completedAt?: Date | string | null
+  maxPositionSec?: number
+  durationSec?: number | null
+  updatedAt?: Date | string
   lesson: Prisma.CourseLessonCreateNestedOneWithoutProgressInput
 }
 
 export type LessonProgressUncheckedCreateWithoutMemberInput = {
   id?: number
   lessonId: number
-  completedAt?: Date | string
+  completedAt?: Date | string | null
+  maxPositionSec?: number
+  durationSec?: number | null
+  updatedAt?: Date | string
 }
 
 export type LessonProgressCreateOrConnectWithoutMemberInput = {
@@ -484,18 +568,27 @@ export type LessonProgressScalarWhereInput = {
   id?: Prisma.IntFilter<"LessonProgress"> | number
   lessonId?: Prisma.IntFilter<"LessonProgress"> | number
   memberId?: Prisma.IntFilter<"LessonProgress"> | number
-  completedAt?: Prisma.DateTimeFilter<"LessonProgress"> | Date | string
+  completedAt?: Prisma.DateTimeNullableFilter<"LessonProgress"> | Date | string | null
+  maxPositionSec?: Prisma.IntFilter<"LessonProgress"> | number
+  durationSec?: Prisma.IntNullableFilter<"LessonProgress"> | number | null
+  updatedAt?: Prisma.DateTimeFilter<"LessonProgress"> | Date | string
 }
 
 export type LessonProgressCreateWithoutLessonInput = {
-  completedAt?: Date | string
+  completedAt?: Date | string | null
+  maxPositionSec?: number
+  durationSec?: number | null
+  updatedAt?: Date | string
   member: Prisma.MemberCreateNestedOneWithoutLessonProgressInput
 }
 
 export type LessonProgressUncheckedCreateWithoutLessonInput = {
   id?: number
   memberId: number
-  completedAt?: Date | string
+  completedAt?: Date | string | null
+  maxPositionSec?: number
+  durationSec?: number | null
+  updatedAt?: Date | string
 }
 
 export type LessonProgressCreateOrConnectWithoutLessonInput = {
@@ -527,47 +620,71 @@ export type LessonProgressUpdateManyWithWhereWithoutLessonInput = {
 export type LessonProgressCreateManyMemberInput = {
   id?: number
   lessonId: number
-  completedAt?: Date | string
+  completedAt?: Date | string | null
+  maxPositionSec?: number
+  durationSec?: number | null
+  updatedAt?: Date | string
 }
 
 export type LessonProgressUpdateWithoutMemberInput = {
-  completedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  maxPositionSec?: Prisma.IntFieldUpdateOperationsInput | number
+  durationSec?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lesson?: Prisma.CourseLessonUpdateOneRequiredWithoutProgressNestedInput
 }
 
 export type LessonProgressUncheckedUpdateWithoutMemberInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   lessonId?: Prisma.IntFieldUpdateOperationsInput | number
-  completedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  maxPositionSec?: Prisma.IntFieldUpdateOperationsInput | number
+  durationSec?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type LessonProgressUncheckedUpdateManyWithoutMemberInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   lessonId?: Prisma.IntFieldUpdateOperationsInput | number
-  completedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  maxPositionSec?: Prisma.IntFieldUpdateOperationsInput | number
+  durationSec?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type LessonProgressCreateManyLessonInput = {
   id?: number
   memberId: number
-  completedAt?: Date | string
+  completedAt?: Date | string | null
+  maxPositionSec?: number
+  durationSec?: number | null
+  updatedAt?: Date | string
 }
 
 export type LessonProgressUpdateWithoutLessonInput = {
-  completedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  maxPositionSec?: Prisma.IntFieldUpdateOperationsInput | number
+  durationSec?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   member?: Prisma.MemberUpdateOneRequiredWithoutLessonProgressNestedInput
 }
 
 export type LessonProgressUncheckedUpdateWithoutLessonInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   memberId?: Prisma.IntFieldUpdateOperationsInput | number
-  completedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  maxPositionSec?: Prisma.IntFieldUpdateOperationsInput | number
+  durationSec?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type LessonProgressUncheckedUpdateManyWithoutLessonInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   memberId?: Prisma.IntFieldUpdateOperationsInput | number
-  completedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  maxPositionSec?: Prisma.IntFieldUpdateOperationsInput | number
+  durationSec?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 
@@ -577,6 +694,9 @@ export type LessonProgressSelect<ExtArgs extends runtime.Types.Extensions.Intern
   lessonId?: boolean
   memberId?: boolean
   completedAt?: boolean
+  maxPositionSec?: boolean
+  durationSec?: boolean
+  updatedAt?: boolean
   lesson?: boolean | Prisma.CourseLessonDefaultArgs<ExtArgs>
   member?: boolean | Prisma.MemberDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["lessonProgress"]>
@@ -588,9 +708,12 @@ export type LessonProgressSelectScalar = {
   lessonId?: boolean
   memberId?: boolean
   completedAt?: boolean
+  maxPositionSec?: boolean
+  durationSec?: boolean
+  updatedAt?: boolean
 }
 
-export type LessonProgressOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "lessonId" | "memberId" | "completedAt", ExtArgs["result"]["lessonProgress"]>
+export type LessonProgressOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "lessonId" | "memberId" | "completedAt" | "maxPositionSec" | "durationSec" | "updatedAt", ExtArgs["result"]["lessonProgress"]>
 export type LessonProgressInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   lesson?: boolean | Prisma.CourseLessonDefaultArgs<ExtArgs>
   member?: boolean | Prisma.MemberDefaultArgs<ExtArgs>
@@ -606,7 +729,22 @@ export type $LessonProgressPayload<ExtArgs extends runtime.Types.Extensions.Inte
     id: number
     lessonId: number
     memberId: number
-    completedAt: Date
+    /**
+     * * Set when the lesson is completed (null = still watching). Row existence
+     *    *  alone means nothing — heartbeats create rows before completion.
+     */
+    completedAt: Date | null
+    /**
+     * * Furthest video-clock position reached (seconds) — drives the ≥90%
+     *    *  completion rule. Monotonic: heartbeats only ever raise it.
+     */
+    maxPositionSec: number
+    /**
+     * * Full video duration in seconds, captured from the player (null until the
+     *    *  first heartbeat that knows it). Needed to compute the watched %.
+     */
+    durationSec: number | null
+    updatedAt: Date
   }, ExtArgs["result"]["lessonProgress"]>
   composites: {}
 }
@@ -982,6 +1120,9 @@ export interface LessonProgressFieldRefs {
   readonly lessonId: Prisma.FieldRef<"LessonProgress", 'Int'>
   readonly memberId: Prisma.FieldRef<"LessonProgress", 'Int'>
   readonly completedAt: Prisma.FieldRef<"LessonProgress", 'DateTime'>
+  readonly maxPositionSec: Prisma.FieldRef<"LessonProgress", 'Int'>
+  readonly durationSec: Prisma.FieldRef<"LessonProgress", 'Int'>
+  readonly updatedAt: Prisma.FieldRef<"LessonProgress", 'DateTime'>
 }
     
 

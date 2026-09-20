@@ -39,6 +39,7 @@ type LearnerProgress = {
   completedLessons: number;
   lessonCount: number;
   progressPct: number;
+  watchedPct: number;
   lastLesson: string | null;
   lastActivityAt: string;
 };
@@ -275,6 +276,8 @@ export default function CrmCourseWatchEditorPage() {
     });
   }
 
+  /** Single Save button: course fields + the whole lesson list (updates,
+   *  creates, deletions) go out in one transactional request. */
   async function save() {
     if (!course || dirtyCount === 0) {
       toast(t("courseAdmin.noChanges"));
@@ -282,8 +285,8 @@ export default function CrmCourseWatchEditorPage() {
     }
     setSaving(true);
     try {
-      if (courseDirty) {
-        await apiCall(`/api/crm/courses/${course.id}/`, "PUT", {
+      const payload = await apiCall<{ course: CourseDetailDto }>(`/api/crm/courses/${course.id}/lessons/`, "PUT", {
+        course: {
           title: course.title,
           slug: course.slug,
           description: course.description,
@@ -294,14 +297,9 @@ export default function CrmCourseWatchEditorPage() {
           instructor: course.instructor ?? "",
           sortOrder: course.sortOrder,
           published: course.published,
-        });
-      }
-      for (const id of removedIds) {
-        await apiCall(`/api/crm/courses/${course.id}/lessons/${id}/`, "DELETE");
-      }
-      for (const [index, item] of items.entries()) {
-        if (!item.dirty && item.id !== null) continue;
-        const body = {
+        },
+        lessons: items.map((item, index) => ({
+          ...(item.id ? { id: item.id } : {}),
           title: item.title.trim() || t("courseAdmin.newLesson"),
           sectionTitle: item.sectionTitle.trim(),
           videoId: item.videoId.trim(),
@@ -311,11 +309,15 @@ export default function CrmCourseWatchEditorPage() {
           durationMin: item.durationMin,
           isPreview: item.isPreview,
           sortOrder: index,
-        };
-        if (item.id) await apiCall(`/api/crm/courses/${course.id}/lessons/${item.id}/`, "PUT", body);
-        else await apiCall(`/api/crm/courses/${course.id}/lessons/`, "POST", body);
-      }
-      await load();
+        })),
+        removedIds,
+      });
+      const nextItems = payload.course.lessons.map(toItem);
+      setCourse(payload.course);
+      setItems(nextItems);
+      setRemovedIds([]);
+      setCourseDirty(false);
+      setSelectedKey((cur) => (nextItems.some((item) => item.key === cur) ? cur : (nextItems[0]?.key ?? null)));
       toast(t("courseAdmin.savedEdits"));
     } catch (saveError) {
       toast(saveError instanceof Error ? saveError.message : "Unable to save changes");
@@ -611,6 +613,7 @@ export default function CrmCourseWatchEditorPage() {
                   <div className="course-learner-meta">
                     {t("courseAdmin.lessonProgress", { done: learner.completedLessons, total: learner.lessonCount })}
                     {learner.lastLesson ? ` · ${t("courseAdmin.lastLesson", { title: learner.lastLesson })}` : ""}
+                    {` · ${t("courseAdmin.watched", { pct: learner.watchedPct })}`}
                   </div>
                 </div>
                 <div className={`course-learner-status${learner.completedAt ? " is-complete" : ""}`}>

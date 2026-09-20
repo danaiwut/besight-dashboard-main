@@ -58,6 +58,8 @@ export type ActivityMinAggregateOutputType = {
   rules: string | null
   sortOrder: number | null
   published: boolean | null
+  mode: string | null
+  winnersFinalizedAt: Date | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -78,6 +80,8 @@ export type ActivityMaxAggregateOutputType = {
   rules: string | null
   sortOrder: number | null
   published: boolean | null
+  mode: string | null
+  winnersFinalizedAt: Date | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -98,6 +102,8 @@ export type ActivityCountAggregateOutputType = {
   rules: number
   sortOrder: number
   published: number
+  mode: number
+  winnersFinalizedAt: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -134,6 +140,8 @@ export type ActivityMinAggregateInputType = {
   rules?: true
   sortOrder?: true
   published?: true
+  mode?: true
+  winnersFinalizedAt?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -154,6 +162,8 @@ export type ActivityMaxAggregateInputType = {
   rules?: true
   sortOrder?: true
   published?: true
+  mode?: true
+  winnersFinalizedAt?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -174,6 +184,8 @@ export type ActivityCountAggregateInputType = {
   rules?: true
   sortOrder?: true
   published?: true
+  mode?: true
+  winnersFinalizedAt?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -281,6 +293,8 @@ export type ActivityGroupByOutputType = {
   rules: string | null
   sortOrder: number
   published: boolean
+  mode: string
+  winnersFinalizedAt: Date | null
   createdAt: Date
   updatedAt: Date
   _count: ActivityCountAggregateOutputType | null
@@ -324,9 +338,13 @@ export type ActivityWhereInput = {
   rules?: Prisma.StringNullableFilter<"Activity"> | string | null
   sortOrder?: Prisma.IntFilter<"Activity"> | number
   published?: Prisma.BoolFilter<"Activity"> | boolean
+  mode?: Prisma.StringFilter<"Activity"> | string
+  winnersFinalizedAt?: Prisma.DateTimeNullableFilter<"Activity"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Activity"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Activity"> | Date | string
   enrollments?: Prisma.ActivityEnrollmentListRelationFilter
+  prizes?: Prisma.CompetitionPrizeListRelationFilter
+  claims?: Prisma.RewardClaimListRelationFilter
 }
 
 export type ActivityOrderByWithRelationInput = {
@@ -345,9 +363,13 @@ export type ActivityOrderByWithRelationInput = {
   rules?: Prisma.SortOrderInput | Prisma.SortOrder
   sortOrder?: Prisma.SortOrder
   published?: Prisma.SortOrder
+  mode?: Prisma.SortOrder
+  winnersFinalizedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   enrollments?: Prisma.ActivityEnrollmentOrderByRelationAggregateInput
+  prizes?: Prisma.CompetitionPrizeOrderByRelationAggregateInput
+  claims?: Prisma.RewardClaimOrderByRelationAggregateInput
   _relevance?: Prisma.ActivityOrderByRelevanceInput
 }
 
@@ -370,9 +392,13 @@ export type ActivityWhereUniqueInput = Prisma.AtLeast<{
   rules?: Prisma.StringNullableFilter<"Activity"> | string | null
   sortOrder?: Prisma.IntFilter<"Activity"> | number
   published?: Prisma.BoolFilter<"Activity"> | boolean
+  mode?: Prisma.StringFilter<"Activity"> | string
+  winnersFinalizedAt?: Prisma.DateTimeNullableFilter<"Activity"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Activity"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Activity"> | Date | string
   enrollments?: Prisma.ActivityEnrollmentListRelationFilter
+  prizes?: Prisma.CompetitionPrizeListRelationFilter
+  claims?: Prisma.RewardClaimListRelationFilter
 }, "id" | "slug">
 
 export type ActivityOrderByWithAggregationInput = {
@@ -391,6 +417,8 @@ export type ActivityOrderByWithAggregationInput = {
   rules?: Prisma.SortOrderInput | Prisma.SortOrder
   sortOrder?: Prisma.SortOrder
   published?: Prisma.SortOrder
+  mode?: Prisma.SortOrder
+  winnersFinalizedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.ActivityCountOrderByAggregateInput
@@ -419,6 +447,8 @@ export type ActivityScalarWhereWithAggregatesInput = {
   rules?: Prisma.StringNullableWithAggregatesFilter<"Activity"> | string | null
   sortOrder?: Prisma.IntWithAggregatesFilter<"Activity"> | number
   published?: Prisma.BoolWithAggregatesFilter<"Activity"> | boolean
+  mode?: Prisma.StringWithAggregatesFilter<"Activity"> | string
+  winnersFinalizedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Activity"> | Date | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Activity"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Activity"> | Date | string
 }
@@ -438,9 +468,13 @@ export type ActivityCreateInput = {
   rules?: string | null
   sortOrder?: number
   published?: boolean
+  mode?: string
+  winnersFinalizedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   enrollments?: Prisma.ActivityEnrollmentCreateNestedManyWithoutActivityInput
+  prizes?: Prisma.CompetitionPrizeCreateNestedManyWithoutActivityInput
+  claims?: Prisma.RewardClaimCreateNestedManyWithoutActivityInput
 }
 
 export type ActivityUncheckedCreateInput = {
@@ -459,9 +493,13 @@ export type ActivityUncheckedCreateInput = {
   rules?: string | null
   sortOrder?: number
   published?: boolean
+  mode?: string
+  winnersFinalizedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   enrollments?: Prisma.ActivityEnrollmentUncheckedCreateNestedManyWithoutActivityInput
+  prizes?: Prisma.CompetitionPrizeUncheckedCreateNestedManyWithoutActivityInput
+  claims?: Prisma.RewardClaimUncheckedCreateNestedManyWithoutActivityInput
 }
 
 export type ActivityUpdateInput = {
@@ -479,9 +517,13 @@ export type ActivityUpdateInput = {
   rules?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
   published?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  mode?: Prisma.StringFieldUpdateOperationsInput | string
+  winnersFinalizedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   enrollments?: Prisma.ActivityEnrollmentUpdateManyWithoutActivityNestedInput
+  prizes?: Prisma.CompetitionPrizeUpdateManyWithoutActivityNestedInput
+  claims?: Prisma.RewardClaimUpdateManyWithoutActivityNestedInput
 }
 
 export type ActivityUncheckedUpdateInput = {
@@ -500,9 +542,13 @@ export type ActivityUncheckedUpdateInput = {
   rules?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
   published?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  mode?: Prisma.StringFieldUpdateOperationsInput | string
+  winnersFinalizedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   enrollments?: Prisma.ActivityEnrollmentUncheckedUpdateManyWithoutActivityNestedInput
+  prizes?: Prisma.CompetitionPrizeUncheckedUpdateManyWithoutActivityNestedInput
+  claims?: Prisma.RewardClaimUncheckedUpdateManyWithoutActivityNestedInput
 }
 
 export type ActivityCreateManyInput = {
@@ -521,6 +567,8 @@ export type ActivityCreateManyInput = {
   rules?: string | null
   sortOrder?: number
   published?: boolean
+  mode?: string
+  winnersFinalizedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -540,6 +588,8 @@ export type ActivityUpdateManyMutationInput = {
   rules?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
   published?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  mode?: Prisma.StringFieldUpdateOperationsInput | string
+  winnersFinalizedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -560,6 +610,8 @@ export type ActivityUncheckedUpdateManyInput = {
   rules?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
   published?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  mode?: Prisma.StringFieldUpdateOperationsInput | string
+  winnersFinalizedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -586,6 +638,8 @@ export type ActivityCountOrderByAggregateInput = {
   rules?: Prisma.SortOrder
   sortOrder?: Prisma.SortOrder
   published?: Prisma.SortOrder
+  mode?: Prisma.SortOrder
+  winnersFinalizedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -613,6 +667,8 @@ export type ActivityMaxOrderByAggregateInput = {
   rules?: Prisma.SortOrder
   sortOrder?: Prisma.SortOrder
   published?: Prisma.SortOrder
+  mode?: Prisma.SortOrder
+  winnersFinalizedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -633,6 +689,8 @@ export type ActivityMinOrderByAggregateInput = {
   rules?: Prisma.SortOrder
   sortOrder?: Prisma.SortOrder
   published?: Prisma.SortOrder
+  mode?: Prisma.SortOrder
+  winnersFinalizedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -647,6 +705,11 @@ export type ActivitySumOrderByAggregateInput = {
 export type ActivityScalarRelationFilter = {
   is?: Prisma.ActivityWhereInput
   isNot?: Prisma.ActivityWhereInput
+}
+
+export type ActivityNullableScalarRelationFilter = {
+  is?: Prisma.ActivityWhereInput | null
+  isNot?: Prisma.ActivityWhereInput | null
 }
 
 export type EnumActivityStatusFieldUpdateOperationsInput = {
@@ -667,6 +730,36 @@ export type ActivityUpdateOneRequiredWithoutEnrollmentsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.ActivityUpdateToOneWithWhereWithoutEnrollmentsInput, Prisma.ActivityUpdateWithoutEnrollmentsInput>, Prisma.ActivityUncheckedUpdateWithoutEnrollmentsInput>
 }
 
+export type ActivityCreateNestedOneWithoutPrizesInput = {
+  create?: Prisma.XOR<Prisma.ActivityCreateWithoutPrizesInput, Prisma.ActivityUncheckedCreateWithoutPrizesInput>
+  connectOrCreate?: Prisma.ActivityCreateOrConnectWithoutPrizesInput
+  connect?: Prisma.ActivityWhereUniqueInput
+}
+
+export type ActivityUpdateOneRequiredWithoutPrizesNestedInput = {
+  create?: Prisma.XOR<Prisma.ActivityCreateWithoutPrizesInput, Prisma.ActivityUncheckedCreateWithoutPrizesInput>
+  connectOrCreate?: Prisma.ActivityCreateOrConnectWithoutPrizesInput
+  upsert?: Prisma.ActivityUpsertWithoutPrizesInput
+  connect?: Prisma.ActivityWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ActivityUpdateToOneWithWhereWithoutPrizesInput, Prisma.ActivityUpdateWithoutPrizesInput>, Prisma.ActivityUncheckedUpdateWithoutPrizesInput>
+}
+
+export type ActivityCreateNestedOneWithoutClaimsInput = {
+  create?: Prisma.XOR<Prisma.ActivityCreateWithoutClaimsInput, Prisma.ActivityUncheckedCreateWithoutClaimsInput>
+  connectOrCreate?: Prisma.ActivityCreateOrConnectWithoutClaimsInput
+  connect?: Prisma.ActivityWhereUniqueInput
+}
+
+export type ActivityUpdateOneWithoutClaimsNestedInput = {
+  create?: Prisma.XOR<Prisma.ActivityCreateWithoutClaimsInput, Prisma.ActivityUncheckedCreateWithoutClaimsInput>
+  connectOrCreate?: Prisma.ActivityCreateOrConnectWithoutClaimsInput
+  upsert?: Prisma.ActivityUpsertWithoutClaimsInput
+  disconnect?: Prisma.ActivityWhereInput | boolean
+  delete?: Prisma.ActivityWhereInput | boolean
+  connect?: Prisma.ActivityWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ActivityUpdateToOneWithWhereWithoutClaimsInput, Prisma.ActivityUpdateWithoutClaimsInput>, Prisma.ActivityUncheckedUpdateWithoutClaimsInput>
+}
+
 export type ActivityCreateWithoutEnrollmentsInput = {
   slug: string
   title: string
@@ -682,8 +775,12 @@ export type ActivityCreateWithoutEnrollmentsInput = {
   rules?: string | null
   sortOrder?: number
   published?: boolean
+  mode?: string
+  winnersFinalizedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  prizes?: Prisma.CompetitionPrizeCreateNestedManyWithoutActivityInput
+  claims?: Prisma.RewardClaimCreateNestedManyWithoutActivityInput
 }
 
 export type ActivityUncheckedCreateWithoutEnrollmentsInput = {
@@ -702,8 +799,12 @@ export type ActivityUncheckedCreateWithoutEnrollmentsInput = {
   rules?: string | null
   sortOrder?: number
   published?: boolean
+  mode?: string
+  winnersFinalizedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  prizes?: Prisma.CompetitionPrizeUncheckedCreateNestedManyWithoutActivityInput
+  claims?: Prisma.RewardClaimUncheckedCreateNestedManyWithoutActivityInput
 }
 
 export type ActivityCreateOrConnectWithoutEnrollmentsInput = {
@@ -737,8 +838,12 @@ export type ActivityUpdateWithoutEnrollmentsInput = {
   rules?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
   published?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  mode?: Prisma.StringFieldUpdateOperationsInput | string
+  winnersFinalizedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  prizes?: Prisma.CompetitionPrizeUpdateManyWithoutActivityNestedInput
+  claims?: Prisma.RewardClaimUpdateManyWithoutActivityNestedInput
 }
 
 export type ActivityUncheckedUpdateWithoutEnrollmentsInput = {
@@ -757,8 +862,232 @@ export type ActivityUncheckedUpdateWithoutEnrollmentsInput = {
   rules?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
   published?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  mode?: Prisma.StringFieldUpdateOperationsInput | string
+  winnersFinalizedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  prizes?: Prisma.CompetitionPrizeUncheckedUpdateManyWithoutActivityNestedInput
+  claims?: Prisma.RewardClaimUncheckedUpdateManyWithoutActivityNestedInput
+}
+
+export type ActivityCreateWithoutPrizesInput = {
+  slug: string
+  title: string
+  description?: string | null
+  status?: $Enums.ActivityStatus
+  startDate: Date | string
+  endDate: Date | string
+  traders?: number
+  prizePool?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  coverImage?: string | null
+  visibleFrom?: Date | string | null
+  registrationOpensAt?: Date | string | null
+  rules?: string | null
+  sortOrder?: number
+  published?: boolean
+  mode?: string
+  winnersFinalizedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  enrollments?: Prisma.ActivityEnrollmentCreateNestedManyWithoutActivityInput
+  claims?: Prisma.RewardClaimCreateNestedManyWithoutActivityInput
+}
+
+export type ActivityUncheckedCreateWithoutPrizesInput = {
+  id?: number
+  slug: string
+  title: string
+  description?: string | null
+  status?: $Enums.ActivityStatus
+  startDate: Date | string
+  endDate: Date | string
+  traders?: number
+  prizePool?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  coverImage?: string | null
+  visibleFrom?: Date | string | null
+  registrationOpensAt?: Date | string | null
+  rules?: string | null
+  sortOrder?: number
+  published?: boolean
+  mode?: string
+  winnersFinalizedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  enrollments?: Prisma.ActivityEnrollmentUncheckedCreateNestedManyWithoutActivityInput
+  claims?: Prisma.RewardClaimUncheckedCreateNestedManyWithoutActivityInput
+}
+
+export type ActivityCreateOrConnectWithoutPrizesInput = {
+  where: Prisma.ActivityWhereUniqueInput
+  create: Prisma.XOR<Prisma.ActivityCreateWithoutPrizesInput, Prisma.ActivityUncheckedCreateWithoutPrizesInput>
+}
+
+export type ActivityUpsertWithoutPrizesInput = {
+  update: Prisma.XOR<Prisma.ActivityUpdateWithoutPrizesInput, Prisma.ActivityUncheckedUpdateWithoutPrizesInput>
+  create: Prisma.XOR<Prisma.ActivityCreateWithoutPrizesInput, Prisma.ActivityUncheckedCreateWithoutPrizesInput>
+  where?: Prisma.ActivityWhereInput
+}
+
+export type ActivityUpdateToOneWithWhereWithoutPrizesInput = {
+  where?: Prisma.ActivityWhereInput
+  data: Prisma.XOR<Prisma.ActivityUpdateWithoutPrizesInput, Prisma.ActivityUncheckedUpdateWithoutPrizesInput>
+}
+
+export type ActivityUpdateWithoutPrizesInput = {
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumActivityStatusFieldUpdateOperationsInput | $Enums.ActivityStatus
+  startDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  endDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  traders?: Prisma.IntFieldUpdateOperationsInput | number
+  prizePool?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  coverImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  visibleFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  registrationOpensAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  rules?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
+  published?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  mode?: Prisma.StringFieldUpdateOperationsInput | string
+  winnersFinalizedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  enrollments?: Prisma.ActivityEnrollmentUpdateManyWithoutActivityNestedInput
+  claims?: Prisma.RewardClaimUpdateManyWithoutActivityNestedInput
+}
+
+export type ActivityUncheckedUpdateWithoutPrizesInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumActivityStatusFieldUpdateOperationsInput | $Enums.ActivityStatus
+  startDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  endDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  traders?: Prisma.IntFieldUpdateOperationsInput | number
+  prizePool?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  coverImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  visibleFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  registrationOpensAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  rules?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
+  published?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  mode?: Prisma.StringFieldUpdateOperationsInput | string
+  winnersFinalizedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  enrollments?: Prisma.ActivityEnrollmentUncheckedUpdateManyWithoutActivityNestedInput
+  claims?: Prisma.RewardClaimUncheckedUpdateManyWithoutActivityNestedInput
+}
+
+export type ActivityCreateWithoutClaimsInput = {
+  slug: string
+  title: string
+  description?: string | null
+  status?: $Enums.ActivityStatus
+  startDate: Date | string
+  endDate: Date | string
+  traders?: number
+  prizePool?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  coverImage?: string | null
+  visibleFrom?: Date | string | null
+  registrationOpensAt?: Date | string | null
+  rules?: string | null
+  sortOrder?: number
+  published?: boolean
+  mode?: string
+  winnersFinalizedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  enrollments?: Prisma.ActivityEnrollmentCreateNestedManyWithoutActivityInput
+  prizes?: Prisma.CompetitionPrizeCreateNestedManyWithoutActivityInput
+}
+
+export type ActivityUncheckedCreateWithoutClaimsInput = {
+  id?: number
+  slug: string
+  title: string
+  description?: string | null
+  status?: $Enums.ActivityStatus
+  startDate: Date | string
+  endDate: Date | string
+  traders?: number
+  prizePool?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  coverImage?: string | null
+  visibleFrom?: Date | string | null
+  registrationOpensAt?: Date | string | null
+  rules?: string | null
+  sortOrder?: number
+  published?: boolean
+  mode?: string
+  winnersFinalizedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  enrollments?: Prisma.ActivityEnrollmentUncheckedCreateNestedManyWithoutActivityInput
+  prizes?: Prisma.CompetitionPrizeUncheckedCreateNestedManyWithoutActivityInput
+}
+
+export type ActivityCreateOrConnectWithoutClaimsInput = {
+  where: Prisma.ActivityWhereUniqueInput
+  create: Prisma.XOR<Prisma.ActivityCreateWithoutClaimsInput, Prisma.ActivityUncheckedCreateWithoutClaimsInput>
+}
+
+export type ActivityUpsertWithoutClaimsInput = {
+  update: Prisma.XOR<Prisma.ActivityUpdateWithoutClaimsInput, Prisma.ActivityUncheckedUpdateWithoutClaimsInput>
+  create: Prisma.XOR<Prisma.ActivityCreateWithoutClaimsInput, Prisma.ActivityUncheckedCreateWithoutClaimsInput>
+  where?: Prisma.ActivityWhereInput
+}
+
+export type ActivityUpdateToOneWithWhereWithoutClaimsInput = {
+  where?: Prisma.ActivityWhereInput
+  data: Prisma.XOR<Prisma.ActivityUpdateWithoutClaimsInput, Prisma.ActivityUncheckedUpdateWithoutClaimsInput>
+}
+
+export type ActivityUpdateWithoutClaimsInput = {
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumActivityStatusFieldUpdateOperationsInput | $Enums.ActivityStatus
+  startDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  endDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  traders?: Prisma.IntFieldUpdateOperationsInput | number
+  prizePool?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  coverImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  visibleFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  registrationOpensAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  rules?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
+  published?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  mode?: Prisma.StringFieldUpdateOperationsInput | string
+  winnersFinalizedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  enrollments?: Prisma.ActivityEnrollmentUpdateManyWithoutActivityNestedInput
+  prizes?: Prisma.CompetitionPrizeUpdateManyWithoutActivityNestedInput
+}
+
+export type ActivityUncheckedUpdateWithoutClaimsInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumActivityStatusFieldUpdateOperationsInput | $Enums.ActivityStatus
+  startDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  endDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  traders?: Prisma.IntFieldUpdateOperationsInput | number
+  prizePool?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  coverImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  visibleFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  registrationOpensAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  rules?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
+  published?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  mode?: Prisma.StringFieldUpdateOperationsInput | string
+  winnersFinalizedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  enrollments?: Prisma.ActivityEnrollmentUncheckedUpdateManyWithoutActivityNestedInput
+  prizes?: Prisma.CompetitionPrizeUncheckedUpdateManyWithoutActivityNestedInput
 }
 
 
@@ -768,10 +1097,14 @@ export type ActivityUncheckedUpdateWithoutEnrollmentsInput = {
 
 export type ActivityCountOutputType = {
   enrollments: number
+  prizes: number
+  claims: number
 }
 
 export type ActivityCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   enrollments?: boolean | ActivityCountOutputTypeCountEnrollmentsArgs
+  prizes?: boolean | ActivityCountOutputTypeCountPrizesArgs
+  claims?: boolean | ActivityCountOutputTypeCountClaimsArgs
 }
 
 /**
@@ -791,6 +1124,20 @@ export type ActivityCountOutputTypeCountEnrollmentsArgs<ExtArgs extends runtime.
   where?: Prisma.ActivityEnrollmentWhereInput
 }
 
+/**
+ * ActivityCountOutputType without action
+ */
+export type ActivityCountOutputTypeCountPrizesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.CompetitionPrizeWhereInput
+}
+
+/**
+ * ActivityCountOutputType without action
+ */
+export type ActivityCountOutputTypeCountClaimsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.RewardClaimWhereInput
+}
+
 
 export type ActivitySelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -808,9 +1155,13 @@ export type ActivitySelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   rules?: boolean
   sortOrder?: boolean
   published?: boolean
+  mode?: boolean
+  winnersFinalizedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   enrollments?: boolean | Prisma.Activity$enrollmentsArgs<ExtArgs>
+  prizes?: boolean | Prisma.Activity$prizesArgs<ExtArgs>
+  claims?: boolean | Prisma.Activity$claimsArgs<ExtArgs>
   _count?: boolean | Prisma.ActivityCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["activity"]>
 
@@ -832,13 +1183,17 @@ export type ActivitySelectScalar = {
   rules?: boolean
   sortOrder?: boolean
   published?: boolean
+  mode?: boolean
+  winnersFinalizedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type ActivityOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "slug" | "title" | "description" | "status" | "startDate" | "endDate" | "traders" | "prizePool" | "coverImage" | "visibleFrom" | "registrationOpensAt" | "rules" | "sortOrder" | "published" | "createdAt" | "updatedAt", ExtArgs["result"]["activity"]>
+export type ActivityOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "slug" | "title" | "description" | "status" | "startDate" | "endDate" | "traders" | "prizePool" | "coverImage" | "visibleFrom" | "registrationOpensAt" | "rules" | "sortOrder" | "published" | "mode" | "winnersFinalizedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["activity"]>
 export type ActivityInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   enrollments?: boolean | Prisma.Activity$enrollmentsArgs<ExtArgs>
+  prizes?: boolean | Prisma.Activity$prizesArgs<ExtArgs>
+  claims?: boolean | Prisma.Activity$claimsArgs<ExtArgs>
   _count?: boolean | Prisma.ActivityCountOutputTypeDefaultArgs<ExtArgs>
 }
 
@@ -846,6 +1201,8 @@ export type $ActivityPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
   name: "Activity"
   objects: {
     enrollments: Prisma.$ActivityEnrollmentPayload<ExtArgs>[]
+    prizes: Prisma.$CompetitionPrizePayload<ExtArgs>[]
+    claims: Prisma.$RewardClaimPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: number
@@ -878,6 +1235,16 @@ export type $ActivityPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
      */
     sortOrder: number
     published: boolean
+    /**
+     * * How members compete: `registered` (own partner-broker account, lots from
+     *    *  the lot webhook) or `demo_legacy` (pre-existing demo-only competitions —
+     *    *  frozen: viewable, no new enrollments).
+     */
+    mode: string
+    /**
+     * * When winners were locked and prize claims auto-created (null = open).
+     */
+    winnersFinalizedAt: Date | null
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["activity"]>
@@ -1221,6 +1588,8 @@ readonly fields: ActivityFieldRefs;
 export interface Prisma__ActivityClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   enrollments<T extends Prisma.Activity$enrollmentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Activity$enrollmentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ActivityEnrollmentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  prizes<T extends Prisma.Activity$prizesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Activity$prizesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CompetitionPrizePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  claims<T extends Prisma.Activity$claimsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Activity$claimsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$RewardClaimPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1265,6 +1634,8 @@ export interface ActivityFieldRefs {
   readonly rules: Prisma.FieldRef<"Activity", 'String'>
   readonly sortOrder: Prisma.FieldRef<"Activity", 'Int'>
   readonly published: Prisma.FieldRef<"Activity", 'Boolean'>
+  readonly mode: Prisma.FieldRef<"Activity", 'String'>
+  readonly winnersFinalizedAt: Prisma.FieldRef<"Activity", 'DateTime'>
   readonly createdAt: Prisma.FieldRef<"Activity", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Activity", 'DateTime'>
 }
@@ -1636,6 +2007,54 @@ export type Activity$enrollmentsArgs<ExtArgs extends runtime.Types.Extensions.In
   take?: number
   skip?: number
   distinct?: Prisma.ActivityEnrollmentScalarFieldEnum | Prisma.ActivityEnrollmentScalarFieldEnum[]
+}
+
+/**
+ * Activity.prizes
+ */
+export type Activity$prizesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the CompetitionPrize
+   */
+  select?: Prisma.CompetitionPrizeSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the CompetitionPrize
+   */
+  omit?: Prisma.CompetitionPrizeOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CompetitionPrizeInclude<ExtArgs> | null
+  where?: Prisma.CompetitionPrizeWhereInput
+  orderBy?: Prisma.CompetitionPrizeOrderByWithRelationInput | Prisma.CompetitionPrizeOrderByWithRelationInput[]
+  cursor?: Prisma.CompetitionPrizeWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.CompetitionPrizeScalarFieldEnum | Prisma.CompetitionPrizeScalarFieldEnum[]
+}
+
+/**
+ * Activity.claims
+ */
+export type Activity$claimsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the RewardClaim
+   */
+  select?: Prisma.RewardClaimSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the RewardClaim
+   */
+  omit?: Prisma.RewardClaimOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.RewardClaimInclude<ExtArgs> | null
+  where?: Prisma.RewardClaimWhereInput
+  orderBy?: Prisma.RewardClaimOrderByWithRelationInput | Prisma.RewardClaimOrderByWithRelationInput[]
+  cursor?: Prisma.RewardClaimWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.RewardClaimScalarFieldEnum | Prisma.RewardClaimScalarFieldEnum[]
 }
 
 /**

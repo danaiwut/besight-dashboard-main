@@ -5,6 +5,11 @@
 
 export type ActivityStatus = "upcoming" | "live" | "finished";
 
+/** How members compete: `registered` (own partner-broker account, lots from
+ *  the lot webhook) or `demo_legacy` (old demo-only competitions — frozen:
+ *  viewable, no new enrollments). */
+export type ActivityMode = "registered" | "demo_legacy";
+
 /** One admin-managed activity, as sent to both CRM and customer pages. */
 export type ActivityDto = {
   id: number;
@@ -32,6 +37,13 @@ export type ActivityDto = {
   sortOrder: number;
   /** Whether the signed-in member is registered. Always false for admin reads. */
   enrolled: boolean;
+  mode: ActivityMode;
+  /** ISO timestamp — set once winners are locked and prize claims created. */
+  winnersFinalizedAt?: string;
+  /** Customer view only: the competition account the member registered. */
+  enrolledTradeId?: string;
+  /** Prize table (admin-managed). Empty when the admin hasn't set one. */
+  prizes: CompetitionPrizeDto[];
 };
 
 /** Result of classifying a competition account as live (in the BeSight IB
@@ -40,13 +52,17 @@ export type ActivityDto = {
 export type AccountKind = "live" | "demo" | "unknown";
 
 export type AccountCheckResult = {
-  kind: AccountKind;
-  /** Whether the account may register for a demo-only competition. */
   allowed: boolean;
   message: string;
+  tradeId?: string;
+  broker?: string;
 };
 
 export const ACTIVITY_STATUSES: ActivityStatus[] = ["upcoming", "live", "finished"];
+
+/** Brokers whose accounts may enter registered-mode competitions — the lot
+ *  webhook covers partner campaign data only. */
+export const PARTNER_BROKER_CODES = ["XM", "EXNESS"];
 
 /** One member's registration for an activity, as sent to the CRM participants
  *  panel. `joinedAt` is the enrollment date (YYYY-MM-DD). */
@@ -117,3 +133,50 @@ export function prizeForRank(rank: number): number | null {
   if (rank >= 11 && rank <= 20) return 20;
   return null;
 }
+
+/** One prize row of an activity's prize table. */
+export type CompetitionPrizeDto = {
+  id: number;
+  rankFrom: number;
+  rankTo: number;
+  title: string;
+  valueNote?: string;
+  sortOrder: number;
+};
+
+/** One loyalty tier of the admin-managed ladder. */
+export type RewardTierDto = {
+  id: number;
+  key: string;
+  title: string;
+  titleEn?: string;
+  threshold: number;
+  reward: string;
+  rewardEn?: string;
+  icon: string;
+  image?: string;
+  accent: string;
+  sortOrder: number;
+  active: boolean;
+};
+
+export type RewardClaimKind = "tier" | "competition" | "manual";
+export type RewardClaimStatus = "pending" | "fulfilled" | "cancelled";
+
+/** One member reward in the shared fulfilment queue. */
+export type RewardClaimDto = {
+  id: number;
+  memberId: number;
+  memberCode: string;
+  memberName: string;
+  kind: RewardClaimKind;
+  refKey: string;
+  activityId?: number;
+  activityTitle?: string;
+  title: string;
+  detail?: string;
+  status: RewardClaimStatus;
+  note?: string;
+  createdAt: string;
+  decidedAt?: string;
+};

@@ -6,16 +6,17 @@ import { useLanguage } from "../crm/LanguageContext";
 import { useCrm, fmtDate, fmtDateTime, lot } from "../crm/CrmContext";
 import { apiCall } from "../../lib/crmApi";
 import Icon from "../Icon";
-import { PRIZE_TIERS, RULE_KEYS, type AccountCheckResult, type ActivityDto, type ActivityLeaderboardRow, type ActivityStanding } from "../../lib/activities";
+import { PRIZE_TIERS, RULE_KEYS, PARTNER_BROKER_CODES, type AccountCheckResult, type ActivityDto, type ActivityLeaderboardRow, type ActivityStanding } from "../../lib/activities";
 
 export default function ActivityDetailView({ slug }: { slug: string }) {
   const { t } = useLanguage();
   const { toast } = useCrm();
+  const { tradeAccounts, brokers } = useCrm();
   const [activity, setActivity] = useState<ActivityDto | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
-  const [tradeId, setTradeId] = useState("");
+  const [accountId, setAccountId] = useState("");
   const [check, setCheck] = useState<AccountCheckResult | null>(null);
   const [checking, setChecking] = useState(false);
   const [confirmed, setConfirmed] = useState(false);
@@ -67,12 +68,18 @@ export default function ActivityDetailView({ slug }: { slug: string }) {
     return () => window.clearInterval(timer);
   }, [loadStandings]);
 
+  // Own accounts eligible for registered-mode competitions: active accounts
+  // at a partner broker (the lot webhook covers partner campaign data).
+  const eligibleAccounts = tradeAccounts.filter(
+    (a) => a.status === "active" && PARTNER_BROKER_CODES.includes(brokers.find((b) => b.id === a.brokerId)?.code ?? ""),
+  );
+
   async function checkAccount() {
-    if (!tradeId.trim()) return;
+    if (!accountId) return;
     setChecking(true);
     try {
-      const payload = await apiCall<AccountCheckResult & { ok: boolean }>(`/api/activities/${slug}/check-account/`, "POST", { tradeId: tradeId.trim() });
-      setCheck({ kind: payload.kind, allowed: payload.allowed, message: payload.message });
+      const payload = await apiCall<AccountCheckResult & { ok: boolean }>(`/api/activities/${slug}/check-account/`, "POST", { tradeAccountId: Number(accountId) });
+      setCheck({ allowed: payload.allowed, message: payload.message, tradeId: payload.tradeId, broker: payload.broker });
     } catch (checkError) {
       setCheck(null);
       toast(checkError instanceof Error ? checkError.message : t("dash.activities.enrollFailed"));
@@ -82,10 +89,10 @@ export default function ActivityDetailView({ slug }: { slug: string }) {
   }
 
   async function enroll() {
-    if (!tradeId.trim() || !confirmed || !check?.allowed) return;
+    if (!accountId || !confirmed || !check?.allowed) return;
     setBusy(true);
     try {
-      const payload = await apiCall<{ activity: ActivityDto }>(`/api/activities/${slug}/`, "POST", { tradeId: tradeId.trim() });
+      const payload = await apiCall<{ activity: ActivityDto }>(`/api/activities/${slug}/`, "POST", { tradeAccountId: Number(accountId) });
       setActivity(payload.activity);
       setConfirmed(false);
       toast(t("dash.activities.enrollDone", { title: payload.activity.title }));
@@ -180,6 +187,9 @@ export default function ActivityDetailView({ slug }: { slug: string }) {
                       <Icon name="check_circle" style={{ fontSize: 14 }} />
                       {t("dash.activities.enrolled")}
                     </span>
+                    {activity.enrolledTradeId && (
+                      <span className="badge suspended mono">{activity.enrolledTradeId}</span>
+                    )}
                     {me && (
                       <span className={`badge ${me.verified ? "active" : "suspended"}`}>
                         {me.verified ? t("act.participants.verified.yes") : t("act.participants.verified.pending")}
@@ -201,29 +211,42 @@ export default function ActivityDetailView({ slug }: { slug: string }) {
                 <div className="activity-finished-note">
                   {t("dash.activities.registrationSoon", { date: activity.registrationOpensAt ? fmtDate(activity.registrationOpensAt) : "—" })}
                 </div>
+              ) : activity.mode !== "registered" ? (
+                <div className="activity-finished-note">{t("dash.activities.frozenNote")}</div>
               ) : (
                 <div style={{ marginTop: 16 }}>
                   <div className="field" style={{ maxWidth: 340, marginBottom: 0 }}>
-                    <label>{t("dash.activities.demoAccount")}</label>
-                    <input
+                    <label>{t("dash.activities.tradeAccount")}</label>
+                    <select
                       className="input"
-                      value={tradeId}
+                      value={accountId}
                       onChange={(e) => {
-                        setTradeId(e.target.value);
+                        setAccountId(e.target.value);
                         setCheck(null);
                       }}
-                      placeholder={t("dash.activities.demoAccountPlaceholder")}
-                      aria-label={t("dash.activities.demoAccount")}
-                    />
+                      aria-label={t("dash.activities.tradeAccount")}
+                    >
+                      <option value="">{t("dash.activities.tradeAccountPlaceholder")}</option>
+                      {eligibleAccounts.map((a) => (
+                        <option key={a.id} value={a.id}>
+                          {brokers.find((b) => b.id === a.brokerId)?.name ?? "—"} · {a.tradeId}
+                        </option>
+                      ))}
+                    </select>
                   </div>
+                  {!eligibleAccounts.length && (
+                    <p style={{ fontSize: 12.5, color: "var(--text-sub)", margin: "8px 0 0", maxWidth: 460 }}>
+                      {t("dash.activities.noEligibleAccount")}
+                    </p>
+                  )}
                   <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 8, flexWrap: "wrap" }}>
-                    <button type="button" className="btn btn-ghost" disabled={checking || !tradeId.trim()} onClick={() => void checkAccount()}>
+                    <button type="button" className="btn btn-ghost" disabled={checking || !accountId} onClick={() => void checkAccount()}>
                       {checking ? t("dash.activities.checking") : t("dash.activities.checkAccount")}
                     </button>
                     {check && <span className={`badge ${check.allowed ? "active" : "expired"}`}>{check.message}</span>}
                   </div>
                   <p style={{ fontSize: 12.5, color: "var(--text-sub)", margin: "8px 0 10px", maxWidth: 460 }}>
-                    {t("dash.activities.demoHint")}
+                    {t("dash.activities.registeredHint")}
                   </p>
                   <label style={{ display: "flex", alignItems: "flex-start", gap: 8, marginBottom: 12, maxWidth: 460 }}>
                     <input type="checkbox" checked={confirmed} onChange={(e) => setConfirmed(e.target.checked)} style={{ marginTop: 3 }} />
@@ -233,7 +256,7 @@ export default function ActivityDetailView({ slug }: { slug: string }) {
                     type="button"
                     className="btn btn-primary"
                     style={{ alignSelf: "flex-start" }}
-                    disabled={busy || !tradeId.trim() || !confirmed || !check?.allowed}
+                    disabled={busy || !accountId || !confirmed || !check?.allowed}
                     onClick={() => void enroll()}
                   >
                     {busy ? t("dash.activities.enrolling") : t("dash.activities.enroll")}
@@ -258,12 +281,24 @@ export default function ActivityDetailView({ slug }: { slug: string }) {
                   </tr>
                 </thead>
                 <tbody>
-                  {PRIZE_TIERS.map((tier) => (
-                    <tr key={tier.rankKey}>
-                      <td>#{tier.rankKey}</td>
-                      <td style={{ color: "var(--green)", fontWeight: 700 }}>${tier.amount.toFixed(2)}</td>
-                    </tr>
-                  ))}
+                  {activity.prizes.length ? (
+                    activity.prizes.map((prize) => (
+                      <tr key={prize.id}>
+                        <td>#{prize.rankFrom === prize.rankTo ? prize.rankFrom : `${prize.rankFrom}–${prize.rankTo}`}</td>
+                        <td style={{ color: "var(--green)", fontWeight: 700 }}>
+                          {prize.title}
+                          {prize.valueNote ? ` · ${prize.valueNote}` : ""}
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    PRIZE_TIERS.map((tier) => (
+                      <tr key={tier.rankKey}>
+                        <td>#{tier.rankKey}</td>
+                        <td style={{ color: "var(--green)", fontWeight: 700 }}>${tier.amount.toFixed(2)}</td>
+                      </tr>
+                    ))
+                  )}
                 </tbody>
               </table>
             </div>

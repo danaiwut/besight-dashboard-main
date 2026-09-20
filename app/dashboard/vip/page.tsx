@@ -1,40 +1,64 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense } from "react";
 import { useCrm, PLAN_LABELS, telegramBadgeClass, telegramStatusLabelKey } from "../../../components/crm/CrmContext";
 import { useLanguage } from "../../../components/crm/LanguageContext";
 import { useCustomerData } from "../../../components/dashboard/useCustomerData";
+import { useSocialStatus } from "../../../components/dashboard/useSocialStatus";
+import TelegramLoginButton from "../../../components/dashboard/TelegramLoginButton";
 
-export default function DashboardVipPage() {
+function openExternal(url: string | null, fallback: () => void) {
+  if (url) {
+    window.open(url, "_blank", "noopener,noreferrer");
+    return;
+  }
+  fallback();
+}
+
+function VipContent() {
+  const { toast } = useCrm();
   const { t } = useLanguage();
-  const { telegramAccess, toast } = useCrm();
   const { member } = useCustomerData();
+  const { telegramAccess } = useCrm();
+  const { data: social, loading: socialLoading, unlink } = useSocialStatus();
+  const router = useRouter();
+  const params = useSearchParams();
 
-  const [discordConnected, setDiscordConnected] = useState(Boolean(member.discordUsername));
-  const [lineConnected, setLineConnected] = useState(Boolean(member.socialLinks?.line));
+  // OAuth round-trip result (?social=discord&linked=1 / &error=…).
+  useEffect(() => {
+    const provider = params.get("social");
+    if (!provider) return;
+    if (params.get("linked") === "1") toast(t("dash.vip.linked", { provider }));
+    else if (params.get("error")) toast(t("dash.vip.linkFailed", { provider }));
+    router.replace("/dashboard/vip/");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const tg = telegramAccess.find((a) => a.memberId === member.id);
+  const tgLinked = social?.status.telegram;
+  const dcLinked = social?.status.discord;
+  const lineLinked = social?.status.line;
+  const invites = social?.inviteLinks;
 
-  function openTelegram() {
-    toast(t("dash.vip.telegram.openToast"));
+  async function disconnect(provider: "telegram" | "discord" | "line") {
+    if (!window.confirm(t("dash.vip.disconnectConfirm", { provider }))) return;
+    try {
+      await unlink(provider);
+      toast(t("dash.vip.disconnected", { provider }));
+    } catch {
+      toast(t("dash.vip.disconnectFailed"));
+    }
   }
 
-  function connectDiscord() {
-    setDiscordConnected(true);
-    toast(t("dash.vip.discord.connectedToast"));
-  }
-
-  function openDiscord() {
-    toast(t("dash.vip.discord.openToast"));
-  }
-
-  function connectLine() {
-    setLineConnected(true);
-    toast(t("dash.vip.line.connectedToast"));
-  }
-
-  function openLine() {
-    toast(t("dash.vip.line.openToast"));
+  function linkedBadge(username: string | null) {
+    return (
+      <>
+        <span className="badge active">{t("common.active")}</span>
+        <span className="vip-channel-room">{username ?? t("dash.vip.linkedNoName")}</span>
+      </>
+    );
   }
 
   return (
@@ -62,22 +86,46 @@ export default function DashboardVipPage() {
             </div>
           </div>
 
-          {tg ? (
+          {socialLoading ? (
+            <div className="vip-channel-note">…</div>
+          ) : tgLinked?.linked ? (
             <>
               <div className="vip-channel-meta">
-                <span className={`badge ${telegramBadgeClass(tg.status)}`}>{t(telegramStatusLabelKey(tg.status))}</span>
-                <span className="vip-channel-room">{tg.room}</span>
+                {linkedBadge(tgLinked.username)}
+                {tg && (
+                  <span className={`badge ${telegramBadgeClass(tg.status)}`} title={tg.room}>
+                    {t(telegramStatusLabelKey(tg.status))}
+                  </span>
+                )}
               </div>
-              {tg.status === "active" ? (
-                <button type="button" className="btn btn-primary vip-channel-btn" onClick={openTelegram}>
+              {tg?.status === "active" ? (
+                <button
+                  type="button"
+                  className="btn btn-primary vip-channel-btn"
+                  onClick={() => openExternal(invites?.telegram ?? null, () => toast(t("dash.vip.noInvite")))}
+                >
                   {t("dash.vip.telegram.open")}
                 </button>
               ) : (
                 <div className="vip-channel-note">{t("dash.vip.telegram.inactiveNote")}</div>
               )}
+              <button type="button" className="btn btn-ghost vip-channel-btn" onClick={() => void disconnect("telegram")}>
+                {t("dash.vip.disconnect")}
+              </button>
+            </>
+          ) : social?.telegramBotUsername ? (
+            <>
+              <div className="vip-channel-note">{t("dash.vip.telegram.loginHint")}</div>
+              <TelegramLoginButton
+                botUsername={social.telegramBotUsername}
+                onLinked={() => {
+                  toast(t("dash.vip.linked", { provider: "Telegram" }));
+                  window.location.reload();
+                }}
+              />
             </>
           ) : (
-            <div className="vip-channel-note">{t("dash.vip.telegram.noneNote")}</div>
+            <div className="vip-channel-note">{t("dash.vip.telegram.notConfigured")}</div>
           )}
         </div>
 
@@ -93,20 +141,30 @@ export default function DashboardVipPage() {
             </div>
           </div>
 
-          {discordConnected ? (
+          {socialLoading ? (
+            <div className="vip-channel-note">…</div>
+          ) : dcLinked?.linked ? (
             <>
-              <div className="vip-channel-meta">
-                <span className="badge active">{t("common.active")}</span>
-                <span className="vip-channel-room">{member.discordUsername ?? member.name}</span>
-              </div>
-              <button type="button" className="btn btn-primary vip-channel-btn" onClick={openDiscord}>
+              <div className="vip-channel-meta">{linkedBadge(dcLinked.username)}</div>
+              <button
+                type="button"
+                className="btn btn-primary vip-channel-btn"
+                onClick={() => openExternal(invites?.discord ?? null, () => toast(t("dash.vip.noInvite")))}
+              >
                 {t("dash.vip.discord.open")}
+              </button>
+              <button type="button" className="btn btn-ghost vip-channel-btn" onClick={() => void disconnect("discord")}>
+                {t("dash.vip.disconnect")}
               </button>
             </>
           ) : (
             <>
-              <div className="vip-channel-note">{t("dash.vip.discord.noneNote")}</div>
-              <button type="button" className="btn btn-ghost vip-channel-btn" onClick={connectDiscord}>
+              <div className="vip-channel-note">{t("dash.vip.discord.loginHint")}</div>
+              <button
+                type="button"
+                className="btn btn-ghost vip-channel-btn"
+                onClick={() => { window.location.href = "/api/social/discord/start/"; }}
+              >
                 {t("dash.vip.discord.connect")}
               </button>
             </>
@@ -125,20 +183,30 @@ export default function DashboardVipPage() {
             </div>
           </div>
 
-          {lineConnected ? (
+          {socialLoading ? (
+            <div className="vip-channel-note">…</div>
+          ) : lineLinked?.linked ? (
             <>
-              <div className="vip-channel-meta">
-                <span className="badge active">{t("common.active")}</span>
-                <span className="vip-channel-room">{member.name}</span>
-              </div>
-              <button type="button" className="btn btn-primary vip-channel-btn" onClick={openLine}>
+              <div className="vip-channel-meta">{linkedBadge(lineLinked.username)}</div>
+              <button
+                type="button"
+                className="btn btn-primary vip-channel-btn"
+                onClick={() => openExternal(invites?.line ?? null, () => toast(t("dash.vip.noInvite")))}
+              >
                 {t("dash.vip.line.open")}
+              </button>
+              <button type="button" className="btn btn-ghost vip-channel-btn" onClick={() => void disconnect("line")}>
+                {t("dash.vip.disconnect")}
               </button>
             </>
           ) : (
             <>
-              <div className="vip-channel-note">{t("dash.vip.line.noneNote")}</div>
-              <button type="button" className="btn btn-ghost vip-channel-btn" onClick={connectLine}>
+              <div className="vip-channel-note">{t("dash.vip.line.loginHint")}</div>
+              <button
+                type="button"
+                className="btn btn-ghost vip-channel-btn"
+                onClick={() => { window.location.href = "/api/social/line/start/"; }}
+              >
                 {t("dash.vip.line.connect")}
               </button>
             </>
@@ -146,5 +214,13 @@ export default function DashboardVipPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function DashboardVipPage() {
+  return (
+    <Suspense fallback={null}>
+      <VipContent />
+    </Suspense>
   );
 }

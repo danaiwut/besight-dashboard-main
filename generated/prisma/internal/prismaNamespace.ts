@@ -414,10 +414,18 @@ export const ModelName = {
   SystemSetting: 'SystemSetting',
   Activity: 'Activity',
   ActivityEnrollment: 'ActivityEnrollment',
+  CompetitionPrize: 'CompetitionPrize',
+  RewardTier: 'RewardTier',
+  RewardClaim: 'RewardClaim',
   BecRate: 'BecRate',
   SpinPrize: 'SpinPrize',
   BecGrant: 'BecGrant',
   SpinResult: 'SpinResult',
+  JournalAccount: 'JournalAccount',
+  JournalTrade: 'JournalTrade',
+  RiskRule: 'RiskRule',
+  SocialAccount: 'SocialAccount',
+  MemberNotificationRead: 'MemberNotificationRead',
   Course: 'Course',
   CourseLesson: 'CourseLesson',
   CourseEnrollment: 'CourseEnrollment',
@@ -437,7 +445,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "member" | "memberAcquisitionChannel" | "broker" | "tradeAccount" | "tradeLog" | "indicator" | "planIndicatorEntitlement" | "memberIndicatorAccess" | "renewalRecord" | "telegramAccess" | "lotCheckRun" | "lotCheckResult" | "activityLog" | "admin" | "systemSetting" | "activity" | "activityEnrollment" | "becRate" | "spinPrize" | "becGrant" | "spinResult" | "course" | "courseLesson" | "courseEnrollment" | "lessonProgress"
+    modelProps: "member" | "memberAcquisitionChannel" | "broker" | "tradeAccount" | "tradeLog" | "indicator" | "planIndicatorEntitlement" | "memberIndicatorAccess" | "renewalRecord" | "telegramAccess" | "lotCheckRun" | "lotCheckResult" | "activityLog" | "admin" | "systemSetting" | "activity" | "activityEnrollment" | "competitionPrize" | "rewardTier" | "rewardClaim" | "becRate" | "spinPrize" | "becGrant" | "spinResult" | "journalAccount" | "journalTrade" | "riskRule" | "socialAccount" | "memberNotificationRead" | "course" | "courseLesson" | "courseEnrollment" | "lessonProgress"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1563,6 +1571,204 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    CompetitionPrize: {
+      payload: Prisma.$CompetitionPrizePayload<ExtArgs>
+      fields: Prisma.CompetitionPrizeFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.CompetitionPrizeFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CompetitionPrizePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.CompetitionPrizeFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CompetitionPrizePayload>
+        }
+        findFirst: {
+          args: Prisma.CompetitionPrizeFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CompetitionPrizePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.CompetitionPrizeFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CompetitionPrizePayload>
+        }
+        findMany: {
+          args: Prisma.CompetitionPrizeFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CompetitionPrizePayload>[]
+        }
+        create: {
+          args: Prisma.CompetitionPrizeCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CompetitionPrizePayload>
+        }
+        createMany: {
+          args: Prisma.CompetitionPrizeCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        delete: {
+          args: Prisma.CompetitionPrizeDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CompetitionPrizePayload>
+        }
+        update: {
+          args: Prisma.CompetitionPrizeUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CompetitionPrizePayload>
+        }
+        deleteMany: {
+          args: Prisma.CompetitionPrizeDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.CompetitionPrizeUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        upsert: {
+          args: Prisma.CompetitionPrizeUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CompetitionPrizePayload>
+        }
+        aggregate: {
+          args: Prisma.CompetitionPrizeAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateCompetitionPrize>
+        }
+        groupBy: {
+          args: Prisma.CompetitionPrizeGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.CompetitionPrizeGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.CompetitionPrizeCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.CompetitionPrizeCountAggregateOutputType> | number
+        }
+      }
+    }
+    RewardTier: {
+      payload: Prisma.$RewardTierPayload<ExtArgs>
+      fields: Prisma.RewardTierFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.RewardTierFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RewardTierPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.RewardTierFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RewardTierPayload>
+        }
+        findFirst: {
+          args: Prisma.RewardTierFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RewardTierPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.RewardTierFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RewardTierPayload>
+        }
+        findMany: {
+          args: Prisma.RewardTierFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RewardTierPayload>[]
+        }
+        create: {
+          args: Prisma.RewardTierCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RewardTierPayload>
+        }
+        createMany: {
+          args: Prisma.RewardTierCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        delete: {
+          args: Prisma.RewardTierDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RewardTierPayload>
+        }
+        update: {
+          args: Prisma.RewardTierUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RewardTierPayload>
+        }
+        deleteMany: {
+          args: Prisma.RewardTierDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.RewardTierUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        upsert: {
+          args: Prisma.RewardTierUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RewardTierPayload>
+        }
+        aggregate: {
+          args: Prisma.RewardTierAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateRewardTier>
+        }
+        groupBy: {
+          args: Prisma.RewardTierGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.RewardTierGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.RewardTierCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.RewardTierCountAggregateOutputType> | number
+        }
+      }
+    }
+    RewardClaim: {
+      payload: Prisma.$RewardClaimPayload<ExtArgs>
+      fields: Prisma.RewardClaimFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.RewardClaimFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RewardClaimPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.RewardClaimFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RewardClaimPayload>
+        }
+        findFirst: {
+          args: Prisma.RewardClaimFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RewardClaimPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.RewardClaimFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RewardClaimPayload>
+        }
+        findMany: {
+          args: Prisma.RewardClaimFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RewardClaimPayload>[]
+        }
+        create: {
+          args: Prisma.RewardClaimCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RewardClaimPayload>
+        }
+        createMany: {
+          args: Prisma.RewardClaimCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        delete: {
+          args: Prisma.RewardClaimDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RewardClaimPayload>
+        }
+        update: {
+          args: Prisma.RewardClaimUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RewardClaimPayload>
+        }
+        deleteMany: {
+          args: Prisma.RewardClaimDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.RewardClaimUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        upsert: {
+          args: Prisma.RewardClaimUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RewardClaimPayload>
+        }
+        aggregate: {
+          args: Prisma.RewardClaimAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateRewardClaim>
+        }
+        groupBy: {
+          args: Prisma.RewardClaimGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.RewardClaimGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.RewardClaimCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.RewardClaimCountAggregateOutputType> | number
+        }
+      }
+    }
     BecRate: {
       payload: Prisma.$BecRatePayload<ExtArgs>
       fields: Prisma.BecRateFieldRefs
@@ -1824,6 +2030,336 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.SpinResultCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.SpinResultCountAggregateOutputType> | number
+        }
+      }
+    }
+    JournalAccount: {
+      payload: Prisma.$JournalAccountPayload<ExtArgs>
+      fields: Prisma.JournalAccountFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.JournalAccountFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$JournalAccountPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.JournalAccountFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$JournalAccountPayload>
+        }
+        findFirst: {
+          args: Prisma.JournalAccountFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$JournalAccountPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.JournalAccountFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$JournalAccountPayload>
+        }
+        findMany: {
+          args: Prisma.JournalAccountFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$JournalAccountPayload>[]
+        }
+        create: {
+          args: Prisma.JournalAccountCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$JournalAccountPayload>
+        }
+        createMany: {
+          args: Prisma.JournalAccountCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        delete: {
+          args: Prisma.JournalAccountDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$JournalAccountPayload>
+        }
+        update: {
+          args: Prisma.JournalAccountUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$JournalAccountPayload>
+        }
+        deleteMany: {
+          args: Prisma.JournalAccountDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.JournalAccountUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        upsert: {
+          args: Prisma.JournalAccountUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$JournalAccountPayload>
+        }
+        aggregate: {
+          args: Prisma.JournalAccountAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateJournalAccount>
+        }
+        groupBy: {
+          args: Prisma.JournalAccountGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.JournalAccountGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.JournalAccountCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.JournalAccountCountAggregateOutputType> | number
+        }
+      }
+    }
+    JournalTrade: {
+      payload: Prisma.$JournalTradePayload<ExtArgs>
+      fields: Prisma.JournalTradeFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.JournalTradeFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$JournalTradePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.JournalTradeFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$JournalTradePayload>
+        }
+        findFirst: {
+          args: Prisma.JournalTradeFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$JournalTradePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.JournalTradeFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$JournalTradePayload>
+        }
+        findMany: {
+          args: Prisma.JournalTradeFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$JournalTradePayload>[]
+        }
+        create: {
+          args: Prisma.JournalTradeCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$JournalTradePayload>
+        }
+        createMany: {
+          args: Prisma.JournalTradeCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        delete: {
+          args: Prisma.JournalTradeDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$JournalTradePayload>
+        }
+        update: {
+          args: Prisma.JournalTradeUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$JournalTradePayload>
+        }
+        deleteMany: {
+          args: Prisma.JournalTradeDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.JournalTradeUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        upsert: {
+          args: Prisma.JournalTradeUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$JournalTradePayload>
+        }
+        aggregate: {
+          args: Prisma.JournalTradeAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateJournalTrade>
+        }
+        groupBy: {
+          args: Prisma.JournalTradeGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.JournalTradeGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.JournalTradeCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.JournalTradeCountAggregateOutputType> | number
+        }
+      }
+    }
+    RiskRule: {
+      payload: Prisma.$RiskRulePayload<ExtArgs>
+      fields: Prisma.RiskRuleFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.RiskRuleFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RiskRulePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.RiskRuleFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RiskRulePayload>
+        }
+        findFirst: {
+          args: Prisma.RiskRuleFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RiskRulePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.RiskRuleFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RiskRulePayload>
+        }
+        findMany: {
+          args: Prisma.RiskRuleFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RiskRulePayload>[]
+        }
+        create: {
+          args: Prisma.RiskRuleCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RiskRulePayload>
+        }
+        createMany: {
+          args: Prisma.RiskRuleCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        delete: {
+          args: Prisma.RiskRuleDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RiskRulePayload>
+        }
+        update: {
+          args: Prisma.RiskRuleUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RiskRulePayload>
+        }
+        deleteMany: {
+          args: Prisma.RiskRuleDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.RiskRuleUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        upsert: {
+          args: Prisma.RiskRuleUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RiskRulePayload>
+        }
+        aggregate: {
+          args: Prisma.RiskRuleAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateRiskRule>
+        }
+        groupBy: {
+          args: Prisma.RiskRuleGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.RiskRuleGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.RiskRuleCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.RiskRuleCountAggregateOutputType> | number
+        }
+      }
+    }
+    SocialAccount: {
+      payload: Prisma.$SocialAccountPayload<ExtArgs>
+      fields: Prisma.SocialAccountFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.SocialAccountFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SocialAccountPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.SocialAccountFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SocialAccountPayload>
+        }
+        findFirst: {
+          args: Prisma.SocialAccountFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SocialAccountPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.SocialAccountFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SocialAccountPayload>
+        }
+        findMany: {
+          args: Prisma.SocialAccountFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SocialAccountPayload>[]
+        }
+        create: {
+          args: Prisma.SocialAccountCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SocialAccountPayload>
+        }
+        createMany: {
+          args: Prisma.SocialAccountCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        delete: {
+          args: Prisma.SocialAccountDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SocialAccountPayload>
+        }
+        update: {
+          args: Prisma.SocialAccountUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SocialAccountPayload>
+        }
+        deleteMany: {
+          args: Prisma.SocialAccountDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.SocialAccountUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        upsert: {
+          args: Prisma.SocialAccountUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SocialAccountPayload>
+        }
+        aggregate: {
+          args: Prisma.SocialAccountAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateSocialAccount>
+        }
+        groupBy: {
+          args: Prisma.SocialAccountGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.SocialAccountGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.SocialAccountCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.SocialAccountCountAggregateOutputType> | number
+        }
+      }
+    }
+    MemberNotificationRead: {
+      payload: Prisma.$MemberNotificationReadPayload<ExtArgs>
+      fields: Prisma.MemberNotificationReadFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.MemberNotificationReadFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemberNotificationReadPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.MemberNotificationReadFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemberNotificationReadPayload>
+        }
+        findFirst: {
+          args: Prisma.MemberNotificationReadFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemberNotificationReadPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.MemberNotificationReadFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemberNotificationReadPayload>
+        }
+        findMany: {
+          args: Prisma.MemberNotificationReadFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemberNotificationReadPayload>[]
+        }
+        create: {
+          args: Prisma.MemberNotificationReadCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemberNotificationReadPayload>
+        }
+        createMany: {
+          args: Prisma.MemberNotificationReadCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        delete: {
+          args: Prisma.MemberNotificationReadDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemberNotificationReadPayload>
+        }
+        update: {
+          args: Prisma.MemberNotificationReadUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemberNotificationReadPayload>
+        }
+        deleteMany: {
+          args: Prisma.MemberNotificationReadDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.MemberNotificationReadUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        upsert: {
+          args: Prisma.MemberNotificationReadUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemberNotificationReadPayload>
+        }
+        aggregate: {
+          args: Prisma.MemberNotificationReadAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateMemberNotificationRead>
+        }
+        groupBy: {
+          args: Prisma.MemberNotificationReadGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.MemberNotificationReadGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.MemberNotificationReadCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.MemberNotificationReadCountAggregateOutputType> | number
         }
       }
     }
@@ -2147,6 +2683,9 @@ export const MemberScalarFieldEnum = {
   telegramUsername: 'telegramUsername',
   telegramUserId: 'telegramUserId',
   discordUsername: 'discordUsername',
+  discordUserId: 'discordUserId',
+  lineUserId: 'lineUserId',
+  lineDisplayName: 'lineDisplayName',
   socialLinksJson: 'socialLinksJson',
   joinedAt: 'joinedAt',
   createdAt: 'createdAt',
@@ -2389,6 +2928,8 @@ export const ActivityScalarFieldEnum = {
   rules: 'rules',
   sortOrder: 'sortOrder',
   published: 'published',
+  mode: 'mode',
+  winnersFinalizedAt: 'winnersFinalizedAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -2414,6 +2955,57 @@ export const ActivityEnrollmentScalarFieldEnum = {
 } as const
 
 export type ActivityEnrollmentScalarFieldEnum = (typeof ActivityEnrollmentScalarFieldEnum)[keyof typeof ActivityEnrollmentScalarFieldEnum]
+
+
+export const CompetitionPrizeScalarFieldEnum = {
+  id: 'id',
+  activityId: 'activityId',
+  rankFrom: 'rankFrom',
+  rankTo: 'rankTo',
+  title: 'title',
+  valueNote: 'valueNote',
+  sortOrder: 'sortOrder',
+  createdAt: 'createdAt'
+} as const
+
+export type CompetitionPrizeScalarFieldEnum = (typeof CompetitionPrizeScalarFieldEnum)[keyof typeof CompetitionPrizeScalarFieldEnum]
+
+
+export const RewardTierScalarFieldEnum = {
+  id: 'id',
+  key: 'key',
+  title: 'title',
+  titleEn: 'titleEn',
+  threshold: 'threshold',
+  reward: 'reward',
+  rewardEn: 'rewardEn',
+  icon: 'icon',
+  image: 'image',
+  accent: 'accent',
+  sortOrder: 'sortOrder',
+  active: 'active',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type RewardTierScalarFieldEnum = (typeof RewardTierScalarFieldEnum)[keyof typeof RewardTierScalarFieldEnum]
+
+
+export const RewardClaimScalarFieldEnum = {
+  id: 'id',
+  memberId: 'memberId',
+  kind: 'kind',
+  refKey: 'refKey',
+  activityId: 'activityId',
+  title: 'title',
+  detail: 'detail',
+  status: 'status',
+  note: 'note',
+  createdAt: 'createdAt',
+  decidedAt: 'decidedAt'
+} as const
+
+export type RewardClaimScalarFieldEnum = (typeof RewardClaimScalarFieldEnum)[keyof typeof RewardClaimScalarFieldEnum]
 
 
 export const BecRateScalarFieldEnum = {
@@ -2471,6 +3063,88 @@ export const SpinResultScalarFieldEnum = {
 export type SpinResultScalarFieldEnum = (typeof SpinResultScalarFieldEnum)[keyof typeof SpinResultScalarFieldEnum]
 
 
+export const JournalAccountScalarFieldEnum = {
+  id: 'id',
+  memberId: 'memberId',
+  tradeAccountId: 'tradeAccountId',
+  tradeId: 'tradeId',
+  broker: 'broker',
+  accountType: 'accountType',
+  platform: 'platform',
+  startingBalance: 'startingBalance',
+  startDate: 'startDate',
+  mtServer: 'mtServer',
+  investorPasswordEnc: 'investorPasswordEnc',
+  mtLastSyncAt: 'mtLastSyncAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type JournalAccountScalarFieldEnum = (typeof JournalAccountScalarFieldEnum)[keyof typeof JournalAccountScalarFieldEnum]
+
+
+export const JournalTradeScalarFieldEnum = {
+  id: 'id',
+  accountId: 'accountId',
+  externalKey: 'externalKey',
+  ticket: 'ticket',
+  symbol: 'symbol',
+  side: 'side',
+  openAt: 'openAt',
+  closeAt: 'closeAt',
+  openPrice: 'openPrice',
+  closePrice: 'closePrice',
+  tp: 'tp',
+  sl: 'sl',
+  lots: 'lots',
+  pnl: 'pnl',
+  commission: 'commission',
+  swap: 'swap',
+  note: 'note',
+  tagsJson: 'tagsJson',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type JournalTradeScalarFieldEnum = (typeof JournalTradeScalarFieldEnum)[keyof typeof JournalTradeScalarFieldEnum]
+
+
+export const RiskRuleScalarFieldEnum = {
+  id: 'id',
+  accountId: 'accountId',
+  maxDailyLoss: 'maxDailyLoss',
+  maxLoss: 'maxLoss',
+  profitTarget: 'profitTarget',
+  updatedAt: 'updatedAt'
+} as const
+
+export type RiskRuleScalarFieldEnum = (typeof RiskRuleScalarFieldEnum)[keyof typeof RiskRuleScalarFieldEnum]
+
+
+export const SocialAccountScalarFieldEnum = {
+  id: 'id',
+  memberId: 'memberId',
+  provider: 'provider',
+  providerUserId: 'providerUserId',
+  username: 'username',
+  verifiedAt: 'verifiedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type SocialAccountScalarFieldEnum = (typeof SocialAccountScalarFieldEnum)[keyof typeof SocialAccountScalarFieldEnum]
+
+
+export const MemberNotificationReadScalarFieldEnum = {
+  id: 'id',
+  memberId: 'memberId',
+  key: 'key',
+  readAt: 'readAt'
+} as const
+
+export type MemberNotificationReadScalarFieldEnum = (typeof MemberNotificationReadScalarFieldEnum)[keyof typeof MemberNotificationReadScalarFieldEnum]
+
+
 export const CourseScalarFieldEnum = {
   id: 'id',
   slug: 'slug',
@@ -2524,7 +3198,10 @@ export const LessonProgressScalarFieldEnum = {
   id: 'id',
   lessonId: 'lessonId',
   memberId: 'memberId',
-  completedAt: 'completedAt'
+  completedAt: 'completedAt',
+  maxPositionSec: 'maxPositionSec',
+  durationSec: 'durationSec',
+  updatedAt: 'updatedAt'
 } as const
 
 export type LessonProgressScalarFieldEnum = (typeof LessonProgressScalarFieldEnum)[keyof typeof LessonProgressScalarFieldEnum]
@@ -2561,6 +3238,9 @@ export const MemberOrderByRelevanceFieldEnum = {
   telegramUsername: 'telegramUsername',
   telegramUserId: 'telegramUserId',
   discordUsername: 'discordUsername',
+  discordUserId: 'discordUserId',
+  lineUserId: 'lineUserId',
+  lineDisplayName: 'lineDisplayName',
   socialLinksJson: 'socialLinksJson',
   requiredLotsOverrideNote: 'requiredLotsOverrideNote'
 } as const
@@ -2684,7 +3364,8 @@ export const ActivityOrderByRelevanceFieldEnum = {
   title: 'title',
   description: 'description',
   coverImage: 'coverImage',
-  rules: 'rules'
+  rules: 'rules',
+  mode: 'mode'
 } as const
 
 export type ActivityOrderByRelevanceFieldEnum = (typeof ActivityOrderByRelevanceFieldEnum)[keyof typeof ActivityOrderByRelevanceFieldEnum]
@@ -2697,6 +3378,40 @@ export const ActivityEnrollmentOrderByRelevanceFieldEnum = {
 } as const
 
 export type ActivityEnrollmentOrderByRelevanceFieldEnum = (typeof ActivityEnrollmentOrderByRelevanceFieldEnum)[keyof typeof ActivityEnrollmentOrderByRelevanceFieldEnum]
+
+
+export const CompetitionPrizeOrderByRelevanceFieldEnum = {
+  title: 'title',
+  valueNote: 'valueNote'
+} as const
+
+export type CompetitionPrizeOrderByRelevanceFieldEnum = (typeof CompetitionPrizeOrderByRelevanceFieldEnum)[keyof typeof CompetitionPrizeOrderByRelevanceFieldEnum]
+
+
+export const RewardTierOrderByRelevanceFieldEnum = {
+  key: 'key',
+  title: 'title',
+  titleEn: 'titleEn',
+  reward: 'reward',
+  rewardEn: 'rewardEn',
+  icon: 'icon',
+  image: 'image',
+  accent: 'accent'
+} as const
+
+export type RewardTierOrderByRelevanceFieldEnum = (typeof RewardTierOrderByRelevanceFieldEnum)[keyof typeof RewardTierOrderByRelevanceFieldEnum]
+
+
+export const RewardClaimOrderByRelevanceFieldEnum = {
+  kind: 'kind',
+  refKey: 'refKey',
+  title: 'title',
+  detail: 'detail',
+  status: 'status',
+  note: 'note'
+} as const
+
+export type RewardClaimOrderByRelevanceFieldEnum = (typeof RewardClaimOrderByRelevanceFieldEnum)[keyof typeof RewardClaimOrderByRelevanceFieldEnum]
 
 
 export const BecRateOrderByRelevanceFieldEnum = {
@@ -2728,6 +3443,46 @@ export const SpinResultOrderByRelevanceFieldEnum = {
 } as const
 
 export type SpinResultOrderByRelevanceFieldEnum = (typeof SpinResultOrderByRelevanceFieldEnum)[keyof typeof SpinResultOrderByRelevanceFieldEnum]
+
+
+export const JournalAccountOrderByRelevanceFieldEnum = {
+  tradeId: 'tradeId',
+  broker: 'broker',
+  accountType: 'accountType',
+  platform: 'platform',
+  mtServer: 'mtServer',
+  investorPasswordEnc: 'investorPasswordEnc'
+} as const
+
+export type JournalAccountOrderByRelevanceFieldEnum = (typeof JournalAccountOrderByRelevanceFieldEnum)[keyof typeof JournalAccountOrderByRelevanceFieldEnum]
+
+
+export const JournalTradeOrderByRelevanceFieldEnum = {
+  externalKey: 'externalKey',
+  ticket: 'ticket',
+  symbol: 'symbol',
+  side: 'side',
+  note: 'note',
+  tagsJson: 'tagsJson'
+} as const
+
+export type JournalTradeOrderByRelevanceFieldEnum = (typeof JournalTradeOrderByRelevanceFieldEnum)[keyof typeof JournalTradeOrderByRelevanceFieldEnum]
+
+
+export const SocialAccountOrderByRelevanceFieldEnum = {
+  provider: 'provider',
+  providerUserId: 'providerUserId',
+  username: 'username'
+} as const
+
+export type SocialAccountOrderByRelevanceFieldEnum = (typeof SocialAccountOrderByRelevanceFieldEnum)[keyof typeof SocialAccountOrderByRelevanceFieldEnum]
+
+
+export const MemberNotificationReadOrderByRelevanceFieldEnum = {
+  key: 'key'
+} as const
+
+export type MemberNotificationReadOrderByRelevanceFieldEnum = (typeof MemberNotificationReadOrderByRelevanceFieldEnum)[keyof typeof MemberNotificationReadOrderByRelevanceFieldEnum]
 
 
 export const CourseOrderByRelevanceFieldEnum = {
@@ -3058,10 +3813,18 @@ export type GlobalOmitConfig = {
   systemSetting?: Prisma.SystemSettingOmit
   activity?: Prisma.ActivityOmit
   activityEnrollment?: Prisma.ActivityEnrollmentOmit
+  competitionPrize?: Prisma.CompetitionPrizeOmit
+  rewardTier?: Prisma.RewardTierOmit
+  rewardClaim?: Prisma.RewardClaimOmit
   becRate?: Prisma.BecRateOmit
   spinPrize?: Prisma.SpinPrizeOmit
   becGrant?: Prisma.BecGrantOmit
   spinResult?: Prisma.SpinResultOmit
+  journalAccount?: Prisma.JournalAccountOmit
+  journalTrade?: Prisma.JournalTradeOmit
+  riskRule?: Prisma.RiskRuleOmit
+  socialAccount?: Prisma.SocialAccountOmit
+  memberNotificationRead?: Prisma.MemberNotificationReadOmit
   course?: Prisma.CourseOmit
   courseLesson?: Prisma.CourseLessonOmit
   courseEnrollment?: Prisma.CourseEnrollmentOmit

@@ -4,8 +4,17 @@ import { useEffect, useState } from "react";
 import { useCrm, fmtDate } from "./CrmContext";
 import { useLanguage } from "./LanguageContext";
 import { apiCall } from "../../lib/crmApi";
-import type { ActivityDto, ActivityEnrollmentDto } from "../../lib/activities";
+import { PRIZE_TIERS, type ActivityDto, type ActivityEnrollmentDto, type CompetitionPrizeDto } from "../../lib/activities";
 import Icon from "../Icon";
+
+type PrizeDraft = { rankFrom: string; rankTo: string; title: string; valueNote: string };
+
+function defaultPrizeRows(): PrizeDraft[] {
+  return PRIZE_TIERS.map((tier) => {
+    const [from, to] = tier.rankKey.includes("-") ? tier.rankKey.split("-").map(Number) : [Number(tier.rankKey), Number(tier.rankKey)];
+    return { rankFrom: String(from), rankTo: String(to), title: `#${tier.rankKey}`, valueNote: `$${tier.amount.toFixed(2)}` };
+  });
+}
 
 /** CRM side panel: everyone registered for one activity, their competition
  *  account, and the activity-window lots snapshot. Scores are refreshed here
@@ -19,6 +28,13 @@ export default function ActivityParticipants({ activity, onClose }: { activity: 
   const [removingId, setRemovingId] = useState<number | null>(null);
   const [workingId, setWorkingId] = useState<number | null>(null);
   const [refreshing, setRefreshing] = useState(false);
+  const [prizes, setPrizes] = useState<CompetitionPrizeDto[] | null>(null);
+  const [prizeDrafts, setPrizeDrafts] = useState<PrizeDraft[]>([]);
+  const [prizesOpen, setPrizesOpen] = useState(false);
+  const [savingPrizes, setSavingPrizes] = useState(false);
+  const [finalizing, setFinalizing] = useState(false);
+  const [finalizeResult, setFinalizeResult] = useState<{ winners: Array<{ rank: number; memberName: string; lots: number; prizeTitle: string }>; claimsCreated: number } | null>(null);
+  const [finalizedAt, setFinalizedAt] = useState<string | undefined>(activity.winnersFinalizedAt);
 
   useEffect(() => {
     let cancelled = false;
@@ -28,6 +44,13 @@ export default function ActivityParticipants({ activity, onClose }: { activity: 
     apiCall<{ enrollments: ActivityEnrollmentDto[] }>(`/api/crm/activities/${activity.id}/enrollments/`, "GET")
       .then((payload) => { if (!cancelled) { setRows(payload.enrollments); setError(""); } })
       .catch((loadError) => { if (!cancelled) setError(loadError instanceof Error ? loadError.message : "Unable to load participants"); });
+    apiCall<{ prizes: CompetitionPrizeDto[] }>(`/api/crm/activities/${activity.id}/prizes/`, "GET")
+      .then((payload) => {
+        if (cancelled) return;
+        setPrizes(payload.prizes);
+        setPrizeDrafts(payload.prizes.map((p) => ({ rankFrom: String(p.rankFrom), rankTo: String(p.rankTo), title: p.title, valueNote: p.valueNote ?? "" })));
+      })
+      .catch(() => undefined);
     return () => { cancelled = true; };
   }, [activity.id]);
 
@@ -42,6 +65,40 @@ export default function ActivityParticipants({ activity, onClose }: { activity: 
       toast(refreshError instanceof Error ? refreshError.message : "Unable to refresh scores");
     } finally {
       setRefreshing(false);
+    }
+  }
+
+  async function savePrizes() {
+    setSavingPrizes(true);
+    try {
+      const payload = await apiCall<{ prizes: CompetitionPrizeDto[] }>(`/api/crm/activities/${activity.id}/prizes/`, "PUT", {
+        prizes: prizeDrafts.map((d) => ({ rankFrom: Number(d.rankFrom), rankTo: Number(d.rankTo), title: d.title.trim(), valueNote: d.valueNote.trim() })),
+      });
+      setPrizes(payload.prizes);
+      toast(t("act.prizes.saved"));
+    } catch (saveError) {
+      toast(saveError instanceof Error ? saveError.message : "Unable to save prizes");
+    } finally {
+      setSavingPrizes(false);
+    }
+  }
+
+  async function finalize() {
+    if (!window.confirm(t("act.finalize.confirm", { title: activity.title }))) return;
+    setFinalizing(true);
+    try {
+      const payload = await apiCall<{
+        winners: Array<{ rank: number; memberName: string; lots: number; prizeTitle: string }>;
+        claimsCreated: number;
+      }>(`/api/crm/activities/${activity.id}/finalize/`, "POST");
+      setFinalizeResult({ winners: payload.winners, claimsCreated: payload.claimsCreated });
+      setFinalizedAt(new Date().toISOString());
+      log({ actor: "Admin", action: "Activity Finalized", description: `"${activity.title}": ${payload.winners.length} winner(s), ${payload.claimsCreated} new claim(s).` });
+      toast(t("act.finalize.done", { n: payload.claimsCreated }));
+    } catch (finalizeError) {
+      toast(finalizeError instanceof Error ? finalizeError.message : "Unable to finalize winners");
+    } finally {
+      setFinalizing(false);
     }
   }
 
@@ -92,6 +149,14 @@ export default function ActivityParticipants({ activity, onClose }: { activity: 
           <div className="de">
             {t("act.participants.count", { n: rows?.length ?? activity.traders })}
           </div>
+          <div style={{ display: "flex", gap: 6, marginTop: 6, flexWrap: "wrap" }}>
+            {activity.mode !== "registered" && (
+              <span className="badge pending" title={t("act.mode.legacyHint")}>{t("act.mode.legacy")}</span>
+            )}
+            {finalizedAt && (
+              <span className="badge active" title={finalizedAt.slice(0, 16).replace("T", " ")}>{t("act.finalized")}</span>
+            )}
+          </div>
         </div>
         <div style={{ marginLeft: "auto", display: "flex", gap: 8 }}>
           <button type="button" className="btn btn-ghost" disabled={refreshing} onClick={() => void refreshScores()}>
@@ -102,6 +167,82 @@ export default function ActivityParticipants({ activity, onClose }: { activity: 
             {t("common.close")}
           </button>
         </div>
+      </div>
+
+      <div className="card" style={{ padding: 16, marginBottom: 16 }}>
+        <button
+          type="button"
+          className="panel-section-title"
+          style={{ background: "none", border: "none", cursor: "pointer", padding: 0, display: "flex", alignItems: "center", gap: 6 }}
+          onClick={() => setPrizesOpen((v) => !v)}
+          aria-expanded={prizesOpen}
+        >
+          <Icon name={prizesOpen ? "expand_more" : "chevron_right"} style={{ fontSize: 18 }} />
+          {t("act.prizes.title")} ({prizes?.length ?? 0})
+        </button>
+        {prizesOpen && (
+          <div style={{ marginTop: 12 }}>
+            {prizeDrafts.map((draft, i) => (
+              <div key={i} style={{ display: "flex", gap: 8, marginBottom: 8, flexWrap: "wrap", alignItems: "center" }}>
+                <span className="mono" style={{ fontSize: 12.5 }}>#</span>
+                <input className="input mono" style={{ width: 64 }} value={draft.rankFrom} onChange={(e) => setPrizeDrafts((cur) => cur.map((d, j) => (j === i ? { ...d, rankFrom: e.target.value.replace(/\D/g, "") } : d)))} placeholder="1" aria-label="Rank from" />
+                <span style={{ fontSize: 12.5 }}>–</span>
+                <input className="input mono" style={{ width: 64 }} value={draft.rankTo} onChange={(e) => setPrizeDrafts((cur) => cur.map((d, j) => (j === i ? { ...d, rankTo: e.target.value.replace(/\D/g, "") } : d)))} placeholder="1" aria-label="Rank to" />
+                <input className="input" style={{ flex: "2 1 160px" }} value={draft.title} onChange={(e) => setPrizeDrafts((cur) => cur.map((d, j) => (j === i ? { ...d, title: e.target.value } : d)))} placeholder={t("act.prizes.titlePh")} />
+                <input className="input mono" style={{ flex: "1 1 100px" }} value={draft.valueNote} onChange={(e) => setPrizeDrafts((cur) => cur.map((d, j) => (j === i ? { ...d, valueNote: e.target.value } : d)))} placeholder="$500" />
+                <button type="button" className="kebab" aria-label={t("common.delete")} onClick={() => setPrizeDrafts((cur) => cur.filter((_, j) => j !== i))}>
+                  <Icon name="delete" />
+                </button>
+              </div>
+            ))}
+            <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 4 }}>
+              <button type="button" className="btn btn-ghost" style={{ padding: "6px 12px" }} onClick={() => setPrizeDrafts((cur) => [...cur, { rankFrom: "", rankTo: "", title: "", valueNote: "" }])}>
+                <Icon name="add" />
+                {t("act.prizes.add")}
+              </button>
+              <button type="button" className="btn btn-ghost" style={{ padding: "6px 12px" }} onClick={() => setPrizeDrafts(defaultPrizeRows())}>
+                {t("act.prizes.defaults")}
+              </button>
+              <button type="button" className="btn btn-primary" style={{ padding: "6px 12px" }} disabled={savingPrizes} onClick={() => void savePrizes()}>
+                {t("common.save")}
+              </button>
+            </div>
+            <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 12, alignItems: "center" }}>
+              <button
+                type="button"
+                className="btn btn-primary"
+                style={{ padding: "6px 12px" }}
+                disabled={finalizing || activity.status !== "finished"}
+                title={activity.status !== "finished" ? t("act.finalize.onlyFinished") : undefined}
+                onClick={() => void finalize()}
+              >
+                <Icon name="emoji_events" />
+                {finalizing ? "…" : t("act.finalize.cta")}
+              </button>
+              {finalizeResult && (
+                <span style={{ fontSize: 12.5, color: "var(--text-sub)" }}>
+                  {t("act.finalize.result", { winners: finalizeResult.winners.length, claims: finalizeResult.claimsCreated })}
+                </span>
+              )}
+            </div>
+            {!!finalizeResult?.winners.length && (
+              <div className="table-wrap" style={{ marginTop: 8 }}>
+                <table className="data">
+                  <tbody>
+                    {finalizeResult.winners.map((w) => (
+                      <tr key={`${w.rank}-${w.memberName}`}>
+                        <td className="mono">#{w.rank}</td>
+                        <td>{w.memberName}</td>
+                        <td className="mono">{w.lots.toFixed(2)}</td>
+                        <td>{w.prizeTitle}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {error ? (

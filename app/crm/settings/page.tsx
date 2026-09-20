@@ -74,8 +74,7 @@ function TelegramSettingsCard() {
         <div className="desc" style={{ fontSize: 12.5, color: "var(--text-sub)", marginTop: 2 }}>
           {t("set.telegramDesc")}
         </div>
-      </div>
-      <div className="form-grid2">
+      </div>      <div className="form-grid2">
         <div className="field">
           <label>{t("set.botToken")}</label>
           <input className="input" type="password" value={botToken} onChange={(e) => setBotToken(e.target.value)} placeholder="123456:ABC-DEF…" autoComplete="off" />
@@ -100,6 +99,66 @@ function TelegramSettingsCard() {
           className="btn btn-primary"
           onClick={() => void save()}
         >
+          {t("set.saveTelegramSettings")}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function SocialInviteCard() {
+  const { settings, setSettings, toast, backendLive } = useCrm();
+  const { t } = useLanguage();
+  const [telegram, setTelegram] = useState(settings.telegramInviteLink);
+  const [discord, setDiscord] = useState(settings.discordInviteLink);
+  const [line, setLine] = useState(settings.lineInviteLink);
+
+  // General settings hydrate from the backend after mount — adopt them.
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setTelegram(settings.telegramInviteLink);
+    setDiscord(settings.discordInviteLink);
+    setLine(settings.lineInviteLink);
+  }, [settings.telegramInviteLink, settings.discordInviteLink, settings.lineInviteLink]);
+
+  async function save() {
+    const data = { telegramInviteLink: telegram.trim(), discordInviteLink: discord.trim(), lineInviteLink: line.trim() };
+    if (!backendLive) {
+      setSettings((cur) => ({ ...cur, ...data }));
+      toast(t("set.toast.telegramSaved"));
+      return;
+    }
+    try {
+      const payload = await apiCall<{ settings: typeof data }>("/api/crm/settings/general/", "PUT", data);
+      setSettings((cur) => ({ ...cur, ...payload.settings }));
+      toast(t("set.toast.telegramSaved"));
+    } catch (error) {
+      toast(error instanceof Error ? error.message : "Unable to save invite links");
+    }
+  }
+
+  return (
+    <div className="card" style={{ padding: 22, marginBottom: 22 }}>
+      <div className="settings-head">
+        <h3>{t("set.inviteLinks")}</h3>
+        <div className="desc" style={{ fontSize: 12.5, color: "var(--text-sub)", marginTop: 2 }}>
+          {t("set.inviteLinksDesc")}
+        </div>
+      </div>
+      <div className="field">
+        <label>{t("set.telegramInvite")}</label>
+        <input className="input" value={telegram} onChange={(e) => setTelegram(e.target.value)} placeholder="https://t.me/…" />
+      </div>
+      <div className="field">
+        <label>{t("set.discordInvite")}</label>
+        <input className="input" value={discord} onChange={(e) => setDiscord(e.target.value)} placeholder="https://discord.gg/…" />
+      </div>
+      <div className="field">
+        <label>{t("set.lineInvite")}</label>
+        <input className="input" value={line} onChange={(e) => setLine(e.target.value)} placeholder="https://line.me/…" />
+      </div>
+      <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 18 }}>
+        <button className="btn btn-primary" onClick={() => void save()}>
           {t("set.saveTelegramSettings")}
         </button>
       </div>
@@ -246,6 +305,7 @@ export default function CrmSettingsPage() {
     <section className="panel is-active">
       <LanguageCard />
       <TelegramSettingsCard />
+      <SocialInviteCard />
       <TeamPermissions />
     </section>
   );

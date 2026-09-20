@@ -57,6 +57,9 @@ export type MemberMinAggregateOutputType = {
   telegramUsername: string | null
   telegramUserId: string | null
   discordUsername: string | null
+  discordUserId: string | null
+  lineUserId: string | null
+  lineDisplayName: string | null
   socialLinksJson: string | null
   joinedAt: Date | null
   createdAt: Date | null
@@ -91,6 +94,9 @@ export type MemberMaxAggregateOutputType = {
   telegramUsername: string | null
   telegramUserId: string | null
   discordUsername: string | null
+  discordUserId: string | null
+  lineUserId: string | null
+  lineDisplayName: string | null
   socialLinksJson: string | null
   joinedAt: Date | null
   createdAt: Date | null
@@ -125,6 +131,9 @@ export type MemberCountAggregateOutputType = {
   telegramUsername: number
   telegramUserId: number
   discordUsername: number
+  discordUserId: number
+  lineUserId: number
+  lineDisplayName: number
   socialLinksJson: number
   joinedAt: number
   createdAt: number
@@ -175,6 +184,9 @@ export type MemberMinAggregateInputType = {
   telegramUsername?: true
   telegramUserId?: true
   discordUsername?: true
+  discordUserId?: true
+  lineUserId?: true
+  lineDisplayName?: true
   socialLinksJson?: true
   joinedAt?: true
   createdAt?: true
@@ -209,6 +221,9 @@ export type MemberMaxAggregateInputType = {
   telegramUsername?: true
   telegramUserId?: true
   discordUsername?: true
+  discordUserId?: true
+  lineUserId?: true
+  lineDisplayName?: true
   socialLinksJson?: true
   joinedAt?: true
   createdAt?: true
@@ -243,6 +258,9 @@ export type MemberCountAggregateInputType = {
   telegramUsername?: true
   telegramUserId?: true
   discordUsername?: true
+  discordUserId?: true
+  lineUserId?: true
+  lineDisplayName?: true
   socialLinksJson?: true
   joinedAt?: true
   createdAt?: true
@@ -364,6 +382,9 @@ export type MemberGroupByOutputType = {
   telegramUsername: string | null
   telegramUserId: string | null
   discordUsername: string | null
+  discordUserId: string | null
+  lineUserId: string | null
+  lineDisplayName: string | null
   socialLinksJson: string | null
   joinedAt: Date
   createdAt: Date
@@ -421,6 +442,9 @@ export type MemberWhereInput = {
   telegramUsername?: Prisma.StringNullableFilter<"Member"> | string | null
   telegramUserId?: Prisma.StringNullableFilter<"Member"> | string | null
   discordUsername?: Prisma.StringNullableFilter<"Member"> | string | null
+  discordUserId?: Prisma.StringNullableFilter<"Member"> | string | null
+  lineUserId?: Prisma.StringNullableFilter<"Member"> | string | null
+  lineDisplayName?: Prisma.StringNullableFilter<"Member"> | string | null
   socialLinksJson?: Prisma.StringNullableFilter<"Member"> | string | null
   joinedAt?: Prisma.DateTimeFilter<"Member"> | Date | string
   createdAt?: Prisma.DateTimeFilter<"Member"> | Date | string
@@ -444,6 +468,10 @@ export type MemberWhereInput = {
   telegramAccess?: Prisma.TelegramAccessListRelationFilter
   renewalHistory?: Prisma.RenewalRecordListRelationFilter
   activityLogs?: Prisma.ActivityLogListRelationFilter
+  rewardClaims?: Prisma.RewardClaimListRelationFilter
+  journalAccounts?: Prisma.JournalAccountListRelationFilter
+  socialAccounts?: Prisma.SocialAccountListRelationFilter
+  notificationReads?: Prisma.MemberNotificationReadListRelationFilter
   lotCheckRuns?: Prisma.LotCheckRunListRelationFilter
   activityEnrollments?: Prisma.ActivityEnrollmentListRelationFilter
   spinResults?: Prisma.SpinResultListRelationFilter
@@ -469,6 +497,9 @@ export type MemberOrderByWithRelationInput = {
   telegramUsername?: Prisma.SortOrderInput | Prisma.SortOrder
   telegramUserId?: Prisma.SortOrderInput | Prisma.SortOrder
   discordUsername?: Prisma.SortOrderInput | Prisma.SortOrder
+  discordUserId?: Prisma.SortOrderInput | Prisma.SortOrder
+  lineUserId?: Prisma.SortOrderInput | Prisma.SortOrder
+  lineDisplayName?: Prisma.SortOrderInput | Prisma.SortOrder
   socialLinksJson?: Prisma.SortOrderInput | Prisma.SortOrder
   joinedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -492,6 +523,10 @@ export type MemberOrderByWithRelationInput = {
   telegramAccess?: Prisma.TelegramAccessOrderByRelationAggregateInput
   renewalHistory?: Prisma.RenewalRecordOrderByRelationAggregateInput
   activityLogs?: Prisma.ActivityLogOrderByRelationAggregateInput
+  rewardClaims?: Prisma.RewardClaimOrderByRelationAggregateInput
+  journalAccounts?: Prisma.JournalAccountOrderByRelationAggregateInput
+  socialAccounts?: Prisma.SocialAccountOrderByRelationAggregateInput
+  notificationReads?: Prisma.MemberNotificationReadOrderByRelationAggregateInput
   lotCheckRuns?: Prisma.LotCheckRunOrderByRelationAggregateInput
   activityEnrollments?: Prisma.ActivityEnrollmentOrderByRelationAggregateInput
   spinResults?: Prisma.SpinResultOrderByRelationAggregateInput
@@ -522,6 +557,9 @@ export type MemberWhereUniqueInput = Prisma.AtLeast<{
   telegramUsername?: Prisma.StringNullableFilter<"Member"> | string | null
   telegramUserId?: Prisma.StringNullableFilter<"Member"> | string | null
   discordUsername?: Prisma.StringNullableFilter<"Member"> | string | null
+  discordUserId?: Prisma.StringNullableFilter<"Member"> | string | null
+  lineUserId?: Prisma.StringNullableFilter<"Member"> | string | null
+  lineDisplayName?: Prisma.StringNullableFilter<"Member"> | string | null
   socialLinksJson?: Prisma.StringNullableFilter<"Member"> | string | null
   joinedAt?: Prisma.DateTimeFilter<"Member"> | Date | string
   createdAt?: Prisma.DateTimeFilter<"Member"> | Date | string
@@ -544,6 +582,10 @@ export type MemberWhereUniqueInput = Prisma.AtLeast<{
   telegramAccess?: Prisma.TelegramAccessListRelationFilter
   renewalHistory?: Prisma.RenewalRecordListRelationFilter
   activityLogs?: Prisma.ActivityLogListRelationFilter
+  rewardClaims?: Prisma.RewardClaimListRelationFilter
+  journalAccounts?: Prisma.JournalAccountListRelationFilter
+  socialAccounts?: Prisma.SocialAccountListRelationFilter
+  notificationReads?: Prisma.MemberNotificationReadListRelationFilter
   lotCheckRuns?: Prisma.LotCheckRunListRelationFilter
   activityEnrollments?: Prisma.ActivityEnrollmentListRelationFilter
   spinResults?: Prisma.SpinResultListRelationFilter
@@ -569,6 +611,9 @@ export type MemberOrderByWithAggregationInput = {
   telegramUsername?: Prisma.SortOrderInput | Prisma.SortOrder
   telegramUserId?: Prisma.SortOrderInput | Prisma.SortOrder
   discordUsername?: Prisma.SortOrderInput | Prisma.SortOrder
+  discordUserId?: Prisma.SortOrderInput | Prisma.SortOrder
+  lineUserId?: Prisma.SortOrderInput | Prisma.SortOrder
+  lineDisplayName?: Prisma.SortOrderInput | Prisma.SortOrder
   socialLinksJson?: Prisma.SortOrderInput | Prisma.SortOrder
   joinedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -611,6 +656,9 @@ export type MemberScalarWhereWithAggregatesInput = {
   telegramUsername?: Prisma.StringNullableWithAggregatesFilter<"Member"> | string | null
   telegramUserId?: Prisma.StringNullableWithAggregatesFilter<"Member"> | string | null
   discordUsername?: Prisma.StringNullableWithAggregatesFilter<"Member"> | string | null
+  discordUserId?: Prisma.StringNullableWithAggregatesFilter<"Member"> | string | null
+  lineUserId?: Prisma.StringNullableWithAggregatesFilter<"Member"> | string | null
+  lineDisplayName?: Prisma.StringNullableWithAggregatesFilter<"Member"> | string | null
   socialLinksJson?: Prisma.StringNullableWithAggregatesFilter<"Member"> | string | null
   joinedAt?: Prisma.DateTimeWithAggregatesFilter<"Member"> | Date | string
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Member"> | Date | string
@@ -644,6 +692,9 @@ export type MemberCreateInput = {
   telegramUsername?: string | null
   telegramUserId?: string | null
   discordUsername?: string | null
+  discordUserId?: string | null
+  lineUserId?: string | null
+  lineDisplayName?: string | null
   socialLinksJson?: string | null
   joinedAt?: Date | string
   createdAt?: Date | string
@@ -666,6 +717,10 @@ export type MemberCreateInput = {
   telegramAccess?: Prisma.TelegramAccessCreateNestedManyWithoutMemberInput
   renewalHistory?: Prisma.RenewalRecordCreateNestedManyWithoutMemberInput
   activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutMemberInput
+  rewardClaims?: Prisma.RewardClaimCreateNestedManyWithoutMemberInput
+  journalAccounts?: Prisma.JournalAccountCreateNestedManyWithoutMemberInput
+  socialAccounts?: Prisma.SocialAccountCreateNestedManyWithoutMemberInput
+  notificationReads?: Prisma.MemberNotificationReadCreateNestedManyWithoutMemberInput
   lotCheckRuns?: Prisma.LotCheckRunCreateNestedManyWithoutMemberInput
   activityEnrollments?: Prisma.ActivityEnrollmentCreateNestedManyWithoutMemberInput
   spinResults?: Prisma.SpinResultCreateNestedManyWithoutMemberInput
@@ -691,6 +746,9 @@ export type MemberUncheckedCreateInput = {
   telegramUsername?: string | null
   telegramUserId?: string | null
   discordUsername?: string | null
+  discordUserId?: string | null
+  lineUserId?: string | null
+  lineDisplayName?: string | null
   socialLinksJson?: string | null
   joinedAt?: Date | string
   createdAt?: Date | string
@@ -713,6 +771,10 @@ export type MemberUncheckedCreateInput = {
   telegramAccess?: Prisma.TelegramAccessUncheckedCreateNestedManyWithoutMemberInput
   renewalHistory?: Prisma.RenewalRecordUncheckedCreateNestedManyWithoutMemberInput
   activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutMemberInput
+  rewardClaims?: Prisma.RewardClaimUncheckedCreateNestedManyWithoutMemberInput
+  journalAccounts?: Prisma.JournalAccountUncheckedCreateNestedManyWithoutMemberInput
+  socialAccounts?: Prisma.SocialAccountUncheckedCreateNestedManyWithoutMemberInput
+  notificationReads?: Prisma.MemberNotificationReadUncheckedCreateNestedManyWithoutMemberInput
   lotCheckRuns?: Prisma.LotCheckRunUncheckedCreateNestedManyWithoutMemberInput
   activityEnrollments?: Prisma.ActivityEnrollmentUncheckedCreateNestedManyWithoutMemberInput
   spinResults?: Prisma.SpinResultUncheckedCreateNestedManyWithoutMemberInput
@@ -737,6 +799,9 @@ export type MemberUpdateInput = {
   telegramUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   telegramUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   discordUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  discordUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lineUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lineDisplayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   socialLinksJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   joinedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -759,6 +824,10 @@ export type MemberUpdateInput = {
   telegramAccess?: Prisma.TelegramAccessUpdateManyWithoutMemberNestedInput
   renewalHistory?: Prisma.RenewalRecordUpdateManyWithoutMemberNestedInput
   activityLogs?: Prisma.ActivityLogUpdateManyWithoutMemberNestedInput
+  rewardClaims?: Prisma.RewardClaimUpdateManyWithoutMemberNestedInput
+  journalAccounts?: Prisma.JournalAccountUpdateManyWithoutMemberNestedInput
+  socialAccounts?: Prisma.SocialAccountUpdateManyWithoutMemberNestedInput
+  notificationReads?: Prisma.MemberNotificationReadUpdateManyWithoutMemberNestedInput
   lotCheckRuns?: Prisma.LotCheckRunUpdateManyWithoutMemberNestedInput
   activityEnrollments?: Prisma.ActivityEnrollmentUpdateManyWithoutMemberNestedInput
   spinResults?: Prisma.SpinResultUpdateManyWithoutMemberNestedInput
@@ -784,6 +853,9 @@ export type MemberUncheckedUpdateInput = {
   telegramUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   telegramUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   discordUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  discordUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lineUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lineDisplayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   socialLinksJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   joinedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -806,6 +878,10 @@ export type MemberUncheckedUpdateInput = {
   telegramAccess?: Prisma.TelegramAccessUncheckedUpdateManyWithoutMemberNestedInput
   renewalHistory?: Prisma.RenewalRecordUncheckedUpdateManyWithoutMemberNestedInput
   activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutMemberNestedInput
+  rewardClaims?: Prisma.RewardClaimUncheckedUpdateManyWithoutMemberNestedInput
+  journalAccounts?: Prisma.JournalAccountUncheckedUpdateManyWithoutMemberNestedInput
+  socialAccounts?: Prisma.SocialAccountUncheckedUpdateManyWithoutMemberNestedInput
+  notificationReads?: Prisma.MemberNotificationReadUncheckedUpdateManyWithoutMemberNestedInput
   lotCheckRuns?: Prisma.LotCheckRunUncheckedUpdateManyWithoutMemberNestedInput
   activityEnrollments?: Prisma.ActivityEnrollmentUncheckedUpdateManyWithoutMemberNestedInput
   spinResults?: Prisma.SpinResultUncheckedUpdateManyWithoutMemberNestedInput
@@ -831,6 +907,9 @@ export type MemberCreateManyInput = {
   telegramUsername?: string | null
   telegramUserId?: string | null
   discordUsername?: string | null
+  discordUserId?: string | null
+  lineUserId?: string | null
+  lineDisplayName?: string | null
   socialLinksJson?: string | null
   joinedAt?: Date | string
   createdAt?: Date | string
@@ -864,6 +943,9 @@ export type MemberUpdateManyMutationInput = {
   telegramUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   telegramUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   discordUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  discordUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lineUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lineDisplayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   socialLinksJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   joinedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -897,6 +979,9 @@ export type MemberUncheckedUpdateManyInput = {
   telegramUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   telegramUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   discordUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  discordUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lineUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lineDisplayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   socialLinksJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   joinedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -937,6 +1022,9 @@ export type MemberCountOrderByAggregateInput = {
   telegramUsername?: Prisma.SortOrder
   telegramUserId?: Prisma.SortOrder
   discordUsername?: Prisma.SortOrder
+  discordUserId?: Prisma.SortOrder
+  lineUserId?: Prisma.SortOrder
+  lineDisplayName?: Prisma.SortOrder
   socialLinksJson?: Prisma.SortOrder
   joinedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -978,6 +1066,9 @@ export type MemberMaxOrderByAggregateInput = {
   telegramUsername?: Prisma.SortOrder
   telegramUserId?: Prisma.SortOrder
   discordUsername?: Prisma.SortOrder
+  discordUserId?: Prisma.SortOrder
+  lineUserId?: Prisma.SortOrder
+  lineDisplayName?: Prisma.SortOrder
   socialLinksJson?: Prisma.SortOrder
   joinedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -1012,6 +1103,9 @@ export type MemberMinOrderByAggregateInput = {
   telegramUsername?: Prisma.SortOrder
   telegramUserId?: Prisma.SortOrder
   discordUsername?: Prisma.SortOrder
+  discordUserId?: Prisma.SortOrder
+  lineUserId?: Prisma.SortOrder
+  lineDisplayName?: Prisma.SortOrder
   socialLinksJson?: Prisma.SortOrder
   joinedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -1284,6 +1378,20 @@ export type MemberUpdateOneRequiredWithoutActivityEnrollmentsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.MemberUpdateToOneWithWhereWithoutActivityEnrollmentsInput, Prisma.MemberUpdateWithoutActivityEnrollmentsInput>, Prisma.MemberUncheckedUpdateWithoutActivityEnrollmentsInput>
 }
 
+export type MemberCreateNestedOneWithoutRewardClaimsInput = {
+  create?: Prisma.XOR<Prisma.MemberCreateWithoutRewardClaimsInput, Prisma.MemberUncheckedCreateWithoutRewardClaimsInput>
+  connectOrCreate?: Prisma.MemberCreateOrConnectWithoutRewardClaimsInput
+  connect?: Prisma.MemberWhereUniqueInput
+}
+
+export type MemberUpdateOneRequiredWithoutRewardClaimsNestedInput = {
+  create?: Prisma.XOR<Prisma.MemberCreateWithoutRewardClaimsInput, Prisma.MemberUncheckedCreateWithoutRewardClaimsInput>
+  connectOrCreate?: Prisma.MemberCreateOrConnectWithoutRewardClaimsInput
+  upsert?: Prisma.MemberUpsertWithoutRewardClaimsInput
+  connect?: Prisma.MemberWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.MemberUpdateToOneWithWhereWithoutRewardClaimsInput, Prisma.MemberUpdateWithoutRewardClaimsInput>, Prisma.MemberUncheckedUpdateWithoutRewardClaimsInput>
+}
+
 export type MemberCreateNestedOneWithoutBecGrantsInput = {
   create?: Prisma.XOR<Prisma.MemberCreateWithoutBecGrantsInput, Prisma.MemberUncheckedCreateWithoutBecGrantsInput>
   connectOrCreate?: Prisma.MemberCreateOrConnectWithoutBecGrantsInput
@@ -1310,6 +1418,48 @@ export type MemberUpdateOneRequiredWithoutSpinResultsNestedInput = {
   upsert?: Prisma.MemberUpsertWithoutSpinResultsInput
   connect?: Prisma.MemberWhereUniqueInput
   update?: Prisma.XOR<Prisma.XOR<Prisma.MemberUpdateToOneWithWhereWithoutSpinResultsInput, Prisma.MemberUpdateWithoutSpinResultsInput>, Prisma.MemberUncheckedUpdateWithoutSpinResultsInput>
+}
+
+export type MemberCreateNestedOneWithoutJournalAccountsInput = {
+  create?: Prisma.XOR<Prisma.MemberCreateWithoutJournalAccountsInput, Prisma.MemberUncheckedCreateWithoutJournalAccountsInput>
+  connectOrCreate?: Prisma.MemberCreateOrConnectWithoutJournalAccountsInput
+  connect?: Prisma.MemberWhereUniqueInput
+}
+
+export type MemberUpdateOneRequiredWithoutJournalAccountsNestedInput = {
+  create?: Prisma.XOR<Prisma.MemberCreateWithoutJournalAccountsInput, Prisma.MemberUncheckedCreateWithoutJournalAccountsInput>
+  connectOrCreate?: Prisma.MemberCreateOrConnectWithoutJournalAccountsInput
+  upsert?: Prisma.MemberUpsertWithoutJournalAccountsInput
+  connect?: Prisma.MemberWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.MemberUpdateToOneWithWhereWithoutJournalAccountsInput, Prisma.MemberUpdateWithoutJournalAccountsInput>, Prisma.MemberUncheckedUpdateWithoutJournalAccountsInput>
+}
+
+export type MemberCreateNestedOneWithoutSocialAccountsInput = {
+  create?: Prisma.XOR<Prisma.MemberCreateWithoutSocialAccountsInput, Prisma.MemberUncheckedCreateWithoutSocialAccountsInput>
+  connectOrCreate?: Prisma.MemberCreateOrConnectWithoutSocialAccountsInput
+  connect?: Prisma.MemberWhereUniqueInput
+}
+
+export type MemberUpdateOneRequiredWithoutSocialAccountsNestedInput = {
+  create?: Prisma.XOR<Prisma.MemberCreateWithoutSocialAccountsInput, Prisma.MemberUncheckedCreateWithoutSocialAccountsInput>
+  connectOrCreate?: Prisma.MemberCreateOrConnectWithoutSocialAccountsInput
+  upsert?: Prisma.MemberUpsertWithoutSocialAccountsInput
+  connect?: Prisma.MemberWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.MemberUpdateToOneWithWhereWithoutSocialAccountsInput, Prisma.MemberUpdateWithoutSocialAccountsInput>, Prisma.MemberUncheckedUpdateWithoutSocialAccountsInput>
+}
+
+export type MemberCreateNestedOneWithoutNotificationReadsInput = {
+  create?: Prisma.XOR<Prisma.MemberCreateWithoutNotificationReadsInput, Prisma.MemberUncheckedCreateWithoutNotificationReadsInput>
+  connectOrCreate?: Prisma.MemberCreateOrConnectWithoutNotificationReadsInput
+  connect?: Prisma.MemberWhereUniqueInput
+}
+
+export type MemberUpdateOneRequiredWithoutNotificationReadsNestedInput = {
+  create?: Prisma.XOR<Prisma.MemberCreateWithoutNotificationReadsInput, Prisma.MemberUncheckedCreateWithoutNotificationReadsInput>
+  connectOrCreate?: Prisma.MemberCreateOrConnectWithoutNotificationReadsInput
+  upsert?: Prisma.MemberUpsertWithoutNotificationReadsInput
+  connect?: Prisma.MemberWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.MemberUpdateToOneWithWhereWithoutNotificationReadsInput, Prisma.MemberUpdateWithoutNotificationReadsInput>, Prisma.MemberUncheckedUpdateWithoutNotificationReadsInput>
 }
 
 export type MemberCreateNestedOneWithoutCourseEnrollmentsInput = {
@@ -1356,6 +1506,9 @@ export type MemberCreateWithoutAcquisitionChannelsInput = {
   telegramUsername?: string | null
   telegramUserId?: string | null
   discordUsername?: string | null
+  discordUserId?: string | null
+  lineUserId?: string | null
+  lineDisplayName?: string | null
   socialLinksJson?: string | null
   joinedAt?: Date | string
   createdAt?: Date | string
@@ -1377,6 +1530,10 @@ export type MemberCreateWithoutAcquisitionChannelsInput = {
   telegramAccess?: Prisma.TelegramAccessCreateNestedManyWithoutMemberInput
   renewalHistory?: Prisma.RenewalRecordCreateNestedManyWithoutMemberInput
   activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutMemberInput
+  rewardClaims?: Prisma.RewardClaimCreateNestedManyWithoutMemberInput
+  journalAccounts?: Prisma.JournalAccountCreateNestedManyWithoutMemberInput
+  socialAccounts?: Prisma.SocialAccountCreateNestedManyWithoutMemberInput
+  notificationReads?: Prisma.MemberNotificationReadCreateNestedManyWithoutMemberInput
   lotCheckRuns?: Prisma.LotCheckRunCreateNestedManyWithoutMemberInput
   activityEnrollments?: Prisma.ActivityEnrollmentCreateNestedManyWithoutMemberInput
   spinResults?: Prisma.SpinResultCreateNestedManyWithoutMemberInput
@@ -1402,6 +1559,9 @@ export type MemberUncheckedCreateWithoutAcquisitionChannelsInput = {
   telegramUsername?: string | null
   telegramUserId?: string | null
   discordUsername?: string | null
+  discordUserId?: string | null
+  lineUserId?: string | null
+  lineDisplayName?: string | null
   socialLinksJson?: string | null
   joinedAt?: Date | string
   createdAt?: Date | string
@@ -1423,6 +1583,10 @@ export type MemberUncheckedCreateWithoutAcquisitionChannelsInput = {
   telegramAccess?: Prisma.TelegramAccessUncheckedCreateNestedManyWithoutMemberInput
   renewalHistory?: Prisma.RenewalRecordUncheckedCreateNestedManyWithoutMemberInput
   activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutMemberInput
+  rewardClaims?: Prisma.RewardClaimUncheckedCreateNestedManyWithoutMemberInput
+  journalAccounts?: Prisma.JournalAccountUncheckedCreateNestedManyWithoutMemberInput
+  socialAccounts?: Prisma.SocialAccountUncheckedCreateNestedManyWithoutMemberInput
+  notificationReads?: Prisma.MemberNotificationReadUncheckedCreateNestedManyWithoutMemberInput
   lotCheckRuns?: Prisma.LotCheckRunUncheckedCreateNestedManyWithoutMemberInput
   activityEnrollments?: Prisma.ActivityEnrollmentUncheckedCreateNestedManyWithoutMemberInput
   spinResults?: Prisma.SpinResultUncheckedCreateNestedManyWithoutMemberInput
@@ -1463,6 +1627,9 @@ export type MemberUpdateWithoutAcquisitionChannelsInput = {
   telegramUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   telegramUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   discordUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  discordUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lineUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lineDisplayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   socialLinksJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   joinedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1484,6 +1651,10 @@ export type MemberUpdateWithoutAcquisitionChannelsInput = {
   telegramAccess?: Prisma.TelegramAccessUpdateManyWithoutMemberNestedInput
   renewalHistory?: Prisma.RenewalRecordUpdateManyWithoutMemberNestedInput
   activityLogs?: Prisma.ActivityLogUpdateManyWithoutMemberNestedInput
+  rewardClaims?: Prisma.RewardClaimUpdateManyWithoutMemberNestedInput
+  journalAccounts?: Prisma.JournalAccountUpdateManyWithoutMemberNestedInput
+  socialAccounts?: Prisma.SocialAccountUpdateManyWithoutMemberNestedInput
+  notificationReads?: Prisma.MemberNotificationReadUpdateManyWithoutMemberNestedInput
   lotCheckRuns?: Prisma.LotCheckRunUpdateManyWithoutMemberNestedInput
   activityEnrollments?: Prisma.ActivityEnrollmentUpdateManyWithoutMemberNestedInput
   spinResults?: Prisma.SpinResultUpdateManyWithoutMemberNestedInput
@@ -1509,6 +1680,9 @@ export type MemberUncheckedUpdateWithoutAcquisitionChannelsInput = {
   telegramUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   telegramUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   discordUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  discordUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lineUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lineDisplayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   socialLinksJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   joinedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1530,6 +1704,10 @@ export type MemberUncheckedUpdateWithoutAcquisitionChannelsInput = {
   telegramAccess?: Prisma.TelegramAccessUncheckedUpdateManyWithoutMemberNestedInput
   renewalHistory?: Prisma.RenewalRecordUncheckedUpdateManyWithoutMemberNestedInput
   activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutMemberNestedInput
+  rewardClaims?: Prisma.RewardClaimUncheckedUpdateManyWithoutMemberNestedInput
+  journalAccounts?: Prisma.JournalAccountUncheckedUpdateManyWithoutMemberNestedInput
+  socialAccounts?: Prisma.SocialAccountUncheckedUpdateManyWithoutMemberNestedInput
+  notificationReads?: Prisma.MemberNotificationReadUncheckedUpdateManyWithoutMemberNestedInput
   lotCheckRuns?: Prisma.LotCheckRunUncheckedUpdateManyWithoutMemberNestedInput
   activityEnrollments?: Prisma.ActivityEnrollmentUncheckedUpdateManyWithoutMemberNestedInput
   spinResults?: Prisma.SpinResultUncheckedUpdateManyWithoutMemberNestedInput
@@ -1554,6 +1732,9 @@ export type MemberCreateWithoutTradeAccountsInput = {
   telegramUsername?: string | null
   telegramUserId?: string | null
   discordUsername?: string | null
+  discordUserId?: string | null
+  lineUserId?: string | null
+  lineDisplayName?: string | null
   socialLinksJson?: string | null
   joinedAt?: Date | string
   createdAt?: Date | string
@@ -1575,6 +1756,10 @@ export type MemberCreateWithoutTradeAccountsInput = {
   telegramAccess?: Prisma.TelegramAccessCreateNestedManyWithoutMemberInput
   renewalHistory?: Prisma.RenewalRecordCreateNestedManyWithoutMemberInput
   activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutMemberInput
+  rewardClaims?: Prisma.RewardClaimCreateNestedManyWithoutMemberInput
+  journalAccounts?: Prisma.JournalAccountCreateNestedManyWithoutMemberInput
+  socialAccounts?: Prisma.SocialAccountCreateNestedManyWithoutMemberInput
+  notificationReads?: Prisma.MemberNotificationReadCreateNestedManyWithoutMemberInput
   lotCheckRuns?: Prisma.LotCheckRunCreateNestedManyWithoutMemberInput
   activityEnrollments?: Prisma.ActivityEnrollmentCreateNestedManyWithoutMemberInput
   spinResults?: Prisma.SpinResultCreateNestedManyWithoutMemberInput
@@ -1600,6 +1785,9 @@ export type MemberUncheckedCreateWithoutTradeAccountsInput = {
   telegramUsername?: string | null
   telegramUserId?: string | null
   discordUsername?: string | null
+  discordUserId?: string | null
+  lineUserId?: string | null
+  lineDisplayName?: string | null
   socialLinksJson?: string | null
   joinedAt?: Date | string
   createdAt?: Date | string
@@ -1621,6 +1809,10 @@ export type MemberUncheckedCreateWithoutTradeAccountsInput = {
   telegramAccess?: Prisma.TelegramAccessUncheckedCreateNestedManyWithoutMemberInput
   renewalHistory?: Prisma.RenewalRecordUncheckedCreateNestedManyWithoutMemberInput
   activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutMemberInput
+  rewardClaims?: Prisma.RewardClaimUncheckedCreateNestedManyWithoutMemberInput
+  journalAccounts?: Prisma.JournalAccountUncheckedCreateNestedManyWithoutMemberInput
+  socialAccounts?: Prisma.SocialAccountUncheckedCreateNestedManyWithoutMemberInput
+  notificationReads?: Prisma.MemberNotificationReadUncheckedCreateNestedManyWithoutMemberInput
   lotCheckRuns?: Prisma.LotCheckRunUncheckedCreateNestedManyWithoutMemberInput
   activityEnrollments?: Prisma.ActivityEnrollmentUncheckedCreateNestedManyWithoutMemberInput
   spinResults?: Prisma.SpinResultUncheckedCreateNestedManyWithoutMemberInput
@@ -1650,6 +1842,9 @@ export type MemberCreateWithoutPrimaryTradeAccountInput = {
   telegramUsername?: string | null
   telegramUserId?: string | null
   discordUsername?: string | null
+  discordUserId?: string | null
+  lineUserId?: string | null
+  lineDisplayName?: string | null
   socialLinksJson?: string | null
   joinedAt?: Date | string
   createdAt?: Date | string
@@ -1671,6 +1866,10 @@ export type MemberCreateWithoutPrimaryTradeAccountInput = {
   telegramAccess?: Prisma.TelegramAccessCreateNestedManyWithoutMemberInput
   renewalHistory?: Prisma.RenewalRecordCreateNestedManyWithoutMemberInput
   activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutMemberInput
+  rewardClaims?: Prisma.RewardClaimCreateNestedManyWithoutMemberInput
+  journalAccounts?: Prisma.JournalAccountCreateNestedManyWithoutMemberInput
+  socialAccounts?: Prisma.SocialAccountCreateNestedManyWithoutMemberInput
+  notificationReads?: Prisma.MemberNotificationReadCreateNestedManyWithoutMemberInput
   lotCheckRuns?: Prisma.LotCheckRunCreateNestedManyWithoutMemberInput
   activityEnrollments?: Prisma.ActivityEnrollmentCreateNestedManyWithoutMemberInput
   spinResults?: Prisma.SpinResultCreateNestedManyWithoutMemberInput
@@ -1696,6 +1895,9 @@ export type MemberUncheckedCreateWithoutPrimaryTradeAccountInput = {
   telegramUsername?: string | null
   telegramUserId?: string | null
   discordUsername?: string | null
+  discordUserId?: string | null
+  lineUserId?: string | null
+  lineDisplayName?: string | null
   socialLinksJson?: string | null
   joinedAt?: Date | string
   createdAt?: Date | string
@@ -1717,6 +1919,10 @@ export type MemberUncheckedCreateWithoutPrimaryTradeAccountInput = {
   telegramAccess?: Prisma.TelegramAccessUncheckedCreateNestedManyWithoutMemberInput
   renewalHistory?: Prisma.RenewalRecordUncheckedCreateNestedManyWithoutMemberInput
   activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutMemberInput
+  rewardClaims?: Prisma.RewardClaimUncheckedCreateNestedManyWithoutMemberInput
+  journalAccounts?: Prisma.JournalAccountUncheckedCreateNestedManyWithoutMemberInput
+  socialAccounts?: Prisma.SocialAccountUncheckedCreateNestedManyWithoutMemberInput
+  notificationReads?: Prisma.MemberNotificationReadUncheckedCreateNestedManyWithoutMemberInput
   lotCheckRuns?: Prisma.LotCheckRunUncheckedCreateNestedManyWithoutMemberInput
   activityEnrollments?: Prisma.ActivityEnrollmentUncheckedCreateNestedManyWithoutMemberInput
   spinResults?: Prisma.SpinResultUncheckedCreateNestedManyWithoutMemberInput
@@ -1762,6 +1968,9 @@ export type MemberUpdateWithoutTradeAccountsInput = {
   telegramUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   telegramUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   discordUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  discordUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lineUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lineDisplayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   socialLinksJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   joinedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1783,6 +1992,10 @@ export type MemberUpdateWithoutTradeAccountsInput = {
   telegramAccess?: Prisma.TelegramAccessUpdateManyWithoutMemberNestedInput
   renewalHistory?: Prisma.RenewalRecordUpdateManyWithoutMemberNestedInput
   activityLogs?: Prisma.ActivityLogUpdateManyWithoutMemberNestedInput
+  rewardClaims?: Prisma.RewardClaimUpdateManyWithoutMemberNestedInput
+  journalAccounts?: Prisma.JournalAccountUpdateManyWithoutMemberNestedInput
+  socialAccounts?: Prisma.SocialAccountUpdateManyWithoutMemberNestedInput
+  notificationReads?: Prisma.MemberNotificationReadUpdateManyWithoutMemberNestedInput
   lotCheckRuns?: Prisma.LotCheckRunUpdateManyWithoutMemberNestedInput
   activityEnrollments?: Prisma.ActivityEnrollmentUpdateManyWithoutMemberNestedInput
   spinResults?: Prisma.SpinResultUpdateManyWithoutMemberNestedInput
@@ -1808,6 +2021,9 @@ export type MemberUncheckedUpdateWithoutTradeAccountsInput = {
   telegramUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   telegramUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   discordUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  discordUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lineUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lineDisplayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   socialLinksJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   joinedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1829,6 +2045,10 @@ export type MemberUncheckedUpdateWithoutTradeAccountsInput = {
   telegramAccess?: Prisma.TelegramAccessUncheckedUpdateManyWithoutMemberNestedInput
   renewalHistory?: Prisma.RenewalRecordUncheckedUpdateManyWithoutMemberNestedInput
   activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutMemberNestedInput
+  rewardClaims?: Prisma.RewardClaimUncheckedUpdateManyWithoutMemberNestedInput
+  journalAccounts?: Prisma.JournalAccountUncheckedUpdateManyWithoutMemberNestedInput
+  socialAccounts?: Prisma.SocialAccountUncheckedUpdateManyWithoutMemberNestedInput
+  notificationReads?: Prisma.MemberNotificationReadUncheckedUpdateManyWithoutMemberNestedInput
   lotCheckRuns?: Prisma.LotCheckRunUncheckedUpdateManyWithoutMemberNestedInput
   activityEnrollments?: Prisma.ActivityEnrollmentUncheckedUpdateManyWithoutMemberNestedInput
   spinResults?: Prisma.SpinResultUncheckedUpdateManyWithoutMemberNestedInput
@@ -1873,6 +2093,9 @@ export type MemberScalarWhereInput = {
   telegramUsername?: Prisma.StringNullableFilter<"Member"> | string | null
   telegramUserId?: Prisma.StringNullableFilter<"Member"> | string | null
   discordUsername?: Prisma.StringNullableFilter<"Member"> | string | null
+  discordUserId?: Prisma.StringNullableFilter<"Member"> | string | null
+  lineUserId?: Prisma.StringNullableFilter<"Member"> | string | null
+  lineDisplayName?: Prisma.StringNullableFilter<"Member"> | string | null
   socialLinksJson?: Prisma.StringNullableFilter<"Member"> | string | null
   joinedAt?: Prisma.DateTimeFilter<"Member"> | Date | string
   createdAt?: Prisma.DateTimeFilter<"Member"> | Date | string
@@ -1906,6 +2129,9 @@ export type MemberCreateWithoutTradeLogsInput = {
   telegramUsername?: string | null
   telegramUserId?: string | null
   discordUsername?: string | null
+  discordUserId?: string | null
+  lineUserId?: string | null
+  lineDisplayName?: string | null
   socialLinksJson?: string | null
   joinedAt?: Date | string
   createdAt?: Date | string
@@ -1927,6 +2153,10 @@ export type MemberCreateWithoutTradeLogsInput = {
   telegramAccess?: Prisma.TelegramAccessCreateNestedManyWithoutMemberInput
   renewalHistory?: Prisma.RenewalRecordCreateNestedManyWithoutMemberInput
   activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutMemberInput
+  rewardClaims?: Prisma.RewardClaimCreateNestedManyWithoutMemberInput
+  journalAccounts?: Prisma.JournalAccountCreateNestedManyWithoutMemberInput
+  socialAccounts?: Prisma.SocialAccountCreateNestedManyWithoutMemberInput
+  notificationReads?: Prisma.MemberNotificationReadCreateNestedManyWithoutMemberInput
   lotCheckRuns?: Prisma.LotCheckRunCreateNestedManyWithoutMemberInput
   activityEnrollments?: Prisma.ActivityEnrollmentCreateNestedManyWithoutMemberInput
   spinResults?: Prisma.SpinResultCreateNestedManyWithoutMemberInput
@@ -1952,6 +2182,9 @@ export type MemberUncheckedCreateWithoutTradeLogsInput = {
   telegramUsername?: string | null
   telegramUserId?: string | null
   discordUsername?: string | null
+  discordUserId?: string | null
+  lineUserId?: string | null
+  lineDisplayName?: string | null
   socialLinksJson?: string | null
   joinedAt?: Date | string
   createdAt?: Date | string
@@ -1973,6 +2206,10 @@ export type MemberUncheckedCreateWithoutTradeLogsInput = {
   telegramAccess?: Prisma.TelegramAccessUncheckedCreateNestedManyWithoutMemberInput
   renewalHistory?: Prisma.RenewalRecordUncheckedCreateNestedManyWithoutMemberInput
   activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutMemberInput
+  rewardClaims?: Prisma.RewardClaimUncheckedCreateNestedManyWithoutMemberInput
+  journalAccounts?: Prisma.JournalAccountUncheckedCreateNestedManyWithoutMemberInput
+  socialAccounts?: Prisma.SocialAccountUncheckedCreateNestedManyWithoutMemberInput
+  notificationReads?: Prisma.MemberNotificationReadUncheckedCreateNestedManyWithoutMemberInput
   lotCheckRuns?: Prisma.LotCheckRunUncheckedCreateNestedManyWithoutMemberInput
   activityEnrollments?: Prisma.ActivityEnrollmentUncheckedCreateNestedManyWithoutMemberInput
   spinResults?: Prisma.SpinResultUncheckedCreateNestedManyWithoutMemberInput
@@ -2013,6 +2250,9 @@ export type MemberUpdateWithoutTradeLogsInput = {
   telegramUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   telegramUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   discordUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  discordUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lineUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lineDisplayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   socialLinksJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   joinedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2034,6 +2274,10 @@ export type MemberUpdateWithoutTradeLogsInput = {
   telegramAccess?: Prisma.TelegramAccessUpdateManyWithoutMemberNestedInput
   renewalHistory?: Prisma.RenewalRecordUpdateManyWithoutMemberNestedInput
   activityLogs?: Prisma.ActivityLogUpdateManyWithoutMemberNestedInput
+  rewardClaims?: Prisma.RewardClaimUpdateManyWithoutMemberNestedInput
+  journalAccounts?: Prisma.JournalAccountUpdateManyWithoutMemberNestedInput
+  socialAccounts?: Prisma.SocialAccountUpdateManyWithoutMemberNestedInput
+  notificationReads?: Prisma.MemberNotificationReadUpdateManyWithoutMemberNestedInput
   lotCheckRuns?: Prisma.LotCheckRunUpdateManyWithoutMemberNestedInput
   activityEnrollments?: Prisma.ActivityEnrollmentUpdateManyWithoutMemberNestedInput
   spinResults?: Prisma.SpinResultUpdateManyWithoutMemberNestedInput
@@ -2059,6 +2303,9 @@ export type MemberUncheckedUpdateWithoutTradeLogsInput = {
   telegramUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   telegramUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   discordUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  discordUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lineUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lineDisplayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   socialLinksJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   joinedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2080,6 +2327,10 @@ export type MemberUncheckedUpdateWithoutTradeLogsInput = {
   telegramAccess?: Prisma.TelegramAccessUncheckedUpdateManyWithoutMemberNestedInput
   renewalHistory?: Prisma.RenewalRecordUncheckedUpdateManyWithoutMemberNestedInput
   activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutMemberNestedInput
+  rewardClaims?: Prisma.RewardClaimUncheckedUpdateManyWithoutMemberNestedInput
+  journalAccounts?: Prisma.JournalAccountUncheckedUpdateManyWithoutMemberNestedInput
+  socialAccounts?: Prisma.SocialAccountUncheckedUpdateManyWithoutMemberNestedInput
+  notificationReads?: Prisma.MemberNotificationReadUncheckedUpdateManyWithoutMemberNestedInput
   lotCheckRuns?: Prisma.LotCheckRunUncheckedUpdateManyWithoutMemberNestedInput
   activityEnrollments?: Prisma.ActivityEnrollmentUncheckedUpdateManyWithoutMemberNestedInput
   spinResults?: Prisma.SpinResultUncheckedUpdateManyWithoutMemberNestedInput
@@ -2104,6 +2355,9 @@ export type MemberCreateWithoutIndicatorAccessInput = {
   telegramUsername?: string | null
   telegramUserId?: string | null
   discordUsername?: string | null
+  discordUserId?: string | null
+  lineUserId?: string | null
+  lineDisplayName?: string | null
   socialLinksJson?: string | null
   joinedAt?: Date | string
   createdAt?: Date | string
@@ -2125,6 +2379,10 @@ export type MemberCreateWithoutIndicatorAccessInput = {
   telegramAccess?: Prisma.TelegramAccessCreateNestedManyWithoutMemberInput
   renewalHistory?: Prisma.RenewalRecordCreateNestedManyWithoutMemberInput
   activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutMemberInput
+  rewardClaims?: Prisma.RewardClaimCreateNestedManyWithoutMemberInput
+  journalAccounts?: Prisma.JournalAccountCreateNestedManyWithoutMemberInput
+  socialAccounts?: Prisma.SocialAccountCreateNestedManyWithoutMemberInput
+  notificationReads?: Prisma.MemberNotificationReadCreateNestedManyWithoutMemberInput
   lotCheckRuns?: Prisma.LotCheckRunCreateNestedManyWithoutMemberInput
   activityEnrollments?: Prisma.ActivityEnrollmentCreateNestedManyWithoutMemberInput
   spinResults?: Prisma.SpinResultCreateNestedManyWithoutMemberInput
@@ -2150,6 +2408,9 @@ export type MemberUncheckedCreateWithoutIndicatorAccessInput = {
   telegramUsername?: string | null
   telegramUserId?: string | null
   discordUsername?: string | null
+  discordUserId?: string | null
+  lineUserId?: string | null
+  lineDisplayName?: string | null
   socialLinksJson?: string | null
   joinedAt?: Date | string
   createdAt?: Date | string
@@ -2171,6 +2432,10 @@ export type MemberUncheckedCreateWithoutIndicatorAccessInput = {
   telegramAccess?: Prisma.TelegramAccessUncheckedCreateNestedManyWithoutMemberInput
   renewalHistory?: Prisma.RenewalRecordUncheckedCreateNestedManyWithoutMemberInput
   activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutMemberInput
+  rewardClaims?: Prisma.RewardClaimUncheckedCreateNestedManyWithoutMemberInput
+  journalAccounts?: Prisma.JournalAccountUncheckedCreateNestedManyWithoutMemberInput
+  socialAccounts?: Prisma.SocialAccountUncheckedCreateNestedManyWithoutMemberInput
+  notificationReads?: Prisma.MemberNotificationReadUncheckedCreateNestedManyWithoutMemberInput
   lotCheckRuns?: Prisma.LotCheckRunUncheckedCreateNestedManyWithoutMemberInput
   activityEnrollments?: Prisma.ActivityEnrollmentUncheckedCreateNestedManyWithoutMemberInput
   spinResults?: Prisma.SpinResultUncheckedCreateNestedManyWithoutMemberInput
@@ -2211,6 +2476,9 @@ export type MemberUpdateWithoutIndicatorAccessInput = {
   telegramUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   telegramUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   discordUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  discordUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lineUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lineDisplayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   socialLinksJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   joinedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2232,6 +2500,10 @@ export type MemberUpdateWithoutIndicatorAccessInput = {
   telegramAccess?: Prisma.TelegramAccessUpdateManyWithoutMemberNestedInput
   renewalHistory?: Prisma.RenewalRecordUpdateManyWithoutMemberNestedInput
   activityLogs?: Prisma.ActivityLogUpdateManyWithoutMemberNestedInput
+  rewardClaims?: Prisma.RewardClaimUpdateManyWithoutMemberNestedInput
+  journalAccounts?: Prisma.JournalAccountUpdateManyWithoutMemberNestedInput
+  socialAccounts?: Prisma.SocialAccountUpdateManyWithoutMemberNestedInput
+  notificationReads?: Prisma.MemberNotificationReadUpdateManyWithoutMemberNestedInput
   lotCheckRuns?: Prisma.LotCheckRunUpdateManyWithoutMemberNestedInput
   activityEnrollments?: Prisma.ActivityEnrollmentUpdateManyWithoutMemberNestedInput
   spinResults?: Prisma.SpinResultUpdateManyWithoutMemberNestedInput
@@ -2257,6 +2529,9 @@ export type MemberUncheckedUpdateWithoutIndicatorAccessInput = {
   telegramUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   telegramUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   discordUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  discordUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lineUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lineDisplayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   socialLinksJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   joinedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2278,6 +2553,10 @@ export type MemberUncheckedUpdateWithoutIndicatorAccessInput = {
   telegramAccess?: Prisma.TelegramAccessUncheckedUpdateManyWithoutMemberNestedInput
   renewalHistory?: Prisma.RenewalRecordUncheckedUpdateManyWithoutMemberNestedInput
   activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutMemberNestedInput
+  rewardClaims?: Prisma.RewardClaimUncheckedUpdateManyWithoutMemberNestedInput
+  journalAccounts?: Prisma.JournalAccountUncheckedUpdateManyWithoutMemberNestedInput
+  socialAccounts?: Prisma.SocialAccountUncheckedUpdateManyWithoutMemberNestedInput
+  notificationReads?: Prisma.MemberNotificationReadUncheckedUpdateManyWithoutMemberNestedInput
   lotCheckRuns?: Prisma.LotCheckRunUncheckedUpdateManyWithoutMemberNestedInput
   activityEnrollments?: Prisma.ActivityEnrollmentUncheckedUpdateManyWithoutMemberNestedInput
   spinResults?: Prisma.SpinResultUncheckedUpdateManyWithoutMemberNestedInput
@@ -2302,6 +2581,9 @@ export type MemberCreateWithoutRenewalHistoryInput = {
   telegramUsername?: string | null
   telegramUserId?: string | null
   discordUsername?: string | null
+  discordUserId?: string | null
+  lineUserId?: string | null
+  lineDisplayName?: string | null
   socialLinksJson?: string | null
   joinedAt?: Date | string
   createdAt?: Date | string
@@ -2323,6 +2605,10 @@ export type MemberCreateWithoutRenewalHistoryInput = {
   indicatorAccess?: Prisma.MemberIndicatorAccessCreateNestedManyWithoutMemberInput
   telegramAccess?: Prisma.TelegramAccessCreateNestedManyWithoutMemberInput
   activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutMemberInput
+  rewardClaims?: Prisma.RewardClaimCreateNestedManyWithoutMemberInput
+  journalAccounts?: Prisma.JournalAccountCreateNestedManyWithoutMemberInput
+  socialAccounts?: Prisma.SocialAccountCreateNestedManyWithoutMemberInput
+  notificationReads?: Prisma.MemberNotificationReadCreateNestedManyWithoutMemberInput
   lotCheckRuns?: Prisma.LotCheckRunCreateNestedManyWithoutMemberInput
   activityEnrollments?: Prisma.ActivityEnrollmentCreateNestedManyWithoutMemberInput
   spinResults?: Prisma.SpinResultCreateNestedManyWithoutMemberInput
@@ -2348,6 +2634,9 @@ export type MemberUncheckedCreateWithoutRenewalHistoryInput = {
   telegramUsername?: string | null
   telegramUserId?: string | null
   discordUsername?: string | null
+  discordUserId?: string | null
+  lineUserId?: string | null
+  lineDisplayName?: string | null
   socialLinksJson?: string | null
   joinedAt?: Date | string
   createdAt?: Date | string
@@ -2369,6 +2658,10 @@ export type MemberUncheckedCreateWithoutRenewalHistoryInput = {
   indicatorAccess?: Prisma.MemberIndicatorAccessUncheckedCreateNestedManyWithoutMemberInput
   telegramAccess?: Prisma.TelegramAccessUncheckedCreateNestedManyWithoutMemberInput
   activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutMemberInput
+  rewardClaims?: Prisma.RewardClaimUncheckedCreateNestedManyWithoutMemberInput
+  journalAccounts?: Prisma.JournalAccountUncheckedCreateNestedManyWithoutMemberInput
+  socialAccounts?: Prisma.SocialAccountUncheckedCreateNestedManyWithoutMemberInput
+  notificationReads?: Prisma.MemberNotificationReadUncheckedCreateNestedManyWithoutMemberInput
   lotCheckRuns?: Prisma.LotCheckRunUncheckedCreateNestedManyWithoutMemberInput
   activityEnrollments?: Prisma.ActivityEnrollmentUncheckedCreateNestedManyWithoutMemberInput
   spinResults?: Prisma.SpinResultUncheckedCreateNestedManyWithoutMemberInput
@@ -2409,6 +2702,9 @@ export type MemberUpdateWithoutRenewalHistoryInput = {
   telegramUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   telegramUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   discordUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  discordUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lineUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lineDisplayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   socialLinksJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   joinedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2430,6 +2726,10 @@ export type MemberUpdateWithoutRenewalHistoryInput = {
   indicatorAccess?: Prisma.MemberIndicatorAccessUpdateManyWithoutMemberNestedInput
   telegramAccess?: Prisma.TelegramAccessUpdateManyWithoutMemberNestedInput
   activityLogs?: Prisma.ActivityLogUpdateManyWithoutMemberNestedInput
+  rewardClaims?: Prisma.RewardClaimUpdateManyWithoutMemberNestedInput
+  journalAccounts?: Prisma.JournalAccountUpdateManyWithoutMemberNestedInput
+  socialAccounts?: Prisma.SocialAccountUpdateManyWithoutMemberNestedInput
+  notificationReads?: Prisma.MemberNotificationReadUpdateManyWithoutMemberNestedInput
   lotCheckRuns?: Prisma.LotCheckRunUpdateManyWithoutMemberNestedInput
   activityEnrollments?: Prisma.ActivityEnrollmentUpdateManyWithoutMemberNestedInput
   spinResults?: Prisma.SpinResultUpdateManyWithoutMemberNestedInput
@@ -2455,6 +2755,9 @@ export type MemberUncheckedUpdateWithoutRenewalHistoryInput = {
   telegramUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   telegramUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   discordUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  discordUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lineUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lineDisplayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   socialLinksJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   joinedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2476,6 +2779,10 @@ export type MemberUncheckedUpdateWithoutRenewalHistoryInput = {
   indicatorAccess?: Prisma.MemberIndicatorAccessUncheckedUpdateManyWithoutMemberNestedInput
   telegramAccess?: Prisma.TelegramAccessUncheckedUpdateManyWithoutMemberNestedInput
   activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutMemberNestedInput
+  rewardClaims?: Prisma.RewardClaimUncheckedUpdateManyWithoutMemberNestedInput
+  journalAccounts?: Prisma.JournalAccountUncheckedUpdateManyWithoutMemberNestedInput
+  socialAccounts?: Prisma.SocialAccountUncheckedUpdateManyWithoutMemberNestedInput
+  notificationReads?: Prisma.MemberNotificationReadUncheckedUpdateManyWithoutMemberNestedInput
   lotCheckRuns?: Prisma.LotCheckRunUncheckedUpdateManyWithoutMemberNestedInput
   activityEnrollments?: Prisma.ActivityEnrollmentUncheckedUpdateManyWithoutMemberNestedInput
   spinResults?: Prisma.SpinResultUncheckedUpdateManyWithoutMemberNestedInput
@@ -2500,6 +2807,9 @@ export type MemberCreateWithoutTelegramAccessInput = {
   telegramUsername?: string | null
   telegramUserId?: string | null
   discordUsername?: string | null
+  discordUserId?: string | null
+  lineUserId?: string | null
+  lineDisplayName?: string | null
   socialLinksJson?: string | null
   joinedAt?: Date | string
   createdAt?: Date | string
@@ -2521,6 +2831,10 @@ export type MemberCreateWithoutTelegramAccessInput = {
   indicatorAccess?: Prisma.MemberIndicatorAccessCreateNestedManyWithoutMemberInput
   renewalHistory?: Prisma.RenewalRecordCreateNestedManyWithoutMemberInput
   activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutMemberInput
+  rewardClaims?: Prisma.RewardClaimCreateNestedManyWithoutMemberInput
+  journalAccounts?: Prisma.JournalAccountCreateNestedManyWithoutMemberInput
+  socialAccounts?: Prisma.SocialAccountCreateNestedManyWithoutMemberInput
+  notificationReads?: Prisma.MemberNotificationReadCreateNestedManyWithoutMemberInput
   lotCheckRuns?: Prisma.LotCheckRunCreateNestedManyWithoutMemberInput
   activityEnrollments?: Prisma.ActivityEnrollmentCreateNestedManyWithoutMemberInput
   spinResults?: Prisma.SpinResultCreateNestedManyWithoutMemberInput
@@ -2546,6 +2860,9 @@ export type MemberUncheckedCreateWithoutTelegramAccessInput = {
   telegramUsername?: string | null
   telegramUserId?: string | null
   discordUsername?: string | null
+  discordUserId?: string | null
+  lineUserId?: string | null
+  lineDisplayName?: string | null
   socialLinksJson?: string | null
   joinedAt?: Date | string
   createdAt?: Date | string
@@ -2567,6 +2884,10 @@ export type MemberUncheckedCreateWithoutTelegramAccessInput = {
   indicatorAccess?: Prisma.MemberIndicatorAccessUncheckedCreateNestedManyWithoutMemberInput
   renewalHistory?: Prisma.RenewalRecordUncheckedCreateNestedManyWithoutMemberInput
   activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutMemberInput
+  rewardClaims?: Prisma.RewardClaimUncheckedCreateNestedManyWithoutMemberInput
+  journalAccounts?: Prisma.JournalAccountUncheckedCreateNestedManyWithoutMemberInput
+  socialAccounts?: Prisma.SocialAccountUncheckedCreateNestedManyWithoutMemberInput
+  notificationReads?: Prisma.MemberNotificationReadUncheckedCreateNestedManyWithoutMemberInput
   lotCheckRuns?: Prisma.LotCheckRunUncheckedCreateNestedManyWithoutMemberInput
   activityEnrollments?: Prisma.ActivityEnrollmentUncheckedCreateNestedManyWithoutMemberInput
   spinResults?: Prisma.SpinResultUncheckedCreateNestedManyWithoutMemberInput
@@ -2607,6 +2928,9 @@ export type MemberUpdateWithoutTelegramAccessInput = {
   telegramUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   telegramUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   discordUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  discordUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lineUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lineDisplayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   socialLinksJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   joinedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2628,6 +2952,10 @@ export type MemberUpdateWithoutTelegramAccessInput = {
   indicatorAccess?: Prisma.MemberIndicatorAccessUpdateManyWithoutMemberNestedInput
   renewalHistory?: Prisma.RenewalRecordUpdateManyWithoutMemberNestedInput
   activityLogs?: Prisma.ActivityLogUpdateManyWithoutMemberNestedInput
+  rewardClaims?: Prisma.RewardClaimUpdateManyWithoutMemberNestedInput
+  journalAccounts?: Prisma.JournalAccountUpdateManyWithoutMemberNestedInput
+  socialAccounts?: Prisma.SocialAccountUpdateManyWithoutMemberNestedInput
+  notificationReads?: Prisma.MemberNotificationReadUpdateManyWithoutMemberNestedInput
   lotCheckRuns?: Prisma.LotCheckRunUpdateManyWithoutMemberNestedInput
   activityEnrollments?: Prisma.ActivityEnrollmentUpdateManyWithoutMemberNestedInput
   spinResults?: Prisma.SpinResultUpdateManyWithoutMemberNestedInput
@@ -2653,6 +2981,9 @@ export type MemberUncheckedUpdateWithoutTelegramAccessInput = {
   telegramUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   telegramUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   discordUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  discordUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lineUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lineDisplayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   socialLinksJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   joinedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2674,6 +3005,10 @@ export type MemberUncheckedUpdateWithoutTelegramAccessInput = {
   indicatorAccess?: Prisma.MemberIndicatorAccessUncheckedUpdateManyWithoutMemberNestedInput
   renewalHistory?: Prisma.RenewalRecordUncheckedUpdateManyWithoutMemberNestedInput
   activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutMemberNestedInput
+  rewardClaims?: Prisma.RewardClaimUncheckedUpdateManyWithoutMemberNestedInput
+  journalAccounts?: Prisma.JournalAccountUncheckedUpdateManyWithoutMemberNestedInput
+  socialAccounts?: Prisma.SocialAccountUncheckedUpdateManyWithoutMemberNestedInput
+  notificationReads?: Prisma.MemberNotificationReadUncheckedUpdateManyWithoutMemberNestedInput
   lotCheckRuns?: Prisma.LotCheckRunUncheckedUpdateManyWithoutMemberNestedInput
   activityEnrollments?: Prisma.ActivityEnrollmentUncheckedUpdateManyWithoutMemberNestedInput
   spinResults?: Prisma.SpinResultUncheckedUpdateManyWithoutMemberNestedInput
@@ -2698,6 +3033,9 @@ export type MemberCreateWithoutLotCheckRunsInput = {
   telegramUsername?: string | null
   telegramUserId?: string | null
   discordUsername?: string | null
+  discordUserId?: string | null
+  lineUserId?: string | null
+  lineDisplayName?: string | null
   socialLinksJson?: string | null
   joinedAt?: Date | string
   createdAt?: Date | string
@@ -2720,6 +3058,10 @@ export type MemberCreateWithoutLotCheckRunsInput = {
   telegramAccess?: Prisma.TelegramAccessCreateNestedManyWithoutMemberInput
   renewalHistory?: Prisma.RenewalRecordCreateNestedManyWithoutMemberInput
   activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutMemberInput
+  rewardClaims?: Prisma.RewardClaimCreateNestedManyWithoutMemberInput
+  journalAccounts?: Prisma.JournalAccountCreateNestedManyWithoutMemberInput
+  socialAccounts?: Prisma.SocialAccountCreateNestedManyWithoutMemberInput
+  notificationReads?: Prisma.MemberNotificationReadCreateNestedManyWithoutMemberInput
   activityEnrollments?: Prisma.ActivityEnrollmentCreateNestedManyWithoutMemberInput
   spinResults?: Prisma.SpinResultCreateNestedManyWithoutMemberInput
   courseEnrollments?: Prisma.CourseEnrollmentCreateNestedManyWithoutMemberInput
@@ -2744,6 +3086,9 @@ export type MemberUncheckedCreateWithoutLotCheckRunsInput = {
   telegramUsername?: string | null
   telegramUserId?: string | null
   discordUsername?: string | null
+  discordUserId?: string | null
+  lineUserId?: string | null
+  lineDisplayName?: string | null
   socialLinksJson?: string | null
   joinedAt?: Date | string
   createdAt?: Date | string
@@ -2766,6 +3111,10 @@ export type MemberUncheckedCreateWithoutLotCheckRunsInput = {
   telegramAccess?: Prisma.TelegramAccessUncheckedCreateNestedManyWithoutMemberInput
   renewalHistory?: Prisma.RenewalRecordUncheckedCreateNestedManyWithoutMemberInput
   activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutMemberInput
+  rewardClaims?: Prisma.RewardClaimUncheckedCreateNestedManyWithoutMemberInput
+  journalAccounts?: Prisma.JournalAccountUncheckedCreateNestedManyWithoutMemberInput
+  socialAccounts?: Prisma.SocialAccountUncheckedCreateNestedManyWithoutMemberInput
+  notificationReads?: Prisma.MemberNotificationReadUncheckedCreateNestedManyWithoutMemberInput
   activityEnrollments?: Prisma.ActivityEnrollmentUncheckedCreateNestedManyWithoutMemberInput
   spinResults?: Prisma.SpinResultUncheckedCreateNestedManyWithoutMemberInput
   courseEnrollments?: Prisma.CourseEnrollmentUncheckedCreateNestedManyWithoutMemberInput
@@ -2805,6 +3154,9 @@ export type MemberUpdateWithoutLotCheckRunsInput = {
   telegramUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   telegramUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   discordUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  discordUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lineUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lineDisplayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   socialLinksJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   joinedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2827,6 +3179,10 @@ export type MemberUpdateWithoutLotCheckRunsInput = {
   telegramAccess?: Prisma.TelegramAccessUpdateManyWithoutMemberNestedInput
   renewalHistory?: Prisma.RenewalRecordUpdateManyWithoutMemberNestedInput
   activityLogs?: Prisma.ActivityLogUpdateManyWithoutMemberNestedInput
+  rewardClaims?: Prisma.RewardClaimUpdateManyWithoutMemberNestedInput
+  journalAccounts?: Prisma.JournalAccountUpdateManyWithoutMemberNestedInput
+  socialAccounts?: Prisma.SocialAccountUpdateManyWithoutMemberNestedInput
+  notificationReads?: Prisma.MemberNotificationReadUpdateManyWithoutMemberNestedInput
   activityEnrollments?: Prisma.ActivityEnrollmentUpdateManyWithoutMemberNestedInput
   spinResults?: Prisma.SpinResultUpdateManyWithoutMemberNestedInput
   courseEnrollments?: Prisma.CourseEnrollmentUpdateManyWithoutMemberNestedInput
@@ -2851,6 +3207,9 @@ export type MemberUncheckedUpdateWithoutLotCheckRunsInput = {
   telegramUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   telegramUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   discordUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  discordUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lineUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lineDisplayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   socialLinksJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   joinedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2873,6 +3232,10 @@ export type MemberUncheckedUpdateWithoutLotCheckRunsInput = {
   telegramAccess?: Prisma.TelegramAccessUncheckedUpdateManyWithoutMemberNestedInput
   renewalHistory?: Prisma.RenewalRecordUncheckedUpdateManyWithoutMemberNestedInput
   activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutMemberNestedInput
+  rewardClaims?: Prisma.RewardClaimUncheckedUpdateManyWithoutMemberNestedInput
+  journalAccounts?: Prisma.JournalAccountUncheckedUpdateManyWithoutMemberNestedInput
+  socialAccounts?: Prisma.SocialAccountUncheckedUpdateManyWithoutMemberNestedInput
+  notificationReads?: Prisma.MemberNotificationReadUncheckedUpdateManyWithoutMemberNestedInput
   activityEnrollments?: Prisma.ActivityEnrollmentUncheckedUpdateManyWithoutMemberNestedInput
   spinResults?: Prisma.SpinResultUncheckedUpdateManyWithoutMemberNestedInput
   courseEnrollments?: Prisma.CourseEnrollmentUncheckedUpdateManyWithoutMemberNestedInput
@@ -2896,6 +3259,9 @@ export type MemberCreateWithoutActivityLogsInput = {
   telegramUsername?: string | null
   telegramUserId?: string | null
   discordUsername?: string | null
+  discordUserId?: string | null
+  lineUserId?: string | null
+  lineDisplayName?: string | null
   socialLinksJson?: string | null
   joinedAt?: Date | string
   createdAt?: Date | string
@@ -2917,6 +3283,10 @@ export type MemberCreateWithoutActivityLogsInput = {
   indicatorAccess?: Prisma.MemberIndicatorAccessCreateNestedManyWithoutMemberInput
   telegramAccess?: Prisma.TelegramAccessCreateNestedManyWithoutMemberInput
   renewalHistory?: Prisma.RenewalRecordCreateNestedManyWithoutMemberInput
+  rewardClaims?: Prisma.RewardClaimCreateNestedManyWithoutMemberInput
+  journalAccounts?: Prisma.JournalAccountCreateNestedManyWithoutMemberInput
+  socialAccounts?: Prisma.SocialAccountCreateNestedManyWithoutMemberInput
+  notificationReads?: Prisma.MemberNotificationReadCreateNestedManyWithoutMemberInput
   lotCheckRuns?: Prisma.LotCheckRunCreateNestedManyWithoutMemberInput
   activityEnrollments?: Prisma.ActivityEnrollmentCreateNestedManyWithoutMemberInput
   spinResults?: Prisma.SpinResultCreateNestedManyWithoutMemberInput
@@ -2942,6 +3312,9 @@ export type MemberUncheckedCreateWithoutActivityLogsInput = {
   telegramUsername?: string | null
   telegramUserId?: string | null
   discordUsername?: string | null
+  discordUserId?: string | null
+  lineUserId?: string | null
+  lineDisplayName?: string | null
   socialLinksJson?: string | null
   joinedAt?: Date | string
   createdAt?: Date | string
@@ -2963,6 +3336,10 @@ export type MemberUncheckedCreateWithoutActivityLogsInput = {
   indicatorAccess?: Prisma.MemberIndicatorAccessUncheckedCreateNestedManyWithoutMemberInput
   telegramAccess?: Prisma.TelegramAccessUncheckedCreateNestedManyWithoutMemberInput
   renewalHistory?: Prisma.RenewalRecordUncheckedCreateNestedManyWithoutMemberInput
+  rewardClaims?: Prisma.RewardClaimUncheckedCreateNestedManyWithoutMemberInput
+  journalAccounts?: Prisma.JournalAccountUncheckedCreateNestedManyWithoutMemberInput
+  socialAccounts?: Prisma.SocialAccountUncheckedCreateNestedManyWithoutMemberInput
+  notificationReads?: Prisma.MemberNotificationReadUncheckedCreateNestedManyWithoutMemberInput
   lotCheckRuns?: Prisma.LotCheckRunUncheckedCreateNestedManyWithoutMemberInput
   activityEnrollments?: Prisma.ActivityEnrollmentUncheckedCreateNestedManyWithoutMemberInput
   spinResults?: Prisma.SpinResultUncheckedCreateNestedManyWithoutMemberInput
@@ -3003,6 +3380,9 @@ export type MemberUpdateWithoutActivityLogsInput = {
   telegramUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   telegramUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   discordUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  discordUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lineUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lineDisplayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   socialLinksJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   joinedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -3024,6 +3404,10 @@ export type MemberUpdateWithoutActivityLogsInput = {
   indicatorAccess?: Prisma.MemberIndicatorAccessUpdateManyWithoutMemberNestedInput
   telegramAccess?: Prisma.TelegramAccessUpdateManyWithoutMemberNestedInput
   renewalHistory?: Prisma.RenewalRecordUpdateManyWithoutMemberNestedInput
+  rewardClaims?: Prisma.RewardClaimUpdateManyWithoutMemberNestedInput
+  journalAccounts?: Prisma.JournalAccountUpdateManyWithoutMemberNestedInput
+  socialAccounts?: Prisma.SocialAccountUpdateManyWithoutMemberNestedInput
+  notificationReads?: Prisma.MemberNotificationReadUpdateManyWithoutMemberNestedInput
   lotCheckRuns?: Prisma.LotCheckRunUpdateManyWithoutMemberNestedInput
   activityEnrollments?: Prisma.ActivityEnrollmentUpdateManyWithoutMemberNestedInput
   spinResults?: Prisma.SpinResultUpdateManyWithoutMemberNestedInput
@@ -3049,6 +3433,9 @@ export type MemberUncheckedUpdateWithoutActivityLogsInput = {
   telegramUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   telegramUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   discordUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  discordUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lineUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lineDisplayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   socialLinksJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   joinedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -3070,6 +3457,10 @@ export type MemberUncheckedUpdateWithoutActivityLogsInput = {
   indicatorAccess?: Prisma.MemberIndicatorAccessUncheckedUpdateManyWithoutMemberNestedInput
   telegramAccess?: Prisma.TelegramAccessUncheckedUpdateManyWithoutMemberNestedInput
   renewalHistory?: Prisma.RenewalRecordUncheckedUpdateManyWithoutMemberNestedInput
+  rewardClaims?: Prisma.RewardClaimUncheckedUpdateManyWithoutMemberNestedInput
+  journalAccounts?: Prisma.JournalAccountUncheckedUpdateManyWithoutMemberNestedInput
+  socialAccounts?: Prisma.SocialAccountUncheckedUpdateManyWithoutMemberNestedInput
+  notificationReads?: Prisma.MemberNotificationReadUncheckedUpdateManyWithoutMemberNestedInput
   lotCheckRuns?: Prisma.LotCheckRunUncheckedUpdateManyWithoutMemberNestedInput
   activityEnrollments?: Prisma.ActivityEnrollmentUncheckedUpdateManyWithoutMemberNestedInput
   spinResults?: Prisma.SpinResultUncheckedUpdateManyWithoutMemberNestedInput
@@ -3094,6 +3485,9 @@ export type MemberCreateWithoutActivityEnrollmentsInput = {
   telegramUsername?: string | null
   telegramUserId?: string | null
   discordUsername?: string | null
+  discordUserId?: string | null
+  lineUserId?: string | null
+  lineDisplayName?: string | null
   socialLinksJson?: string | null
   joinedAt?: Date | string
   createdAt?: Date | string
@@ -3116,6 +3510,10 @@ export type MemberCreateWithoutActivityEnrollmentsInput = {
   telegramAccess?: Prisma.TelegramAccessCreateNestedManyWithoutMemberInput
   renewalHistory?: Prisma.RenewalRecordCreateNestedManyWithoutMemberInput
   activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutMemberInput
+  rewardClaims?: Prisma.RewardClaimCreateNestedManyWithoutMemberInput
+  journalAccounts?: Prisma.JournalAccountCreateNestedManyWithoutMemberInput
+  socialAccounts?: Prisma.SocialAccountCreateNestedManyWithoutMemberInput
+  notificationReads?: Prisma.MemberNotificationReadCreateNestedManyWithoutMemberInput
   lotCheckRuns?: Prisma.LotCheckRunCreateNestedManyWithoutMemberInput
   spinResults?: Prisma.SpinResultCreateNestedManyWithoutMemberInput
   courseEnrollments?: Prisma.CourseEnrollmentCreateNestedManyWithoutMemberInput
@@ -3140,6 +3538,9 @@ export type MemberUncheckedCreateWithoutActivityEnrollmentsInput = {
   telegramUsername?: string | null
   telegramUserId?: string | null
   discordUsername?: string | null
+  discordUserId?: string | null
+  lineUserId?: string | null
+  lineDisplayName?: string | null
   socialLinksJson?: string | null
   joinedAt?: Date | string
   createdAt?: Date | string
@@ -3162,6 +3563,10 @@ export type MemberUncheckedCreateWithoutActivityEnrollmentsInput = {
   telegramAccess?: Prisma.TelegramAccessUncheckedCreateNestedManyWithoutMemberInput
   renewalHistory?: Prisma.RenewalRecordUncheckedCreateNestedManyWithoutMemberInput
   activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutMemberInput
+  rewardClaims?: Prisma.RewardClaimUncheckedCreateNestedManyWithoutMemberInput
+  journalAccounts?: Prisma.JournalAccountUncheckedCreateNestedManyWithoutMemberInput
+  socialAccounts?: Prisma.SocialAccountUncheckedCreateNestedManyWithoutMemberInput
+  notificationReads?: Prisma.MemberNotificationReadUncheckedCreateNestedManyWithoutMemberInput
   lotCheckRuns?: Prisma.LotCheckRunUncheckedCreateNestedManyWithoutMemberInput
   spinResults?: Prisma.SpinResultUncheckedCreateNestedManyWithoutMemberInput
   courseEnrollments?: Prisma.CourseEnrollmentUncheckedCreateNestedManyWithoutMemberInput
@@ -3201,6 +3606,9 @@ export type MemberUpdateWithoutActivityEnrollmentsInput = {
   telegramUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   telegramUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   discordUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  discordUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lineUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lineDisplayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   socialLinksJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   joinedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -3223,6 +3631,10 @@ export type MemberUpdateWithoutActivityEnrollmentsInput = {
   telegramAccess?: Prisma.TelegramAccessUpdateManyWithoutMemberNestedInput
   renewalHistory?: Prisma.RenewalRecordUpdateManyWithoutMemberNestedInput
   activityLogs?: Prisma.ActivityLogUpdateManyWithoutMemberNestedInput
+  rewardClaims?: Prisma.RewardClaimUpdateManyWithoutMemberNestedInput
+  journalAccounts?: Prisma.JournalAccountUpdateManyWithoutMemberNestedInput
+  socialAccounts?: Prisma.SocialAccountUpdateManyWithoutMemberNestedInput
+  notificationReads?: Prisma.MemberNotificationReadUpdateManyWithoutMemberNestedInput
   lotCheckRuns?: Prisma.LotCheckRunUpdateManyWithoutMemberNestedInput
   spinResults?: Prisma.SpinResultUpdateManyWithoutMemberNestedInput
   courseEnrollments?: Prisma.CourseEnrollmentUpdateManyWithoutMemberNestedInput
@@ -3247,6 +3659,9 @@ export type MemberUncheckedUpdateWithoutActivityEnrollmentsInput = {
   telegramUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   telegramUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   discordUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  discordUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lineUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lineDisplayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   socialLinksJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   joinedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -3269,6 +3684,10 @@ export type MemberUncheckedUpdateWithoutActivityEnrollmentsInput = {
   telegramAccess?: Prisma.TelegramAccessUncheckedUpdateManyWithoutMemberNestedInput
   renewalHistory?: Prisma.RenewalRecordUncheckedUpdateManyWithoutMemberNestedInput
   activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutMemberNestedInput
+  rewardClaims?: Prisma.RewardClaimUncheckedUpdateManyWithoutMemberNestedInput
+  journalAccounts?: Prisma.JournalAccountUncheckedUpdateManyWithoutMemberNestedInput
+  socialAccounts?: Prisma.SocialAccountUncheckedUpdateManyWithoutMemberNestedInput
+  notificationReads?: Prisma.MemberNotificationReadUncheckedUpdateManyWithoutMemberNestedInput
   lotCheckRuns?: Prisma.LotCheckRunUncheckedUpdateManyWithoutMemberNestedInput
   spinResults?: Prisma.SpinResultUncheckedUpdateManyWithoutMemberNestedInput
   courseEnrollments?: Prisma.CourseEnrollmentUncheckedUpdateManyWithoutMemberNestedInput
@@ -3276,7 +3695,7 @@ export type MemberUncheckedUpdateWithoutActivityEnrollmentsInput = {
   becGrants?: Prisma.BecGrantUncheckedUpdateManyWithoutMemberNestedInput
 }
 
-export type MemberCreateWithoutBecGrantsInput = {
+export type MemberCreateWithoutRewardClaimsInput = {
   externalId?: string | null
   code: string
   name: string
@@ -3292,6 +3711,9 @@ export type MemberCreateWithoutBecGrantsInput = {
   telegramUsername?: string | null
   telegramUserId?: string | null
   discordUsername?: string | null
+  discordUserId?: string | null
+  lineUserId?: string | null
+  lineDisplayName?: string | null
   socialLinksJson?: string | null
   joinedAt?: Date | string
   createdAt?: Date | string
@@ -3314,6 +3736,236 @@ export type MemberCreateWithoutBecGrantsInput = {
   telegramAccess?: Prisma.TelegramAccessCreateNestedManyWithoutMemberInput
   renewalHistory?: Prisma.RenewalRecordCreateNestedManyWithoutMemberInput
   activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutMemberInput
+  journalAccounts?: Prisma.JournalAccountCreateNestedManyWithoutMemberInput
+  socialAccounts?: Prisma.SocialAccountCreateNestedManyWithoutMemberInput
+  notificationReads?: Prisma.MemberNotificationReadCreateNestedManyWithoutMemberInput
+  lotCheckRuns?: Prisma.LotCheckRunCreateNestedManyWithoutMemberInput
+  activityEnrollments?: Prisma.ActivityEnrollmentCreateNestedManyWithoutMemberInput
+  spinResults?: Prisma.SpinResultCreateNestedManyWithoutMemberInput
+  courseEnrollments?: Prisma.CourseEnrollmentCreateNestedManyWithoutMemberInput
+  lessonProgress?: Prisma.LessonProgressCreateNestedManyWithoutMemberInput
+  becGrants?: Prisma.BecGrantCreateNestedManyWithoutMemberInput
+}
+
+export type MemberUncheckedCreateWithoutRewardClaimsInput = {
+  id?: number
+  externalId?: string | null
+  code: string
+  name: string
+  displayName?: string | null
+  avatarUrl?: string | null
+  email?: string | null
+  passwordHash?: string | null
+  identityVerifiedAt?: Date | string | null
+  phone?: string | null
+  country?: string | null
+  address?: string | null
+  tradingView?: string | null
+  telegramUsername?: string | null
+  telegramUserId?: string | null
+  discordUsername?: string | null
+  discordUserId?: string | null
+  lineUserId?: string | null
+  lineDisplayName?: string | null
+  socialLinksJson?: string | null
+  joinedAt?: Date | string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  plan?: $Enums.Plan
+  primaryTradeAccountId?: number | null
+  requiredLotsOverride?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  requiredLotsOverrideNote?: string | null
+  crmStartDate?: Date | string | null
+  crmExpiryDate?: Date | string | null
+  currentPeriodLots?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  currentPeriodLotsAt?: Date | string | null
+  currentPeriodLotsFrom?: Date | string | null
+  currentPeriodLotsTo?: Date | string | null
+  customerStageOverride?: $Enums.CustomerStage | null
+  tradeAccounts?: Prisma.TradeAccountUncheckedCreateNestedManyWithoutMemberInput
+  tradeLogs?: Prisma.TradeLogUncheckedCreateNestedManyWithoutMemberInput
+  acquisitionChannels?: Prisma.MemberAcquisitionChannelUncheckedCreateNestedManyWithoutMemberInput
+  indicatorAccess?: Prisma.MemberIndicatorAccessUncheckedCreateNestedManyWithoutMemberInput
+  telegramAccess?: Prisma.TelegramAccessUncheckedCreateNestedManyWithoutMemberInput
+  renewalHistory?: Prisma.RenewalRecordUncheckedCreateNestedManyWithoutMemberInput
+  activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutMemberInput
+  journalAccounts?: Prisma.JournalAccountUncheckedCreateNestedManyWithoutMemberInput
+  socialAccounts?: Prisma.SocialAccountUncheckedCreateNestedManyWithoutMemberInput
+  notificationReads?: Prisma.MemberNotificationReadUncheckedCreateNestedManyWithoutMemberInput
+  lotCheckRuns?: Prisma.LotCheckRunUncheckedCreateNestedManyWithoutMemberInput
+  activityEnrollments?: Prisma.ActivityEnrollmentUncheckedCreateNestedManyWithoutMemberInput
+  spinResults?: Prisma.SpinResultUncheckedCreateNestedManyWithoutMemberInput
+  courseEnrollments?: Prisma.CourseEnrollmentUncheckedCreateNestedManyWithoutMemberInput
+  lessonProgress?: Prisma.LessonProgressUncheckedCreateNestedManyWithoutMemberInput
+  becGrants?: Prisma.BecGrantUncheckedCreateNestedManyWithoutMemberInput
+}
+
+export type MemberCreateOrConnectWithoutRewardClaimsInput = {
+  where: Prisma.MemberWhereUniqueInput
+  create: Prisma.XOR<Prisma.MemberCreateWithoutRewardClaimsInput, Prisma.MemberUncheckedCreateWithoutRewardClaimsInput>
+}
+
+export type MemberUpsertWithoutRewardClaimsInput = {
+  update: Prisma.XOR<Prisma.MemberUpdateWithoutRewardClaimsInput, Prisma.MemberUncheckedUpdateWithoutRewardClaimsInput>
+  create: Prisma.XOR<Prisma.MemberCreateWithoutRewardClaimsInput, Prisma.MemberUncheckedCreateWithoutRewardClaimsInput>
+  where?: Prisma.MemberWhereInput
+}
+
+export type MemberUpdateToOneWithWhereWithoutRewardClaimsInput = {
+  where?: Prisma.MemberWhereInput
+  data: Prisma.XOR<Prisma.MemberUpdateWithoutRewardClaimsInput, Prisma.MemberUncheckedUpdateWithoutRewardClaimsInput>
+}
+
+export type MemberUpdateWithoutRewardClaimsInput = {
+  externalId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  code?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  identityVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tradingView?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegramUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegramUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  discordUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  discordUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lineUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lineDisplayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  socialLinksJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  joinedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  plan?: Prisma.EnumPlanFieldUpdateOperationsInput | $Enums.Plan
+  requiredLotsOverride?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  requiredLotsOverrideNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  crmStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  crmExpiryDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  currentPeriodLots?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  currentPeriodLotsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  currentPeriodLotsFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  currentPeriodLotsTo?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  customerStageOverride?: Prisma.NullableEnumCustomerStageFieldUpdateOperationsInput | $Enums.CustomerStage | null
+  primaryTradeAccount?: Prisma.TradeAccountUpdateOneWithoutPrimaryForMembersNestedInput
+  tradeAccounts?: Prisma.TradeAccountUpdateManyWithoutMemberNestedInput
+  tradeLogs?: Prisma.TradeLogUpdateManyWithoutMemberNestedInput
+  acquisitionChannels?: Prisma.MemberAcquisitionChannelUpdateManyWithoutMemberNestedInput
+  indicatorAccess?: Prisma.MemberIndicatorAccessUpdateManyWithoutMemberNestedInput
+  telegramAccess?: Prisma.TelegramAccessUpdateManyWithoutMemberNestedInput
+  renewalHistory?: Prisma.RenewalRecordUpdateManyWithoutMemberNestedInput
+  activityLogs?: Prisma.ActivityLogUpdateManyWithoutMemberNestedInput
+  journalAccounts?: Prisma.JournalAccountUpdateManyWithoutMemberNestedInput
+  socialAccounts?: Prisma.SocialAccountUpdateManyWithoutMemberNestedInput
+  notificationReads?: Prisma.MemberNotificationReadUpdateManyWithoutMemberNestedInput
+  lotCheckRuns?: Prisma.LotCheckRunUpdateManyWithoutMemberNestedInput
+  activityEnrollments?: Prisma.ActivityEnrollmentUpdateManyWithoutMemberNestedInput
+  spinResults?: Prisma.SpinResultUpdateManyWithoutMemberNestedInput
+  courseEnrollments?: Prisma.CourseEnrollmentUpdateManyWithoutMemberNestedInput
+  lessonProgress?: Prisma.LessonProgressUpdateManyWithoutMemberNestedInput
+  becGrants?: Prisma.BecGrantUpdateManyWithoutMemberNestedInput
+}
+
+export type MemberUncheckedUpdateWithoutRewardClaimsInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  externalId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  code?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  identityVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tradingView?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegramUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegramUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  discordUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  discordUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lineUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lineDisplayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  socialLinksJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  joinedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  plan?: Prisma.EnumPlanFieldUpdateOperationsInput | $Enums.Plan
+  primaryTradeAccountId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  requiredLotsOverride?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  requiredLotsOverrideNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  crmStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  crmExpiryDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  currentPeriodLots?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  currentPeriodLotsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  currentPeriodLotsFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  currentPeriodLotsTo?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  customerStageOverride?: Prisma.NullableEnumCustomerStageFieldUpdateOperationsInput | $Enums.CustomerStage | null
+  tradeAccounts?: Prisma.TradeAccountUncheckedUpdateManyWithoutMemberNestedInput
+  tradeLogs?: Prisma.TradeLogUncheckedUpdateManyWithoutMemberNestedInput
+  acquisitionChannels?: Prisma.MemberAcquisitionChannelUncheckedUpdateManyWithoutMemberNestedInput
+  indicatorAccess?: Prisma.MemberIndicatorAccessUncheckedUpdateManyWithoutMemberNestedInput
+  telegramAccess?: Prisma.TelegramAccessUncheckedUpdateManyWithoutMemberNestedInput
+  renewalHistory?: Prisma.RenewalRecordUncheckedUpdateManyWithoutMemberNestedInput
+  activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutMemberNestedInput
+  journalAccounts?: Prisma.JournalAccountUncheckedUpdateManyWithoutMemberNestedInput
+  socialAccounts?: Prisma.SocialAccountUncheckedUpdateManyWithoutMemberNestedInput
+  notificationReads?: Prisma.MemberNotificationReadUncheckedUpdateManyWithoutMemberNestedInput
+  lotCheckRuns?: Prisma.LotCheckRunUncheckedUpdateManyWithoutMemberNestedInput
+  activityEnrollments?: Prisma.ActivityEnrollmentUncheckedUpdateManyWithoutMemberNestedInput
+  spinResults?: Prisma.SpinResultUncheckedUpdateManyWithoutMemberNestedInput
+  courseEnrollments?: Prisma.CourseEnrollmentUncheckedUpdateManyWithoutMemberNestedInput
+  lessonProgress?: Prisma.LessonProgressUncheckedUpdateManyWithoutMemberNestedInput
+  becGrants?: Prisma.BecGrantUncheckedUpdateManyWithoutMemberNestedInput
+}
+
+export type MemberCreateWithoutBecGrantsInput = {
+  externalId?: string | null
+  code: string
+  name: string
+  displayName?: string | null
+  avatarUrl?: string | null
+  email?: string | null
+  passwordHash?: string | null
+  identityVerifiedAt?: Date | string | null
+  phone?: string | null
+  country?: string | null
+  address?: string | null
+  tradingView?: string | null
+  telegramUsername?: string | null
+  telegramUserId?: string | null
+  discordUsername?: string | null
+  discordUserId?: string | null
+  lineUserId?: string | null
+  lineDisplayName?: string | null
+  socialLinksJson?: string | null
+  joinedAt?: Date | string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  plan?: $Enums.Plan
+  requiredLotsOverride?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  requiredLotsOverrideNote?: string | null
+  crmStartDate?: Date | string | null
+  crmExpiryDate?: Date | string | null
+  currentPeriodLots?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  currentPeriodLotsAt?: Date | string | null
+  currentPeriodLotsFrom?: Date | string | null
+  currentPeriodLotsTo?: Date | string | null
+  customerStageOverride?: $Enums.CustomerStage | null
+  primaryTradeAccount?: Prisma.TradeAccountCreateNestedOneWithoutPrimaryForMembersInput
+  tradeAccounts?: Prisma.TradeAccountCreateNestedManyWithoutMemberInput
+  tradeLogs?: Prisma.TradeLogCreateNestedManyWithoutMemberInput
+  acquisitionChannels?: Prisma.MemberAcquisitionChannelCreateNestedManyWithoutMemberInput
+  indicatorAccess?: Prisma.MemberIndicatorAccessCreateNestedManyWithoutMemberInput
+  telegramAccess?: Prisma.TelegramAccessCreateNestedManyWithoutMemberInput
+  renewalHistory?: Prisma.RenewalRecordCreateNestedManyWithoutMemberInput
+  activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutMemberInput
+  rewardClaims?: Prisma.RewardClaimCreateNestedManyWithoutMemberInput
+  journalAccounts?: Prisma.JournalAccountCreateNestedManyWithoutMemberInput
+  socialAccounts?: Prisma.SocialAccountCreateNestedManyWithoutMemberInput
+  notificationReads?: Prisma.MemberNotificationReadCreateNestedManyWithoutMemberInput
   lotCheckRuns?: Prisma.LotCheckRunCreateNestedManyWithoutMemberInput
   activityEnrollments?: Prisma.ActivityEnrollmentCreateNestedManyWithoutMemberInput
   spinResults?: Prisma.SpinResultCreateNestedManyWithoutMemberInput
@@ -3338,6 +3990,9 @@ export type MemberUncheckedCreateWithoutBecGrantsInput = {
   telegramUsername?: string | null
   telegramUserId?: string | null
   discordUsername?: string | null
+  discordUserId?: string | null
+  lineUserId?: string | null
+  lineDisplayName?: string | null
   socialLinksJson?: string | null
   joinedAt?: Date | string
   createdAt?: Date | string
@@ -3360,6 +4015,10 @@ export type MemberUncheckedCreateWithoutBecGrantsInput = {
   telegramAccess?: Prisma.TelegramAccessUncheckedCreateNestedManyWithoutMemberInput
   renewalHistory?: Prisma.RenewalRecordUncheckedCreateNestedManyWithoutMemberInput
   activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutMemberInput
+  rewardClaims?: Prisma.RewardClaimUncheckedCreateNestedManyWithoutMemberInput
+  journalAccounts?: Prisma.JournalAccountUncheckedCreateNestedManyWithoutMemberInput
+  socialAccounts?: Prisma.SocialAccountUncheckedCreateNestedManyWithoutMemberInput
+  notificationReads?: Prisma.MemberNotificationReadUncheckedCreateNestedManyWithoutMemberInput
   lotCheckRuns?: Prisma.LotCheckRunUncheckedCreateNestedManyWithoutMemberInput
   activityEnrollments?: Prisma.ActivityEnrollmentUncheckedCreateNestedManyWithoutMemberInput
   spinResults?: Prisma.SpinResultUncheckedCreateNestedManyWithoutMemberInput
@@ -3399,6 +4058,9 @@ export type MemberUpdateWithoutBecGrantsInput = {
   telegramUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   telegramUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   discordUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  discordUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lineUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lineDisplayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   socialLinksJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   joinedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -3421,6 +4083,10 @@ export type MemberUpdateWithoutBecGrantsInput = {
   telegramAccess?: Prisma.TelegramAccessUpdateManyWithoutMemberNestedInput
   renewalHistory?: Prisma.RenewalRecordUpdateManyWithoutMemberNestedInput
   activityLogs?: Prisma.ActivityLogUpdateManyWithoutMemberNestedInput
+  rewardClaims?: Prisma.RewardClaimUpdateManyWithoutMemberNestedInput
+  journalAccounts?: Prisma.JournalAccountUpdateManyWithoutMemberNestedInput
+  socialAccounts?: Prisma.SocialAccountUpdateManyWithoutMemberNestedInput
+  notificationReads?: Prisma.MemberNotificationReadUpdateManyWithoutMemberNestedInput
   lotCheckRuns?: Prisma.LotCheckRunUpdateManyWithoutMemberNestedInput
   activityEnrollments?: Prisma.ActivityEnrollmentUpdateManyWithoutMemberNestedInput
   spinResults?: Prisma.SpinResultUpdateManyWithoutMemberNestedInput
@@ -3445,6 +4111,9 @@ export type MemberUncheckedUpdateWithoutBecGrantsInput = {
   telegramUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   telegramUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   discordUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  discordUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lineUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lineDisplayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   socialLinksJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   joinedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -3467,6 +4136,10 @@ export type MemberUncheckedUpdateWithoutBecGrantsInput = {
   telegramAccess?: Prisma.TelegramAccessUncheckedUpdateManyWithoutMemberNestedInput
   renewalHistory?: Prisma.RenewalRecordUncheckedUpdateManyWithoutMemberNestedInput
   activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutMemberNestedInput
+  rewardClaims?: Prisma.RewardClaimUncheckedUpdateManyWithoutMemberNestedInput
+  journalAccounts?: Prisma.JournalAccountUncheckedUpdateManyWithoutMemberNestedInput
+  socialAccounts?: Prisma.SocialAccountUncheckedUpdateManyWithoutMemberNestedInput
+  notificationReads?: Prisma.MemberNotificationReadUncheckedUpdateManyWithoutMemberNestedInput
   lotCheckRuns?: Prisma.LotCheckRunUncheckedUpdateManyWithoutMemberNestedInput
   activityEnrollments?: Prisma.ActivityEnrollmentUncheckedUpdateManyWithoutMemberNestedInput
   spinResults?: Prisma.SpinResultUncheckedUpdateManyWithoutMemberNestedInput
@@ -3490,6 +4163,9 @@ export type MemberCreateWithoutSpinResultsInput = {
   telegramUsername?: string | null
   telegramUserId?: string | null
   discordUsername?: string | null
+  discordUserId?: string | null
+  lineUserId?: string | null
+  lineDisplayName?: string | null
   socialLinksJson?: string | null
   joinedAt?: Date | string
   createdAt?: Date | string
@@ -3512,6 +4188,10 @@ export type MemberCreateWithoutSpinResultsInput = {
   telegramAccess?: Prisma.TelegramAccessCreateNestedManyWithoutMemberInput
   renewalHistory?: Prisma.RenewalRecordCreateNestedManyWithoutMemberInput
   activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutMemberInput
+  rewardClaims?: Prisma.RewardClaimCreateNestedManyWithoutMemberInput
+  journalAccounts?: Prisma.JournalAccountCreateNestedManyWithoutMemberInput
+  socialAccounts?: Prisma.SocialAccountCreateNestedManyWithoutMemberInput
+  notificationReads?: Prisma.MemberNotificationReadCreateNestedManyWithoutMemberInput
   lotCheckRuns?: Prisma.LotCheckRunCreateNestedManyWithoutMemberInput
   activityEnrollments?: Prisma.ActivityEnrollmentCreateNestedManyWithoutMemberInput
   courseEnrollments?: Prisma.CourseEnrollmentCreateNestedManyWithoutMemberInput
@@ -3536,6 +4216,9 @@ export type MemberUncheckedCreateWithoutSpinResultsInput = {
   telegramUsername?: string | null
   telegramUserId?: string | null
   discordUsername?: string | null
+  discordUserId?: string | null
+  lineUserId?: string | null
+  lineDisplayName?: string | null
   socialLinksJson?: string | null
   joinedAt?: Date | string
   createdAt?: Date | string
@@ -3558,6 +4241,10 @@ export type MemberUncheckedCreateWithoutSpinResultsInput = {
   telegramAccess?: Prisma.TelegramAccessUncheckedCreateNestedManyWithoutMemberInput
   renewalHistory?: Prisma.RenewalRecordUncheckedCreateNestedManyWithoutMemberInput
   activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutMemberInput
+  rewardClaims?: Prisma.RewardClaimUncheckedCreateNestedManyWithoutMemberInput
+  journalAccounts?: Prisma.JournalAccountUncheckedCreateNestedManyWithoutMemberInput
+  socialAccounts?: Prisma.SocialAccountUncheckedCreateNestedManyWithoutMemberInput
+  notificationReads?: Prisma.MemberNotificationReadUncheckedCreateNestedManyWithoutMemberInput
   lotCheckRuns?: Prisma.LotCheckRunUncheckedCreateNestedManyWithoutMemberInput
   activityEnrollments?: Prisma.ActivityEnrollmentUncheckedCreateNestedManyWithoutMemberInput
   courseEnrollments?: Prisma.CourseEnrollmentUncheckedCreateNestedManyWithoutMemberInput
@@ -3597,6 +4284,9 @@ export type MemberUpdateWithoutSpinResultsInput = {
   telegramUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   telegramUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   discordUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  discordUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lineUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lineDisplayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   socialLinksJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   joinedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -3619,6 +4309,10 @@ export type MemberUpdateWithoutSpinResultsInput = {
   telegramAccess?: Prisma.TelegramAccessUpdateManyWithoutMemberNestedInput
   renewalHistory?: Prisma.RenewalRecordUpdateManyWithoutMemberNestedInput
   activityLogs?: Prisma.ActivityLogUpdateManyWithoutMemberNestedInput
+  rewardClaims?: Prisma.RewardClaimUpdateManyWithoutMemberNestedInput
+  journalAccounts?: Prisma.JournalAccountUpdateManyWithoutMemberNestedInput
+  socialAccounts?: Prisma.SocialAccountUpdateManyWithoutMemberNestedInput
+  notificationReads?: Prisma.MemberNotificationReadUpdateManyWithoutMemberNestedInput
   lotCheckRuns?: Prisma.LotCheckRunUpdateManyWithoutMemberNestedInput
   activityEnrollments?: Prisma.ActivityEnrollmentUpdateManyWithoutMemberNestedInput
   courseEnrollments?: Prisma.CourseEnrollmentUpdateManyWithoutMemberNestedInput
@@ -3643,6 +4337,9 @@ export type MemberUncheckedUpdateWithoutSpinResultsInput = {
   telegramUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   telegramUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   discordUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  discordUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lineUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lineDisplayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   socialLinksJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   joinedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -3665,6 +4362,10 @@ export type MemberUncheckedUpdateWithoutSpinResultsInput = {
   telegramAccess?: Prisma.TelegramAccessUncheckedUpdateManyWithoutMemberNestedInput
   renewalHistory?: Prisma.RenewalRecordUncheckedUpdateManyWithoutMemberNestedInput
   activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutMemberNestedInput
+  rewardClaims?: Prisma.RewardClaimUncheckedUpdateManyWithoutMemberNestedInput
+  journalAccounts?: Prisma.JournalAccountUncheckedUpdateManyWithoutMemberNestedInput
+  socialAccounts?: Prisma.SocialAccountUncheckedUpdateManyWithoutMemberNestedInput
+  notificationReads?: Prisma.MemberNotificationReadUncheckedUpdateManyWithoutMemberNestedInput
   lotCheckRuns?: Prisma.LotCheckRunUncheckedUpdateManyWithoutMemberNestedInput
   activityEnrollments?: Prisma.ActivityEnrollmentUncheckedUpdateManyWithoutMemberNestedInput
   courseEnrollments?: Prisma.CourseEnrollmentUncheckedUpdateManyWithoutMemberNestedInput
@@ -3672,7 +4373,7 @@ export type MemberUncheckedUpdateWithoutSpinResultsInput = {
   becGrants?: Prisma.BecGrantUncheckedUpdateManyWithoutMemberNestedInput
 }
 
-export type MemberCreateWithoutCourseEnrollmentsInput = {
+export type MemberCreateWithoutJournalAccountsInput = {
   externalId?: string | null
   code: string
   name: string
@@ -3688,6 +4389,9 @@ export type MemberCreateWithoutCourseEnrollmentsInput = {
   telegramUsername?: string | null
   telegramUserId?: string | null
   discordUsername?: string | null
+  discordUserId?: string | null
+  lineUserId?: string | null
+  lineDisplayName?: string | null
   socialLinksJson?: string | null
   joinedAt?: Date | string
   createdAt?: Date | string
@@ -3710,6 +4414,688 @@ export type MemberCreateWithoutCourseEnrollmentsInput = {
   telegramAccess?: Prisma.TelegramAccessCreateNestedManyWithoutMemberInput
   renewalHistory?: Prisma.RenewalRecordCreateNestedManyWithoutMemberInput
   activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutMemberInput
+  rewardClaims?: Prisma.RewardClaimCreateNestedManyWithoutMemberInput
+  socialAccounts?: Prisma.SocialAccountCreateNestedManyWithoutMemberInput
+  notificationReads?: Prisma.MemberNotificationReadCreateNestedManyWithoutMemberInput
+  lotCheckRuns?: Prisma.LotCheckRunCreateNestedManyWithoutMemberInput
+  activityEnrollments?: Prisma.ActivityEnrollmentCreateNestedManyWithoutMemberInput
+  spinResults?: Prisma.SpinResultCreateNestedManyWithoutMemberInput
+  courseEnrollments?: Prisma.CourseEnrollmentCreateNestedManyWithoutMemberInput
+  lessonProgress?: Prisma.LessonProgressCreateNestedManyWithoutMemberInput
+  becGrants?: Prisma.BecGrantCreateNestedManyWithoutMemberInput
+}
+
+export type MemberUncheckedCreateWithoutJournalAccountsInput = {
+  id?: number
+  externalId?: string | null
+  code: string
+  name: string
+  displayName?: string | null
+  avatarUrl?: string | null
+  email?: string | null
+  passwordHash?: string | null
+  identityVerifiedAt?: Date | string | null
+  phone?: string | null
+  country?: string | null
+  address?: string | null
+  tradingView?: string | null
+  telegramUsername?: string | null
+  telegramUserId?: string | null
+  discordUsername?: string | null
+  discordUserId?: string | null
+  lineUserId?: string | null
+  lineDisplayName?: string | null
+  socialLinksJson?: string | null
+  joinedAt?: Date | string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  plan?: $Enums.Plan
+  primaryTradeAccountId?: number | null
+  requiredLotsOverride?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  requiredLotsOverrideNote?: string | null
+  crmStartDate?: Date | string | null
+  crmExpiryDate?: Date | string | null
+  currentPeriodLots?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  currentPeriodLotsAt?: Date | string | null
+  currentPeriodLotsFrom?: Date | string | null
+  currentPeriodLotsTo?: Date | string | null
+  customerStageOverride?: $Enums.CustomerStage | null
+  tradeAccounts?: Prisma.TradeAccountUncheckedCreateNestedManyWithoutMemberInput
+  tradeLogs?: Prisma.TradeLogUncheckedCreateNestedManyWithoutMemberInput
+  acquisitionChannels?: Prisma.MemberAcquisitionChannelUncheckedCreateNestedManyWithoutMemberInput
+  indicatorAccess?: Prisma.MemberIndicatorAccessUncheckedCreateNestedManyWithoutMemberInput
+  telegramAccess?: Prisma.TelegramAccessUncheckedCreateNestedManyWithoutMemberInput
+  renewalHistory?: Prisma.RenewalRecordUncheckedCreateNestedManyWithoutMemberInput
+  activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutMemberInput
+  rewardClaims?: Prisma.RewardClaimUncheckedCreateNestedManyWithoutMemberInput
+  socialAccounts?: Prisma.SocialAccountUncheckedCreateNestedManyWithoutMemberInput
+  notificationReads?: Prisma.MemberNotificationReadUncheckedCreateNestedManyWithoutMemberInput
+  lotCheckRuns?: Prisma.LotCheckRunUncheckedCreateNestedManyWithoutMemberInput
+  activityEnrollments?: Prisma.ActivityEnrollmentUncheckedCreateNestedManyWithoutMemberInput
+  spinResults?: Prisma.SpinResultUncheckedCreateNestedManyWithoutMemberInput
+  courseEnrollments?: Prisma.CourseEnrollmentUncheckedCreateNestedManyWithoutMemberInput
+  lessonProgress?: Prisma.LessonProgressUncheckedCreateNestedManyWithoutMemberInput
+  becGrants?: Prisma.BecGrantUncheckedCreateNestedManyWithoutMemberInput
+}
+
+export type MemberCreateOrConnectWithoutJournalAccountsInput = {
+  where: Prisma.MemberWhereUniqueInput
+  create: Prisma.XOR<Prisma.MemberCreateWithoutJournalAccountsInput, Prisma.MemberUncheckedCreateWithoutJournalAccountsInput>
+}
+
+export type MemberUpsertWithoutJournalAccountsInput = {
+  update: Prisma.XOR<Prisma.MemberUpdateWithoutJournalAccountsInput, Prisma.MemberUncheckedUpdateWithoutJournalAccountsInput>
+  create: Prisma.XOR<Prisma.MemberCreateWithoutJournalAccountsInput, Prisma.MemberUncheckedCreateWithoutJournalAccountsInput>
+  where?: Prisma.MemberWhereInput
+}
+
+export type MemberUpdateToOneWithWhereWithoutJournalAccountsInput = {
+  where?: Prisma.MemberWhereInput
+  data: Prisma.XOR<Prisma.MemberUpdateWithoutJournalAccountsInput, Prisma.MemberUncheckedUpdateWithoutJournalAccountsInput>
+}
+
+export type MemberUpdateWithoutJournalAccountsInput = {
+  externalId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  code?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  identityVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tradingView?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegramUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegramUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  discordUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  discordUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lineUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lineDisplayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  socialLinksJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  joinedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  plan?: Prisma.EnumPlanFieldUpdateOperationsInput | $Enums.Plan
+  requiredLotsOverride?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  requiredLotsOverrideNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  crmStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  crmExpiryDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  currentPeriodLots?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  currentPeriodLotsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  currentPeriodLotsFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  currentPeriodLotsTo?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  customerStageOverride?: Prisma.NullableEnumCustomerStageFieldUpdateOperationsInput | $Enums.CustomerStage | null
+  primaryTradeAccount?: Prisma.TradeAccountUpdateOneWithoutPrimaryForMembersNestedInput
+  tradeAccounts?: Prisma.TradeAccountUpdateManyWithoutMemberNestedInput
+  tradeLogs?: Prisma.TradeLogUpdateManyWithoutMemberNestedInput
+  acquisitionChannels?: Prisma.MemberAcquisitionChannelUpdateManyWithoutMemberNestedInput
+  indicatorAccess?: Prisma.MemberIndicatorAccessUpdateManyWithoutMemberNestedInput
+  telegramAccess?: Prisma.TelegramAccessUpdateManyWithoutMemberNestedInput
+  renewalHistory?: Prisma.RenewalRecordUpdateManyWithoutMemberNestedInput
+  activityLogs?: Prisma.ActivityLogUpdateManyWithoutMemberNestedInput
+  rewardClaims?: Prisma.RewardClaimUpdateManyWithoutMemberNestedInput
+  socialAccounts?: Prisma.SocialAccountUpdateManyWithoutMemberNestedInput
+  notificationReads?: Prisma.MemberNotificationReadUpdateManyWithoutMemberNestedInput
+  lotCheckRuns?: Prisma.LotCheckRunUpdateManyWithoutMemberNestedInput
+  activityEnrollments?: Prisma.ActivityEnrollmentUpdateManyWithoutMemberNestedInput
+  spinResults?: Prisma.SpinResultUpdateManyWithoutMemberNestedInput
+  courseEnrollments?: Prisma.CourseEnrollmentUpdateManyWithoutMemberNestedInput
+  lessonProgress?: Prisma.LessonProgressUpdateManyWithoutMemberNestedInput
+  becGrants?: Prisma.BecGrantUpdateManyWithoutMemberNestedInput
+}
+
+export type MemberUncheckedUpdateWithoutJournalAccountsInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  externalId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  code?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  identityVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tradingView?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegramUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegramUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  discordUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  discordUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lineUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lineDisplayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  socialLinksJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  joinedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  plan?: Prisma.EnumPlanFieldUpdateOperationsInput | $Enums.Plan
+  primaryTradeAccountId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  requiredLotsOverride?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  requiredLotsOverrideNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  crmStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  crmExpiryDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  currentPeriodLots?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  currentPeriodLotsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  currentPeriodLotsFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  currentPeriodLotsTo?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  customerStageOverride?: Prisma.NullableEnumCustomerStageFieldUpdateOperationsInput | $Enums.CustomerStage | null
+  tradeAccounts?: Prisma.TradeAccountUncheckedUpdateManyWithoutMemberNestedInput
+  tradeLogs?: Prisma.TradeLogUncheckedUpdateManyWithoutMemberNestedInput
+  acquisitionChannels?: Prisma.MemberAcquisitionChannelUncheckedUpdateManyWithoutMemberNestedInput
+  indicatorAccess?: Prisma.MemberIndicatorAccessUncheckedUpdateManyWithoutMemberNestedInput
+  telegramAccess?: Prisma.TelegramAccessUncheckedUpdateManyWithoutMemberNestedInput
+  renewalHistory?: Prisma.RenewalRecordUncheckedUpdateManyWithoutMemberNestedInput
+  activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutMemberNestedInput
+  rewardClaims?: Prisma.RewardClaimUncheckedUpdateManyWithoutMemberNestedInput
+  socialAccounts?: Prisma.SocialAccountUncheckedUpdateManyWithoutMemberNestedInput
+  notificationReads?: Prisma.MemberNotificationReadUncheckedUpdateManyWithoutMemberNestedInput
+  lotCheckRuns?: Prisma.LotCheckRunUncheckedUpdateManyWithoutMemberNestedInput
+  activityEnrollments?: Prisma.ActivityEnrollmentUncheckedUpdateManyWithoutMemberNestedInput
+  spinResults?: Prisma.SpinResultUncheckedUpdateManyWithoutMemberNestedInput
+  courseEnrollments?: Prisma.CourseEnrollmentUncheckedUpdateManyWithoutMemberNestedInput
+  lessonProgress?: Prisma.LessonProgressUncheckedUpdateManyWithoutMemberNestedInput
+  becGrants?: Prisma.BecGrantUncheckedUpdateManyWithoutMemberNestedInput
+}
+
+export type MemberCreateWithoutSocialAccountsInput = {
+  externalId?: string | null
+  code: string
+  name: string
+  displayName?: string | null
+  avatarUrl?: string | null
+  email?: string | null
+  passwordHash?: string | null
+  identityVerifiedAt?: Date | string | null
+  phone?: string | null
+  country?: string | null
+  address?: string | null
+  tradingView?: string | null
+  telegramUsername?: string | null
+  telegramUserId?: string | null
+  discordUsername?: string | null
+  discordUserId?: string | null
+  lineUserId?: string | null
+  lineDisplayName?: string | null
+  socialLinksJson?: string | null
+  joinedAt?: Date | string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  plan?: $Enums.Plan
+  requiredLotsOverride?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  requiredLotsOverrideNote?: string | null
+  crmStartDate?: Date | string | null
+  crmExpiryDate?: Date | string | null
+  currentPeriodLots?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  currentPeriodLotsAt?: Date | string | null
+  currentPeriodLotsFrom?: Date | string | null
+  currentPeriodLotsTo?: Date | string | null
+  customerStageOverride?: $Enums.CustomerStage | null
+  primaryTradeAccount?: Prisma.TradeAccountCreateNestedOneWithoutPrimaryForMembersInput
+  tradeAccounts?: Prisma.TradeAccountCreateNestedManyWithoutMemberInput
+  tradeLogs?: Prisma.TradeLogCreateNestedManyWithoutMemberInput
+  acquisitionChannels?: Prisma.MemberAcquisitionChannelCreateNestedManyWithoutMemberInput
+  indicatorAccess?: Prisma.MemberIndicatorAccessCreateNestedManyWithoutMemberInput
+  telegramAccess?: Prisma.TelegramAccessCreateNestedManyWithoutMemberInput
+  renewalHistory?: Prisma.RenewalRecordCreateNestedManyWithoutMemberInput
+  activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutMemberInput
+  rewardClaims?: Prisma.RewardClaimCreateNestedManyWithoutMemberInput
+  journalAccounts?: Prisma.JournalAccountCreateNestedManyWithoutMemberInput
+  notificationReads?: Prisma.MemberNotificationReadCreateNestedManyWithoutMemberInput
+  lotCheckRuns?: Prisma.LotCheckRunCreateNestedManyWithoutMemberInput
+  activityEnrollments?: Prisma.ActivityEnrollmentCreateNestedManyWithoutMemberInput
+  spinResults?: Prisma.SpinResultCreateNestedManyWithoutMemberInput
+  courseEnrollments?: Prisma.CourseEnrollmentCreateNestedManyWithoutMemberInput
+  lessonProgress?: Prisma.LessonProgressCreateNestedManyWithoutMemberInput
+  becGrants?: Prisma.BecGrantCreateNestedManyWithoutMemberInput
+}
+
+export type MemberUncheckedCreateWithoutSocialAccountsInput = {
+  id?: number
+  externalId?: string | null
+  code: string
+  name: string
+  displayName?: string | null
+  avatarUrl?: string | null
+  email?: string | null
+  passwordHash?: string | null
+  identityVerifiedAt?: Date | string | null
+  phone?: string | null
+  country?: string | null
+  address?: string | null
+  tradingView?: string | null
+  telegramUsername?: string | null
+  telegramUserId?: string | null
+  discordUsername?: string | null
+  discordUserId?: string | null
+  lineUserId?: string | null
+  lineDisplayName?: string | null
+  socialLinksJson?: string | null
+  joinedAt?: Date | string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  plan?: $Enums.Plan
+  primaryTradeAccountId?: number | null
+  requiredLotsOverride?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  requiredLotsOverrideNote?: string | null
+  crmStartDate?: Date | string | null
+  crmExpiryDate?: Date | string | null
+  currentPeriodLots?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  currentPeriodLotsAt?: Date | string | null
+  currentPeriodLotsFrom?: Date | string | null
+  currentPeriodLotsTo?: Date | string | null
+  customerStageOverride?: $Enums.CustomerStage | null
+  tradeAccounts?: Prisma.TradeAccountUncheckedCreateNestedManyWithoutMemberInput
+  tradeLogs?: Prisma.TradeLogUncheckedCreateNestedManyWithoutMemberInput
+  acquisitionChannels?: Prisma.MemberAcquisitionChannelUncheckedCreateNestedManyWithoutMemberInput
+  indicatorAccess?: Prisma.MemberIndicatorAccessUncheckedCreateNestedManyWithoutMemberInput
+  telegramAccess?: Prisma.TelegramAccessUncheckedCreateNestedManyWithoutMemberInput
+  renewalHistory?: Prisma.RenewalRecordUncheckedCreateNestedManyWithoutMemberInput
+  activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutMemberInput
+  rewardClaims?: Prisma.RewardClaimUncheckedCreateNestedManyWithoutMemberInput
+  journalAccounts?: Prisma.JournalAccountUncheckedCreateNestedManyWithoutMemberInput
+  notificationReads?: Prisma.MemberNotificationReadUncheckedCreateNestedManyWithoutMemberInput
+  lotCheckRuns?: Prisma.LotCheckRunUncheckedCreateNestedManyWithoutMemberInput
+  activityEnrollments?: Prisma.ActivityEnrollmentUncheckedCreateNestedManyWithoutMemberInput
+  spinResults?: Prisma.SpinResultUncheckedCreateNestedManyWithoutMemberInput
+  courseEnrollments?: Prisma.CourseEnrollmentUncheckedCreateNestedManyWithoutMemberInput
+  lessonProgress?: Prisma.LessonProgressUncheckedCreateNestedManyWithoutMemberInput
+  becGrants?: Prisma.BecGrantUncheckedCreateNestedManyWithoutMemberInput
+}
+
+export type MemberCreateOrConnectWithoutSocialAccountsInput = {
+  where: Prisma.MemberWhereUniqueInput
+  create: Prisma.XOR<Prisma.MemberCreateWithoutSocialAccountsInput, Prisma.MemberUncheckedCreateWithoutSocialAccountsInput>
+}
+
+export type MemberUpsertWithoutSocialAccountsInput = {
+  update: Prisma.XOR<Prisma.MemberUpdateWithoutSocialAccountsInput, Prisma.MemberUncheckedUpdateWithoutSocialAccountsInput>
+  create: Prisma.XOR<Prisma.MemberCreateWithoutSocialAccountsInput, Prisma.MemberUncheckedCreateWithoutSocialAccountsInput>
+  where?: Prisma.MemberWhereInput
+}
+
+export type MemberUpdateToOneWithWhereWithoutSocialAccountsInput = {
+  where?: Prisma.MemberWhereInput
+  data: Prisma.XOR<Prisma.MemberUpdateWithoutSocialAccountsInput, Prisma.MemberUncheckedUpdateWithoutSocialAccountsInput>
+}
+
+export type MemberUpdateWithoutSocialAccountsInput = {
+  externalId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  code?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  identityVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tradingView?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegramUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegramUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  discordUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  discordUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lineUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lineDisplayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  socialLinksJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  joinedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  plan?: Prisma.EnumPlanFieldUpdateOperationsInput | $Enums.Plan
+  requiredLotsOverride?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  requiredLotsOverrideNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  crmStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  crmExpiryDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  currentPeriodLots?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  currentPeriodLotsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  currentPeriodLotsFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  currentPeriodLotsTo?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  customerStageOverride?: Prisma.NullableEnumCustomerStageFieldUpdateOperationsInput | $Enums.CustomerStage | null
+  primaryTradeAccount?: Prisma.TradeAccountUpdateOneWithoutPrimaryForMembersNestedInput
+  tradeAccounts?: Prisma.TradeAccountUpdateManyWithoutMemberNestedInput
+  tradeLogs?: Prisma.TradeLogUpdateManyWithoutMemberNestedInput
+  acquisitionChannels?: Prisma.MemberAcquisitionChannelUpdateManyWithoutMemberNestedInput
+  indicatorAccess?: Prisma.MemberIndicatorAccessUpdateManyWithoutMemberNestedInput
+  telegramAccess?: Prisma.TelegramAccessUpdateManyWithoutMemberNestedInput
+  renewalHistory?: Prisma.RenewalRecordUpdateManyWithoutMemberNestedInput
+  activityLogs?: Prisma.ActivityLogUpdateManyWithoutMemberNestedInput
+  rewardClaims?: Prisma.RewardClaimUpdateManyWithoutMemberNestedInput
+  journalAccounts?: Prisma.JournalAccountUpdateManyWithoutMemberNestedInput
+  notificationReads?: Prisma.MemberNotificationReadUpdateManyWithoutMemberNestedInput
+  lotCheckRuns?: Prisma.LotCheckRunUpdateManyWithoutMemberNestedInput
+  activityEnrollments?: Prisma.ActivityEnrollmentUpdateManyWithoutMemberNestedInput
+  spinResults?: Prisma.SpinResultUpdateManyWithoutMemberNestedInput
+  courseEnrollments?: Prisma.CourseEnrollmentUpdateManyWithoutMemberNestedInput
+  lessonProgress?: Prisma.LessonProgressUpdateManyWithoutMemberNestedInput
+  becGrants?: Prisma.BecGrantUpdateManyWithoutMemberNestedInput
+}
+
+export type MemberUncheckedUpdateWithoutSocialAccountsInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  externalId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  code?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  identityVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tradingView?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegramUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegramUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  discordUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  discordUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lineUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lineDisplayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  socialLinksJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  joinedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  plan?: Prisma.EnumPlanFieldUpdateOperationsInput | $Enums.Plan
+  primaryTradeAccountId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  requiredLotsOverride?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  requiredLotsOverrideNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  crmStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  crmExpiryDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  currentPeriodLots?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  currentPeriodLotsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  currentPeriodLotsFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  currentPeriodLotsTo?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  customerStageOverride?: Prisma.NullableEnumCustomerStageFieldUpdateOperationsInput | $Enums.CustomerStage | null
+  tradeAccounts?: Prisma.TradeAccountUncheckedUpdateManyWithoutMemberNestedInput
+  tradeLogs?: Prisma.TradeLogUncheckedUpdateManyWithoutMemberNestedInput
+  acquisitionChannels?: Prisma.MemberAcquisitionChannelUncheckedUpdateManyWithoutMemberNestedInput
+  indicatorAccess?: Prisma.MemberIndicatorAccessUncheckedUpdateManyWithoutMemberNestedInput
+  telegramAccess?: Prisma.TelegramAccessUncheckedUpdateManyWithoutMemberNestedInput
+  renewalHistory?: Prisma.RenewalRecordUncheckedUpdateManyWithoutMemberNestedInput
+  activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutMemberNestedInput
+  rewardClaims?: Prisma.RewardClaimUncheckedUpdateManyWithoutMemberNestedInput
+  journalAccounts?: Prisma.JournalAccountUncheckedUpdateManyWithoutMemberNestedInput
+  notificationReads?: Prisma.MemberNotificationReadUncheckedUpdateManyWithoutMemberNestedInput
+  lotCheckRuns?: Prisma.LotCheckRunUncheckedUpdateManyWithoutMemberNestedInput
+  activityEnrollments?: Prisma.ActivityEnrollmentUncheckedUpdateManyWithoutMemberNestedInput
+  spinResults?: Prisma.SpinResultUncheckedUpdateManyWithoutMemberNestedInput
+  courseEnrollments?: Prisma.CourseEnrollmentUncheckedUpdateManyWithoutMemberNestedInput
+  lessonProgress?: Prisma.LessonProgressUncheckedUpdateManyWithoutMemberNestedInput
+  becGrants?: Prisma.BecGrantUncheckedUpdateManyWithoutMemberNestedInput
+}
+
+export type MemberCreateWithoutNotificationReadsInput = {
+  externalId?: string | null
+  code: string
+  name: string
+  displayName?: string | null
+  avatarUrl?: string | null
+  email?: string | null
+  passwordHash?: string | null
+  identityVerifiedAt?: Date | string | null
+  phone?: string | null
+  country?: string | null
+  address?: string | null
+  tradingView?: string | null
+  telegramUsername?: string | null
+  telegramUserId?: string | null
+  discordUsername?: string | null
+  discordUserId?: string | null
+  lineUserId?: string | null
+  lineDisplayName?: string | null
+  socialLinksJson?: string | null
+  joinedAt?: Date | string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  plan?: $Enums.Plan
+  requiredLotsOverride?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  requiredLotsOverrideNote?: string | null
+  crmStartDate?: Date | string | null
+  crmExpiryDate?: Date | string | null
+  currentPeriodLots?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  currentPeriodLotsAt?: Date | string | null
+  currentPeriodLotsFrom?: Date | string | null
+  currentPeriodLotsTo?: Date | string | null
+  customerStageOverride?: $Enums.CustomerStage | null
+  primaryTradeAccount?: Prisma.TradeAccountCreateNestedOneWithoutPrimaryForMembersInput
+  tradeAccounts?: Prisma.TradeAccountCreateNestedManyWithoutMemberInput
+  tradeLogs?: Prisma.TradeLogCreateNestedManyWithoutMemberInput
+  acquisitionChannels?: Prisma.MemberAcquisitionChannelCreateNestedManyWithoutMemberInput
+  indicatorAccess?: Prisma.MemberIndicatorAccessCreateNestedManyWithoutMemberInput
+  telegramAccess?: Prisma.TelegramAccessCreateNestedManyWithoutMemberInput
+  renewalHistory?: Prisma.RenewalRecordCreateNestedManyWithoutMemberInput
+  activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutMemberInput
+  rewardClaims?: Prisma.RewardClaimCreateNestedManyWithoutMemberInput
+  journalAccounts?: Prisma.JournalAccountCreateNestedManyWithoutMemberInput
+  socialAccounts?: Prisma.SocialAccountCreateNestedManyWithoutMemberInput
+  lotCheckRuns?: Prisma.LotCheckRunCreateNestedManyWithoutMemberInput
+  activityEnrollments?: Prisma.ActivityEnrollmentCreateNestedManyWithoutMemberInput
+  spinResults?: Prisma.SpinResultCreateNestedManyWithoutMemberInput
+  courseEnrollments?: Prisma.CourseEnrollmentCreateNestedManyWithoutMemberInput
+  lessonProgress?: Prisma.LessonProgressCreateNestedManyWithoutMemberInput
+  becGrants?: Prisma.BecGrantCreateNestedManyWithoutMemberInput
+}
+
+export type MemberUncheckedCreateWithoutNotificationReadsInput = {
+  id?: number
+  externalId?: string | null
+  code: string
+  name: string
+  displayName?: string | null
+  avatarUrl?: string | null
+  email?: string | null
+  passwordHash?: string | null
+  identityVerifiedAt?: Date | string | null
+  phone?: string | null
+  country?: string | null
+  address?: string | null
+  tradingView?: string | null
+  telegramUsername?: string | null
+  telegramUserId?: string | null
+  discordUsername?: string | null
+  discordUserId?: string | null
+  lineUserId?: string | null
+  lineDisplayName?: string | null
+  socialLinksJson?: string | null
+  joinedAt?: Date | string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  plan?: $Enums.Plan
+  primaryTradeAccountId?: number | null
+  requiredLotsOverride?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  requiredLotsOverrideNote?: string | null
+  crmStartDate?: Date | string | null
+  crmExpiryDate?: Date | string | null
+  currentPeriodLots?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  currentPeriodLotsAt?: Date | string | null
+  currentPeriodLotsFrom?: Date | string | null
+  currentPeriodLotsTo?: Date | string | null
+  customerStageOverride?: $Enums.CustomerStage | null
+  tradeAccounts?: Prisma.TradeAccountUncheckedCreateNestedManyWithoutMemberInput
+  tradeLogs?: Prisma.TradeLogUncheckedCreateNestedManyWithoutMemberInput
+  acquisitionChannels?: Prisma.MemberAcquisitionChannelUncheckedCreateNestedManyWithoutMemberInput
+  indicatorAccess?: Prisma.MemberIndicatorAccessUncheckedCreateNestedManyWithoutMemberInput
+  telegramAccess?: Prisma.TelegramAccessUncheckedCreateNestedManyWithoutMemberInput
+  renewalHistory?: Prisma.RenewalRecordUncheckedCreateNestedManyWithoutMemberInput
+  activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutMemberInput
+  rewardClaims?: Prisma.RewardClaimUncheckedCreateNestedManyWithoutMemberInput
+  journalAccounts?: Prisma.JournalAccountUncheckedCreateNestedManyWithoutMemberInput
+  socialAccounts?: Prisma.SocialAccountUncheckedCreateNestedManyWithoutMemberInput
+  lotCheckRuns?: Prisma.LotCheckRunUncheckedCreateNestedManyWithoutMemberInput
+  activityEnrollments?: Prisma.ActivityEnrollmentUncheckedCreateNestedManyWithoutMemberInput
+  spinResults?: Prisma.SpinResultUncheckedCreateNestedManyWithoutMemberInput
+  courseEnrollments?: Prisma.CourseEnrollmentUncheckedCreateNestedManyWithoutMemberInput
+  lessonProgress?: Prisma.LessonProgressUncheckedCreateNestedManyWithoutMemberInput
+  becGrants?: Prisma.BecGrantUncheckedCreateNestedManyWithoutMemberInput
+}
+
+export type MemberCreateOrConnectWithoutNotificationReadsInput = {
+  where: Prisma.MemberWhereUniqueInput
+  create: Prisma.XOR<Prisma.MemberCreateWithoutNotificationReadsInput, Prisma.MemberUncheckedCreateWithoutNotificationReadsInput>
+}
+
+export type MemberUpsertWithoutNotificationReadsInput = {
+  update: Prisma.XOR<Prisma.MemberUpdateWithoutNotificationReadsInput, Prisma.MemberUncheckedUpdateWithoutNotificationReadsInput>
+  create: Prisma.XOR<Prisma.MemberCreateWithoutNotificationReadsInput, Prisma.MemberUncheckedCreateWithoutNotificationReadsInput>
+  where?: Prisma.MemberWhereInput
+}
+
+export type MemberUpdateToOneWithWhereWithoutNotificationReadsInput = {
+  where?: Prisma.MemberWhereInput
+  data: Prisma.XOR<Prisma.MemberUpdateWithoutNotificationReadsInput, Prisma.MemberUncheckedUpdateWithoutNotificationReadsInput>
+}
+
+export type MemberUpdateWithoutNotificationReadsInput = {
+  externalId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  code?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  identityVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tradingView?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegramUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegramUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  discordUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  discordUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lineUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lineDisplayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  socialLinksJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  joinedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  plan?: Prisma.EnumPlanFieldUpdateOperationsInput | $Enums.Plan
+  requiredLotsOverride?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  requiredLotsOverrideNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  crmStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  crmExpiryDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  currentPeriodLots?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  currentPeriodLotsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  currentPeriodLotsFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  currentPeriodLotsTo?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  customerStageOverride?: Prisma.NullableEnumCustomerStageFieldUpdateOperationsInput | $Enums.CustomerStage | null
+  primaryTradeAccount?: Prisma.TradeAccountUpdateOneWithoutPrimaryForMembersNestedInput
+  tradeAccounts?: Prisma.TradeAccountUpdateManyWithoutMemberNestedInput
+  tradeLogs?: Prisma.TradeLogUpdateManyWithoutMemberNestedInput
+  acquisitionChannels?: Prisma.MemberAcquisitionChannelUpdateManyWithoutMemberNestedInput
+  indicatorAccess?: Prisma.MemberIndicatorAccessUpdateManyWithoutMemberNestedInput
+  telegramAccess?: Prisma.TelegramAccessUpdateManyWithoutMemberNestedInput
+  renewalHistory?: Prisma.RenewalRecordUpdateManyWithoutMemberNestedInput
+  activityLogs?: Prisma.ActivityLogUpdateManyWithoutMemberNestedInput
+  rewardClaims?: Prisma.RewardClaimUpdateManyWithoutMemberNestedInput
+  journalAccounts?: Prisma.JournalAccountUpdateManyWithoutMemberNestedInput
+  socialAccounts?: Prisma.SocialAccountUpdateManyWithoutMemberNestedInput
+  lotCheckRuns?: Prisma.LotCheckRunUpdateManyWithoutMemberNestedInput
+  activityEnrollments?: Prisma.ActivityEnrollmentUpdateManyWithoutMemberNestedInput
+  spinResults?: Prisma.SpinResultUpdateManyWithoutMemberNestedInput
+  courseEnrollments?: Prisma.CourseEnrollmentUpdateManyWithoutMemberNestedInput
+  lessonProgress?: Prisma.LessonProgressUpdateManyWithoutMemberNestedInput
+  becGrants?: Prisma.BecGrantUpdateManyWithoutMemberNestedInput
+}
+
+export type MemberUncheckedUpdateWithoutNotificationReadsInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  externalId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  code?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  identityVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tradingView?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegramUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegramUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  discordUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  discordUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lineUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lineDisplayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  socialLinksJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  joinedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  plan?: Prisma.EnumPlanFieldUpdateOperationsInput | $Enums.Plan
+  primaryTradeAccountId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  requiredLotsOverride?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  requiredLotsOverrideNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  crmStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  crmExpiryDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  currentPeriodLots?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  currentPeriodLotsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  currentPeriodLotsFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  currentPeriodLotsTo?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  customerStageOverride?: Prisma.NullableEnumCustomerStageFieldUpdateOperationsInput | $Enums.CustomerStage | null
+  tradeAccounts?: Prisma.TradeAccountUncheckedUpdateManyWithoutMemberNestedInput
+  tradeLogs?: Prisma.TradeLogUncheckedUpdateManyWithoutMemberNestedInput
+  acquisitionChannels?: Prisma.MemberAcquisitionChannelUncheckedUpdateManyWithoutMemberNestedInput
+  indicatorAccess?: Prisma.MemberIndicatorAccessUncheckedUpdateManyWithoutMemberNestedInput
+  telegramAccess?: Prisma.TelegramAccessUncheckedUpdateManyWithoutMemberNestedInput
+  renewalHistory?: Prisma.RenewalRecordUncheckedUpdateManyWithoutMemberNestedInput
+  activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutMemberNestedInput
+  rewardClaims?: Prisma.RewardClaimUncheckedUpdateManyWithoutMemberNestedInput
+  journalAccounts?: Prisma.JournalAccountUncheckedUpdateManyWithoutMemberNestedInput
+  socialAccounts?: Prisma.SocialAccountUncheckedUpdateManyWithoutMemberNestedInput
+  lotCheckRuns?: Prisma.LotCheckRunUncheckedUpdateManyWithoutMemberNestedInput
+  activityEnrollments?: Prisma.ActivityEnrollmentUncheckedUpdateManyWithoutMemberNestedInput
+  spinResults?: Prisma.SpinResultUncheckedUpdateManyWithoutMemberNestedInput
+  courseEnrollments?: Prisma.CourseEnrollmentUncheckedUpdateManyWithoutMemberNestedInput
+  lessonProgress?: Prisma.LessonProgressUncheckedUpdateManyWithoutMemberNestedInput
+  becGrants?: Prisma.BecGrantUncheckedUpdateManyWithoutMemberNestedInput
+}
+
+export type MemberCreateWithoutCourseEnrollmentsInput = {
+  externalId?: string | null
+  code: string
+  name: string
+  displayName?: string | null
+  avatarUrl?: string | null
+  email?: string | null
+  passwordHash?: string | null
+  identityVerifiedAt?: Date | string | null
+  phone?: string | null
+  country?: string | null
+  address?: string | null
+  tradingView?: string | null
+  telegramUsername?: string | null
+  telegramUserId?: string | null
+  discordUsername?: string | null
+  discordUserId?: string | null
+  lineUserId?: string | null
+  lineDisplayName?: string | null
+  socialLinksJson?: string | null
+  joinedAt?: Date | string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  plan?: $Enums.Plan
+  requiredLotsOverride?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  requiredLotsOverrideNote?: string | null
+  crmStartDate?: Date | string | null
+  crmExpiryDate?: Date | string | null
+  currentPeriodLots?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  currentPeriodLotsAt?: Date | string | null
+  currentPeriodLotsFrom?: Date | string | null
+  currentPeriodLotsTo?: Date | string | null
+  customerStageOverride?: $Enums.CustomerStage | null
+  primaryTradeAccount?: Prisma.TradeAccountCreateNestedOneWithoutPrimaryForMembersInput
+  tradeAccounts?: Prisma.TradeAccountCreateNestedManyWithoutMemberInput
+  tradeLogs?: Prisma.TradeLogCreateNestedManyWithoutMemberInput
+  acquisitionChannels?: Prisma.MemberAcquisitionChannelCreateNestedManyWithoutMemberInput
+  indicatorAccess?: Prisma.MemberIndicatorAccessCreateNestedManyWithoutMemberInput
+  telegramAccess?: Prisma.TelegramAccessCreateNestedManyWithoutMemberInput
+  renewalHistory?: Prisma.RenewalRecordCreateNestedManyWithoutMemberInput
+  activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutMemberInput
+  rewardClaims?: Prisma.RewardClaimCreateNestedManyWithoutMemberInput
+  journalAccounts?: Prisma.JournalAccountCreateNestedManyWithoutMemberInput
+  socialAccounts?: Prisma.SocialAccountCreateNestedManyWithoutMemberInput
+  notificationReads?: Prisma.MemberNotificationReadCreateNestedManyWithoutMemberInput
   lotCheckRuns?: Prisma.LotCheckRunCreateNestedManyWithoutMemberInput
   activityEnrollments?: Prisma.ActivityEnrollmentCreateNestedManyWithoutMemberInput
   spinResults?: Prisma.SpinResultCreateNestedManyWithoutMemberInput
@@ -3734,6 +5120,9 @@ export type MemberUncheckedCreateWithoutCourseEnrollmentsInput = {
   telegramUsername?: string | null
   telegramUserId?: string | null
   discordUsername?: string | null
+  discordUserId?: string | null
+  lineUserId?: string | null
+  lineDisplayName?: string | null
   socialLinksJson?: string | null
   joinedAt?: Date | string
   createdAt?: Date | string
@@ -3756,6 +5145,10 @@ export type MemberUncheckedCreateWithoutCourseEnrollmentsInput = {
   telegramAccess?: Prisma.TelegramAccessUncheckedCreateNestedManyWithoutMemberInput
   renewalHistory?: Prisma.RenewalRecordUncheckedCreateNestedManyWithoutMemberInput
   activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutMemberInput
+  rewardClaims?: Prisma.RewardClaimUncheckedCreateNestedManyWithoutMemberInput
+  journalAccounts?: Prisma.JournalAccountUncheckedCreateNestedManyWithoutMemberInput
+  socialAccounts?: Prisma.SocialAccountUncheckedCreateNestedManyWithoutMemberInput
+  notificationReads?: Prisma.MemberNotificationReadUncheckedCreateNestedManyWithoutMemberInput
   lotCheckRuns?: Prisma.LotCheckRunUncheckedCreateNestedManyWithoutMemberInput
   activityEnrollments?: Prisma.ActivityEnrollmentUncheckedCreateNestedManyWithoutMemberInput
   spinResults?: Prisma.SpinResultUncheckedCreateNestedManyWithoutMemberInput
@@ -3795,6 +5188,9 @@ export type MemberUpdateWithoutCourseEnrollmentsInput = {
   telegramUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   telegramUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   discordUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  discordUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lineUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lineDisplayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   socialLinksJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   joinedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -3817,6 +5213,10 @@ export type MemberUpdateWithoutCourseEnrollmentsInput = {
   telegramAccess?: Prisma.TelegramAccessUpdateManyWithoutMemberNestedInput
   renewalHistory?: Prisma.RenewalRecordUpdateManyWithoutMemberNestedInput
   activityLogs?: Prisma.ActivityLogUpdateManyWithoutMemberNestedInput
+  rewardClaims?: Prisma.RewardClaimUpdateManyWithoutMemberNestedInput
+  journalAccounts?: Prisma.JournalAccountUpdateManyWithoutMemberNestedInput
+  socialAccounts?: Prisma.SocialAccountUpdateManyWithoutMemberNestedInput
+  notificationReads?: Prisma.MemberNotificationReadUpdateManyWithoutMemberNestedInput
   lotCheckRuns?: Prisma.LotCheckRunUpdateManyWithoutMemberNestedInput
   activityEnrollments?: Prisma.ActivityEnrollmentUpdateManyWithoutMemberNestedInput
   spinResults?: Prisma.SpinResultUpdateManyWithoutMemberNestedInput
@@ -3841,6 +5241,9 @@ export type MemberUncheckedUpdateWithoutCourseEnrollmentsInput = {
   telegramUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   telegramUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   discordUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  discordUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lineUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lineDisplayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   socialLinksJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   joinedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -3863,6 +5266,10 @@ export type MemberUncheckedUpdateWithoutCourseEnrollmentsInput = {
   telegramAccess?: Prisma.TelegramAccessUncheckedUpdateManyWithoutMemberNestedInput
   renewalHistory?: Prisma.RenewalRecordUncheckedUpdateManyWithoutMemberNestedInput
   activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutMemberNestedInput
+  rewardClaims?: Prisma.RewardClaimUncheckedUpdateManyWithoutMemberNestedInput
+  journalAccounts?: Prisma.JournalAccountUncheckedUpdateManyWithoutMemberNestedInput
+  socialAccounts?: Prisma.SocialAccountUncheckedUpdateManyWithoutMemberNestedInput
+  notificationReads?: Prisma.MemberNotificationReadUncheckedUpdateManyWithoutMemberNestedInput
   lotCheckRuns?: Prisma.LotCheckRunUncheckedUpdateManyWithoutMemberNestedInput
   activityEnrollments?: Prisma.ActivityEnrollmentUncheckedUpdateManyWithoutMemberNestedInput
   spinResults?: Prisma.SpinResultUncheckedUpdateManyWithoutMemberNestedInput
@@ -3886,6 +5293,9 @@ export type MemberCreateWithoutLessonProgressInput = {
   telegramUsername?: string | null
   telegramUserId?: string | null
   discordUsername?: string | null
+  discordUserId?: string | null
+  lineUserId?: string | null
+  lineDisplayName?: string | null
   socialLinksJson?: string | null
   joinedAt?: Date | string
   createdAt?: Date | string
@@ -3908,6 +5318,10 @@ export type MemberCreateWithoutLessonProgressInput = {
   telegramAccess?: Prisma.TelegramAccessCreateNestedManyWithoutMemberInput
   renewalHistory?: Prisma.RenewalRecordCreateNestedManyWithoutMemberInput
   activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutMemberInput
+  rewardClaims?: Prisma.RewardClaimCreateNestedManyWithoutMemberInput
+  journalAccounts?: Prisma.JournalAccountCreateNestedManyWithoutMemberInput
+  socialAccounts?: Prisma.SocialAccountCreateNestedManyWithoutMemberInput
+  notificationReads?: Prisma.MemberNotificationReadCreateNestedManyWithoutMemberInput
   lotCheckRuns?: Prisma.LotCheckRunCreateNestedManyWithoutMemberInput
   activityEnrollments?: Prisma.ActivityEnrollmentCreateNestedManyWithoutMemberInput
   spinResults?: Prisma.SpinResultCreateNestedManyWithoutMemberInput
@@ -3932,6 +5346,9 @@ export type MemberUncheckedCreateWithoutLessonProgressInput = {
   telegramUsername?: string | null
   telegramUserId?: string | null
   discordUsername?: string | null
+  discordUserId?: string | null
+  lineUserId?: string | null
+  lineDisplayName?: string | null
   socialLinksJson?: string | null
   joinedAt?: Date | string
   createdAt?: Date | string
@@ -3954,6 +5371,10 @@ export type MemberUncheckedCreateWithoutLessonProgressInput = {
   telegramAccess?: Prisma.TelegramAccessUncheckedCreateNestedManyWithoutMemberInput
   renewalHistory?: Prisma.RenewalRecordUncheckedCreateNestedManyWithoutMemberInput
   activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutMemberInput
+  rewardClaims?: Prisma.RewardClaimUncheckedCreateNestedManyWithoutMemberInput
+  journalAccounts?: Prisma.JournalAccountUncheckedCreateNestedManyWithoutMemberInput
+  socialAccounts?: Prisma.SocialAccountUncheckedCreateNestedManyWithoutMemberInput
+  notificationReads?: Prisma.MemberNotificationReadUncheckedCreateNestedManyWithoutMemberInput
   lotCheckRuns?: Prisma.LotCheckRunUncheckedCreateNestedManyWithoutMemberInput
   activityEnrollments?: Prisma.ActivityEnrollmentUncheckedCreateNestedManyWithoutMemberInput
   spinResults?: Prisma.SpinResultUncheckedCreateNestedManyWithoutMemberInput
@@ -3993,6 +5414,9 @@ export type MemberUpdateWithoutLessonProgressInput = {
   telegramUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   telegramUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   discordUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  discordUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lineUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lineDisplayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   socialLinksJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   joinedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -4015,6 +5439,10 @@ export type MemberUpdateWithoutLessonProgressInput = {
   telegramAccess?: Prisma.TelegramAccessUpdateManyWithoutMemberNestedInput
   renewalHistory?: Prisma.RenewalRecordUpdateManyWithoutMemberNestedInput
   activityLogs?: Prisma.ActivityLogUpdateManyWithoutMemberNestedInput
+  rewardClaims?: Prisma.RewardClaimUpdateManyWithoutMemberNestedInput
+  journalAccounts?: Prisma.JournalAccountUpdateManyWithoutMemberNestedInput
+  socialAccounts?: Prisma.SocialAccountUpdateManyWithoutMemberNestedInput
+  notificationReads?: Prisma.MemberNotificationReadUpdateManyWithoutMemberNestedInput
   lotCheckRuns?: Prisma.LotCheckRunUpdateManyWithoutMemberNestedInput
   activityEnrollments?: Prisma.ActivityEnrollmentUpdateManyWithoutMemberNestedInput
   spinResults?: Prisma.SpinResultUpdateManyWithoutMemberNestedInput
@@ -4039,6 +5467,9 @@ export type MemberUncheckedUpdateWithoutLessonProgressInput = {
   telegramUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   telegramUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   discordUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  discordUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lineUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lineDisplayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   socialLinksJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   joinedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -4061,6 +5492,10 @@ export type MemberUncheckedUpdateWithoutLessonProgressInput = {
   telegramAccess?: Prisma.TelegramAccessUncheckedUpdateManyWithoutMemberNestedInput
   renewalHistory?: Prisma.RenewalRecordUncheckedUpdateManyWithoutMemberNestedInput
   activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutMemberNestedInput
+  rewardClaims?: Prisma.RewardClaimUncheckedUpdateManyWithoutMemberNestedInput
+  journalAccounts?: Prisma.JournalAccountUncheckedUpdateManyWithoutMemberNestedInput
+  socialAccounts?: Prisma.SocialAccountUncheckedUpdateManyWithoutMemberNestedInput
+  notificationReads?: Prisma.MemberNotificationReadUncheckedUpdateManyWithoutMemberNestedInput
   lotCheckRuns?: Prisma.LotCheckRunUncheckedUpdateManyWithoutMemberNestedInput
   activityEnrollments?: Prisma.ActivityEnrollmentUncheckedUpdateManyWithoutMemberNestedInput
   spinResults?: Prisma.SpinResultUncheckedUpdateManyWithoutMemberNestedInput
@@ -4085,6 +5520,9 @@ export type MemberCreateManyPrimaryTradeAccountInput = {
   telegramUsername?: string | null
   telegramUserId?: string | null
   discordUsername?: string | null
+  discordUserId?: string | null
+  lineUserId?: string | null
+  lineDisplayName?: string | null
   socialLinksJson?: string | null
   joinedAt?: Date | string
   createdAt?: Date | string
@@ -4117,6 +5555,9 @@ export type MemberUpdateWithoutPrimaryTradeAccountInput = {
   telegramUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   telegramUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   discordUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  discordUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lineUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lineDisplayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   socialLinksJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   joinedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -4138,6 +5579,10 @@ export type MemberUpdateWithoutPrimaryTradeAccountInput = {
   telegramAccess?: Prisma.TelegramAccessUpdateManyWithoutMemberNestedInput
   renewalHistory?: Prisma.RenewalRecordUpdateManyWithoutMemberNestedInput
   activityLogs?: Prisma.ActivityLogUpdateManyWithoutMemberNestedInput
+  rewardClaims?: Prisma.RewardClaimUpdateManyWithoutMemberNestedInput
+  journalAccounts?: Prisma.JournalAccountUpdateManyWithoutMemberNestedInput
+  socialAccounts?: Prisma.SocialAccountUpdateManyWithoutMemberNestedInput
+  notificationReads?: Prisma.MemberNotificationReadUpdateManyWithoutMemberNestedInput
   lotCheckRuns?: Prisma.LotCheckRunUpdateManyWithoutMemberNestedInput
   activityEnrollments?: Prisma.ActivityEnrollmentUpdateManyWithoutMemberNestedInput
   spinResults?: Prisma.SpinResultUpdateManyWithoutMemberNestedInput
@@ -4163,6 +5608,9 @@ export type MemberUncheckedUpdateWithoutPrimaryTradeAccountInput = {
   telegramUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   telegramUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   discordUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  discordUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lineUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lineDisplayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   socialLinksJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   joinedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -4184,6 +5632,10 @@ export type MemberUncheckedUpdateWithoutPrimaryTradeAccountInput = {
   telegramAccess?: Prisma.TelegramAccessUncheckedUpdateManyWithoutMemberNestedInput
   renewalHistory?: Prisma.RenewalRecordUncheckedUpdateManyWithoutMemberNestedInput
   activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutMemberNestedInput
+  rewardClaims?: Prisma.RewardClaimUncheckedUpdateManyWithoutMemberNestedInput
+  journalAccounts?: Prisma.JournalAccountUncheckedUpdateManyWithoutMemberNestedInput
+  socialAccounts?: Prisma.SocialAccountUncheckedUpdateManyWithoutMemberNestedInput
+  notificationReads?: Prisma.MemberNotificationReadUncheckedUpdateManyWithoutMemberNestedInput
   lotCheckRuns?: Prisma.LotCheckRunUncheckedUpdateManyWithoutMemberNestedInput
   activityEnrollments?: Prisma.ActivityEnrollmentUncheckedUpdateManyWithoutMemberNestedInput
   spinResults?: Prisma.SpinResultUncheckedUpdateManyWithoutMemberNestedInput
@@ -4209,6 +5661,9 @@ export type MemberUncheckedUpdateManyWithoutPrimaryTradeAccountInput = {
   telegramUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   telegramUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   discordUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  discordUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lineUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lineDisplayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   socialLinksJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   joinedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -4238,6 +5693,10 @@ export type MemberCountOutputType = {
   telegramAccess: number
   renewalHistory: number
   activityLogs: number
+  rewardClaims: number
+  journalAccounts: number
+  socialAccounts: number
+  notificationReads: number
   lotCheckRuns: number
   activityEnrollments: number
   spinResults: number
@@ -4254,6 +5713,10 @@ export type MemberCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions
   telegramAccess?: boolean | MemberCountOutputTypeCountTelegramAccessArgs
   renewalHistory?: boolean | MemberCountOutputTypeCountRenewalHistoryArgs
   activityLogs?: boolean | MemberCountOutputTypeCountActivityLogsArgs
+  rewardClaims?: boolean | MemberCountOutputTypeCountRewardClaimsArgs
+  journalAccounts?: boolean | MemberCountOutputTypeCountJournalAccountsArgs
+  socialAccounts?: boolean | MemberCountOutputTypeCountSocialAccountsArgs
+  notificationReads?: boolean | MemberCountOutputTypeCountNotificationReadsArgs
   lotCheckRuns?: boolean | MemberCountOutputTypeCountLotCheckRunsArgs
   activityEnrollments?: boolean | MemberCountOutputTypeCountActivityEnrollmentsArgs
   spinResults?: boolean | MemberCountOutputTypeCountSpinResultsArgs
@@ -4324,6 +5787,34 @@ export type MemberCountOutputTypeCountActivityLogsArgs<ExtArgs extends runtime.T
 /**
  * MemberCountOutputType without action
  */
+export type MemberCountOutputTypeCountRewardClaimsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.RewardClaimWhereInput
+}
+
+/**
+ * MemberCountOutputType without action
+ */
+export type MemberCountOutputTypeCountJournalAccountsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.JournalAccountWhereInput
+}
+
+/**
+ * MemberCountOutputType without action
+ */
+export type MemberCountOutputTypeCountSocialAccountsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.SocialAccountWhereInput
+}
+
+/**
+ * MemberCountOutputType without action
+ */
+export type MemberCountOutputTypeCountNotificationReadsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.MemberNotificationReadWhereInput
+}
+
+/**
+ * MemberCountOutputType without action
+ */
 export type MemberCountOutputTypeCountLotCheckRunsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.LotCheckRunWhereInput
 }
@@ -4381,6 +5872,9 @@ export type MemberSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   telegramUsername?: boolean
   telegramUserId?: boolean
   discordUsername?: boolean
+  discordUserId?: boolean
+  lineUserId?: boolean
+  lineDisplayName?: boolean
   socialLinksJson?: boolean
   joinedAt?: boolean
   createdAt?: boolean
@@ -4404,6 +5898,10 @@ export type MemberSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   telegramAccess?: boolean | Prisma.Member$telegramAccessArgs<ExtArgs>
   renewalHistory?: boolean | Prisma.Member$renewalHistoryArgs<ExtArgs>
   activityLogs?: boolean | Prisma.Member$activityLogsArgs<ExtArgs>
+  rewardClaims?: boolean | Prisma.Member$rewardClaimsArgs<ExtArgs>
+  journalAccounts?: boolean | Prisma.Member$journalAccountsArgs<ExtArgs>
+  socialAccounts?: boolean | Prisma.Member$socialAccountsArgs<ExtArgs>
+  notificationReads?: boolean | Prisma.Member$notificationReadsArgs<ExtArgs>
   lotCheckRuns?: boolean | Prisma.Member$lotCheckRunsArgs<ExtArgs>
   activityEnrollments?: boolean | Prisma.Member$activityEnrollmentsArgs<ExtArgs>
   spinResults?: boolean | Prisma.Member$spinResultsArgs<ExtArgs>
@@ -4432,6 +5930,9 @@ export type MemberSelectScalar = {
   telegramUsername?: boolean
   telegramUserId?: boolean
   discordUsername?: boolean
+  discordUserId?: boolean
+  lineUserId?: boolean
+  lineDisplayName?: boolean
   socialLinksJson?: boolean
   joinedAt?: boolean
   createdAt?: boolean
@@ -4449,7 +5950,7 @@ export type MemberSelectScalar = {
   customerStageOverride?: boolean
 }
 
-export type MemberOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "externalId" | "code" | "name" | "displayName" | "avatarUrl" | "email" | "passwordHash" | "identityVerifiedAt" | "phone" | "country" | "address" | "tradingView" | "telegramUsername" | "telegramUserId" | "discordUsername" | "socialLinksJson" | "joinedAt" | "createdAt" | "updatedAt" | "plan" | "primaryTradeAccountId" | "requiredLotsOverride" | "requiredLotsOverrideNote" | "crmStartDate" | "crmExpiryDate" | "currentPeriodLots" | "currentPeriodLotsAt" | "currentPeriodLotsFrom" | "currentPeriodLotsTo" | "customerStageOverride", ExtArgs["result"]["member"]>
+export type MemberOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "externalId" | "code" | "name" | "displayName" | "avatarUrl" | "email" | "passwordHash" | "identityVerifiedAt" | "phone" | "country" | "address" | "tradingView" | "telegramUsername" | "telegramUserId" | "discordUsername" | "discordUserId" | "lineUserId" | "lineDisplayName" | "socialLinksJson" | "joinedAt" | "createdAt" | "updatedAt" | "plan" | "primaryTradeAccountId" | "requiredLotsOverride" | "requiredLotsOverrideNote" | "crmStartDate" | "crmExpiryDate" | "currentPeriodLots" | "currentPeriodLotsAt" | "currentPeriodLotsFrom" | "currentPeriodLotsTo" | "customerStageOverride", ExtArgs["result"]["member"]>
 export type MemberInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   primaryTradeAccount?: boolean | Prisma.Member$primaryTradeAccountArgs<ExtArgs>
   tradeAccounts?: boolean | Prisma.Member$tradeAccountsArgs<ExtArgs>
@@ -4459,6 +5960,10 @@ export type MemberInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   telegramAccess?: boolean | Prisma.Member$telegramAccessArgs<ExtArgs>
   renewalHistory?: boolean | Prisma.Member$renewalHistoryArgs<ExtArgs>
   activityLogs?: boolean | Prisma.Member$activityLogsArgs<ExtArgs>
+  rewardClaims?: boolean | Prisma.Member$rewardClaimsArgs<ExtArgs>
+  journalAccounts?: boolean | Prisma.Member$journalAccountsArgs<ExtArgs>
+  socialAccounts?: boolean | Prisma.Member$socialAccountsArgs<ExtArgs>
+  notificationReads?: boolean | Prisma.Member$notificationReadsArgs<ExtArgs>
   lotCheckRuns?: boolean | Prisma.Member$lotCheckRunsArgs<ExtArgs>
   activityEnrollments?: boolean | Prisma.Member$activityEnrollmentsArgs<ExtArgs>
   spinResults?: boolean | Prisma.Member$spinResultsArgs<ExtArgs>
@@ -4479,6 +5984,10 @@ export type $MemberPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
     telegramAccess: Prisma.$TelegramAccessPayload<ExtArgs>[]
     renewalHistory: Prisma.$RenewalRecordPayload<ExtArgs>[]
     activityLogs: Prisma.$ActivityLogPayload<ExtArgs>[]
+    rewardClaims: Prisma.$RewardClaimPayload<ExtArgs>[]
+    journalAccounts: Prisma.$JournalAccountPayload<ExtArgs>[]
+    socialAccounts: Prisma.$SocialAccountPayload<ExtArgs>[]
+    notificationReads: Prisma.$MemberNotificationReadPayload<ExtArgs>[]
     lotCheckRuns: Prisma.$LotCheckRunPayload<ExtArgs>[]
     activityEnrollments: Prisma.$ActivityEnrollmentPayload<ExtArgs>[]
     spinResults: Prisma.$SpinResultPayload<ExtArgs>[]
@@ -4511,6 +6020,9 @@ export type $MemberPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
     telegramUsername: string | null
     telegramUserId: string | null
     discordUsername: string | null
+    discordUserId: string | null
+    lineUserId: string | null
+    lineDisplayName: string | null
     socialLinksJson: string | null
     joinedAt: Date
     createdAt: Date
@@ -4880,6 +6392,10 @@ export interface Prisma__MemberClient<T, Null = never, ExtArgs extends runtime.T
   telegramAccess<T extends Prisma.Member$telegramAccessArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Member$telegramAccessArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TelegramAccessPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   renewalHistory<T extends Prisma.Member$renewalHistoryArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Member$renewalHistoryArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$RenewalRecordPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   activityLogs<T extends Prisma.Member$activityLogsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Member$activityLogsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ActivityLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  rewardClaims<T extends Prisma.Member$rewardClaimsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Member$rewardClaimsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$RewardClaimPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  journalAccounts<T extends Prisma.Member$journalAccountsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Member$journalAccountsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$JournalAccountPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  socialAccounts<T extends Prisma.Member$socialAccountsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Member$socialAccountsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SocialAccountPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  notificationReads<T extends Prisma.Member$notificationReadsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Member$notificationReadsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MemberNotificationReadPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   lotCheckRuns<T extends Prisma.Member$lotCheckRunsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Member$lotCheckRunsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$LotCheckRunPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   activityEnrollments<T extends Prisma.Member$activityEnrollmentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Member$activityEnrollmentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ActivityEnrollmentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   spinResults<T extends Prisma.Member$spinResultsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Member$spinResultsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SpinResultPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -4931,6 +6447,9 @@ export interface MemberFieldRefs {
   readonly telegramUsername: Prisma.FieldRef<"Member", 'String'>
   readonly telegramUserId: Prisma.FieldRef<"Member", 'String'>
   readonly discordUsername: Prisma.FieldRef<"Member", 'String'>
+  readonly discordUserId: Prisma.FieldRef<"Member", 'String'>
+  readonly lineUserId: Prisma.FieldRef<"Member", 'String'>
+  readonly lineDisplayName: Prisma.FieldRef<"Member", 'String'>
   readonly socialLinksJson: Prisma.FieldRef<"Member", 'String'>
   readonly joinedAt: Prisma.FieldRef<"Member", 'DateTime'>
   readonly createdAt: Prisma.FieldRef<"Member", 'DateTime'>
@@ -5478,6 +6997,102 @@ export type Member$activityLogsArgs<ExtArgs extends runtime.Types.Extensions.Int
   take?: number
   skip?: number
   distinct?: Prisma.ActivityLogScalarFieldEnum | Prisma.ActivityLogScalarFieldEnum[]
+}
+
+/**
+ * Member.rewardClaims
+ */
+export type Member$rewardClaimsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the RewardClaim
+   */
+  select?: Prisma.RewardClaimSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the RewardClaim
+   */
+  omit?: Prisma.RewardClaimOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.RewardClaimInclude<ExtArgs> | null
+  where?: Prisma.RewardClaimWhereInput
+  orderBy?: Prisma.RewardClaimOrderByWithRelationInput | Prisma.RewardClaimOrderByWithRelationInput[]
+  cursor?: Prisma.RewardClaimWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.RewardClaimScalarFieldEnum | Prisma.RewardClaimScalarFieldEnum[]
+}
+
+/**
+ * Member.journalAccounts
+ */
+export type Member$journalAccountsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the JournalAccount
+   */
+  select?: Prisma.JournalAccountSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the JournalAccount
+   */
+  omit?: Prisma.JournalAccountOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.JournalAccountInclude<ExtArgs> | null
+  where?: Prisma.JournalAccountWhereInput
+  orderBy?: Prisma.JournalAccountOrderByWithRelationInput | Prisma.JournalAccountOrderByWithRelationInput[]
+  cursor?: Prisma.JournalAccountWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.JournalAccountScalarFieldEnum | Prisma.JournalAccountScalarFieldEnum[]
+}
+
+/**
+ * Member.socialAccounts
+ */
+export type Member$socialAccountsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the SocialAccount
+   */
+  select?: Prisma.SocialAccountSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the SocialAccount
+   */
+  omit?: Prisma.SocialAccountOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SocialAccountInclude<ExtArgs> | null
+  where?: Prisma.SocialAccountWhereInput
+  orderBy?: Prisma.SocialAccountOrderByWithRelationInput | Prisma.SocialAccountOrderByWithRelationInput[]
+  cursor?: Prisma.SocialAccountWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.SocialAccountScalarFieldEnum | Prisma.SocialAccountScalarFieldEnum[]
+}
+
+/**
+ * Member.notificationReads
+ */
+export type Member$notificationReadsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the MemberNotificationRead
+   */
+  select?: Prisma.MemberNotificationReadSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the MemberNotificationRead
+   */
+  omit?: Prisma.MemberNotificationReadOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MemberNotificationReadInclude<ExtArgs> | null
+  where?: Prisma.MemberNotificationReadWhereInput
+  orderBy?: Prisma.MemberNotificationReadOrderByWithRelationInput | Prisma.MemberNotificationReadOrderByWithRelationInput[]
+  cursor?: Prisma.MemberNotificationReadWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.MemberNotificationReadScalarFieldEnum | Prisma.MemberNotificationReadScalarFieldEnum[]
 }
 
 /**

@@ -77,6 +77,9 @@ model Member {
   telegramUsername         String?                    @db.VarChar(96)
   telegramUserId           String?                    @db.VarChar(96)
   discordUsername          String?                    @db.VarChar(96)
+  discordUserId            String?                    @db.VarChar(96)
+  lineUserId               String?                    @db.VarChar(96)
+  lineDisplayName          String?                    @db.VarChar(191)
   socialLinksJson          String?                    @db.Text
   joinedAt                 DateTime                   @default(now())
   createdAt                DateTime                   @default(now())
@@ -104,6 +107,10 @@ model Member {
   telegramAccess           TelegramAccess[]
   renewalHistory           RenewalRecord[]
   activityLogs             ActivityLog[]
+  rewardClaims             RewardClaim[]
+  journalAccounts          JournalAccount[]
+  socialAccounts           SocialAccount[]
+  notificationReads        MemberNotificationRead[]
   lotCheckRuns             LotCheckRun[]
   activityEnrollments      ActivityEnrollment[]
   spinResults              SpinResult[]
@@ -161,6 +168,7 @@ model TradeAccount {
   tradeLogs         TradeLog[]
   lotCheckRuns      LotCheckRun[]
   activityEnrollments ActivityEnrollment[]
+  journalAccounts   JournalAccount[]
 
   @@index([brokerId, tradeId])
   @@index([memberId, tradeId])
@@ -370,9 +378,17 @@ model Activity {
   /** Manual ordering; lower shows first. Ties fall back to startDate desc. */
   sortOrder   Int            @default(0)
   published   Boolean        @default(true)
+  /** How members compete: `registered` (own partner-broker account, lots from
+   *  the lot webhook) or `demo_legacy` (pre-existing demo-only competitions —
+   *  frozen: viewable, no new enrollments). */
+  mode        String         @default("registered") @db.VarChar(16)
+  /** When winners were locked and prize claims auto-created (null = open). */
+  winnersFinalizedAt DateTime?
   createdAt   DateTime       @default(now())
   updatedAt   DateTime       @updatedAt
   enrollments ActivityEnrollment[]
+  prizes      CompetitionPrize[]
+  claims      RewardClaim[]
 
   @@index([published, status, startDate])
 }
@@ -417,6 +433,65 @@ model ActivityEnrollment {
   @@index([memberId, createdAt])
   @@index([activityId, createdAt])
   @@index([activityId, lots])
+}
+
+/** Prize table for one activity (`rankFrom`–`rankTo` → award). Admin-managed;
+ *  the finalize step matches standings ranks against these rows and creates
+ *  one RewardClaim per winner. */
+model CompetitionPrize {
+  id         Int      @id @default(autoincrement())
+  activityId Int
+  rankFrom   Int
+  rankTo     Int
+  title      String   @db.VarChar(191)
+  valueNote  String?  @db.Text
+  sortOrder  Int      @default(0)
+  createdAt  DateTime @default(now())
+  activity   Activity @relation(fields: [activityId], references: [id], onDelete: Cascade)
+
+  @@index([activityId, sortOrder])
+}
+
+/** Loyalty tier ladder (Bronze → Exclusive). Thresholds are lifetime lots;
+ *  admin-editable so the ladder never needs a code change. */
+model RewardTier {
+  id        Int      @id @default(autoincrement())
+  key       String   @unique @db.VarChar(32)
+  title     String   @db.VarChar(96)
+  titleEn   String?  @db.VarChar(96)
+  threshold Decimal  @db.Decimal(18, 2)
+  reward    String   @db.VarChar(191)
+  rewardEn  String?  @db.VarChar(191)
+  icon      String   @default("redeem") @db.VarChar(48)
+  image     String?  @db.Text
+  accent    String   @default("#2F6FED") @db.VarChar(16)
+  sortOrder Int      @default(0)
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+/** One member's reward to fulfil — tier claims, competition prizes and manual
+ *  grants share a single queue so the CRM fulfils everything in one place.
+ *  `refKey` scopes idempotency: `tier:{key}` or `activity:{id}:rank:{rank}`. */
+model RewardClaim {
+  id         Int       @id @default(autoincrement())
+  memberId   Int
+  kind       String    @db.VarChar(16)
+  refKey     String    @db.VarChar(96)
+  activityId Int?
+  title      String    @db.VarChar(191)
+  detail     String?   @db.Text
+  status     String    @default("pending") @db.VarChar(16)
+  note       String?   @db.Text
+  createdAt  DateTime  @default(now())
+  decidedAt  DateTime?
+  member     Member    @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  activity   Activity? @relation(fields: [activityId], references: [id], onDelete: SetNull)
+
+  @@unique([memberId, kind, refKey])
+  @@index([status, createdAt])
+  @@index([memberId, createdAt])
 }
 
 /* ── BEC points & Spin & Win ──
@@ -491,6 +566,119 @@ model SpinResult {
 
   @@index([memberId, spunAt])
   @@index([status, spunAt])
+}
+
+/* ── Trading Journal (member-private) ──
+    A member links each journal account to one of their own registered trade
+    accounts and records real outcomes per trade (entry/exit, P&L) — data the
+    rebate-only TradeLog never captures. Stats are always derived from the
+    trade rows, so nothing can drift. Lots here never feed CRM qualification. */
+
+model JournalAccount {
+  id              Int            @id @default(autoincrement())
+  memberId        Int
+  /** The member's own registered account this journal tracks. */
+  tradeAccountId  Int?
+  tradeId         String         @db.VarChar(64)
+  broker          String         @db.VarChar(120)
+  accountType     String         @default("Standard") @db.VarChar(64)
+  platform        String         @default("MetaTrader 5") @db.VarChar(32)
+  startingBalance Decimal        @default(0) @db.Decimal(18, 2)
+  startDate       DateTime
+  /** MT server name (e.g. XMGlobal-MT5) for future live-sync. Non-secret. */
+  mtServer        String?        @db.VarChar(64)
+  /** Investor (read-only) password, AES-256-GCM encrypted. Plaintext is
+   *  never returned by any API — only a "set or not" flag leaves the server. */
+  investorPasswordEnc String?    @db.Text
+  /** Last time the MT sync EA pushed trades for this account. */
+  mtLastSyncAt        DateTime?
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  member          Member         @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  tradeAccount    TradeAccount?  @relation(fields: [tradeAccountId], references: [id], onDelete: SetNull)
+  trades          JournalTrade[]
+  riskRule        RiskRule?
+
+  @@unique([memberId, tradeAccountId])
+  @@index([memberId, createdAt])
+}
+
+model JournalTrade {
+  id          Int            @id @default(autoincrement())
+  accountId   Int
+  /** Dedupe key for imports (`ticket:closeTime`); null for hand-entered rows. */
+  externalKey String?        @unique @db.VarChar(191)
+  ticket      String?        @db.VarChar(64)
+  symbol      String         @db.VarChar(32)
+  side        String         @db.VarChar(8)
+  openAt      DateTime
+  /** Null = still open. */
+  closeAt     DateTime?
+  openPrice   Decimal        @db.Decimal(18, 5)
+  closePrice  Decimal?       @db.Decimal(18, 5)
+  tp          Decimal?       @db.Decimal(18, 5)
+  sl          Decimal?       @db.Decimal(18, 5)
+  lots        Decimal        @db.Decimal(18, 2)
+  pnl         Decimal?       @db.Decimal(18, 2)
+  commission  Decimal        @default(0) @db.Decimal(18, 2)
+  swap        Decimal        @default(0) @db.Decimal(18, 2)
+  note        String?        @db.Text
+  /** JSON array of technique tags. */
+  tagsJson    String         @default("[]") @db.Text
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  account     JournalAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  @@index([accountId, closeAt])
+  @@index([accountId, openAt])
+}
+
+/** Per-account risk objectives (max daily loss / max loss / profit target). */
+model RiskRule {
+  id            Int            @id @default(autoincrement())
+  accountId     Int            @unique
+  maxDailyLoss  Decimal        @default(250) @db.Decimal(18, 2)
+  maxLoss       Decimal        @default(500) @db.Decimal(18, 2)
+  profitTarget  Decimal        @default(400) @db.Decimal(18, 2)
+  updatedAt     DateTime       @updatedAt
+  account       JournalAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
+}
+
+/* ── Social account links (member-verified) ──
+    One row per member+provider, written ONLY by a real OAuth/Login flow
+    (Telegram Login Widget, Discord OAuth2, LINE Login) — never hand-typed.
+    The Member telegram/discord columns stay as display copies so the CRM
+    sync and TelegramAccess derivation keep working. */
+
+model SocialAccount {
+  id             Int      @id @default(autoincrement())
+  memberId       Int
+  provider       String   @db.VarChar(16)
+  providerUserId String   @db.VarChar(96)
+  username       String?  @db.VarChar(191)
+  verifiedAt     DateTime @default(now())
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  member         Member   @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  @@unique([memberId, provider])
+  @@unique([provider, providerUserId])
+  @@index([memberId, provider])
+}
+
+/* ── Member notification reads (customer bell) ──
+    The bell items themselves are derived on read (rebate, renewals, tiers,
+    competitions, claims, spins) — only the dismissed keys persist here. */
+
+model MemberNotificationRead {
+  id        Int      @id @default(autoincrement())
+  memberId  Int
+  key       String   @db.VarChar(96)
+  readAt    DateTime @default(now())
+  member    Member   @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  @@unique([memberId, key])
+  @@index([memberId, readAt])
 }
 
 /* ── Course Online (LMS) ──
@@ -582,7 +770,16 @@ model LessonProgress {
   id          Int          @id @default(autoincrement())
   lessonId    Int
   memberId    Int
-  completedAt DateTime     @default(now())
+  /** Set when the lesson is completed (null = still watching). Row existence
+   *  alone means nothing — heartbeats create rows before completion. */
+  completedAt DateTime?
+  /** Furthest video-clock position reached (seconds) — drives the ≥90%
+   *  completion rule. Monotonic: heartbeats only ever raise it. */
+  maxPositionSec Int       @default(0)
+  /** Full video duration in seconds, captured from the player (null until the
+   *  first heartbeat that knows it). Needed to compute the watched %. */
+  durationSec Int?
+  updatedAt   DateTime     @updatedAt
   lesson      CourseLesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
   member      Member       @relation(fields: [memberId], references: [id], onDelete: Cascade)
 

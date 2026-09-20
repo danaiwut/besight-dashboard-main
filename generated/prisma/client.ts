@@ -132,6 +132,26 @@ export type Activity = Prisma.ActivityModel
  */
 export type ActivityEnrollment = Prisma.ActivityEnrollmentModel
 /**
+ * Model CompetitionPrize
+ * * Prize table for one activity (`rankFrom`–`rankTo` → award). Admin-managed;
+ *  *  the finalize step matches standings ranks against these rows and creates
+ *  *  one RewardClaim per winner.
+ */
+export type CompetitionPrize = Prisma.CompetitionPrizeModel
+/**
+ * Model RewardTier
+ * * Loyalty tier ladder (Bronze → Exclusive). Thresholds are lifetime lots;
+ *  *  admin-editable so the ladder never needs a code change.
+ */
+export type RewardTier = Prisma.RewardTierModel
+/**
+ * Model RewardClaim
+ * * One member's reward to fulfil — tier claims, competition prizes and manual
+ *  *  grants share a single queue so the CRM fulfils everything in one place.
+ *  *  `refKey` scopes idempotency: `tier:{key}` or `activity:{id}:rank:{rank}`.
+ */
+export type RewardClaim = Prisma.RewardClaimModel
+/**
  * Model BecRate
  * * Points per traded lot for one symbol. Symbols without a row use the
  *  *  `defaultPointsPerLot` from the spin settings.
@@ -154,6 +174,31 @@ export type BecGrant = Prisma.BecGrantModel
  * 
  */
 export type SpinResult = Prisma.SpinResultModel
+/**
+ * Model JournalAccount
+ * 
+ */
+export type JournalAccount = Prisma.JournalAccountModel
+/**
+ * Model JournalTrade
+ * 
+ */
+export type JournalTrade = Prisma.JournalTradeModel
+/**
+ * Model RiskRule
+ * * Per-account risk objectives (max daily loss / max loss / profit target).
+ */
+export type RiskRule = Prisma.RiskRuleModel
+/**
+ * Model SocialAccount
+ * 
+ */
+export type SocialAccount = Prisma.SocialAccountModel
+/**
+ * Model MemberNotificationRead
+ * 
+ */
+export type MemberNotificationRead = Prisma.MemberNotificationReadModel
 /**
  * Model Course
  * 

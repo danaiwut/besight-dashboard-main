@@ -286,6 +286,7 @@ export type TradeAccountWhereInput = {
   tradeLogs?: Prisma.TradeLogListRelationFilter
   lotCheckRuns?: Prisma.LotCheckRunListRelationFilter
   activityEnrollments?: Prisma.ActivityEnrollmentListRelationFilter
+  journalAccounts?: Prisma.JournalAccountListRelationFilter
 }
 
 export type TradeAccountOrderByWithRelationInput = {
@@ -307,6 +308,7 @@ export type TradeAccountOrderByWithRelationInput = {
   tradeLogs?: Prisma.TradeLogOrderByRelationAggregateInput
   lotCheckRuns?: Prisma.LotCheckRunOrderByRelationAggregateInput
   activityEnrollments?: Prisma.ActivityEnrollmentOrderByRelationAggregateInput
+  journalAccounts?: Prisma.JournalAccountOrderByRelationAggregateInput
   _relevance?: Prisma.TradeAccountOrderByRelevanceInput
 }
 
@@ -332,6 +334,7 @@ export type TradeAccountWhereUniqueInput = Prisma.AtLeast<{
   tradeLogs?: Prisma.TradeLogListRelationFilter
   lotCheckRuns?: Prisma.LotCheckRunListRelationFilter
   activityEnrollments?: Prisma.ActivityEnrollmentListRelationFilter
+  journalAccounts?: Prisma.JournalAccountListRelationFilter
 }, "id">
 
 export type TradeAccountOrderByWithAggregationInput = {
@@ -388,6 +391,7 @@ export type TradeAccountCreateInput = {
   tradeLogs?: Prisma.TradeLogCreateNestedManyWithoutTradeAccountInput
   lotCheckRuns?: Prisma.LotCheckRunCreateNestedManyWithoutTradeAccountInput
   activityEnrollments?: Prisma.ActivityEnrollmentCreateNestedManyWithoutTradeAccountInput
+  journalAccounts?: Prisma.JournalAccountCreateNestedManyWithoutTradeAccountInput
 }
 
 export type TradeAccountUncheckedCreateInput = {
@@ -407,6 +411,7 @@ export type TradeAccountUncheckedCreateInput = {
   tradeLogs?: Prisma.TradeLogUncheckedCreateNestedManyWithoutTradeAccountInput
   lotCheckRuns?: Prisma.LotCheckRunUncheckedCreateNestedManyWithoutTradeAccountInput
   activityEnrollments?: Prisma.ActivityEnrollmentUncheckedCreateNestedManyWithoutTradeAccountInput
+  journalAccounts?: Prisma.JournalAccountUncheckedCreateNestedManyWithoutTradeAccountInput
 }
 
 export type TradeAccountUpdateInput = {
@@ -425,6 +430,7 @@ export type TradeAccountUpdateInput = {
   tradeLogs?: Prisma.TradeLogUpdateManyWithoutTradeAccountNestedInput
   lotCheckRuns?: Prisma.LotCheckRunUpdateManyWithoutTradeAccountNestedInput
   activityEnrollments?: Prisma.ActivityEnrollmentUpdateManyWithoutTradeAccountNestedInput
+  journalAccounts?: Prisma.JournalAccountUpdateManyWithoutTradeAccountNestedInput
 }
 
 export type TradeAccountUncheckedUpdateInput = {
@@ -444,6 +450,7 @@ export type TradeAccountUncheckedUpdateInput = {
   tradeLogs?: Prisma.TradeLogUncheckedUpdateManyWithoutTradeAccountNestedInput
   lotCheckRuns?: Prisma.LotCheckRunUncheckedUpdateManyWithoutTradeAccountNestedInput
   activityEnrollments?: Prisma.ActivityEnrollmentUncheckedUpdateManyWithoutTradeAccountNestedInput
+  journalAccounts?: Prisma.JournalAccountUncheckedUpdateManyWithoutTradeAccountNestedInput
 }
 
 export type TradeAccountCreateManyInput = {
@@ -725,6 +732,22 @@ export type TradeAccountUpdateOneWithoutActivityEnrollmentsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.TradeAccountUpdateToOneWithWhereWithoutActivityEnrollmentsInput, Prisma.TradeAccountUpdateWithoutActivityEnrollmentsInput>, Prisma.TradeAccountUncheckedUpdateWithoutActivityEnrollmentsInput>
 }
 
+export type TradeAccountCreateNestedOneWithoutJournalAccountsInput = {
+  create?: Prisma.XOR<Prisma.TradeAccountCreateWithoutJournalAccountsInput, Prisma.TradeAccountUncheckedCreateWithoutJournalAccountsInput>
+  connectOrCreate?: Prisma.TradeAccountCreateOrConnectWithoutJournalAccountsInput
+  connect?: Prisma.TradeAccountWhereUniqueInput
+}
+
+export type TradeAccountUpdateOneWithoutJournalAccountsNestedInput = {
+  create?: Prisma.XOR<Prisma.TradeAccountCreateWithoutJournalAccountsInput, Prisma.TradeAccountUncheckedCreateWithoutJournalAccountsInput>
+  connectOrCreate?: Prisma.TradeAccountCreateOrConnectWithoutJournalAccountsInput
+  upsert?: Prisma.TradeAccountUpsertWithoutJournalAccountsInput
+  disconnect?: Prisma.TradeAccountWhereInput | boolean
+  delete?: Prisma.TradeAccountWhereInput | boolean
+  connect?: Prisma.TradeAccountWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.TradeAccountUpdateToOneWithWhereWithoutJournalAccountsInput, Prisma.TradeAccountUpdateWithoutJournalAccountsInput>, Prisma.TradeAccountUncheckedUpdateWithoutJournalAccountsInput>
+}
+
 export type TradeAccountCreateWithoutPrimaryForMembersInput = {
   tradeId: string
   accountType?: string | null
@@ -740,6 +763,7 @@ export type TradeAccountCreateWithoutPrimaryForMembersInput = {
   tradeLogs?: Prisma.TradeLogCreateNestedManyWithoutTradeAccountInput
   lotCheckRuns?: Prisma.LotCheckRunCreateNestedManyWithoutTradeAccountInput
   activityEnrollments?: Prisma.ActivityEnrollmentCreateNestedManyWithoutTradeAccountInput
+  journalAccounts?: Prisma.JournalAccountCreateNestedManyWithoutTradeAccountInput
 }
 
 export type TradeAccountUncheckedCreateWithoutPrimaryForMembersInput = {
@@ -758,6 +782,7 @@ export type TradeAccountUncheckedCreateWithoutPrimaryForMembersInput = {
   tradeLogs?: Prisma.TradeLogUncheckedCreateNestedManyWithoutTradeAccountInput
   lotCheckRuns?: Prisma.LotCheckRunUncheckedCreateNestedManyWithoutTradeAccountInput
   activityEnrollments?: Prisma.ActivityEnrollmentUncheckedCreateNestedManyWithoutTradeAccountInput
+  journalAccounts?: Prisma.JournalAccountUncheckedCreateNestedManyWithoutTradeAccountInput
 }
 
 export type TradeAccountCreateOrConnectWithoutPrimaryForMembersInput = {
@@ -780,6 +805,7 @@ export type TradeAccountCreateWithoutMemberInput = {
   tradeLogs?: Prisma.TradeLogCreateNestedManyWithoutTradeAccountInput
   lotCheckRuns?: Prisma.LotCheckRunCreateNestedManyWithoutTradeAccountInput
   activityEnrollments?: Prisma.ActivityEnrollmentCreateNestedManyWithoutTradeAccountInput
+  journalAccounts?: Prisma.JournalAccountCreateNestedManyWithoutTradeAccountInput
 }
 
 export type TradeAccountUncheckedCreateWithoutMemberInput = {
@@ -798,6 +824,7 @@ export type TradeAccountUncheckedCreateWithoutMemberInput = {
   tradeLogs?: Prisma.TradeLogUncheckedCreateNestedManyWithoutTradeAccountInput
   lotCheckRuns?: Prisma.LotCheckRunUncheckedCreateNestedManyWithoutTradeAccountInput
   activityEnrollments?: Prisma.ActivityEnrollmentUncheckedCreateNestedManyWithoutTradeAccountInput
+  journalAccounts?: Prisma.JournalAccountUncheckedCreateNestedManyWithoutTradeAccountInput
 }
 
 export type TradeAccountCreateOrConnectWithoutMemberInput = {
@@ -836,6 +863,7 @@ export type TradeAccountUpdateWithoutPrimaryForMembersInput = {
   tradeLogs?: Prisma.TradeLogUpdateManyWithoutTradeAccountNestedInput
   lotCheckRuns?: Prisma.LotCheckRunUpdateManyWithoutTradeAccountNestedInput
   activityEnrollments?: Prisma.ActivityEnrollmentUpdateManyWithoutTradeAccountNestedInput
+  journalAccounts?: Prisma.JournalAccountUpdateManyWithoutTradeAccountNestedInput
 }
 
 export type TradeAccountUncheckedUpdateWithoutPrimaryForMembersInput = {
@@ -854,6 +882,7 @@ export type TradeAccountUncheckedUpdateWithoutPrimaryForMembersInput = {
   tradeLogs?: Prisma.TradeLogUncheckedUpdateManyWithoutTradeAccountNestedInput
   lotCheckRuns?: Prisma.LotCheckRunUncheckedUpdateManyWithoutTradeAccountNestedInput
   activityEnrollments?: Prisma.ActivityEnrollmentUncheckedUpdateManyWithoutTradeAccountNestedInput
+  journalAccounts?: Prisma.JournalAccountUncheckedUpdateManyWithoutTradeAccountNestedInput
 }
 
 export type TradeAccountUpsertWithWhereUniqueWithoutMemberInput = {
@@ -905,6 +934,7 @@ export type TradeAccountCreateWithoutBrokerInput = {
   tradeLogs?: Prisma.TradeLogCreateNestedManyWithoutTradeAccountInput
   lotCheckRuns?: Prisma.LotCheckRunCreateNestedManyWithoutTradeAccountInput
   activityEnrollments?: Prisma.ActivityEnrollmentCreateNestedManyWithoutTradeAccountInput
+  journalAccounts?: Prisma.JournalAccountCreateNestedManyWithoutTradeAccountInput
 }
 
 export type TradeAccountUncheckedCreateWithoutBrokerInput = {
@@ -923,6 +953,7 @@ export type TradeAccountUncheckedCreateWithoutBrokerInput = {
   tradeLogs?: Prisma.TradeLogUncheckedCreateNestedManyWithoutTradeAccountInput
   lotCheckRuns?: Prisma.LotCheckRunUncheckedCreateNestedManyWithoutTradeAccountInput
   activityEnrollments?: Prisma.ActivityEnrollmentUncheckedCreateNestedManyWithoutTradeAccountInput
+  journalAccounts?: Prisma.JournalAccountUncheckedCreateNestedManyWithoutTradeAccountInput
 }
 
 export type TradeAccountCreateOrConnectWithoutBrokerInput = {
@@ -966,6 +997,7 @@ export type TradeAccountCreateWithoutTradeLogsInput = {
   primaryForMembers?: Prisma.MemberCreateNestedManyWithoutPrimaryTradeAccountInput
   lotCheckRuns?: Prisma.LotCheckRunCreateNestedManyWithoutTradeAccountInput
   activityEnrollments?: Prisma.ActivityEnrollmentCreateNestedManyWithoutTradeAccountInput
+  journalAccounts?: Prisma.JournalAccountCreateNestedManyWithoutTradeAccountInput
 }
 
 export type TradeAccountUncheckedCreateWithoutTradeLogsInput = {
@@ -984,6 +1016,7 @@ export type TradeAccountUncheckedCreateWithoutTradeLogsInput = {
   primaryForMembers?: Prisma.MemberUncheckedCreateNestedManyWithoutPrimaryTradeAccountInput
   lotCheckRuns?: Prisma.LotCheckRunUncheckedCreateNestedManyWithoutTradeAccountInput
   activityEnrollments?: Prisma.ActivityEnrollmentUncheckedCreateNestedManyWithoutTradeAccountInput
+  journalAccounts?: Prisma.JournalAccountUncheckedCreateNestedManyWithoutTradeAccountInput
 }
 
 export type TradeAccountCreateOrConnectWithoutTradeLogsInput = {
@@ -1017,6 +1050,7 @@ export type TradeAccountUpdateWithoutTradeLogsInput = {
   primaryForMembers?: Prisma.MemberUpdateManyWithoutPrimaryTradeAccountNestedInput
   lotCheckRuns?: Prisma.LotCheckRunUpdateManyWithoutTradeAccountNestedInput
   activityEnrollments?: Prisma.ActivityEnrollmentUpdateManyWithoutTradeAccountNestedInput
+  journalAccounts?: Prisma.JournalAccountUpdateManyWithoutTradeAccountNestedInput
 }
 
 export type TradeAccountUncheckedUpdateWithoutTradeLogsInput = {
@@ -1035,6 +1069,7 @@ export type TradeAccountUncheckedUpdateWithoutTradeLogsInput = {
   primaryForMembers?: Prisma.MemberUncheckedUpdateManyWithoutPrimaryTradeAccountNestedInput
   lotCheckRuns?: Prisma.LotCheckRunUncheckedUpdateManyWithoutTradeAccountNestedInput
   activityEnrollments?: Prisma.ActivityEnrollmentUncheckedUpdateManyWithoutTradeAccountNestedInput
+  journalAccounts?: Prisma.JournalAccountUncheckedUpdateManyWithoutTradeAccountNestedInput
 }
 
 export type TradeAccountCreateWithoutLotCheckRunsInput = {
@@ -1052,6 +1087,7 @@ export type TradeAccountCreateWithoutLotCheckRunsInput = {
   primaryForMembers?: Prisma.MemberCreateNestedManyWithoutPrimaryTradeAccountInput
   tradeLogs?: Prisma.TradeLogCreateNestedManyWithoutTradeAccountInput
   activityEnrollments?: Prisma.ActivityEnrollmentCreateNestedManyWithoutTradeAccountInput
+  journalAccounts?: Prisma.JournalAccountCreateNestedManyWithoutTradeAccountInput
 }
 
 export type TradeAccountUncheckedCreateWithoutLotCheckRunsInput = {
@@ -1070,6 +1106,7 @@ export type TradeAccountUncheckedCreateWithoutLotCheckRunsInput = {
   primaryForMembers?: Prisma.MemberUncheckedCreateNestedManyWithoutPrimaryTradeAccountInput
   tradeLogs?: Prisma.TradeLogUncheckedCreateNestedManyWithoutTradeAccountInput
   activityEnrollments?: Prisma.ActivityEnrollmentUncheckedCreateNestedManyWithoutTradeAccountInput
+  journalAccounts?: Prisma.JournalAccountUncheckedCreateNestedManyWithoutTradeAccountInput
 }
 
 export type TradeAccountCreateOrConnectWithoutLotCheckRunsInput = {
@@ -1103,6 +1140,7 @@ export type TradeAccountUpdateWithoutLotCheckRunsInput = {
   primaryForMembers?: Prisma.MemberUpdateManyWithoutPrimaryTradeAccountNestedInput
   tradeLogs?: Prisma.TradeLogUpdateManyWithoutTradeAccountNestedInput
   activityEnrollments?: Prisma.ActivityEnrollmentUpdateManyWithoutTradeAccountNestedInput
+  journalAccounts?: Prisma.JournalAccountUpdateManyWithoutTradeAccountNestedInput
 }
 
 export type TradeAccountUncheckedUpdateWithoutLotCheckRunsInput = {
@@ -1121,6 +1159,7 @@ export type TradeAccountUncheckedUpdateWithoutLotCheckRunsInput = {
   primaryForMembers?: Prisma.MemberUncheckedUpdateManyWithoutPrimaryTradeAccountNestedInput
   tradeLogs?: Prisma.TradeLogUncheckedUpdateManyWithoutTradeAccountNestedInput
   activityEnrollments?: Prisma.ActivityEnrollmentUncheckedUpdateManyWithoutTradeAccountNestedInput
+  journalAccounts?: Prisma.JournalAccountUncheckedUpdateManyWithoutTradeAccountNestedInput
 }
 
 export type TradeAccountCreateWithoutActivityEnrollmentsInput = {
@@ -1138,6 +1177,7 @@ export type TradeAccountCreateWithoutActivityEnrollmentsInput = {
   primaryForMembers?: Prisma.MemberCreateNestedManyWithoutPrimaryTradeAccountInput
   tradeLogs?: Prisma.TradeLogCreateNestedManyWithoutTradeAccountInput
   lotCheckRuns?: Prisma.LotCheckRunCreateNestedManyWithoutTradeAccountInput
+  journalAccounts?: Prisma.JournalAccountCreateNestedManyWithoutTradeAccountInput
 }
 
 export type TradeAccountUncheckedCreateWithoutActivityEnrollmentsInput = {
@@ -1156,6 +1196,7 @@ export type TradeAccountUncheckedCreateWithoutActivityEnrollmentsInput = {
   primaryForMembers?: Prisma.MemberUncheckedCreateNestedManyWithoutPrimaryTradeAccountInput
   tradeLogs?: Prisma.TradeLogUncheckedCreateNestedManyWithoutTradeAccountInput
   lotCheckRuns?: Prisma.LotCheckRunUncheckedCreateNestedManyWithoutTradeAccountInput
+  journalAccounts?: Prisma.JournalAccountUncheckedCreateNestedManyWithoutTradeAccountInput
 }
 
 export type TradeAccountCreateOrConnectWithoutActivityEnrollmentsInput = {
@@ -1189,6 +1230,7 @@ export type TradeAccountUpdateWithoutActivityEnrollmentsInput = {
   primaryForMembers?: Prisma.MemberUpdateManyWithoutPrimaryTradeAccountNestedInput
   tradeLogs?: Prisma.TradeLogUpdateManyWithoutTradeAccountNestedInput
   lotCheckRuns?: Prisma.LotCheckRunUpdateManyWithoutTradeAccountNestedInput
+  journalAccounts?: Prisma.JournalAccountUpdateManyWithoutTradeAccountNestedInput
 }
 
 export type TradeAccountUncheckedUpdateWithoutActivityEnrollmentsInput = {
@@ -1207,6 +1249,97 @@ export type TradeAccountUncheckedUpdateWithoutActivityEnrollmentsInput = {
   primaryForMembers?: Prisma.MemberUncheckedUpdateManyWithoutPrimaryTradeAccountNestedInput
   tradeLogs?: Prisma.TradeLogUncheckedUpdateManyWithoutTradeAccountNestedInput
   lotCheckRuns?: Prisma.LotCheckRunUncheckedUpdateManyWithoutTradeAccountNestedInput
+  journalAccounts?: Prisma.JournalAccountUncheckedUpdateManyWithoutTradeAccountNestedInput
+}
+
+export type TradeAccountCreateWithoutJournalAccountsInput = {
+  tradeId: string
+  accountType?: string | null
+  partnerIb?: string | null
+  verification?: $Enums.VerificationStatus
+  status?: $Enums.RecordStatus
+  memberConfirmed?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  lastSyncAt?: Date | string | null
+  member: Prisma.MemberCreateNestedOneWithoutTradeAccountsInput
+  broker?: Prisma.BrokerCreateNestedOneWithoutAccountsInput
+  primaryForMembers?: Prisma.MemberCreateNestedManyWithoutPrimaryTradeAccountInput
+  tradeLogs?: Prisma.TradeLogCreateNestedManyWithoutTradeAccountInput
+  lotCheckRuns?: Prisma.LotCheckRunCreateNestedManyWithoutTradeAccountInput
+  activityEnrollments?: Prisma.ActivityEnrollmentCreateNestedManyWithoutTradeAccountInput
+}
+
+export type TradeAccountUncheckedCreateWithoutJournalAccountsInput = {
+  id?: number
+  memberId: number
+  brokerId?: number | null
+  tradeId: string
+  accountType?: string | null
+  partnerIb?: string | null
+  verification?: $Enums.VerificationStatus
+  status?: $Enums.RecordStatus
+  memberConfirmed?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  lastSyncAt?: Date | string | null
+  primaryForMembers?: Prisma.MemberUncheckedCreateNestedManyWithoutPrimaryTradeAccountInput
+  tradeLogs?: Prisma.TradeLogUncheckedCreateNestedManyWithoutTradeAccountInput
+  lotCheckRuns?: Prisma.LotCheckRunUncheckedCreateNestedManyWithoutTradeAccountInput
+  activityEnrollments?: Prisma.ActivityEnrollmentUncheckedCreateNestedManyWithoutTradeAccountInput
+}
+
+export type TradeAccountCreateOrConnectWithoutJournalAccountsInput = {
+  where: Prisma.TradeAccountWhereUniqueInput
+  create: Prisma.XOR<Prisma.TradeAccountCreateWithoutJournalAccountsInput, Prisma.TradeAccountUncheckedCreateWithoutJournalAccountsInput>
+}
+
+export type TradeAccountUpsertWithoutJournalAccountsInput = {
+  update: Prisma.XOR<Prisma.TradeAccountUpdateWithoutJournalAccountsInput, Prisma.TradeAccountUncheckedUpdateWithoutJournalAccountsInput>
+  create: Prisma.XOR<Prisma.TradeAccountCreateWithoutJournalAccountsInput, Prisma.TradeAccountUncheckedCreateWithoutJournalAccountsInput>
+  where?: Prisma.TradeAccountWhereInput
+}
+
+export type TradeAccountUpdateToOneWithWhereWithoutJournalAccountsInput = {
+  where?: Prisma.TradeAccountWhereInput
+  data: Prisma.XOR<Prisma.TradeAccountUpdateWithoutJournalAccountsInput, Prisma.TradeAccountUncheckedUpdateWithoutJournalAccountsInput>
+}
+
+export type TradeAccountUpdateWithoutJournalAccountsInput = {
+  tradeId?: Prisma.StringFieldUpdateOperationsInput | string
+  accountType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  partnerIb?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  verification?: Prisma.EnumVerificationStatusFieldUpdateOperationsInput | $Enums.VerificationStatus
+  status?: Prisma.EnumRecordStatusFieldUpdateOperationsInput | $Enums.RecordStatus
+  memberConfirmed?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  lastSyncAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  member?: Prisma.MemberUpdateOneRequiredWithoutTradeAccountsNestedInput
+  broker?: Prisma.BrokerUpdateOneWithoutAccountsNestedInput
+  primaryForMembers?: Prisma.MemberUpdateManyWithoutPrimaryTradeAccountNestedInput
+  tradeLogs?: Prisma.TradeLogUpdateManyWithoutTradeAccountNestedInput
+  lotCheckRuns?: Prisma.LotCheckRunUpdateManyWithoutTradeAccountNestedInput
+  activityEnrollments?: Prisma.ActivityEnrollmentUpdateManyWithoutTradeAccountNestedInput
+}
+
+export type TradeAccountUncheckedUpdateWithoutJournalAccountsInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  memberId?: Prisma.IntFieldUpdateOperationsInput | number
+  brokerId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  tradeId?: Prisma.StringFieldUpdateOperationsInput | string
+  accountType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  partnerIb?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  verification?: Prisma.EnumVerificationStatusFieldUpdateOperationsInput | $Enums.VerificationStatus
+  status?: Prisma.EnumRecordStatusFieldUpdateOperationsInput | $Enums.RecordStatus
+  memberConfirmed?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  lastSyncAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  primaryForMembers?: Prisma.MemberUncheckedUpdateManyWithoutPrimaryTradeAccountNestedInput
+  tradeLogs?: Prisma.TradeLogUncheckedUpdateManyWithoutTradeAccountNestedInput
+  lotCheckRuns?: Prisma.LotCheckRunUncheckedUpdateManyWithoutTradeAccountNestedInput
+  activityEnrollments?: Prisma.ActivityEnrollmentUncheckedUpdateManyWithoutTradeAccountNestedInput
 }
 
 export type TradeAccountCreateManyMemberInput = {
@@ -1238,6 +1371,7 @@ export type TradeAccountUpdateWithoutMemberInput = {
   tradeLogs?: Prisma.TradeLogUpdateManyWithoutTradeAccountNestedInput
   lotCheckRuns?: Prisma.LotCheckRunUpdateManyWithoutTradeAccountNestedInput
   activityEnrollments?: Prisma.ActivityEnrollmentUpdateManyWithoutTradeAccountNestedInput
+  journalAccounts?: Prisma.JournalAccountUpdateManyWithoutTradeAccountNestedInput
 }
 
 export type TradeAccountUncheckedUpdateWithoutMemberInput = {
@@ -1256,6 +1390,7 @@ export type TradeAccountUncheckedUpdateWithoutMemberInput = {
   tradeLogs?: Prisma.TradeLogUncheckedUpdateManyWithoutTradeAccountNestedInput
   lotCheckRuns?: Prisma.LotCheckRunUncheckedUpdateManyWithoutTradeAccountNestedInput
   activityEnrollments?: Prisma.ActivityEnrollmentUncheckedUpdateManyWithoutTradeAccountNestedInput
+  journalAccounts?: Prisma.JournalAccountUncheckedUpdateManyWithoutTradeAccountNestedInput
 }
 
 export type TradeAccountUncheckedUpdateManyWithoutMemberInput = {
@@ -1301,6 +1436,7 @@ export type TradeAccountUpdateWithoutBrokerInput = {
   tradeLogs?: Prisma.TradeLogUpdateManyWithoutTradeAccountNestedInput
   lotCheckRuns?: Prisma.LotCheckRunUpdateManyWithoutTradeAccountNestedInput
   activityEnrollments?: Prisma.ActivityEnrollmentUpdateManyWithoutTradeAccountNestedInput
+  journalAccounts?: Prisma.JournalAccountUpdateManyWithoutTradeAccountNestedInput
 }
 
 export type TradeAccountUncheckedUpdateWithoutBrokerInput = {
@@ -1319,6 +1455,7 @@ export type TradeAccountUncheckedUpdateWithoutBrokerInput = {
   tradeLogs?: Prisma.TradeLogUncheckedUpdateManyWithoutTradeAccountNestedInput
   lotCheckRuns?: Prisma.LotCheckRunUncheckedUpdateManyWithoutTradeAccountNestedInput
   activityEnrollments?: Prisma.ActivityEnrollmentUncheckedUpdateManyWithoutTradeAccountNestedInput
+  journalAccounts?: Prisma.JournalAccountUncheckedUpdateManyWithoutTradeAccountNestedInput
 }
 
 export type TradeAccountUncheckedUpdateManyWithoutBrokerInput = {
@@ -1345,6 +1482,7 @@ export type TradeAccountCountOutputType = {
   tradeLogs: number
   lotCheckRuns: number
   activityEnrollments: number
+  journalAccounts: number
 }
 
 export type TradeAccountCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1352,6 +1490,7 @@ export type TradeAccountCountOutputTypeSelect<ExtArgs extends runtime.Types.Exte
   tradeLogs?: boolean | TradeAccountCountOutputTypeCountTradeLogsArgs
   lotCheckRuns?: boolean | TradeAccountCountOutputTypeCountLotCheckRunsArgs
   activityEnrollments?: boolean | TradeAccountCountOutputTypeCountActivityEnrollmentsArgs
+  journalAccounts?: boolean | TradeAccountCountOutputTypeCountJournalAccountsArgs
 }
 
 /**
@@ -1392,6 +1531,13 @@ export type TradeAccountCountOutputTypeCountActivityEnrollmentsArgs<ExtArgs exte
   where?: Prisma.ActivityEnrollmentWhereInput
 }
 
+/**
+ * TradeAccountCountOutputType without action
+ */
+export type TradeAccountCountOutputTypeCountJournalAccountsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.JournalAccountWhereInput
+}
+
 
 export type TradeAccountSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -1412,6 +1558,7 @@ export type TradeAccountSelect<ExtArgs extends runtime.Types.Extensions.Internal
   tradeLogs?: boolean | Prisma.TradeAccount$tradeLogsArgs<ExtArgs>
   lotCheckRuns?: boolean | Prisma.TradeAccount$lotCheckRunsArgs<ExtArgs>
   activityEnrollments?: boolean | Prisma.TradeAccount$activityEnrollmentsArgs<ExtArgs>
+  journalAccounts?: boolean | Prisma.TradeAccount$journalAccountsArgs<ExtArgs>
   _count?: boolean | Prisma.TradeAccountCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["tradeAccount"]>
 
@@ -1440,6 +1587,7 @@ export type TradeAccountInclude<ExtArgs extends runtime.Types.Extensions.Interna
   tradeLogs?: boolean | Prisma.TradeAccount$tradeLogsArgs<ExtArgs>
   lotCheckRuns?: boolean | Prisma.TradeAccount$lotCheckRunsArgs<ExtArgs>
   activityEnrollments?: boolean | Prisma.TradeAccount$activityEnrollmentsArgs<ExtArgs>
+  journalAccounts?: boolean | Prisma.TradeAccount$journalAccountsArgs<ExtArgs>
   _count?: boolean | Prisma.TradeAccountCountOutputTypeDefaultArgs<ExtArgs>
 }
 
@@ -1452,6 +1600,7 @@ export type $TradeAccountPayload<ExtArgs extends runtime.Types.Extensions.Intern
     tradeLogs: Prisma.$TradeLogPayload<ExtArgs>[]
     lotCheckRuns: Prisma.$LotCheckRunPayload<ExtArgs>[]
     activityEnrollments: Prisma.$ActivityEnrollmentPayload<ExtArgs>[]
+    journalAccounts: Prisma.$JournalAccountPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: number
@@ -1818,6 +1967,7 @@ export interface Prisma__TradeAccountClient<T, Null = never, ExtArgs extends run
   tradeLogs<T extends Prisma.TradeAccount$tradeLogsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.TradeAccount$tradeLogsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TradeLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   lotCheckRuns<T extends Prisma.TradeAccount$lotCheckRunsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.TradeAccount$lotCheckRunsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$LotCheckRunPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   activityEnrollments<T extends Prisma.TradeAccount$activityEnrollmentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.TradeAccount$activityEnrollmentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ActivityEnrollmentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  journalAccounts<T extends Prisma.TradeAccount$journalAccountsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.TradeAccount$journalAccountsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$JournalAccountPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2319,6 +2469,30 @@ export type TradeAccount$activityEnrollmentsArgs<ExtArgs extends runtime.Types.E
   take?: number
   skip?: number
   distinct?: Prisma.ActivityEnrollmentScalarFieldEnum | Prisma.ActivityEnrollmentScalarFieldEnum[]
+}
+
+/**
+ * TradeAccount.journalAccounts
+ */
+export type TradeAccount$journalAccountsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the JournalAccount
+   */
+  select?: Prisma.JournalAccountSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the JournalAccount
+   */
+  omit?: Prisma.JournalAccountOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.JournalAccountInclude<ExtArgs> | null
+  where?: Prisma.JournalAccountWhereInput
+  orderBy?: Prisma.JournalAccountOrderByWithRelationInput | Prisma.JournalAccountOrderByWithRelationInput[]
+  cursor?: Prisma.JournalAccountWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.JournalAccountScalarFieldEnum | Prisma.JournalAccountScalarFieldEnum[]
 }
 
 /**

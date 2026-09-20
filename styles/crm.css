@@ -79,13 +79,13 @@ button, input, select { font-family: inherit; color: inherit; }
 
 /* ── Main ── */
 .main { min-width: 0; padding: 22px 28px 40px; }
-.topbar { display: flex; align-items: center; justify-content: space-between; gap: 20px; margin-bottom: 24px; }
+.topbar { display: flex; align-items: center; justify-content: space-between; gap: 12px 20px; margin-bottom: 24px; flex-wrap: wrap; }
 .topbar-left { display: flex; align-items: center; gap: 14px; min-width: 0; }
 .menu-toggle { display: none; background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; width: 40px; height: 40px; place-items: center; cursor: pointer; }
 .menu-toggle .icon { font-size: 20px; }
-.topbar h1 { font-size: 24px; font-weight: 700; letter-spacing: -0.4px; white-space: nowrap; }
+.topbar h1 { font-size: 24px; font-weight: 700; letter-spacing: -0.4px; }
 .topbar .sub { font-size: 13px; color: var(--text-sub); }
-.topbar-right { display: flex; align-items: center; gap: 12px; }
+.topbar-right { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
 .icon-btn { position: relative; width: 42px; height: 42px; border-radius: 50%; background: var(--bg-card); border: 1px solid var(--border); display: grid; place-items: center; cursor: pointer; color: var(--muted); }
 .icon-btn:hover { background: var(--bg-card2); }
 .icon-btn .icon { font-size: 19px; }
@@ -377,7 +377,9 @@ label .ppr-hint { margin-top: 0; }
 .toolbar .btn { height: 42px; }
 .toolbar .tabs { align-items: center; }
 .tabs { display: inline-flex; gap: 4px; padding: 4px; background: var(--bg-card2); border: 1px solid var(--border); border-radius: 10px; }
-.tab { padding: 7px 14px; border-radius: 7px; font-size: 13px; font-weight: 500; color: var(--text-sub); background: none; border: none; cursor: pointer; white-space: nowrap; transition: background var(--transition), color var(--transition); }
+/* wrapping variant for segmented controls with long labels (e.g. lot-check periods) */
+.tabs.tabs-wrap { flex-wrap: wrap; height: auto !important; row-gap: 8px; max-width: 100%; }
+.tab { display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; border-radius: 7px; font-size: 13px; font-weight: 500; color: var(--text-sub); background: none; border: none; cursor: pointer; white-space: nowrap; transition: background var(--transition), color var(--transition); }
 .tab.is-active { background: var(--gradient-cta); color: #fff; }
 .tab .n { opacity: 0.7; margin-left: 4px; }
 .filter-select {
@@ -603,7 +605,7 @@ table.data tbody tr:last-child td { border-bottom: none; }
 .scrim { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.32); backdrop-filter: blur(2px); z-index: 60; }
 .scrim.show { display: block; }
 .drawer {
-  position: fixed; top: 0; right: 0; height: 100vh; width: 420px; max-width: 92vw;
+  position: fixed; top: 0; right: 0; height: 100vh; height: 100dvh; width: 420px; max-width: 92vw;
   background: var(--bg-card); border-left: 1px solid var(--border); box-shadow: var(--shadow-pop);
   transform: translateX(100%); transition: transform 280ms ease; z-index: 70;
   display: flex; flex-direction: column;
@@ -719,7 +721,8 @@ table.data tbody tr:last-child td { border-bottom: none; }
 .admin-course-body { padding: 14px 16px 16px; display: flex; flex-direction: column; gap: 10px; flex: 1; }
 .admin-course-title { font-size: 15px; font-weight: 700; line-height: 1.4; }
 .admin-course-desc { font-size: 12.5px; color: var(--text-sub); line-height: 1.55; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-.admin-course-meta { display: flex; flex-wrap: wrap; gap: 6px; }
+.admin-course-meta { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.admin-course-meta-text { font-size: 12px; color: var(--text-sub); white-space: nowrap; }
 .admin-course-actions { display: flex; align-items: center; gap: 8px; margin-top: auto; flex-wrap: wrap; }
 .admin-course-actions .btn { padding: 6px 12px; font-size: 12.5px; }
 .course-visibility-control { display: inline-flex; align-items: center; gap: 6px; min-height: 31px; padding: 6px 10px; border: 1px solid transparent; border-radius: 8px; font: inherit; font-size: 12px; font-weight: 750; cursor: pointer; }

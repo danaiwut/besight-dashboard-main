@@ -34,6 +34,7 @@ import SuspendAccessModal from "../../../../components/crm/SuspendAccessModal";
 import LotOverrideCard from "../../../../components/crm/LotOverrideCard";
 import MemberIndicatorAccessPanel from "../../../../components/crm/MemberIndicatorAccessPanel";
 import MemberTradeAccountsCard from "../../../../components/crm/MemberTradeAccountsCard";
+import MemberJournalCard from "../../../../components/crm/MemberJournalCard";
 import { MEMBER_LEVEL_LABEL_KEYS, PREMIUM_MONTHS, levelFromMonthlyLots, monthlyLotsFromLogs, recentMonthKeys } from "../../../../lib/memberLevel";
 import type { LotPeriod } from "../../../../lib/lotCycle";
 
@@ -357,14 +358,18 @@ function MemberDetailContent() {
         </div>
 
         <div className="card" style={{ padding: 20 }}>
-          <div className="panel-section-title">{t("members.section.telegram")}</div>
+          <div className="panel-section-title">{t("members.section.social")}</div>
           <div className="drawer-row">
-            <span className="k">{t("members.field.username")}</span>
-            <span className="v mono">{member.telegramUsername || "—"}</span>
+            <span className="k">Telegram</span>
+            <span className="v mono">{member.telegramUsername || member.telegramUserId || "—"}</span>
           </div>
           <div className="drawer-row">
-            <span className="k">{t("members.field.userId")}</span>
-            <span className="v mono">{member.telegramUserId || "—"}</span>
+            <span className="k">Discord</span>
+            <span className="v mono">{member.discordUsername || member.discordUserId || "—"}</span>
+          </div>
+          <div className="drawer-row">
+            <span className="k">LINE</span>
+            <span className="v mono">{member.lineDisplayName || member.lineUserId || "—"}</span>
           </div>
           <div className="drawer-row" style={{ borderBottom: "none" }}>
             <span className="k">{t("members.col.accessStatus")}</span>
@@ -424,6 +429,8 @@ function MemberDetailContent() {
       <MemberRenewalHistory memberId={member.id} />
 
       <MemberTradeAccountsCard key={`${member.id}:${member.crmStartDate || ""}:${member.crmExpiryDate || ""}`} member={member} />
+
+      <MemberJournalCard member={member} />
 
       <Drawer
         open={editOpen}

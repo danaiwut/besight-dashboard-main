@@ -13,6 +13,7 @@ import type { CourseLessonDto } from "../../lib/courses";
 type YouTubePlayer = {
   destroy: () => void;
   getCurrentTime?: () => number;
+  getDuration?: () => number;
   seekTo?: (seconds: number, allowSeekAhead: boolean) => void;
 };
 
@@ -21,6 +22,8 @@ export type LessonPlayerHandle = {
   getCurrentTime: () => number;
   seekTo: (seconds: number) => void;
 };
+
+export type WatchProgress = { positionSec: number; durationSec: number };
 
 type YouTubeWindow = {
   YT?: { Player?: unknown; PlayerState?: { ENDED: number } };
@@ -65,14 +68,17 @@ export function fmtTimecode(sec: number) {
   return h > 0 ? `${h}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}` : `${m}:${String(s).padStart(2, "0")}`;
 }
 
-const LessonPlayer = forwardRef<LessonPlayerHandle, { lesson: CourseLessonDto; onEnded?: () => void }>(function LessonPlayer(
-  { lesson, onEnded },
+export const WATCH_HEARTBEAT_MS = 5000;
+
+const LessonPlayer = forwardRef<LessonPlayerHandle, { lesson: CourseLessonDto; onEnded?: () => void; onProgress?: (progress: WatchProgress) => void }>(function LessonPlayer(
+  { lesson, onEnded, onProgress },
   ref,
 ) {
   const { t } = useLanguage();
   const hostRef = useRef<HTMLDivElement>(null);
   const playerRef = useRef<YouTubePlayer | null>(null);
   const endedRef = useRef(onEnded);
+  const progressRef = useRef(onProgress);
   const createdRef = useRef(false);
   const [fallback, setFallback] = useState(false);
 
@@ -86,9 +92,20 @@ const LessonPlayer = forwardRef<LessonPlayerHandle, { lesson: CourseLessonDto; o
   }, [onEnded]);
 
   useEffect(() => {
+    progressRef.current = onProgress;
+  }, [onProgress]);
+
+  function reportProgress() {
+    const position = playerRef.current?.getCurrentTime?.() ?? 0;
+    const duration = playerRef.current?.getDuration?.() ?? 0;
+    if (position > 0 && duration > 0) progressRef.current?.({ positionSec: Math.floor(position), durationSec: Math.floor(duration) });
+  }
+
+  useEffect(() => {
     if (!lesson.videoId || fallback) return;
     let cancelled = false;
     createdRef.current = false;
+    let heartbeat: number | null = null;
     const timeout = window.setTimeout(() => {
       if (!createdRef.current) setFallback(true);
     }, 5000);
@@ -109,10 +126,16 @@ const LessonPlayer = forwardRef<LessonPlayerHandle, { lesson: CourseLessonDto; o
         },
         events: {
           onStateChange: (event: { data: number }) => {
-            if (event.data === YT.PlayerState.ENDED) endedRef.current?.();
+            if (event.data === YT.PlayerState.ENDED) {
+              // Flush the final position before signalling the end.
+              reportProgress();
+              endedRef.current?.();
+            }
           },
         },
       });
+      // Watch heartbeat for the ≥90% completion rule (lesson page persists it).
+      heartbeat = window.setInterval(reportProgress, WATCH_HEARTBEAT_MS);
       // The IFrame API creates the iframe for us. Explicitly grant it the
       // fullscreen permission so YouTube's bottom-right fullscreen button
       // expands to the entire viewport just like youtube.com.
@@ -127,6 +150,7 @@ const LessonPlayer = forwardRef<LessonPlayerHandle, { lesson: CourseLessonDto; o
     return () => {
       cancelled = true;
       window.clearTimeout(timeout);
+      if (heartbeat) window.clearInterval(heartbeat);
       try {
         playerRef.current?.destroy();
       } catch {

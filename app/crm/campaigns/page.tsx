@@ -106,12 +106,12 @@ function LotCheckPanel() {
         <div className="field" style={{ marginBottom: 0, flex: "1 1 100%" }}>
           <label>ช่วงที่ตรวจ</label>
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
-            <div className="comp-tabs" style={{ marginBottom: 0 }}>
+            <div className="tabs tabs-wrap" style={{ marginBottom: 0 }}>
               {PERIOD_OPTIONS.map((option) => (
                 <button
                   key={option.value}
                   type="button"
-                  className={`comp-tab${period === option.value ? " is-active" : ""}`}
+                  className={`tab${period === option.value ? " is-active" : ""}`}
                   onClick={() => setPeriod(option.value)}
                 >
                   {option.label}

@@ -1,6 +1,6 @@
 import { Prisma, type Activity, type ActivityEnrollment, type Admin, type Broker, type Indicator, type MemberIndicatorAccess, type RenewalRecord, type TelegramAccess, type TradeAccount } from "@/generated/prisma/client";
 import type { CustomerMemberDto, CustomerTradeAccountDto } from "./customerSync";
-import type { ActivityDto, ActivityEnrollmentDto } from "../activities";
+import type { ActivityDto, ActivityEnrollmentDto, CompetitionPrizeDto, RewardClaimDto, RewardTierDto } from "../activities";
 
 /* ── Single source of truth for CRM API ⇄ UI shapes ──
    Every read AND write route maps Prisma rows through these helpers so a row
@@ -25,6 +25,9 @@ export function toMemberDto(member: MemberWithRelations): CustomerMemberDto {
     telegramUsername: member.telegramUsername || undefined,
     telegramUserId: member.telegramUserId || undefined,
     discordUsername: member.discordUsername || undefined,
+    discordUserId: member.discordUserId || undefined,
+    lineUserId: member.lineUserId || undefined,
+    lineDisplayName: member.lineDisplayName || undefined,
     crmStartDate: member.crmStartDate?.toISOString().slice(0, 10),
     crmExpiryDate: member.crmExpiryDate?.toISOString().slice(0, 10),
     createdDate: member.createdAt.toISOString().slice(0, 10),
@@ -207,9 +210,10 @@ export function toRenewalRecordDto(
 }
 
 export function toActivityDto(
-  activity: Activity & { _count?: { enrollments: number } },
+  activity: Activity & { _count?: { enrollments: number }; prizes?: Array<{ id: number; rankFrom: number; rankTo: number; title: string; valueNote: string | null; sortOrder: number }> },
   enrolled = false,
   registrationOpen?: boolean,
+  extras?: { enrolledTradeId?: string },
 ): ActivityDto {
   return {
     id: activity.id,
@@ -231,10 +235,86 @@ export function toActivityDto(
     published: activity.published,
     sortOrder: activity.sortOrder,
     enrolled,
+    mode: activity.mode === "demo_legacy" ? "demo_legacy" : "registered",
+    winnersFinalizedAt: activity.winnersFinalizedAt?.toISOString(),
+    enrolledTradeId: extras?.enrolledTradeId,
+    prizes: (activity.prizes ?? [])
+      .map((prize) => ({
+        id: prize.id,
+        rankFrom: prize.rankFrom,
+        rankTo: prize.rankTo,
+        title: prize.title,
+        valueNote: prize.valueNote || undefined,
+        sortOrder: prize.sortOrder,
+      }))
+      .sort((a, b) => a.sortOrder - b.sortOrder || a.rankFrom - b.rankFrom),
   };
 }
 
 export type { ActivityEnrollmentDto };
+
+export type CompetitionPrizeInput = { id: number; rankFrom: number; rankTo: number; title: string; valueNote: string | null; sortOrder: number };
+
+export function toCompetitionPrizeDto(prize: CompetitionPrizeInput): CompetitionPrizeDto {
+  return {
+    id: prize.id,
+    rankFrom: prize.rankFrom,
+    rankTo: prize.rankTo,
+    title: prize.title,
+    valueNote: prize.valueNote || undefined,
+    sortOrder: prize.sortOrder,
+  };
+}
+
+export function toRewardTierDto(tier: {
+  id: number; key: string; title: string; titleEn: string | null; threshold: unknown; reward: string; rewardEn: string | null;
+  icon: string; image: string | null; accent: string; sortOrder: number; active: boolean;
+}): RewardTierDto {
+  const threshold = typeof tier.threshold === "object" && tier.threshold !== null && "toNumber" in tier.threshold
+    ? (tier.threshold as { toNumber: () => number }).toNumber()
+    : Number(tier.threshold);
+  return {
+    id: tier.id,
+    key: tier.key,
+    title: tier.title,
+    titleEn: tier.titleEn || undefined,
+    threshold,
+    reward: tier.reward,
+    rewardEn: tier.rewardEn || undefined,
+    icon: tier.icon,
+    image: tier.image || undefined,
+    accent: tier.accent,
+    sortOrder: tier.sortOrder,
+    active: tier.active,
+  };
+}
+
+export function toRewardClaimDto(row: {
+  id: number; memberId: number; kind: string; refKey: string; activityId: number | null;
+  title: string; detail: string | null; status: string; note: string | null;
+  createdAt: Date; decidedAt: Date | null;
+  member: { code: string; name: string; displayName: string | null };
+  activity: { title: string } | null;
+}): RewardClaimDto {
+  const kind = row.kind === "competition" || row.kind === "manual" ? row.kind : "tier";
+  const status = row.status === "fulfilled" || row.status === "cancelled" ? row.status : "pending";
+  return {
+    id: row.id,
+    memberId: row.memberId,
+    memberCode: row.member.code,
+    memberName: row.member.displayName?.trim() || row.member.name,
+    kind,
+    refKey: row.refKey,
+    activityId: row.activityId ?? undefined,
+    activityTitle: row.activity?.title,
+    title: row.title,
+    detail: row.detail || undefined,
+    status,
+    note: row.note || undefined,
+    createdAt: row.createdAt.toISOString(),
+    decidedAt: row.decidedAt?.toISOString(),
+  };
+}
 
 export function toActivityEnrollmentDto(
   row: ActivityEnrollment & { member: { code: string; name: string; displayName: string | null; email: string | null } },

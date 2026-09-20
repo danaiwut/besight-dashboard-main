@@ -149,7 +149,7 @@ export default function CourseLearnPage() {
                   {chapter.lessons.map((lesson, index) => (
                     <Link className="lms-lesson-row" key={lesson.id} href={`/dashboard/courses/${course.slug}/${lesson.id}`}>
                       <span className={`lms-lesson-num${lesson.completed ? " is-done" : ""}`}>
-                        {lesson.completed ? <Icon name="check" /> : index + 1}
+                        {lesson.completed ? <Icon name="check" /> : lesson.locked ? <Icon name="lock" /> : index + 1}
                       </span>
                       <span className="lms-lesson-body">
                         <span className="lms-lesson-title">{lesson.title}</span>

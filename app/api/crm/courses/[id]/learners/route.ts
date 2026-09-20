@@ -28,7 +28,10 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
       }),
       prisma.lessonProgress.findMany({
         where: { lesson: { courseId } },
-        select: { memberId: true, completedAt: true, lesson: { select: { title: true, sortOrder: true } } },
+        select: {
+          memberId: true, completedAt: true, maxPositionSec: true, durationSec: true,
+          lesson: { select: { title: true, sortOrder: true, videoStart: true, videoEnd: true, videoId: true } },
+        },
         orderBy: { completedAt: "desc" },
       }),
     ]);
@@ -36,16 +39,26 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
     const byMember = new Map<number, typeof progress>();
     for (const item of progress) byMember.set(item.memberId, [...(byMember.get(item.memberId) ?? []), item]);
     const lessonCount = course.lessons.length;
+    const pctOf = (item: (typeof progress)[number]): number | null => {
+      if (!item.lesson.videoId) return 100;
+      const start = Math.max(0, item.lesson.videoStart);
+      const end = item.lesson.videoEnd ?? item.durationSec;
+      if (end == null || end <= start) return null;
+      return Math.round((Math.min(Math.max(0, item.maxPositionSec - start), end - start) / (end - start)) * 100);
+    };
     const learners = enrollments.map((enrollment) => {
       const completed = byMember.get(enrollment.memberId) ?? [];
+      const done = completed.filter((item) => item.completedAt != null);
       const latest = completed[0];
+      const pcts = completed.map(pctOf).filter((pct): pct is number => pct != null);
       return {
         member: enrollment.member,
         enrolledAt: enrollment.startedAt,
         completedAt: enrollment.completedAt,
-        completedLessons: completed.length,
+        completedLessons: done.length,
         lessonCount,
-        progressPct: lessonCount ? Math.round((completed.length / lessonCount) * 100) : 0,
+        progressPct: lessonCount ? Math.round((done.length / lessonCount) * 100) : 0,
+        watchedPct: pcts.length ? Math.round(pcts.reduce((sum, pct) => sum + pct, 0) / pcts.length) : 0,
         lastLesson: latest?.lesson.title ?? null,
         lastActivityAt: latest?.completedAt ?? enrollment.startedAt,
       };

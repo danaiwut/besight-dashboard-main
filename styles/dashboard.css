@@ -71,7 +71,7 @@
 .dashx-topbar .welcome { font-size: 14px; color: var(--text-sub); line-height: 1.2; margin-bottom: 0; }
 .dashx-topbar h1 { font-size: 28px; font-weight: 800; letter-spacing: -0.6px; line-height: 1.15; }
 .dashx-topbar .sub { font-size: 13px; color: var(--text-sub); margin-top: 4px; }
-.dashx-topbar-right { display: flex; align-items: center; gap: 12px; }
+.dashx-topbar-right { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
 /* Language chip, theme toggle, and account chip each derive their height
    from different content (flag+text, icon buttons, avatar), so they don't
    naturally line up — pin all three to a shared height here rather than
@@ -1841,6 +1841,22 @@
   .journal-cal-info .count { font-size: 9px; gap: 2px; }
   .journal-cal-info .count .icon { font-size: 10px !important; }
   .journal-cal-info .pnl { font-size: 9px; }
+}
+
+/* ── Small-phone fixes ── */
+@media (max-width: 640px) {
+  /* Leaderboard rows keep 6 columns — scroll the table instead of squeezing. */
+  .lbd-table { overflow-x: auto; }
+  .lbd-row { min-width: 600px; }
+  /* Journal header actions share the row instead of overflowing it. */
+  .journal-header .btn { flex: 1 1 140px; }
+  .journal-header .kebab { flex: 0 0 auto; }
+}
+@media (max-width: 480px) {
+  /* Topbar account chip: keep the avatar, ellipsize the text. */
+  .dashx-topbar-right .utext { max-width: 110px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .dashx-topbar-right .uhandle { display: none; }
+  .dashx-topbar-right .user-chip .chev { display: none; }
 }
 
 .journal-gauge-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 20px; }

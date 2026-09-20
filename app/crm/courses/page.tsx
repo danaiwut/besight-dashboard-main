@@ -128,11 +128,11 @@ export default function CrmCoursesPage() {
 
       {/* Toolbar */}
       <div className="toolbar" style={{ marginBottom: 16 }}>
-        <div className="comp-tabs" style={{ marginBottom: 0 }}>
-          <button type="button" className={`comp-tab${view === "cards" ? " is-active" : ""}`} onClick={() => setView("cards")}>
+        <div className="tabs" style={{ marginBottom: 0 }}>
+          <button type="button" className={`tab${view === "cards" ? " is-active" : ""}`} onClick={() => setView("cards")}>
             <Icon name="grid_view" style={{ fontSize: 15 }} /> {t("courseAdmin.view.cards")}
           </button>
-          <button type="button" className={`comp-tab${view === "table" ? " is-active" : ""}`} onClick={() => setView("table")}>
+          <button type="button" className={`tab${view === "table" ? " is-active" : ""}`} onClick={() => setView("table")}>
             <Icon name="list" style={{ fontSize: 15 }} /> {t("courseAdmin.view.table")}
           </button>
         </div>
@@ -154,7 +154,10 @@ export default function CrmCoursesPage() {
       {view === "cards" &&
         (courses.length ? (
           <div className="admin-course-grid">
-            {courses.map((course) => (
+            {courses.map((course) => {
+              const categoryLabel = t(`dash.courses.tab.${course.category}`);
+              const levelLabel = t(`dash.courses.level.${course.level}`);
+              return (
               <div className="card admin-course-card" key={course.id}>
                 <div className="admin-course-cover">
                   {course.coverImage ? (
@@ -176,10 +179,11 @@ export default function CrmCoursesPage() {
                     <div className="admin-course-desc">{course.description || "—"}</div>
                   </div>
                   <div className="admin-course-meta">
-                    <span className="course-tag">{t(`dash.courses.tab.${course.category}`)}</span>
-                    <span className="course-tag">{t(`dash.courses.level.${course.level}`)}</span>
-                    <span className="course-tag">{t("dash.courses.lessons", { n: course.lessonCount })}</span>
-                    <span className="course-tag">{t("dash.courses.duration", { n: course.durationMin })}</span>
+                    <span className="course-tag">{categoryLabel}</span>
+                    {levelLabel !== categoryLabel && <span className="course-tag">{levelLabel}</span>}
+                    <span className="admin-course-meta-text">
+                      {t("dash.courses.lessons", { n: course.lessonCount })} · {t("dash.courses.duration", { n: course.durationMin })}
+                    </span>
                   </div>
                   <div className="admin-course-actions">
                     <Link className="btn btn-primary" href={`/crm/courses/${course.id}/watch`}>
@@ -202,7 +206,8 @@ export default function CrmCoursesPage() {
                   </div>
                 </div>
               </div>
-            ))}
+              );
+            })}
           </div>
         ) : (
           <div className="card" style={{ padding: 24 }}>

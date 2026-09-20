@@ -13,6 +13,10 @@ export type GeneralSettings = {
    *  verification. The legacy stored value "sum_all_verified" is accepted and
    *  treated identically (see normalizeGeneralSettings). */
   lotCalculationMode: "sum_all_active" | "selected_only";
+  /** Public invite links (admin-editable) shown on the VIP page after linking. */
+  telegramInviteLink: string;
+  discordInviteLink: string;
+  lineInviteLink: string;
 };
 
 export const GENERAL_SETTINGS_KEY = "crm_general";
@@ -24,6 +28,9 @@ export function defaultGeneralSettings(): GeneralSettings {
     telegramAutoRemove: true,
     expiringSoonDays: 7,
     lotCalculationMode: "sum_all_active",
+    telegramInviteLink: "",
+    discordInviteLink: "",
+    lineInviteLink: "",
   };
 }
 
@@ -38,6 +45,9 @@ export function normalizeGeneralSettings(value: unknown): GeneralSettings {
     expiringSoonDays: Number.isFinite(expiring) && expiring >= 1 ? Math.floor(expiring) : defaults.expiringSoonDays,
     // Legacy stored value "sum_all_verified" counts the same as "sum_all_active".
     lotCalculationMode: input.lotCalculationMode === "selected_only" ? "selected_only" : "sum_all_active",
+    telegramInviteLink: typeof input.telegramInviteLink === "string" ? input.telegramInviteLink.trim() : defaults.telegramInviteLink,
+    discordInviteLink: typeof input.discordInviteLink === "string" ? input.discordInviteLink.trim() : defaults.discordInviteLink,
+    lineInviteLink: typeof input.lineInviteLink === "string" ? input.lineInviteLink.trim() : defaults.lineInviteLink,
   };
 }
 

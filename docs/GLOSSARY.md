@@ -15,8 +15,13 @@
 | Renewal | Extending an access `expiresAt` from max(expiry, now) by `renewalMonths` after qualification. Recorded idempotently in `RenewalRecord` per (member, indicator, cycle period) with `origin` (`auto` = lot-check/cron, `manual` = admin Grant/Extend + attached cycle lots). Auto-grants run on the monthly cycle only; other check windows are view-only. |
 | Lot check run | Audit of one lot query (`LotCheckRun` + `LotCheckResult` rows split by account/campaign/country/excluded-symbol). |
 | Telegram access | `TelegramAccess`: one member+room grant (`active/pending/expired/banned`). Derived from member telegram fields during customer sync. |
-| Activity | Customer-facing monthly trading competition shown on `/dashboard/activities` (`Activity` table; admin-managed in `/crm/activities`). Not to be confused with Activity log. |
+| Activity | Customer-facing monthly trading competition shown on `/dashboard/activities` (`Activity` table; admin-managed in `/crm/activities`). `registered` mode: members enter with one of their own active XM/Exness accounts and are ranked by lot-check lots over the activity window. `demo_legacy`: pre-existing demo-only competitions — frozen (viewable, no new enrollments). Not to be confused with Activity log. |
 | Activity log | Append-only `ActivityLog`; rows flagged `notification` feed the notification bell. Every admin action writes one (and bumps the data version). |
+| Reward tier | One rung of the loyalty ladder (`RewardTier`, admin-managed in `/crm/reward-tiers`): lifetime lots threshold → reward. Members claim a tier once; each claim enters the fulfilment queue. |
+| Competition prize | One `CompetitionPrize` row per activity (`rankFrom`–`rankTo` → award). The finalize step locks winners and creates one `RewardClaim` per winner. |
+| Reward claim | One member reward to fulfil (`RewardClaim`: `tier` \| `competition` \| `manual`, `pending` → `fulfilled`/`cancelled`). Admins work a single queue (`/crm/reward-claims`); members track everything in `/dashboard/my-rewards`. |
+| Journal account | One member's trading diary for one of their own registered trade accounts (`JournalAccount`; one journal per trade account). Holds hand-entered or MT4/MT5-imported `JournalTrade` rows plus a `RiskRule` — member-private, admins read-only via the member detail page. |
+| Social link | A member-verified channel identity (`SocialAccount`: Telegram Login Widget, Discord OAuth2, LINE Login — real app logins, never hand-typed). Secrets in env, invite links in CRM settings; room access still follows indicator standing. |
 | Acquisition channel | Where a member came from (`facebook/instagram/tiktok`, multi-select). |
 | Customer stage | Lifecycle tag: `new` (never renewed) vs `existing` (renewed ≥ once), overridable per member. |
 | Replace sync | Customer sync semantics: a non-empty upstream response replaces DB rows (stale members/accounts deleted); an empty response is rejected to protect data. |

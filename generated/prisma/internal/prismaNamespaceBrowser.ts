@@ -68,10 +68,18 @@ export const ModelName = {
   SystemSetting: 'SystemSetting',
   Activity: 'Activity',
   ActivityEnrollment: 'ActivityEnrollment',
+  CompetitionPrize: 'CompetitionPrize',
+  RewardTier: 'RewardTier',
+  RewardClaim: 'RewardClaim',
   BecRate: 'BecRate',
   SpinPrize: 'SpinPrize',
   BecGrant: 'BecGrant',
   SpinResult: 'SpinResult',
+  JournalAccount: 'JournalAccount',
+  JournalTrade: 'JournalTrade',
+  RiskRule: 'RiskRule',
+  SocialAccount: 'SocialAccount',
+  MemberNotificationRead: 'MemberNotificationRead',
   Course: 'Course',
   CourseLesson: 'CourseLesson',
   CourseEnrollment: 'CourseEnrollment',
@@ -111,6 +119,9 @@ export const MemberScalarFieldEnum = {
   telegramUsername: 'telegramUsername',
   telegramUserId: 'telegramUserId',
   discordUsername: 'discordUsername',
+  discordUserId: 'discordUserId',
+  lineUserId: 'lineUserId',
+  lineDisplayName: 'lineDisplayName',
   socialLinksJson: 'socialLinksJson',
   joinedAt: 'joinedAt',
   createdAt: 'createdAt',
@@ -353,6 +364,8 @@ export const ActivityScalarFieldEnum = {
   rules: 'rules',
   sortOrder: 'sortOrder',
   published: 'published',
+  mode: 'mode',
+  winnersFinalizedAt: 'winnersFinalizedAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -378,6 +391,57 @@ export const ActivityEnrollmentScalarFieldEnum = {
 } as const
 
 export type ActivityEnrollmentScalarFieldEnum = (typeof ActivityEnrollmentScalarFieldEnum)[keyof typeof ActivityEnrollmentScalarFieldEnum]
+
+
+export const CompetitionPrizeScalarFieldEnum = {
+  id: 'id',
+  activityId: 'activityId',
+  rankFrom: 'rankFrom',
+  rankTo: 'rankTo',
+  title: 'title',
+  valueNote: 'valueNote',
+  sortOrder: 'sortOrder',
+  createdAt: 'createdAt'
+} as const
+
+export type CompetitionPrizeScalarFieldEnum = (typeof CompetitionPrizeScalarFieldEnum)[keyof typeof CompetitionPrizeScalarFieldEnum]
+
+
+export const RewardTierScalarFieldEnum = {
+  id: 'id',
+  key: 'key',
+  title: 'title',
+  titleEn: 'titleEn',
+  threshold: 'threshold',
+  reward: 'reward',
+  rewardEn: 'rewardEn',
+  icon: 'icon',
+  image: 'image',
+  accent: 'accent',
+  sortOrder: 'sortOrder',
+  active: 'active',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type RewardTierScalarFieldEnum = (typeof RewardTierScalarFieldEnum)[keyof typeof RewardTierScalarFieldEnum]
+
+
+export const RewardClaimScalarFieldEnum = {
+  id: 'id',
+  memberId: 'memberId',
+  kind: 'kind',
+  refKey: 'refKey',
+  activityId: 'activityId',
+  title: 'title',
+  detail: 'detail',
+  status: 'status',
+  note: 'note',
+  createdAt: 'createdAt',
+  decidedAt: 'decidedAt'
+} as const
+
+export type RewardClaimScalarFieldEnum = (typeof RewardClaimScalarFieldEnum)[keyof typeof RewardClaimScalarFieldEnum]
 
 
 export const BecRateScalarFieldEnum = {
@@ -435,6 +499,88 @@ export const SpinResultScalarFieldEnum = {
 export type SpinResultScalarFieldEnum = (typeof SpinResultScalarFieldEnum)[keyof typeof SpinResultScalarFieldEnum]
 
 
+export const JournalAccountScalarFieldEnum = {
+  id: 'id',
+  memberId: 'memberId',
+  tradeAccountId: 'tradeAccountId',
+  tradeId: 'tradeId',
+  broker: 'broker',
+  accountType: 'accountType',
+  platform: 'platform',
+  startingBalance: 'startingBalance',
+  startDate: 'startDate',
+  mtServer: 'mtServer',
+  investorPasswordEnc: 'investorPasswordEnc',
+  mtLastSyncAt: 'mtLastSyncAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type JournalAccountScalarFieldEnum = (typeof JournalAccountScalarFieldEnum)[keyof typeof JournalAccountScalarFieldEnum]
+
+
+export const JournalTradeScalarFieldEnum = {
+  id: 'id',
+  accountId: 'accountId',
+  externalKey: 'externalKey',
+  ticket: 'ticket',
+  symbol: 'symbol',
+  side: 'side',
+  openAt: 'openAt',
+  closeAt: 'closeAt',
+  openPrice: 'openPrice',
+  closePrice: 'closePrice',
+  tp: 'tp',
+  sl: 'sl',
+  lots: 'lots',
+  pnl: 'pnl',
+  commission: 'commission',
+  swap: 'swap',
+  note: 'note',
+  tagsJson: 'tagsJson',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type JournalTradeScalarFieldEnum = (typeof JournalTradeScalarFieldEnum)[keyof typeof JournalTradeScalarFieldEnum]
+
+
+export const RiskRuleScalarFieldEnum = {
+  id: 'id',
+  accountId: 'accountId',
+  maxDailyLoss: 'maxDailyLoss',
+  maxLoss: 'maxLoss',
+  profitTarget: 'profitTarget',
+  updatedAt: 'updatedAt'
+} as const
+
+export type RiskRuleScalarFieldEnum = (typeof RiskRuleScalarFieldEnum)[keyof typeof RiskRuleScalarFieldEnum]
+
+
+export const SocialAccountScalarFieldEnum = {
+  id: 'id',
+  memberId: 'memberId',
+  provider: 'provider',
+  providerUserId: 'providerUserId',
+  username: 'username',
+  verifiedAt: 'verifiedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type SocialAccountScalarFieldEnum = (typeof SocialAccountScalarFieldEnum)[keyof typeof SocialAccountScalarFieldEnum]
+
+
+export const MemberNotificationReadScalarFieldEnum = {
+  id: 'id',
+  memberId: 'memberId',
+  key: 'key',
+  readAt: 'readAt'
+} as const
+
+export type MemberNotificationReadScalarFieldEnum = (typeof MemberNotificationReadScalarFieldEnum)[keyof typeof MemberNotificationReadScalarFieldEnum]
+
+
 export const CourseScalarFieldEnum = {
   id: 'id',
   slug: 'slug',
@@ -488,7 +634,10 @@ export const LessonProgressScalarFieldEnum = {
   id: 'id',
   lessonId: 'lessonId',
   memberId: 'memberId',
-  completedAt: 'completedAt'
+  completedAt: 'completedAt',
+  maxPositionSec: 'maxPositionSec',
+  durationSec: 'durationSec',
+  updatedAt: 'updatedAt'
 } as const
 
 export type LessonProgressScalarFieldEnum = (typeof LessonProgressScalarFieldEnum)[keyof typeof LessonProgressScalarFieldEnum]
@@ -525,6 +674,9 @@ export const MemberOrderByRelevanceFieldEnum = {
   telegramUsername: 'telegramUsername',
   telegramUserId: 'telegramUserId',
   discordUsername: 'discordUsername',
+  discordUserId: 'discordUserId',
+  lineUserId: 'lineUserId',
+  lineDisplayName: 'lineDisplayName',
   socialLinksJson: 'socialLinksJson',
   requiredLotsOverrideNote: 'requiredLotsOverrideNote'
 } as const
@@ -648,7 +800,8 @@ export const ActivityOrderByRelevanceFieldEnum = {
   title: 'title',
   description: 'description',
   coverImage: 'coverImage',
-  rules: 'rules'
+  rules: 'rules',
+  mode: 'mode'
 } as const
 
 export type ActivityOrderByRelevanceFieldEnum = (typeof ActivityOrderByRelevanceFieldEnum)[keyof typeof ActivityOrderByRelevanceFieldEnum]
@@ -661,6 +814,40 @@ export const ActivityEnrollmentOrderByRelevanceFieldEnum = {
 } as const
 
 export type ActivityEnrollmentOrderByRelevanceFieldEnum = (typeof ActivityEnrollmentOrderByRelevanceFieldEnum)[keyof typeof ActivityEnrollmentOrderByRelevanceFieldEnum]
+
+
+export const CompetitionPrizeOrderByRelevanceFieldEnum = {
+  title: 'title',
+  valueNote: 'valueNote'
+} as const
+
+export type CompetitionPrizeOrderByRelevanceFieldEnum = (typeof CompetitionPrizeOrderByRelevanceFieldEnum)[keyof typeof CompetitionPrizeOrderByRelevanceFieldEnum]
+
+
+export const RewardTierOrderByRelevanceFieldEnum = {
+  key: 'key',
+  title: 'title',
+  titleEn: 'titleEn',
+  reward: 'reward',
+  rewardEn: 'rewardEn',
+  icon: 'icon',
+  image: 'image',
+  accent: 'accent'
+} as const
+
+export type RewardTierOrderByRelevanceFieldEnum = (typeof RewardTierOrderByRelevanceFieldEnum)[keyof typeof RewardTierOrderByRelevanceFieldEnum]
+
+
+export const RewardClaimOrderByRelevanceFieldEnum = {
+  kind: 'kind',
+  refKey: 'refKey',
+  title: 'title',
+  detail: 'detail',
+  status: 'status',
+  note: 'note'
+} as const
+
+export type RewardClaimOrderByRelevanceFieldEnum = (typeof RewardClaimOrderByRelevanceFieldEnum)[keyof typeof RewardClaimOrderByRelevanceFieldEnum]
 
 
 export const BecRateOrderByRelevanceFieldEnum = {
@@ -692,6 +879,46 @@ export const SpinResultOrderByRelevanceFieldEnum = {
 } as const
 
 export type SpinResultOrderByRelevanceFieldEnum = (typeof SpinResultOrderByRelevanceFieldEnum)[keyof typeof SpinResultOrderByRelevanceFieldEnum]
+
+
+export const JournalAccountOrderByRelevanceFieldEnum = {
+  tradeId: 'tradeId',
+  broker: 'broker',
+  accountType: 'accountType',
+  platform: 'platform',
+  mtServer: 'mtServer',
+  investorPasswordEnc: 'investorPasswordEnc'
+} as const
+
+export type JournalAccountOrderByRelevanceFieldEnum = (typeof JournalAccountOrderByRelevanceFieldEnum)[keyof typeof JournalAccountOrderByRelevanceFieldEnum]
+
+
+export const JournalTradeOrderByRelevanceFieldEnum = {
+  externalKey: 'externalKey',
+  ticket: 'ticket',
+  symbol: 'symbol',
+  side: 'side',
+  note: 'note',
+  tagsJson: 'tagsJson'
+} as const
+
+export type JournalTradeOrderByRelevanceFieldEnum = (typeof JournalTradeOrderByRelevanceFieldEnum)[keyof typeof JournalTradeOrderByRelevanceFieldEnum]
+
+
+export const SocialAccountOrderByRelevanceFieldEnum = {
+  provider: 'provider',
+  providerUserId: 'providerUserId',
+  username: 'username'
+} as const
+
+export type SocialAccountOrderByRelevanceFieldEnum = (typeof SocialAccountOrderByRelevanceFieldEnum)[keyof typeof SocialAccountOrderByRelevanceFieldEnum]
+
+
+export const MemberNotificationReadOrderByRelevanceFieldEnum = {
+  key: 'key'
+} as const
+
+export type MemberNotificationReadOrderByRelevanceFieldEnum = (typeof MemberNotificationReadOrderByRelevanceFieldEnum)[keyof typeof MemberNotificationReadOrderByRelevanceFieldEnum]
 
 
 export const CourseOrderByRelevanceFieldEnum = {

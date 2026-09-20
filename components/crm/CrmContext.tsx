@@ -139,6 +139,9 @@ export type Member = {
   telegramUsername?: string;
   telegramUserId?: string;
   discordUsername?: string;
+  discordUserId?: string;
+  lineUserId?: string;
+  lineDisplayName?: string;
   /** Demo-only connect/disconnect state for the profile page's Social Media section — no real OAuth backing it. */
   socialLinks?: { google?: boolean; line?: boolean; facebook?: boolean };
   createdDate: string;
@@ -214,6 +217,10 @@ export type Settings = {
   telegramBotToken: string;
   telegramPrivateRoomId: string;
   telegramAutoRemove: boolean;
+  /** Public invite links shown on the VIP page after linking. */
+  telegramInviteLink: string;
+  discordInviteLink: string;
+  lineInviteLink: string;
   /** Which indicator IDs each plan entitles a member to — drives auto-grant
    *  on top of (never instead of) manual Grant/Suspend/Revoke, so admins
    *  keep full override control per member. */
@@ -229,6 +236,9 @@ const DEFAULT_SETTINGS: Settings = {
   telegramBotToken: "",
   telegramPrivateRoomId: "",
   telegramAutoRemove: true,
+  telegramInviteLink: "",
+  discordInviteLink: "",
+  lineInviteLink: "",
   planEntitlements: { free: [2, 3], ib_partner: [1, 2] },
 };
 
@@ -339,7 +349,7 @@ type DatabasePayloads = {
   admins?: { admins?: Admin[] } | null;
   tradeLogs?: { tradeLogs?: TradeLog[] } | null;
   automation?: { requiredLots?: number; renewalMonths?: number; enabled?: boolean } | null;
-  general?: { telegramBotToken?: string; telegramPrivateRoomId?: string; telegramAutoRemove?: boolean; expiringSoonDays?: number; lotCalculationMode?: LotCalculationMode | "sum_all_verified" } | null;
+  general?: { telegramBotToken?: string; telegramPrivateRoomId?: string; telegramAutoRemove?: boolean; expiringSoonDays?: number; lotCalculationMode?: LotCalculationMode | "sum_all_verified"; telegramInviteLink?: string; discordInviteLink?: string; lineInviteLink?: string } | null;
   renewals?: { renewalHistory?: RenewalRecord[] } | null;
   version?: { version?: number } | null;
   /** Member dashboard only: set once the member has passed the identity check,
@@ -502,6 +512,9 @@ export function CrmProvider({ children, mode = "admin", viewer }: { children: Re
         ...(typeof general.telegramBotToken === "string" ? { telegramBotToken: general.telegramBotToken } : {}),
         ...(typeof general.telegramPrivateRoomId === "string" ? { telegramPrivateRoomId: general.telegramPrivateRoomId } : {}),
         ...(typeof general.telegramAutoRemove === "boolean" ? { telegramAutoRemove: general.telegramAutoRemove } : {}),
+        ...(typeof general.telegramInviteLink === "string" ? { telegramInviteLink: general.telegramInviteLink } : {}),
+        ...(typeof general.discordInviteLink === "string" ? { discordInviteLink: general.discordInviteLink } : {}),
+        ...(typeof general.lineInviteLink === "string" ? { lineInviteLink: general.lineInviteLink } : {}),
         ...(typeof general.expiringSoonDays === "number" ? { expiringSoonDays: general.expiringSoonDays } : {}),
         // Legacy stored value "sum_all_verified" counts the same as "sum_all_active".
         ...(general.lotCalculationMode === "selected_only" || general.lotCalculationMode === "sum_all_active" || general.lotCalculationMode === "sum_all_verified"

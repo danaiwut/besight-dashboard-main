@@ -30,7 +30,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     const data: Record<string, unknown> = parseLessonBody(body);
     const lesson = await getPrisma().courseLesson.update({ where: { id: lessonId }, data });
     await bumpDataVersion();
-    return NextResponse.json({ ok: true, lesson: toCourseLessonDto(lesson, false) });
+    return NextResponse.json({ ok: true, lesson: toCourseLessonDto(lesson, { completed: false, maxPositionSec: 0, durationSec: null }) });
   } catch (error) {
     return fail(error, "Unable to update lesson");
   }

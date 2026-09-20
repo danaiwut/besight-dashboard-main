@@ -1,7 +1,8 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Open_Sans } from "next/font/google";
 import "../styles/tokens.css";
 import { LanguageProvider } from "../components/crm/LanguageContext";
+import PwaRegister from "../components/PwaRegister";
 
 const openSans = Open_Sans({
   subsets: ["latin"],
@@ -13,7 +14,19 @@ const openSans = Open_Sans({
 export const metadata: Metadata = {
   title: "BeSight — Member CRM",
   description: "Internal CRM for managing BeSight members, trade accounts, and indicator access.",
-  icons: { icon: "/img/favicon_besight_2025.svg" },
+  manifest: "/manifest.webmanifest",
+  icons: { icon: "/img/favicon_besight_2025.svg", apple: "/icons/apple-touch-icon.png" },
+  appleWebApp: { capable: true, statusBarStyle: "black-translucent", title: "BeSight" },
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
+    { media: "(prefers-color-scheme: dark)", color: "#0b0b12" },
+  ],
 };
 
 export default function RootLayout({
@@ -32,6 +45,7 @@ export default function RootLayout({
       </head>
       <body suppressHydrationWarning>
         <LanguageProvider>{children}</LanguageProvider>
+        <PwaRegister />
       </body>
     </html>
   );

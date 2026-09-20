@@ -62,6 +62,9 @@ export type CustomerMemberDto = {
   telegramUsername?: string;
   telegramUserId?: string;
   discordUsername?: string;
+  discordUserId?: string;
+  lineUserId?: string;
+  lineDisplayName?: string;
   crmStartDate?: string;
   crmExpiryDate?: string;
   createdDate: string;

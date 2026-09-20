@@ -1,44 +1,106 @@
-/** Self-contained demo dataset for the Trading Journal page — a richer
- *  per-trade shape (entry/exit price, P&L, TP/SL) than the rebate-only
- *  TradeLog model the rest of the dashboard uses, since none of that data
- *  captures win/loss outcomes. Kept local to this feature rather than
- *  bolted onto the shared CrmContext trade logs. */
+/** Trading Journal — client-safe types + stat math.
+ *  Accounts/trades/rules persist in JournalAccount/JournalTrade/RiskRule
+ *  (member-private). Stats are always derived from the trade rows. */
 
 export type JournalTrade = {
   id: number;
+  accountId?: number;
+  ticket?: string;
   symbol: string;
   side: "buy" | "sell";
   openDate: string; // ISO datetime
-  closeDate: string; // ISO datetime
+  closeDate: string; // ISO datetime ("" when still open)
   openPrice: number;
   closePrice: number;
   tp: number | null;
   sl: number | null;
   lots: number;
   pnl: number;
+  commission?: number;
+  swap?: number;
+  note?: string;
+  tags?: string[];
 };
 
-/** A single linked trading account — a member can hold several (e.g. one
- *  per broker or sub-account), each with its own trade history. */
+/** A single linked trading account — one journal account per registered
+ *  trade account, each with its own trade history. */
 export type JournalAccount = {
   id: string;
+  accountId?: number;
+  tradeAccountId?: number;
   createdDate: string;
   broker: string;
   accountType: string;
   platform: string;
   size: number;
   startDate: string;
+  mtServer?: string;
+  hasInvestorPassword?: boolean;
+  mtLastSyncAt?: string;
   trades: JournalTrade[];
 };
 
-/** Journal accounts are per-member and not persisted yet — the feature reads
- *  nothing from here until a JournalEntry store exists, so this starts empty
- *  (no fabricated demo accounts/trades). */
+/** Journal accounts are per-member and persist server-side — this starts
+ *  empty until the member links their first account. */
 export const INITIAL_ACCOUNTS: JournalAccount[] = [];
 
 /** Trade technique/strategy tags a member can attach to a journal note —
  *  common trading concepts plus BeSight's own named strategies. */
 export const TRADE_TAGS = ["SMC", "ICT", "CRT", "BeSight ONE", "BeSight Orca"];
+
+/** Journal account as sent by the API (trades loaded separately per account). */
+export type JournalAccountDto = {
+  id: number;
+  tradeAccountId?: number;
+  tradeId: string;
+  broker: string;
+  accountType: string;
+  platform: string;
+  startingBalance: number;
+  startDate: string;
+  createdDate: string;
+  mtServer?: string;
+  hasInvestorPassword: boolean;
+  mtLastSyncAt?: string;
+  openTrades: number;
+  tradeCount: number;
+};
+
+export type RiskRuleDto = {
+  maxDailyLoss: number;
+  maxLoss: number;
+  profitTarget: number;
+};
+
+export type InsightTone = "good" | "bad" | "neutral";
+
+export type InsightDto = {
+  key: string;
+  title: string;
+  detail: string;
+  tone: InsightTone;
+  value?: string;
+};
+
+/** One parsed import row awaiting confirm. `rowNumber` is the source line. */
+export type ImportPreviewRow = {
+  rowNumber: number;
+  ticket: string;
+  symbol: string;
+  side: "buy" | "sell";
+  openAt: string;
+  closeAt: string;
+  openPrice: number;
+  closePrice: number;
+  tp: number | null;
+  sl: number | null;
+  lots: number;
+  pnl: number;
+  commission: number;
+  swap: number;
+  duplicate: boolean;
+  error?: string;
+};
 
 export function tradeDurationMs(trade: JournalTrade) {
   return new Date(trade.closeDate).getTime() - new Date(trade.openDate).getTime();

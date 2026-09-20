@@ -123,6 +123,7 @@ export default function DashboardActivitiesPage() {
                   {t("dash.activities.traders", { n: c.traders })}
                   <Link href="/dashboard/leaderboard">{t("dash.activities.leaderboard")}</Link>
                   {c.status === "live" && <span className="comp-live-dot">{t("dash.activities.liveBadge")}</span>}
+                  {c.mode !== "registered" && <span className="badge pending">{t("dash.activities.legacyBadge")}</span>}
                 </div>
                 <div className="comp-card-title">{c.title}</div>
                 <p className="comp-card-desc">
