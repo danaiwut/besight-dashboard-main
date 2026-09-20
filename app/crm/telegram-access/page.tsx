@@ -57,13 +57,13 @@ export default function TelegramAccessPage() {
     if (backendLive) {
       void (async () => {
         if (!(await expireAccess(id, today))) return;
-        log({ actor: "Alex Dean", memberId: rec?.memberId, memberName: m?.name, action: "Telegram Access Removed", description: `${m?.name ?? "Member"} removed from ${rec?.room ?? "the private room"} — webhook event queued for the Telegram bot.` });
+        log({ memberId: rec?.memberId, memberName: m?.name, action: "Telegram Access Removed", description: `${m?.name ?? "Member"} removed from ${rec?.room ?? "the private room"} — webhook event queued for the Telegram bot.` });
         toast(t("tg.toast.removed", { name: m?.name ?? "Member" }));
       })();
       return;
     }
     setTelegramAccess((cur) => cur.map((x) => (x.id === id ? { ...x, status: "expired", expiryDate: today } : x)));
-    log({ actor: "Alex Dean", memberId: rec?.memberId, memberName: m?.name, action: "Telegram Access Removed", description: `${m?.name ?? "Member"} removed from ${rec?.room ?? "the private room"} — webhook event queued for the Telegram bot.` });
+    log({ memberId: rec?.memberId, memberName: m?.name, action: "Telegram Access Removed", description: `${m?.name ?? "Member"} removed from ${rec?.room ?? "the private room"} — webhook event queued for the Telegram bot.` });
     toast(t("tg.toast.removed", { name: m?.name ?? "Member" }));
   }
 

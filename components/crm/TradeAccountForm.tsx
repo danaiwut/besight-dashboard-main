@@ -83,7 +83,6 @@ const TradeAccountForm = forwardRef<TradeAccountFormHandle, { account: TradeAcco
           const payload = await apiCall<{ tradeAccount: TradeAccount }>("/api/crm/trade-accounts/", "POST", data);
           setTradeAccounts((cur) => [payload.tradeAccount, ...cur]);
           log({
-            actor: "Alex Dean",
             memberId: memberId || undefined,
             memberName: member?.name,
             action: "Trade ID Added",
@@ -96,7 +95,7 @@ const TradeAccountForm = forwardRef<TradeAccountFormHandle, { account: TradeAcco
           const payload = await apiCall<{ tradeAccount: TradeAccount }>(`/api/crm/trade-accounts/${account!.id}/`, "PUT", data);
           setTradeAccounts((cur) => cur.map((a) => (a.id === account!.id ? payload.tradeAccount : a)));
           if (account!.verification !== verification && verification === "verified") {
-            log({ actor: "Alex Dean", memberId, memberName: member?.name, action: "Trade ID Verified", description: `Trade ID ${trimmedId} at ${broker?.name ?? "broker"} marked verified.` });
+            log({ memberId, memberName: member?.name, action: "Trade ID Verified", description: `Trade ID ${trimmedId} at ${broker?.name ?? "broker"} marked verified.` });
           }
           toast(t("ta.toast.updated"));
         }
@@ -119,7 +118,6 @@ const TradeAccountForm = forwardRef<TradeAccountFormHandle, { account: TradeAcco
             ...cur,
           ]);
           log({
-            actor: "Alex Dean",
             memberId: memberId || undefined,
             memberName: member?.name,
             action: "Trade ID Added",
@@ -131,7 +129,7 @@ const TradeAccountForm = forwardRef<TradeAccountFormHandle, { account: TradeAcco
         } else {
           setTradeAccounts((cur) => cur.map((a) => (a.id === account!.id ? { ...a, ...data } : a)));
           if (account!.verification !== verification && verification === "verified") {
-            log({ actor: "Alex Dean", memberId, memberName: member?.name, action: "Trade ID Verified", description: `Trade ID ${trimmedId} at ${broker?.name ?? "broker"} marked verified.` });
+            log({ memberId, memberName: member?.name, action: "Trade ID Verified", description: `Trade ID ${trimmedId} at ${broker?.name ?? "broker"} marked verified.` });
           }
           toast(t("ta.toast.updated"));
         }

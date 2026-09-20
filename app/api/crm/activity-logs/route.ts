@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getPrisma, isDatabaseConfigured } from "@/lib/server/prisma";
 import { bumpDataVersion } from "@/lib/server/dataVersion";
-import { adminGuard, adminWriteGuard } from "@/lib/session";
+import { actorFromSession, adminGuard, adminWriteGuard } from "@/lib/session";
 
 export const dynamic = "force-dynamic";
 
@@ -35,13 +35,15 @@ export async function POST(request: NextRequest) {
   if (!guard.ok) return guard.response;
   if (!isDatabaseConfigured()) return NextResponse.json({ ok: false, error: "DATABASE_URL is not configured" }, { status: 503 });
   try {
-    const body = await request.json() as { actor?: string; memberId?: number; action?: string; description?: string };
-    if (!body.actor?.trim() || !body.action?.trim() || !body.description?.trim()) {
-      return NextResponse.json({ ok: false, error: "actor, action and description are required" }, { status: 400 });
+    const body = await request.json() as { memberId?: number; action?: string; description?: string };
+    if (!body.action?.trim() || !body.description?.trim()) {
+      return NextResponse.json({ ok: false, error: "action and description are required" }, { status: 400 });
     }
     const record = await getPrisma().activityLog.create({
       data: {
-        actor: body.actor.trim(),
+        // Never from the request body: an audit trail the caller can label with
+        // someone else's name records nothing worth having.
+        actor: actorFromSession(guard.user),
         memberId: body.memberId || null,
         action: body.action.trim(),
         description: body.description.trim(),

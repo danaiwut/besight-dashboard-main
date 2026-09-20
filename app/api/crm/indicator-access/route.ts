@@ -6,7 +6,7 @@ import { toIndicatorAccessDto } from "@/lib/server/crmDtos";
 import { readIndicatorAutomationSettings } from "@/lib/server/indicatorSettings";
 import { getMemberLots } from "@/lib/server/lotService";
 import { resolveLotWindow, snapshotMatchesWindow } from "@/lib/lotEngine";
-import { adminWriteGuard } from "@/lib/session";
+import { actorFromSession, adminWriteGuard } from "@/lib/session";
 
 
 export const dynamic = "force-dynamic";
@@ -124,7 +124,7 @@ export async function POST(request: NextRequest) {
       });
       await prisma.activityLog.create({
         data: {
-          memberId, actor: "Admin", action: "Indicator Granted",
+          memberId, actor: actorFromSession(guard.user), action: "Indicator Granted",
           description: `${indicator.name} manually granted, expires ${expiresAt.toISOString().slice(0, 10)} (${qualifiedLots.toFixed(2)} / ${requiredLots.toFixed(2)} lots for ${window.period}).`,
         },
       });
@@ -152,7 +152,7 @@ export async function POST(request: NextRequest) {
     });
     await prisma.activityLog.create({
       data: {
-        memberId, actor: "Admin", action: "Indicator Renewed",
+        memberId, actor: actorFromSession(guard.user), action: "Indicator Renewed",
         description: `${indicator.name} manually re-granted after expiry (${day(dup.expiresAt)}); new expiry ${expiresAt.toISOString().slice(0, 10)} (${qualifiedLots.toFixed(2)} / ${requiredLots.toFixed(2)} lots for ${window.period}).`,
       },
     });

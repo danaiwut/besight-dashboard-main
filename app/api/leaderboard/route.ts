@@ -7,14 +7,16 @@ export const dynamic = "force-dynamic";
 
 export type LeaderboardPeriod = "daily" | "monthly";
 
+/* Every signed-in member can read this board, so it carries the minimum needed
+   to render a ranking: standing, a display label and the lot count it is ranked
+   on. Deliberately absent: other members' rebate earnings (financial data),
+   country, and any un-masked legal name. */
 export type LeaderboardRowDto = {
   rank: number;
   memberId: number;
   name: string;
   code: string;
-  country?: string;
   lots: number;
-  rebate: number;
   /** Rank in the previous comparable window, when one exists. */
   previousRank: number | null;
 };
@@ -50,13 +52,32 @@ function rankByLots(totals: Totals[]) {
   return new Map(ranked.map((row, index) => [row.memberId, index + 1]));
 }
 
+/** A member who never chose a display name did not agree to have their legal
+ *  name shown to every other member, so it is abbreviated: "Somchai Wattana"
+ *  becomes "Somchai W.". A chosen display name is shown as-is.
+ *
+ *  `Member.name` is not always a name: the CRM sync falls back to the email
+ *  address when the upstream record has none, so an email-shaped value must
+ *  never reach the board — those fall back to the pseudonymous member code. */
+function publicLabel(displayName: string | null, name: string, code: string): string {
+  const chosen = displayName?.trim();
+  if (chosen && !chosen.includes("@")) return chosen;
+
+  const raw = name.trim();
+  if (!raw || raw.includes("@")) return code;
+
+  const [first, ...rest] = raw.split(/\s+/).filter(Boolean);
+  if (!first) return code;
+  return rest.length ? `${first} ${rest[rest.length - 1].charAt(0)}.` : first;
+}
+
 async function memberInfo(ids: number[]) {
-  if (!ids.length) return new Map<number, { name: string; code: string; country: string | null }>();
+  if (!ids.length) return new Map<number, { name: string; code: string }>();
   const rows = await getPrisma().member.findMany({
     where: { id: { in: ids } },
-    select: { id: true, name: true, displayName: true, code: true, country: true },
+    select: { id: true, name: true, displayName: true, code: true },
   });
-  return new Map(rows.map((row) => [row.id, { name: row.displayName?.trim() || row.name, code: row.code, country: row.country }]));
+  return new Map(rows.map((row) => [row.id, { name: publicLabel(row.displayName, row.name, row.code), code: row.code }]));
 }
 
 /** Calendar-period lot leaderboard. "monthly" = the current calendar month,
@@ -115,9 +136,7 @@ export async function GET(request: NextRequest) {
         memberId: row.memberId,
         name: member?.name ?? "—",
         code: member?.code ?? "—",
-        country: member?.country || undefined,
         lots: Math.round(row.lots * 100) / 100,
-        rebate: Math.round(row.rebate * 100) / 100,
         previousRank: prevRanks.get(row.memberId) ?? null,
       };
     });
@@ -133,9 +152,7 @@ export async function GET(request: NextRequest) {
           memberId,
           name: member?.name ?? "—",
           code: member?.code ?? "—",
-          country: member?.country || undefined,
           lots: Math.round(mine.lots * 100) / 100,
-          rebate: Math.round(mine.rebate * 100) / 100,
           previousRank: prevRanks.get(memberId) ?? null,
         };
       }

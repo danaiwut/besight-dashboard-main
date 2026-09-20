@@ -275,7 +275,9 @@ type CrmContextValue = {
   toast: (msg: string) => void;
   toastMsg: string;
   toastShow: boolean;
-  log: (entry: Omit<ActivityLog, "id" | "timestamp">) => void;
+  /** `actor` is accepted for call-site compatibility but ignored — the signed-in
+   *  identity is used instead, both locally and on the server. */
+  log: (entry: Omit<ActivityLog, "id" | "timestamp" | "actor"> & { actor?: string }) => void;
   syncPlanAccess: (memberId: number, plan: Plan, memberName: string) => Promise<number>;
   memberSyncStatus: "idle" | "loading" | "live" | "error";
   memberSyncError: string;
@@ -646,15 +648,20 @@ export function CrmProvider({ children, mode = "admin", viewer }: { children: Re
     setTimeout(() => setToastShow(false), 1800);
   }
 
-  function log(entry: Omit<ActivityLog, "id" | "timestamp">) {
+  /* `actor` is ignored if a caller passes one: the server stamps the row from
+     the session, so the optimistic row here uses the same signed-in identity
+     rather than a name the caller chose. */
+  function log(entry: Omit<ActivityLog, "id" | "timestamp" | "actor"> & { actor?: string }) {
+    const { actor: _ignored, ...rest } = entry;
+    const actor = viewer?.name?.trim() || viewer?.email?.trim() || "—";
     setActivityLogs((cur) => [
-      { id: Math.max(0, ...cur.map((l) => l.id)) + 1, timestamp: new Date().toISOString(), ...entry },
+      { id: Math.max(0, ...cur.map((l) => l.id)) + 1, timestamp: new Date().toISOString(), actor, ...rest },
       ...cur,
     ]);
     void fetch("/api/crm/activity-logs/", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(entry),
+      body: JSON.stringify(rest),
     }).catch(() => undefined);
   }
 

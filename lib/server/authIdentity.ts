@@ -2,34 +2,32 @@ import { getPrisma, isDatabaseConfigured } from "./prisma";
 import { verifyPassword } from "./password";
 
 /* Maps an email to the one account it belongs to. Identity lives in the
-   existing Member/Admin tables (no separate auth user store): admins win when
-   an email exists in both, members are provisioned by the CRM sync — social
-   sign-in only claims an existing row, it never creates one. */
+   existing Member/Admin tables (no separate auth user store): members are
+   provisioned by the CRM sync — signing in only claims an existing row, it
+   never creates one. */
 
 export type AdminIdentity = { role: "admin"; adminId: number; email: string; name: string };
 export type MemberIdentity = { role: "member"; memberId: number; email: string; name: string };
 export type Identity = AdminIdentity | MemberIdentity;
 
-export async function resolveIdentityByEmail(email: string): Promise<Identity | null> {
+/** Member-only lookup, used by the social sign-in path.
+ *
+ *  Admins are deliberately NOT resolvable here. An admin account is reached
+ *  with its password (Admin.passwordHash) and nothing else, so controlling an
+ *  identity provider account that happens to share an admin's email address
+ *  cannot yield CRM access. The previous admin-first lookup made every OAuth
+ *  provider a password-free door into the backoffice. */
+export async function resolveMemberIdentityByEmail(email: string): Promise<MemberIdentity | null> {
   if (!isDatabaseConfigured()) return null;
   const normalized = email.trim();
   if (!normalized) return null;
-  const prisma = getPrisma();
 
-  const admin = await prisma.admin.findFirst({
-    where: { email: normalized },
-    select: { id: true, name: true, email: true },
-  });
-  if (admin) return { role: "admin", adminId: admin.id, email: admin.email, name: admin.name };
-
-  const member = await prisma.member.findFirst({
+  const member = await getPrisma().member.findFirst({
     where: { email: normalized },
     select: { id: true, name: true, displayName: true, email: true },
   });
-  if (member?.email) {
-    return { role: "member", memberId: member.id, email: member.email, name: member.displayName?.trim() || member.name };
-  }
-  return null;
+  if (!member?.email) return null;
+  return { role: "member", memberId: member.id, email: member.email, name: member.displayName?.trim() || member.name };
 }
 
 /** Email + password sign-in (admins first, then members). Returns null on any

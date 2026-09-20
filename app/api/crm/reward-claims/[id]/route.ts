@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getPrisma, isDatabaseConfigured } from "@/lib/server/prisma";
 import { bumpDataVersion } from "@/lib/server/dataVersion";
 import { toRewardClaimDto } from "@/lib/server/crmDtos";
-import { adminWriteGuard } from "@/lib/session";
+import { actorFromSession, adminWriteGuard } from "@/lib/session";
 
 export const dynamic = "force-dynamic";
 
@@ -36,7 +36,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     await prisma.activityLog.create({
       data: {
         memberId: claim.memberId,
-        actor: "Admin",
+        actor: actorFromSession(guard.user),
         action: claim.status === "fulfilled" ? "Reward Fulfilled" : claim.status === "cancelled" ? "Reward Cancelled" : "Reward Reopened",
         description: `"${claim.title}" → ${claim.status}.${claim.note ? ` Note: ${claim.note}.` : ""}`,
       },

@@ -65,6 +65,19 @@ export async function adminSettingsGuard(): Promise<AdminGuard> {
   return guard;
 }
 
+/** The name an ActivityLog row is attributed to. Always derived from the
+ *  server-side session: an audit trail whose actor comes from the request body
+ *  (or a hardcoded literal) records who *claimed* to act, not who did. */
+export function actorFromSession(user: SessionUser): string {
+  const name = user.name?.trim();
+  if (name) return name;
+  const email = user.email?.trim();
+  if (email) return email;
+  if (user.adminId) return `admin#${user.adminId}`;
+  if (user.memberId) return `member#${user.memberId}`;
+  return "Unknown";
+}
+
 /** Signed-in endpoints readable by a member or an admin (/api/me, /api/activities). */
 export async function memberGuard(): Promise<AnyGuard> {
   const user = await getSessionUser();

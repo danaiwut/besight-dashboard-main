@@ -184,7 +184,7 @@ const MemberForm = forwardRef<MemberFormHandle, { member: Member | null; onDone:
               };
             });
           setTradeAccounts((accts) => [...accts, ...newAccounts]);
-          log({ actor: "Alex Dean", memberId: id, memberName: trimmedName, action: "Member Added", description: `${trimmedName} added with ${newAccounts.length} trade account(s).` });
+          log({ memberId: id, memberName: trimmedName, action: "Member Added", description: `${trimmedName} added with ${newAccounts.length} trade account(s).` });
           return [{ id, code, joinedDate: today, createdDate: today, ...data }, ...cur];
         });
         const granted = await syncPlanAccess(id, plan, trimmedName);
@@ -257,7 +257,7 @@ const MemberForm = forwardRef<MemberFormHandle, { member: Member | null; onDone:
         }
         setMembers((cur) => [created.member, ...cur]);
         if (newAccounts.length) setTradeAccounts((cur) => [...newAccounts, ...cur]);
-        log({ actor: "Alex Dean", memberId: createdId, memberName: trimmedName, action: "Member Added", description: `${trimmedName} added with ${newAccounts.length} trade account(s).` });
+        log({ memberId: createdId, memberName: trimmedName, action: "Member Added", description: `${trimmedName} added with ${newAccounts.length} trade account(s).` });
         const granted = await syncPlanAccess(createdId, plan, trimmedName);
         toast(granted ? t("members.toast.addedWithPlan", { plan: PLAN_LABELS[plan], n: granted }) : t("members.toast.added"));
       } catch (error) {

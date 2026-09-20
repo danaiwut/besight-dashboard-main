@@ -262,7 +262,6 @@ function MemberDetailContent() {
       setIndicatorAccess((cur) => cur.map((a) => (a.memberId === id ? { ...a, status: "suspended" } : a)));
     }
     log({
-      actor: "Alex Dean",
       memberId: id,
       memberName: member!.name,
       action: "Manual Admin Override",

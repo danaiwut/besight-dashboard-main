@@ -3,7 +3,7 @@ import Credentials from "next-auth/providers/credentials";
 import Google from "next-auth/providers/google";
 import Facebook from "next-auth/providers/facebook";
 import LINE from "next-auth/providers/line";
-import { resolveIdentityByEmail, verifyCredentials } from "@/lib/server/authIdentity";
+import { resolveMemberIdentityByEmail, verifyCredentials } from "@/lib/server/authIdentity";
 
 /* ── Auth.js (NextAuth v5) ──
    Identity lives in the existing Member/Admin tables — signing in only claims
@@ -21,7 +21,6 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
     Google({
       clientId: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      allowDangerousEmailAccountLinking: true,
     }),
   );
 }
@@ -31,7 +30,6 @@ if (process.env.FACEBOOK_CLIENT_ID && process.env.FACEBOOK_CLIENT_SECRET) {
     Facebook({
       clientId: process.env.FACEBOOK_CLIENT_ID,
       clientSecret: process.env.FACEBOOK_CLIENT_SECRET,
-      allowDangerousEmailAccountLinking: true,
     }),
   );
 }
@@ -41,7 +39,6 @@ if (process.env.LINE_CLIENT_ID && process.env.LINE_CLIENT_SECRET) {
     LINE({
       clientId: process.env.LINE_CLIENT_ID,
       clientSecret: process.env.LINE_CLIENT_SECRET,
-      allowDangerousEmailAccountLinking: true,
     }),
   );
 }
@@ -78,11 +75,19 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   pages: { signIn: "/login" },
   providers,
   callbacks: {
-    async signIn({ user, account }) {
+    async signIn({ user, account, profile }) {
       if (account?.provider === "credentials") return true;
-      // Social sign-in must match an existing Member/Admin row.
       if (!user?.email) return false;
-      return Boolean(await resolveIdentityByEmail(user.email));
+
+      /* The provider must positively assert the address is verified. Google
+         sends `email_verified`; Facebook and LINE send no such claim, so they
+         fail closed here — enabling either one is a deliberate decision that
+         has to deal with unverified addresses first, because an unverified
+         email would otherwise let anyone claim a member's account. */
+      if (profile?.email_verified !== true) return false;
+
+      // Social sign-in claims an existing MEMBER row only — never an admin.
+      return Boolean(await resolveMemberIdentityByEmail(user.email));
     },
     async jwt({ token, user }) {
       if (user) {
@@ -92,11 +97,14 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           token.memberId = u.memberId;
           token.adminId = u.adminId;
         } else if (u.email) {
-          const identity = await resolveIdentityByEmail(u.email);
+          /* Social path. Member-only, mirroring the signIn callback — belt and
+             braces, so a token can never be minted with an admin role from an
+             identity provider. */
+          const identity = await resolveMemberIdentityByEmail(u.email);
           if (identity) {
             token.role = identity.role;
-            token.memberId = identity.role === "member" ? identity.memberId : undefined;
-            token.adminId = identity.role === "admin" ? identity.adminId : undefined;
+            token.memberId = identity.memberId;
+            token.adminId = undefined;
           }
         }
         if (u.name) token.name = u.name;

@@ -39,7 +39,6 @@ export default function LotOverrideCard({ member }: { member: Member }) {
 
   function afterSave(trimmedNote: string) {
     log({
-      actor: "Alex Dean",
       memberId: member.id,
       memberName: member.name,
       action: "Manual Admin Override",

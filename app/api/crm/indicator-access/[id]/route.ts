@@ -6,7 +6,7 @@ import { toIndicatorAccessDto } from "@/lib/server/crmDtos";
 import { readIndicatorAutomationSettings } from "@/lib/server/indicatorSettings";
 import { getMemberLots } from "@/lib/server/lotService";
 import { resolveLotWindow, snapshotMatchesWindow } from "@/lib/lotEngine";
-import { adminWriteGuard } from "@/lib/session";
+import { actorFromSession, adminWriteGuard } from "@/lib/session";
 
 
 export const dynamic = "force-dynamic";
@@ -97,7 +97,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
       });
       await prisma.activityLog.create({
         data: {
-          memberId: member.id, actor: "Admin", action: "Indicator Renewed",
+          memberId: member.id, actor: actorFromSession(guard.user), action: "Indicator Renewed",
           description: `${current.indicator.name} manually extended ${months} month(s): ${day(current.expiresAt)} → ${newExpiry.toISOString().slice(0, 10)} (${qualifiedLots.toFixed(2)} / ${requiredLots.toFixed(2)} lots for ${window.period}).`,
         },
       });

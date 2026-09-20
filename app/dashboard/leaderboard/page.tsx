@@ -14,7 +14,6 @@ type Row = {
   name: string;
   code: string;
   lots: number;
-  rebate: number;
   previousRank: number | null;
 };
 
@@ -192,7 +191,7 @@ export default function DashboardLeaderboardPage() {
                     </div>
                     <div className="lbd-rank-badge">#{rank}</div>
                     <div className="lbd-name">{row.name}</div>
-                    <div className="lbd-code">{row.code}</div>
+                    {row.code !== row.name && <div className="lbd-code">{row.code}</div>}
                     <div className="lbd-amount">{lot(row.lots)}</div>
                     {rank === 1 && (
                       <div className="lbd-top-pill">
@@ -248,7 +247,7 @@ export default function DashboardLeaderboardPage() {
                       </span>
                         <span className="lbd-member-info">
                           <div className="lbd-member-name">{row.name}</div>
-                          <div className="lbd-member-code">{row.code}</div>
+                          {row.code !== row.name && <div className="lbd-member-code">{row.code}</div>}
                         </span>
                       </span>
                       <span>{t(tierFor(row.lots).titleKey)}</span>

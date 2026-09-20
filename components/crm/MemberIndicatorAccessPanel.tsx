@@ -30,7 +30,7 @@ export default function MemberIndicatorAccessPanel({ member }: { member: Member 
   async function patchAccess(access: IndicatorAccess, patch: Partial<IndicatorAccess>, action: string, description: string, toastKey: string) {
     if (!backendLive) {
       applyAccess(access.id, patch);
-      log({ actor: "Alex Dean", memberId: member.id, memberName: member.name, action, description });
+      log({ memberId: member.id, memberName: member.name, action, description });
       toast(t(toastKey, { name: member.name }));
       return;
     }
@@ -41,7 +41,7 @@ export default function MemberIndicatorAccessPanel({ member }: { member: Member 
         ...(patch.status === "active" && patch.expiryDate ? { renewed: true } : {}),
       });
       applyAccess(access.id, payload.indicatorAccess);
-      log({ actor: "Alex Dean", memberId: member.id, memberName: member.name, action, description });
+      log({ memberId: member.id, memberName: member.name, action, description });
       toast(t(toastKey, { name: member.name }));
     } catch (error) {
       toast(error instanceof Error ? error.message : "Unable to update indicator access");
@@ -57,7 +57,7 @@ export default function MemberIndicatorAccessPanel({ member }: { member: Member 
         { id: Math.max(0, ...cur.map((a) => a.id)) + 1, memberId: member.id, indicator: effectiveGrantName, status: "active", source: "Admin", startDate: today, expiryDate: expiry },
         ...cur,
       ]);
-      log({ actor: "Alex Dean", memberId: member.id, memberName: member.name, action: "Indicator Granted", description: `${effectiveGrantName} granted by admin, expires ${expiry}.` });
+      log({ memberId: member.id, memberName: member.name, action: "Indicator Granted", description: `${effectiveGrantName} granted by admin, expires ${expiry}.` });
       toast(t("ia.toast.granted", { name: member.name, indicator: effectiveGrantName }));
       return;
     }
@@ -90,7 +90,7 @@ export default function MemberIndicatorAccessPanel({ member }: { member: Member 
       const oldExpiry = access.expiryDate;
       const newExpiry = addMonths(oldExpiry, settings.renewalPeriodMonths);
       applyAccess(access.id, { status: "active", expiryDate: newExpiry, lastRenewalDate: new Date().toISOString().slice(0, 10) });
-      log({ actor: "Alex Dean", memberId: member.id, memberName: member.name, action: "Indicator Renewed", description: `${access.indicator}: manually extended ${settings.renewalPeriodMonths} month(s). Expiry changed ${oldExpiry} → ${newExpiry}.` });
+      log({ memberId: member.id, memberName: member.name, action: "Indicator Renewed", description: `${access.indicator}: manually extended ${settings.renewalPeriodMonths} month(s). Expiry changed ${oldExpiry} → ${newExpiry}.` });
       toast(t("ia.toast.extended", { name: member.name }));
       return;
     }
