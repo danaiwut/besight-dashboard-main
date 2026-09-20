@@ -28,6 +28,7 @@ export type AggregateMember = {
 
 export type MemberAvgAggregateOutputType = {
   id: number | null
+  tokenVersion: number | null
   primaryTradeAccountId: number | null
   requiredLotsOverride: runtime.Decimal | null
   currentPeriodLots: runtime.Decimal | null
@@ -35,6 +36,7 @@ export type MemberAvgAggregateOutputType = {
 
 export type MemberSumAggregateOutputType = {
   id: number | null
+  tokenVersion: number | null
   primaryTradeAccountId: number | null
   requiredLotsOverride: runtime.Decimal | null
   currentPeriodLots: runtime.Decimal | null
@@ -49,6 +51,7 @@ export type MemberMinAggregateOutputType = {
   avatarUrl: string | null
   email: string | null
   passwordHash: string | null
+  tokenVersion: number | null
   identityVerifiedAt: Date | null
   phone: string | null
   country: string | null
@@ -86,6 +89,7 @@ export type MemberMaxAggregateOutputType = {
   avatarUrl: string | null
   email: string | null
   passwordHash: string | null
+  tokenVersion: number | null
   identityVerifiedAt: Date | null
   phone: string | null
   country: string | null
@@ -123,6 +127,7 @@ export type MemberCountAggregateOutputType = {
   avatarUrl: number
   email: number
   passwordHash: number
+  tokenVersion: number
   identityVerifiedAt: number
   phone: number
   country: number
@@ -155,6 +160,7 @@ export type MemberCountAggregateOutputType = {
 
 export type MemberAvgAggregateInputType = {
   id?: true
+  tokenVersion?: true
   primaryTradeAccountId?: true
   requiredLotsOverride?: true
   currentPeriodLots?: true
@@ -162,6 +168,7 @@ export type MemberAvgAggregateInputType = {
 
 export type MemberSumAggregateInputType = {
   id?: true
+  tokenVersion?: true
   primaryTradeAccountId?: true
   requiredLotsOverride?: true
   currentPeriodLots?: true
@@ -176,6 +183,7 @@ export type MemberMinAggregateInputType = {
   avatarUrl?: true
   email?: true
   passwordHash?: true
+  tokenVersion?: true
   identityVerifiedAt?: true
   phone?: true
   country?: true
@@ -213,6 +221,7 @@ export type MemberMaxAggregateInputType = {
   avatarUrl?: true
   email?: true
   passwordHash?: true
+  tokenVersion?: true
   identityVerifiedAt?: true
   phone?: true
   country?: true
@@ -250,6 +259,7 @@ export type MemberCountAggregateInputType = {
   avatarUrl?: true
   email?: true
   passwordHash?: true
+  tokenVersion?: true
   identityVerifiedAt?: true
   phone?: true
   country?: true
@@ -374,6 +384,7 @@ export type MemberGroupByOutputType = {
   avatarUrl: string | null
   email: string | null
   passwordHash: string | null
+  tokenVersion: number
   identityVerifiedAt: Date | null
   phone: string | null
   country: string | null
@@ -434,6 +445,7 @@ export type MemberWhereInput = {
   avatarUrl?: Prisma.StringNullableFilter<"Member"> | string | null
   email?: Prisma.StringNullableFilter<"Member"> | string | null
   passwordHash?: Prisma.StringNullableFilter<"Member"> | string | null
+  tokenVersion?: Prisma.IntFilter<"Member"> | number
   identityVerifiedAt?: Prisma.DateTimeNullableFilter<"Member"> | Date | string | null
   phone?: Prisma.StringNullableFilter<"Member"> | string | null
   country?: Prisma.StringNullableFilter<"Member"> | string | null
@@ -478,6 +490,7 @@ export type MemberWhereInput = {
   courseEnrollments?: Prisma.CourseEnrollmentListRelationFilter
   lessonProgress?: Prisma.LessonProgressListRelationFilter
   becGrants?: Prisma.BecGrantListRelationFilter
+  claimTokens?: Prisma.MemberClaimTokenListRelationFilter
 }
 
 export type MemberOrderByWithRelationInput = {
@@ -489,6 +502,7 @@ export type MemberOrderByWithRelationInput = {
   avatarUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   email?: Prisma.SortOrderInput | Prisma.SortOrder
   passwordHash?: Prisma.SortOrderInput | Prisma.SortOrder
+  tokenVersion?: Prisma.SortOrder
   identityVerifiedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   phone?: Prisma.SortOrderInput | Prisma.SortOrder
   country?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -533,6 +547,7 @@ export type MemberOrderByWithRelationInput = {
   courseEnrollments?: Prisma.CourseEnrollmentOrderByRelationAggregateInput
   lessonProgress?: Prisma.LessonProgressOrderByRelationAggregateInput
   becGrants?: Prisma.BecGrantOrderByRelationAggregateInput
+  claimTokens?: Prisma.MemberClaimTokenOrderByRelationAggregateInput
   _relevance?: Prisma.MemberOrderByRelevanceInput
 }
 
@@ -549,6 +564,7 @@ export type MemberWhereUniqueInput = Prisma.AtLeast<{
   displayName?: Prisma.StringNullableFilter<"Member"> | string | null
   avatarUrl?: Prisma.StringNullableFilter<"Member"> | string | null
   passwordHash?: Prisma.StringNullableFilter<"Member"> | string | null
+  tokenVersion?: Prisma.IntFilter<"Member"> | number
   identityVerifiedAt?: Prisma.DateTimeNullableFilter<"Member"> | Date | string | null
   phone?: Prisma.StringNullableFilter<"Member"> | string | null
   country?: Prisma.StringNullableFilter<"Member"> | string | null
@@ -592,6 +608,7 @@ export type MemberWhereUniqueInput = Prisma.AtLeast<{
   courseEnrollments?: Prisma.CourseEnrollmentListRelationFilter
   lessonProgress?: Prisma.LessonProgressListRelationFilter
   becGrants?: Prisma.BecGrantListRelationFilter
+  claimTokens?: Prisma.MemberClaimTokenListRelationFilter
 }, "id" | "externalId" | "code" | "email" | "primaryTradeAccountId">
 
 export type MemberOrderByWithAggregationInput = {
@@ -603,6 +620,7 @@ export type MemberOrderByWithAggregationInput = {
   avatarUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   email?: Prisma.SortOrderInput | Prisma.SortOrder
   passwordHash?: Prisma.SortOrderInput | Prisma.SortOrder
+  tokenVersion?: Prisma.SortOrder
   identityVerifiedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   phone?: Prisma.SortOrderInput | Prisma.SortOrder
   country?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -648,6 +666,7 @@ export type MemberScalarWhereWithAggregatesInput = {
   avatarUrl?: Prisma.StringNullableWithAggregatesFilter<"Member"> | string | null
   email?: Prisma.StringNullableWithAggregatesFilter<"Member"> | string | null
   passwordHash?: Prisma.StringNullableWithAggregatesFilter<"Member"> | string | null
+  tokenVersion?: Prisma.IntWithAggregatesFilter<"Member"> | number
   identityVerifiedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Member"> | Date | string | null
   phone?: Prisma.StringNullableWithAggregatesFilter<"Member"> | string | null
   country?: Prisma.StringNullableWithAggregatesFilter<"Member"> | string | null
@@ -684,6 +703,7 @@ export type MemberCreateInput = {
   avatarUrl?: string | null
   email?: string | null
   passwordHash?: string | null
+  tokenVersion?: number
   identityVerifiedAt?: Date | string | null
   phone?: string | null
   country?: string | null
@@ -727,6 +747,7 @@ export type MemberCreateInput = {
   courseEnrollments?: Prisma.CourseEnrollmentCreateNestedManyWithoutMemberInput
   lessonProgress?: Prisma.LessonProgressCreateNestedManyWithoutMemberInput
   becGrants?: Prisma.BecGrantCreateNestedManyWithoutMemberInput
+  claimTokens?: Prisma.MemberClaimTokenCreateNestedManyWithoutMemberInput
 }
 
 export type MemberUncheckedCreateInput = {
@@ -738,6 +759,7 @@ export type MemberUncheckedCreateInput = {
   avatarUrl?: string | null
   email?: string | null
   passwordHash?: string | null
+  tokenVersion?: number
   identityVerifiedAt?: Date | string | null
   phone?: string | null
   country?: string | null
@@ -781,6 +803,7 @@ export type MemberUncheckedCreateInput = {
   courseEnrollments?: Prisma.CourseEnrollmentUncheckedCreateNestedManyWithoutMemberInput
   lessonProgress?: Prisma.LessonProgressUncheckedCreateNestedManyWithoutMemberInput
   becGrants?: Prisma.BecGrantUncheckedCreateNestedManyWithoutMemberInput
+  claimTokens?: Prisma.MemberClaimTokenUncheckedCreateNestedManyWithoutMemberInput
 }
 
 export type MemberUpdateInput = {
@@ -791,6 +814,7 @@ export type MemberUpdateInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
   identityVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -834,6 +858,7 @@ export type MemberUpdateInput = {
   courseEnrollments?: Prisma.CourseEnrollmentUpdateManyWithoutMemberNestedInput
   lessonProgress?: Prisma.LessonProgressUpdateManyWithoutMemberNestedInput
   becGrants?: Prisma.BecGrantUpdateManyWithoutMemberNestedInput
+  claimTokens?: Prisma.MemberClaimTokenUpdateManyWithoutMemberNestedInput
 }
 
 export type MemberUncheckedUpdateInput = {
@@ -845,6 +870,7 @@ export type MemberUncheckedUpdateInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
   identityVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -888,6 +914,7 @@ export type MemberUncheckedUpdateInput = {
   courseEnrollments?: Prisma.CourseEnrollmentUncheckedUpdateManyWithoutMemberNestedInput
   lessonProgress?: Prisma.LessonProgressUncheckedUpdateManyWithoutMemberNestedInput
   becGrants?: Prisma.BecGrantUncheckedUpdateManyWithoutMemberNestedInput
+  claimTokens?: Prisma.MemberClaimTokenUncheckedUpdateManyWithoutMemberNestedInput
 }
 
 export type MemberCreateManyInput = {
@@ -899,6 +926,7 @@ export type MemberCreateManyInput = {
   avatarUrl?: string | null
   email?: string | null
   passwordHash?: string | null
+  tokenVersion?: number
   identityVerifiedAt?: Date | string | null
   phone?: string | null
   country?: string | null
@@ -935,6 +963,7 @@ export type MemberUpdateManyMutationInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
   identityVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -971,6 +1000,7 @@ export type MemberUncheckedUpdateManyInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
   identityVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1014,6 +1044,7 @@ export type MemberCountOrderByAggregateInput = {
   avatarUrl?: Prisma.SortOrder
   email?: Prisma.SortOrder
   passwordHash?: Prisma.SortOrder
+  tokenVersion?: Prisma.SortOrder
   identityVerifiedAt?: Prisma.SortOrder
   phone?: Prisma.SortOrder
   country?: Prisma.SortOrder
@@ -1044,6 +1075,7 @@ export type MemberCountOrderByAggregateInput = {
 
 export type MemberAvgOrderByAggregateInput = {
   id?: Prisma.SortOrder
+  tokenVersion?: Prisma.SortOrder
   primaryTradeAccountId?: Prisma.SortOrder
   requiredLotsOverride?: Prisma.SortOrder
   currentPeriodLots?: Prisma.SortOrder
@@ -1058,6 +1090,7 @@ export type MemberMaxOrderByAggregateInput = {
   avatarUrl?: Prisma.SortOrder
   email?: Prisma.SortOrder
   passwordHash?: Prisma.SortOrder
+  tokenVersion?: Prisma.SortOrder
   identityVerifiedAt?: Prisma.SortOrder
   phone?: Prisma.SortOrder
   country?: Prisma.SortOrder
@@ -1095,6 +1128,7 @@ export type MemberMinOrderByAggregateInput = {
   avatarUrl?: Prisma.SortOrder
   email?: Prisma.SortOrder
   passwordHash?: Prisma.SortOrder
+  tokenVersion?: Prisma.SortOrder
   identityVerifiedAt?: Prisma.SortOrder
   phone?: Prisma.SortOrder
   country?: Prisma.SortOrder
@@ -1125,6 +1159,7 @@ export type MemberMinOrderByAggregateInput = {
 
 export type MemberSumOrderByAggregateInput = {
   id?: Prisma.SortOrder
+  tokenVersion?: Prisma.SortOrder
   primaryTradeAccountId?: Prisma.SortOrder
   requiredLotsOverride?: Prisma.SortOrder
   currentPeriodLots?: Prisma.SortOrder
@@ -1158,6 +1193,14 @@ export type StringFieldUpdateOperationsInput = {
   set?: string
 }
 
+export type IntFieldUpdateOperationsInput = {
+  set?: number
+  increment?: number
+  decrement?: number
+  multiply?: number
+  divide?: number
+}
+
 export type NullableDateTimeFieldUpdateOperationsInput = {
   set?: Date | string | null
 }
@@ -1188,14 +1231,6 @@ export type DecimalFieldUpdateOperationsInput = {
 
 export type NullableEnumCustomerStageFieldUpdateOperationsInput = {
   set?: $Enums.CustomerStage | null
-}
-
-export type IntFieldUpdateOperationsInput = {
-  set?: number
-  increment?: number
-  decrement?: number
-  multiply?: number
-  divide?: number
 }
 
 export type NullableIntFieldUpdateOperationsInput = {
@@ -1490,6 +1525,20 @@ export type MemberUpdateOneRequiredWithoutLessonProgressNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.MemberUpdateToOneWithWhereWithoutLessonProgressInput, Prisma.MemberUpdateWithoutLessonProgressInput>, Prisma.MemberUncheckedUpdateWithoutLessonProgressInput>
 }
 
+export type MemberCreateNestedOneWithoutClaimTokensInput = {
+  create?: Prisma.XOR<Prisma.MemberCreateWithoutClaimTokensInput, Prisma.MemberUncheckedCreateWithoutClaimTokensInput>
+  connectOrCreate?: Prisma.MemberCreateOrConnectWithoutClaimTokensInput
+  connect?: Prisma.MemberWhereUniqueInput
+}
+
+export type MemberUpdateOneRequiredWithoutClaimTokensNestedInput = {
+  create?: Prisma.XOR<Prisma.MemberCreateWithoutClaimTokensInput, Prisma.MemberUncheckedCreateWithoutClaimTokensInput>
+  connectOrCreate?: Prisma.MemberCreateOrConnectWithoutClaimTokensInput
+  upsert?: Prisma.MemberUpsertWithoutClaimTokensInput
+  connect?: Prisma.MemberWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.MemberUpdateToOneWithWhereWithoutClaimTokensInput, Prisma.MemberUpdateWithoutClaimTokensInput>, Prisma.MemberUncheckedUpdateWithoutClaimTokensInput>
+}
+
 export type MemberCreateWithoutAcquisitionChannelsInput = {
   externalId?: string | null
   code: string
@@ -1498,6 +1547,7 @@ export type MemberCreateWithoutAcquisitionChannelsInput = {
   avatarUrl?: string | null
   email?: string | null
   passwordHash?: string | null
+  tokenVersion?: number
   identityVerifiedAt?: Date | string | null
   phone?: string | null
   country?: string | null
@@ -1540,6 +1590,7 @@ export type MemberCreateWithoutAcquisitionChannelsInput = {
   courseEnrollments?: Prisma.CourseEnrollmentCreateNestedManyWithoutMemberInput
   lessonProgress?: Prisma.LessonProgressCreateNestedManyWithoutMemberInput
   becGrants?: Prisma.BecGrantCreateNestedManyWithoutMemberInput
+  claimTokens?: Prisma.MemberClaimTokenCreateNestedManyWithoutMemberInput
 }
 
 export type MemberUncheckedCreateWithoutAcquisitionChannelsInput = {
@@ -1551,6 +1602,7 @@ export type MemberUncheckedCreateWithoutAcquisitionChannelsInput = {
   avatarUrl?: string | null
   email?: string | null
   passwordHash?: string | null
+  tokenVersion?: number
   identityVerifiedAt?: Date | string | null
   phone?: string | null
   country?: string | null
@@ -1593,6 +1645,7 @@ export type MemberUncheckedCreateWithoutAcquisitionChannelsInput = {
   courseEnrollments?: Prisma.CourseEnrollmentUncheckedCreateNestedManyWithoutMemberInput
   lessonProgress?: Prisma.LessonProgressUncheckedCreateNestedManyWithoutMemberInput
   becGrants?: Prisma.BecGrantUncheckedCreateNestedManyWithoutMemberInput
+  claimTokens?: Prisma.MemberClaimTokenUncheckedCreateNestedManyWithoutMemberInput
 }
 
 export type MemberCreateOrConnectWithoutAcquisitionChannelsInput = {
@@ -1619,6 +1672,7 @@ export type MemberUpdateWithoutAcquisitionChannelsInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
   identityVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1661,6 +1715,7 @@ export type MemberUpdateWithoutAcquisitionChannelsInput = {
   courseEnrollments?: Prisma.CourseEnrollmentUpdateManyWithoutMemberNestedInput
   lessonProgress?: Prisma.LessonProgressUpdateManyWithoutMemberNestedInput
   becGrants?: Prisma.BecGrantUpdateManyWithoutMemberNestedInput
+  claimTokens?: Prisma.MemberClaimTokenUpdateManyWithoutMemberNestedInput
 }
 
 export type MemberUncheckedUpdateWithoutAcquisitionChannelsInput = {
@@ -1672,6 +1727,7 @@ export type MemberUncheckedUpdateWithoutAcquisitionChannelsInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
   identityVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1714,6 +1770,7 @@ export type MemberUncheckedUpdateWithoutAcquisitionChannelsInput = {
   courseEnrollments?: Prisma.CourseEnrollmentUncheckedUpdateManyWithoutMemberNestedInput
   lessonProgress?: Prisma.LessonProgressUncheckedUpdateManyWithoutMemberNestedInput
   becGrants?: Prisma.BecGrantUncheckedUpdateManyWithoutMemberNestedInput
+  claimTokens?: Prisma.MemberClaimTokenUncheckedUpdateManyWithoutMemberNestedInput
 }
 
 export type MemberCreateWithoutTradeAccountsInput = {
@@ -1724,6 +1781,7 @@ export type MemberCreateWithoutTradeAccountsInput = {
   avatarUrl?: string | null
   email?: string | null
   passwordHash?: string | null
+  tokenVersion?: number
   identityVerifiedAt?: Date | string | null
   phone?: string | null
   country?: string | null
@@ -1766,6 +1824,7 @@ export type MemberCreateWithoutTradeAccountsInput = {
   courseEnrollments?: Prisma.CourseEnrollmentCreateNestedManyWithoutMemberInput
   lessonProgress?: Prisma.LessonProgressCreateNestedManyWithoutMemberInput
   becGrants?: Prisma.BecGrantCreateNestedManyWithoutMemberInput
+  claimTokens?: Prisma.MemberClaimTokenCreateNestedManyWithoutMemberInput
 }
 
 export type MemberUncheckedCreateWithoutTradeAccountsInput = {
@@ -1777,6 +1836,7 @@ export type MemberUncheckedCreateWithoutTradeAccountsInput = {
   avatarUrl?: string | null
   email?: string | null
   passwordHash?: string | null
+  tokenVersion?: number
   identityVerifiedAt?: Date | string | null
   phone?: string | null
   country?: string | null
@@ -1819,6 +1879,7 @@ export type MemberUncheckedCreateWithoutTradeAccountsInput = {
   courseEnrollments?: Prisma.CourseEnrollmentUncheckedCreateNestedManyWithoutMemberInput
   lessonProgress?: Prisma.LessonProgressUncheckedCreateNestedManyWithoutMemberInput
   becGrants?: Prisma.BecGrantUncheckedCreateNestedManyWithoutMemberInput
+  claimTokens?: Prisma.MemberClaimTokenUncheckedCreateNestedManyWithoutMemberInput
 }
 
 export type MemberCreateOrConnectWithoutTradeAccountsInput = {
@@ -1834,6 +1895,7 @@ export type MemberCreateWithoutPrimaryTradeAccountInput = {
   avatarUrl?: string | null
   email?: string | null
   passwordHash?: string | null
+  tokenVersion?: number
   identityVerifiedAt?: Date | string | null
   phone?: string | null
   country?: string | null
@@ -1876,6 +1938,7 @@ export type MemberCreateWithoutPrimaryTradeAccountInput = {
   courseEnrollments?: Prisma.CourseEnrollmentCreateNestedManyWithoutMemberInput
   lessonProgress?: Prisma.LessonProgressCreateNestedManyWithoutMemberInput
   becGrants?: Prisma.BecGrantCreateNestedManyWithoutMemberInput
+  claimTokens?: Prisma.MemberClaimTokenCreateNestedManyWithoutMemberInput
 }
 
 export type MemberUncheckedCreateWithoutPrimaryTradeAccountInput = {
@@ -1887,6 +1950,7 @@ export type MemberUncheckedCreateWithoutPrimaryTradeAccountInput = {
   avatarUrl?: string | null
   email?: string | null
   passwordHash?: string | null
+  tokenVersion?: number
   identityVerifiedAt?: Date | string | null
   phone?: string | null
   country?: string | null
@@ -1929,6 +1993,7 @@ export type MemberUncheckedCreateWithoutPrimaryTradeAccountInput = {
   courseEnrollments?: Prisma.CourseEnrollmentUncheckedCreateNestedManyWithoutMemberInput
   lessonProgress?: Prisma.LessonProgressUncheckedCreateNestedManyWithoutMemberInput
   becGrants?: Prisma.BecGrantUncheckedCreateNestedManyWithoutMemberInput
+  claimTokens?: Prisma.MemberClaimTokenUncheckedCreateNestedManyWithoutMemberInput
 }
 
 export type MemberCreateOrConnectWithoutPrimaryTradeAccountInput = {
@@ -1960,6 +2025,7 @@ export type MemberUpdateWithoutTradeAccountsInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
   identityVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2002,6 +2068,7 @@ export type MemberUpdateWithoutTradeAccountsInput = {
   courseEnrollments?: Prisma.CourseEnrollmentUpdateManyWithoutMemberNestedInput
   lessonProgress?: Prisma.LessonProgressUpdateManyWithoutMemberNestedInput
   becGrants?: Prisma.BecGrantUpdateManyWithoutMemberNestedInput
+  claimTokens?: Prisma.MemberClaimTokenUpdateManyWithoutMemberNestedInput
 }
 
 export type MemberUncheckedUpdateWithoutTradeAccountsInput = {
@@ -2013,6 +2080,7 @@ export type MemberUncheckedUpdateWithoutTradeAccountsInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
   identityVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2055,6 +2123,7 @@ export type MemberUncheckedUpdateWithoutTradeAccountsInput = {
   courseEnrollments?: Prisma.CourseEnrollmentUncheckedUpdateManyWithoutMemberNestedInput
   lessonProgress?: Prisma.LessonProgressUncheckedUpdateManyWithoutMemberNestedInput
   becGrants?: Prisma.BecGrantUncheckedUpdateManyWithoutMemberNestedInput
+  claimTokens?: Prisma.MemberClaimTokenUncheckedUpdateManyWithoutMemberNestedInput
 }
 
 export type MemberUpsertWithWhereUniqueWithoutPrimaryTradeAccountInput = {
@@ -2085,6 +2154,7 @@ export type MemberScalarWhereInput = {
   avatarUrl?: Prisma.StringNullableFilter<"Member"> | string | null
   email?: Prisma.StringNullableFilter<"Member"> | string | null
   passwordHash?: Prisma.StringNullableFilter<"Member"> | string | null
+  tokenVersion?: Prisma.IntFilter<"Member"> | number
   identityVerifiedAt?: Prisma.DateTimeNullableFilter<"Member"> | Date | string | null
   phone?: Prisma.StringNullableFilter<"Member"> | string | null
   country?: Prisma.StringNullableFilter<"Member"> | string | null
@@ -2121,6 +2191,7 @@ export type MemberCreateWithoutTradeLogsInput = {
   avatarUrl?: string | null
   email?: string | null
   passwordHash?: string | null
+  tokenVersion?: number
   identityVerifiedAt?: Date | string | null
   phone?: string | null
   country?: string | null
@@ -2163,6 +2234,7 @@ export type MemberCreateWithoutTradeLogsInput = {
   courseEnrollments?: Prisma.CourseEnrollmentCreateNestedManyWithoutMemberInput
   lessonProgress?: Prisma.LessonProgressCreateNestedManyWithoutMemberInput
   becGrants?: Prisma.BecGrantCreateNestedManyWithoutMemberInput
+  claimTokens?: Prisma.MemberClaimTokenCreateNestedManyWithoutMemberInput
 }
 
 export type MemberUncheckedCreateWithoutTradeLogsInput = {
@@ -2174,6 +2246,7 @@ export type MemberUncheckedCreateWithoutTradeLogsInput = {
   avatarUrl?: string | null
   email?: string | null
   passwordHash?: string | null
+  tokenVersion?: number
   identityVerifiedAt?: Date | string | null
   phone?: string | null
   country?: string | null
@@ -2216,6 +2289,7 @@ export type MemberUncheckedCreateWithoutTradeLogsInput = {
   courseEnrollments?: Prisma.CourseEnrollmentUncheckedCreateNestedManyWithoutMemberInput
   lessonProgress?: Prisma.LessonProgressUncheckedCreateNestedManyWithoutMemberInput
   becGrants?: Prisma.BecGrantUncheckedCreateNestedManyWithoutMemberInput
+  claimTokens?: Prisma.MemberClaimTokenUncheckedCreateNestedManyWithoutMemberInput
 }
 
 export type MemberCreateOrConnectWithoutTradeLogsInput = {
@@ -2242,6 +2316,7 @@ export type MemberUpdateWithoutTradeLogsInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
   identityVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2284,6 +2359,7 @@ export type MemberUpdateWithoutTradeLogsInput = {
   courseEnrollments?: Prisma.CourseEnrollmentUpdateManyWithoutMemberNestedInput
   lessonProgress?: Prisma.LessonProgressUpdateManyWithoutMemberNestedInput
   becGrants?: Prisma.BecGrantUpdateManyWithoutMemberNestedInput
+  claimTokens?: Prisma.MemberClaimTokenUpdateManyWithoutMemberNestedInput
 }
 
 export type MemberUncheckedUpdateWithoutTradeLogsInput = {
@@ -2295,6 +2371,7 @@ export type MemberUncheckedUpdateWithoutTradeLogsInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
   identityVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2337,6 +2414,7 @@ export type MemberUncheckedUpdateWithoutTradeLogsInput = {
   courseEnrollments?: Prisma.CourseEnrollmentUncheckedUpdateManyWithoutMemberNestedInput
   lessonProgress?: Prisma.LessonProgressUncheckedUpdateManyWithoutMemberNestedInput
   becGrants?: Prisma.BecGrantUncheckedUpdateManyWithoutMemberNestedInput
+  claimTokens?: Prisma.MemberClaimTokenUncheckedUpdateManyWithoutMemberNestedInput
 }
 
 export type MemberCreateWithoutIndicatorAccessInput = {
@@ -2347,6 +2425,7 @@ export type MemberCreateWithoutIndicatorAccessInput = {
   avatarUrl?: string | null
   email?: string | null
   passwordHash?: string | null
+  tokenVersion?: number
   identityVerifiedAt?: Date | string | null
   phone?: string | null
   country?: string | null
@@ -2389,6 +2468,7 @@ export type MemberCreateWithoutIndicatorAccessInput = {
   courseEnrollments?: Prisma.CourseEnrollmentCreateNestedManyWithoutMemberInput
   lessonProgress?: Prisma.LessonProgressCreateNestedManyWithoutMemberInput
   becGrants?: Prisma.BecGrantCreateNestedManyWithoutMemberInput
+  claimTokens?: Prisma.MemberClaimTokenCreateNestedManyWithoutMemberInput
 }
 
 export type MemberUncheckedCreateWithoutIndicatorAccessInput = {
@@ -2400,6 +2480,7 @@ export type MemberUncheckedCreateWithoutIndicatorAccessInput = {
   avatarUrl?: string | null
   email?: string | null
   passwordHash?: string | null
+  tokenVersion?: number
   identityVerifiedAt?: Date | string | null
   phone?: string | null
   country?: string | null
@@ -2442,6 +2523,7 @@ export type MemberUncheckedCreateWithoutIndicatorAccessInput = {
   courseEnrollments?: Prisma.CourseEnrollmentUncheckedCreateNestedManyWithoutMemberInput
   lessonProgress?: Prisma.LessonProgressUncheckedCreateNestedManyWithoutMemberInput
   becGrants?: Prisma.BecGrantUncheckedCreateNestedManyWithoutMemberInput
+  claimTokens?: Prisma.MemberClaimTokenUncheckedCreateNestedManyWithoutMemberInput
 }
 
 export type MemberCreateOrConnectWithoutIndicatorAccessInput = {
@@ -2468,6 +2550,7 @@ export type MemberUpdateWithoutIndicatorAccessInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
   identityVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2510,6 +2593,7 @@ export type MemberUpdateWithoutIndicatorAccessInput = {
   courseEnrollments?: Prisma.CourseEnrollmentUpdateManyWithoutMemberNestedInput
   lessonProgress?: Prisma.LessonProgressUpdateManyWithoutMemberNestedInput
   becGrants?: Prisma.BecGrantUpdateManyWithoutMemberNestedInput
+  claimTokens?: Prisma.MemberClaimTokenUpdateManyWithoutMemberNestedInput
 }
 
 export type MemberUncheckedUpdateWithoutIndicatorAccessInput = {
@@ -2521,6 +2605,7 @@ export type MemberUncheckedUpdateWithoutIndicatorAccessInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
   identityVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2563,6 +2648,7 @@ export type MemberUncheckedUpdateWithoutIndicatorAccessInput = {
   courseEnrollments?: Prisma.CourseEnrollmentUncheckedUpdateManyWithoutMemberNestedInput
   lessonProgress?: Prisma.LessonProgressUncheckedUpdateManyWithoutMemberNestedInput
   becGrants?: Prisma.BecGrantUncheckedUpdateManyWithoutMemberNestedInput
+  claimTokens?: Prisma.MemberClaimTokenUncheckedUpdateManyWithoutMemberNestedInput
 }
 
 export type MemberCreateWithoutRenewalHistoryInput = {
@@ -2573,6 +2659,7 @@ export type MemberCreateWithoutRenewalHistoryInput = {
   avatarUrl?: string | null
   email?: string | null
   passwordHash?: string | null
+  tokenVersion?: number
   identityVerifiedAt?: Date | string | null
   phone?: string | null
   country?: string | null
@@ -2615,6 +2702,7 @@ export type MemberCreateWithoutRenewalHistoryInput = {
   courseEnrollments?: Prisma.CourseEnrollmentCreateNestedManyWithoutMemberInput
   lessonProgress?: Prisma.LessonProgressCreateNestedManyWithoutMemberInput
   becGrants?: Prisma.BecGrantCreateNestedManyWithoutMemberInput
+  claimTokens?: Prisma.MemberClaimTokenCreateNestedManyWithoutMemberInput
 }
 
 export type MemberUncheckedCreateWithoutRenewalHistoryInput = {
@@ -2626,6 +2714,7 @@ export type MemberUncheckedCreateWithoutRenewalHistoryInput = {
   avatarUrl?: string | null
   email?: string | null
   passwordHash?: string | null
+  tokenVersion?: number
   identityVerifiedAt?: Date | string | null
   phone?: string | null
   country?: string | null
@@ -2668,6 +2757,7 @@ export type MemberUncheckedCreateWithoutRenewalHistoryInput = {
   courseEnrollments?: Prisma.CourseEnrollmentUncheckedCreateNestedManyWithoutMemberInput
   lessonProgress?: Prisma.LessonProgressUncheckedCreateNestedManyWithoutMemberInput
   becGrants?: Prisma.BecGrantUncheckedCreateNestedManyWithoutMemberInput
+  claimTokens?: Prisma.MemberClaimTokenUncheckedCreateNestedManyWithoutMemberInput
 }
 
 export type MemberCreateOrConnectWithoutRenewalHistoryInput = {
@@ -2694,6 +2784,7 @@ export type MemberUpdateWithoutRenewalHistoryInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
   identityVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2736,6 +2827,7 @@ export type MemberUpdateWithoutRenewalHistoryInput = {
   courseEnrollments?: Prisma.CourseEnrollmentUpdateManyWithoutMemberNestedInput
   lessonProgress?: Prisma.LessonProgressUpdateManyWithoutMemberNestedInput
   becGrants?: Prisma.BecGrantUpdateManyWithoutMemberNestedInput
+  claimTokens?: Prisma.MemberClaimTokenUpdateManyWithoutMemberNestedInput
 }
 
 export type MemberUncheckedUpdateWithoutRenewalHistoryInput = {
@@ -2747,6 +2839,7 @@ export type MemberUncheckedUpdateWithoutRenewalHistoryInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
   identityVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2789,6 +2882,7 @@ export type MemberUncheckedUpdateWithoutRenewalHistoryInput = {
   courseEnrollments?: Prisma.CourseEnrollmentUncheckedUpdateManyWithoutMemberNestedInput
   lessonProgress?: Prisma.LessonProgressUncheckedUpdateManyWithoutMemberNestedInput
   becGrants?: Prisma.BecGrantUncheckedUpdateManyWithoutMemberNestedInput
+  claimTokens?: Prisma.MemberClaimTokenUncheckedUpdateManyWithoutMemberNestedInput
 }
 
 export type MemberCreateWithoutTelegramAccessInput = {
@@ -2799,6 +2893,7 @@ export type MemberCreateWithoutTelegramAccessInput = {
   avatarUrl?: string | null
   email?: string | null
   passwordHash?: string | null
+  tokenVersion?: number
   identityVerifiedAt?: Date | string | null
   phone?: string | null
   country?: string | null
@@ -2841,6 +2936,7 @@ export type MemberCreateWithoutTelegramAccessInput = {
   courseEnrollments?: Prisma.CourseEnrollmentCreateNestedManyWithoutMemberInput
   lessonProgress?: Prisma.LessonProgressCreateNestedManyWithoutMemberInput
   becGrants?: Prisma.BecGrantCreateNestedManyWithoutMemberInput
+  claimTokens?: Prisma.MemberClaimTokenCreateNestedManyWithoutMemberInput
 }
 
 export type MemberUncheckedCreateWithoutTelegramAccessInput = {
@@ -2852,6 +2948,7 @@ export type MemberUncheckedCreateWithoutTelegramAccessInput = {
   avatarUrl?: string | null
   email?: string | null
   passwordHash?: string | null
+  tokenVersion?: number
   identityVerifiedAt?: Date | string | null
   phone?: string | null
   country?: string | null
@@ -2894,6 +2991,7 @@ export type MemberUncheckedCreateWithoutTelegramAccessInput = {
   courseEnrollments?: Prisma.CourseEnrollmentUncheckedCreateNestedManyWithoutMemberInput
   lessonProgress?: Prisma.LessonProgressUncheckedCreateNestedManyWithoutMemberInput
   becGrants?: Prisma.BecGrantUncheckedCreateNestedManyWithoutMemberInput
+  claimTokens?: Prisma.MemberClaimTokenUncheckedCreateNestedManyWithoutMemberInput
 }
 
 export type MemberCreateOrConnectWithoutTelegramAccessInput = {
@@ -2920,6 +3018,7 @@ export type MemberUpdateWithoutTelegramAccessInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
   identityVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2962,6 +3061,7 @@ export type MemberUpdateWithoutTelegramAccessInput = {
   courseEnrollments?: Prisma.CourseEnrollmentUpdateManyWithoutMemberNestedInput
   lessonProgress?: Prisma.LessonProgressUpdateManyWithoutMemberNestedInput
   becGrants?: Prisma.BecGrantUpdateManyWithoutMemberNestedInput
+  claimTokens?: Prisma.MemberClaimTokenUpdateManyWithoutMemberNestedInput
 }
 
 export type MemberUncheckedUpdateWithoutTelegramAccessInput = {
@@ -2973,6 +3073,7 @@ export type MemberUncheckedUpdateWithoutTelegramAccessInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
   identityVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3015,6 +3116,7 @@ export type MemberUncheckedUpdateWithoutTelegramAccessInput = {
   courseEnrollments?: Prisma.CourseEnrollmentUncheckedUpdateManyWithoutMemberNestedInput
   lessonProgress?: Prisma.LessonProgressUncheckedUpdateManyWithoutMemberNestedInput
   becGrants?: Prisma.BecGrantUncheckedUpdateManyWithoutMemberNestedInput
+  claimTokens?: Prisma.MemberClaimTokenUncheckedUpdateManyWithoutMemberNestedInput
 }
 
 export type MemberCreateWithoutLotCheckRunsInput = {
@@ -3025,6 +3127,7 @@ export type MemberCreateWithoutLotCheckRunsInput = {
   avatarUrl?: string | null
   email?: string | null
   passwordHash?: string | null
+  tokenVersion?: number
   identityVerifiedAt?: Date | string | null
   phone?: string | null
   country?: string | null
@@ -3067,6 +3170,7 @@ export type MemberCreateWithoutLotCheckRunsInput = {
   courseEnrollments?: Prisma.CourseEnrollmentCreateNestedManyWithoutMemberInput
   lessonProgress?: Prisma.LessonProgressCreateNestedManyWithoutMemberInput
   becGrants?: Prisma.BecGrantCreateNestedManyWithoutMemberInput
+  claimTokens?: Prisma.MemberClaimTokenCreateNestedManyWithoutMemberInput
 }
 
 export type MemberUncheckedCreateWithoutLotCheckRunsInput = {
@@ -3078,6 +3182,7 @@ export type MemberUncheckedCreateWithoutLotCheckRunsInput = {
   avatarUrl?: string | null
   email?: string | null
   passwordHash?: string | null
+  tokenVersion?: number
   identityVerifiedAt?: Date | string | null
   phone?: string | null
   country?: string | null
@@ -3120,6 +3225,7 @@ export type MemberUncheckedCreateWithoutLotCheckRunsInput = {
   courseEnrollments?: Prisma.CourseEnrollmentUncheckedCreateNestedManyWithoutMemberInput
   lessonProgress?: Prisma.LessonProgressUncheckedCreateNestedManyWithoutMemberInput
   becGrants?: Prisma.BecGrantUncheckedCreateNestedManyWithoutMemberInput
+  claimTokens?: Prisma.MemberClaimTokenUncheckedCreateNestedManyWithoutMemberInput
 }
 
 export type MemberCreateOrConnectWithoutLotCheckRunsInput = {
@@ -3146,6 +3252,7 @@ export type MemberUpdateWithoutLotCheckRunsInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
   identityVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3188,6 +3295,7 @@ export type MemberUpdateWithoutLotCheckRunsInput = {
   courseEnrollments?: Prisma.CourseEnrollmentUpdateManyWithoutMemberNestedInput
   lessonProgress?: Prisma.LessonProgressUpdateManyWithoutMemberNestedInput
   becGrants?: Prisma.BecGrantUpdateManyWithoutMemberNestedInput
+  claimTokens?: Prisma.MemberClaimTokenUpdateManyWithoutMemberNestedInput
 }
 
 export type MemberUncheckedUpdateWithoutLotCheckRunsInput = {
@@ -3199,6 +3307,7 @@ export type MemberUncheckedUpdateWithoutLotCheckRunsInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
   identityVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3241,6 +3350,7 @@ export type MemberUncheckedUpdateWithoutLotCheckRunsInput = {
   courseEnrollments?: Prisma.CourseEnrollmentUncheckedUpdateManyWithoutMemberNestedInput
   lessonProgress?: Prisma.LessonProgressUncheckedUpdateManyWithoutMemberNestedInput
   becGrants?: Prisma.BecGrantUncheckedUpdateManyWithoutMemberNestedInput
+  claimTokens?: Prisma.MemberClaimTokenUncheckedUpdateManyWithoutMemberNestedInput
 }
 
 export type MemberCreateWithoutActivityLogsInput = {
@@ -3251,6 +3361,7 @@ export type MemberCreateWithoutActivityLogsInput = {
   avatarUrl?: string | null
   email?: string | null
   passwordHash?: string | null
+  tokenVersion?: number
   identityVerifiedAt?: Date | string | null
   phone?: string | null
   country?: string | null
@@ -3293,6 +3404,7 @@ export type MemberCreateWithoutActivityLogsInput = {
   courseEnrollments?: Prisma.CourseEnrollmentCreateNestedManyWithoutMemberInput
   lessonProgress?: Prisma.LessonProgressCreateNestedManyWithoutMemberInput
   becGrants?: Prisma.BecGrantCreateNestedManyWithoutMemberInput
+  claimTokens?: Prisma.MemberClaimTokenCreateNestedManyWithoutMemberInput
 }
 
 export type MemberUncheckedCreateWithoutActivityLogsInput = {
@@ -3304,6 +3416,7 @@ export type MemberUncheckedCreateWithoutActivityLogsInput = {
   avatarUrl?: string | null
   email?: string | null
   passwordHash?: string | null
+  tokenVersion?: number
   identityVerifiedAt?: Date | string | null
   phone?: string | null
   country?: string | null
@@ -3346,6 +3459,7 @@ export type MemberUncheckedCreateWithoutActivityLogsInput = {
   courseEnrollments?: Prisma.CourseEnrollmentUncheckedCreateNestedManyWithoutMemberInput
   lessonProgress?: Prisma.LessonProgressUncheckedCreateNestedManyWithoutMemberInput
   becGrants?: Prisma.BecGrantUncheckedCreateNestedManyWithoutMemberInput
+  claimTokens?: Prisma.MemberClaimTokenUncheckedCreateNestedManyWithoutMemberInput
 }
 
 export type MemberCreateOrConnectWithoutActivityLogsInput = {
@@ -3372,6 +3486,7 @@ export type MemberUpdateWithoutActivityLogsInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
   identityVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3414,6 +3529,7 @@ export type MemberUpdateWithoutActivityLogsInput = {
   courseEnrollments?: Prisma.CourseEnrollmentUpdateManyWithoutMemberNestedInput
   lessonProgress?: Prisma.LessonProgressUpdateManyWithoutMemberNestedInput
   becGrants?: Prisma.BecGrantUpdateManyWithoutMemberNestedInput
+  claimTokens?: Prisma.MemberClaimTokenUpdateManyWithoutMemberNestedInput
 }
 
 export type MemberUncheckedUpdateWithoutActivityLogsInput = {
@@ -3425,6 +3541,7 @@ export type MemberUncheckedUpdateWithoutActivityLogsInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
   identityVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3467,6 +3584,7 @@ export type MemberUncheckedUpdateWithoutActivityLogsInput = {
   courseEnrollments?: Prisma.CourseEnrollmentUncheckedUpdateManyWithoutMemberNestedInput
   lessonProgress?: Prisma.LessonProgressUncheckedUpdateManyWithoutMemberNestedInput
   becGrants?: Prisma.BecGrantUncheckedUpdateManyWithoutMemberNestedInput
+  claimTokens?: Prisma.MemberClaimTokenUncheckedUpdateManyWithoutMemberNestedInput
 }
 
 export type MemberCreateWithoutActivityEnrollmentsInput = {
@@ -3477,6 +3595,7 @@ export type MemberCreateWithoutActivityEnrollmentsInput = {
   avatarUrl?: string | null
   email?: string | null
   passwordHash?: string | null
+  tokenVersion?: number
   identityVerifiedAt?: Date | string | null
   phone?: string | null
   country?: string | null
@@ -3519,6 +3638,7 @@ export type MemberCreateWithoutActivityEnrollmentsInput = {
   courseEnrollments?: Prisma.CourseEnrollmentCreateNestedManyWithoutMemberInput
   lessonProgress?: Prisma.LessonProgressCreateNestedManyWithoutMemberInput
   becGrants?: Prisma.BecGrantCreateNestedManyWithoutMemberInput
+  claimTokens?: Prisma.MemberClaimTokenCreateNestedManyWithoutMemberInput
 }
 
 export type MemberUncheckedCreateWithoutActivityEnrollmentsInput = {
@@ -3530,6 +3650,7 @@ export type MemberUncheckedCreateWithoutActivityEnrollmentsInput = {
   avatarUrl?: string | null
   email?: string | null
   passwordHash?: string | null
+  tokenVersion?: number
   identityVerifiedAt?: Date | string | null
   phone?: string | null
   country?: string | null
@@ -3572,6 +3693,7 @@ export type MemberUncheckedCreateWithoutActivityEnrollmentsInput = {
   courseEnrollments?: Prisma.CourseEnrollmentUncheckedCreateNestedManyWithoutMemberInput
   lessonProgress?: Prisma.LessonProgressUncheckedCreateNestedManyWithoutMemberInput
   becGrants?: Prisma.BecGrantUncheckedCreateNestedManyWithoutMemberInput
+  claimTokens?: Prisma.MemberClaimTokenUncheckedCreateNestedManyWithoutMemberInput
 }
 
 export type MemberCreateOrConnectWithoutActivityEnrollmentsInput = {
@@ -3598,6 +3720,7 @@ export type MemberUpdateWithoutActivityEnrollmentsInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
   identityVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3640,6 +3763,7 @@ export type MemberUpdateWithoutActivityEnrollmentsInput = {
   courseEnrollments?: Prisma.CourseEnrollmentUpdateManyWithoutMemberNestedInput
   lessonProgress?: Prisma.LessonProgressUpdateManyWithoutMemberNestedInput
   becGrants?: Prisma.BecGrantUpdateManyWithoutMemberNestedInput
+  claimTokens?: Prisma.MemberClaimTokenUpdateManyWithoutMemberNestedInput
 }
 
 export type MemberUncheckedUpdateWithoutActivityEnrollmentsInput = {
@@ -3651,6 +3775,7 @@ export type MemberUncheckedUpdateWithoutActivityEnrollmentsInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
   identityVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3693,6 +3818,7 @@ export type MemberUncheckedUpdateWithoutActivityEnrollmentsInput = {
   courseEnrollments?: Prisma.CourseEnrollmentUncheckedUpdateManyWithoutMemberNestedInput
   lessonProgress?: Prisma.LessonProgressUncheckedUpdateManyWithoutMemberNestedInput
   becGrants?: Prisma.BecGrantUncheckedUpdateManyWithoutMemberNestedInput
+  claimTokens?: Prisma.MemberClaimTokenUncheckedUpdateManyWithoutMemberNestedInput
 }
 
 export type MemberCreateWithoutRewardClaimsInput = {
@@ -3703,6 +3829,7 @@ export type MemberCreateWithoutRewardClaimsInput = {
   avatarUrl?: string | null
   email?: string | null
   passwordHash?: string | null
+  tokenVersion?: number
   identityVerifiedAt?: Date | string | null
   phone?: string | null
   country?: string | null
@@ -3745,6 +3872,7 @@ export type MemberCreateWithoutRewardClaimsInput = {
   courseEnrollments?: Prisma.CourseEnrollmentCreateNestedManyWithoutMemberInput
   lessonProgress?: Prisma.LessonProgressCreateNestedManyWithoutMemberInput
   becGrants?: Prisma.BecGrantCreateNestedManyWithoutMemberInput
+  claimTokens?: Prisma.MemberClaimTokenCreateNestedManyWithoutMemberInput
 }
 
 export type MemberUncheckedCreateWithoutRewardClaimsInput = {
@@ -3756,6 +3884,7 @@ export type MemberUncheckedCreateWithoutRewardClaimsInput = {
   avatarUrl?: string | null
   email?: string | null
   passwordHash?: string | null
+  tokenVersion?: number
   identityVerifiedAt?: Date | string | null
   phone?: string | null
   country?: string | null
@@ -3798,6 +3927,7 @@ export type MemberUncheckedCreateWithoutRewardClaimsInput = {
   courseEnrollments?: Prisma.CourseEnrollmentUncheckedCreateNestedManyWithoutMemberInput
   lessonProgress?: Prisma.LessonProgressUncheckedCreateNestedManyWithoutMemberInput
   becGrants?: Prisma.BecGrantUncheckedCreateNestedManyWithoutMemberInput
+  claimTokens?: Prisma.MemberClaimTokenUncheckedCreateNestedManyWithoutMemberInput
 }
 
 export type MemberCreateOrConnectWithoutRewardClaimsInput = {
@@ -3824,6 +3954,7 @@ export type MemberUpdateWithoutRewardClaimsInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
   identityVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3866,6 +3997,7 @@ export type MemberUpdateWithoutRewardClaimsInput = {
   courseEnrollments?: Prisma.CourseEnrollmentUpdateManyWithoutMemberNestedInput
   lessonProgress?: Prisma.LessonProgressUpdateManyWithoutMemberNestedInput
   becGrants?: Prisma.BecGrantUpdateManyWithoutMemberNestedInput
+  claimTokens?: Prisma.MemberClaimTokenUpdateManyWithoutMemberNestedInput
 }
 
 export type MemberUncheckedUpdateWithoutRewardClaimsInput = {
@@ -3877,6 +4009,7 @@ export type MemberUncheckedUpdateWithoutRewardClaimsInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
   identityVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3919,6 +4052,7 @@ export type MemberUncheckedUpdateWithoutRewardClaimsInput = {
   courseEnrollments?: Prisma.CourseEnrollmentUncheckedUpdateManyWithoutMemberNestedInput
   lessonProgress?: Prisma.LessonProgressUncheckedUpdateManyWithoutMemberNestedInput
   becGrants?: Prisma.BecGrantUncheckedUpdateManyWithoutMemberNestedInput
+  claimTokens?: Prisma.MemberClaimTokenUncheckedUpdateManyWithoutMemberNestedInput
 }
 
 export type MemberCreateWithoutBecGrantsInput = {
@@ -3929,6 +4063,7 @@ export type MemberCreateWithoutBecGrantsInput = {
   avatarUrl?: string | null
   email?: string | null
   passwordHash?: string | null
+  tokenVersion?: number
   identityVerifiedAt?: Date | string | null
   phone?: string | null
   country?: string | null
@@ -3971,6 +4106,7 @@ export type MemberCreateWithoutBecGrantsInput = {
   spinResults?: Prisma.SpinResultCreateNestedManyWithoutMemberInput
   courseEnrollments?: Prisma.CourseEnrollmentCreateNestedManyWithoutMemberInput
   lessonProgress?: Prisma.LessonProgressCreateNestedManyWithoutMemberInput
+  claimTokens?: Prisma.MemberClaimTokenCreateNestedManyWithoutMemberInput
 }
 
 export type MemberUncheckedCreateWithoutBecGrantsInput = {
@@ -3982,6 +4118,7 @@ export type MemberUncheckedCreateWithoutBecGrantsInput = {
   avatarUrl?: string | null
   email?: string | null
   passwordHash?: string | null
+  tokenVersion?: number
   identityVerifiedAt?: Date | string | null
   phone?: string | null
   country?: string | null
@@ -4024,6 +4161,7 @@ export type MemberUncheckedCreateWithoutBecGrantsInput = {
   spinResults?: Prisma.SpinResultUncheckedCreateNestedManyWithoutMemberInput
   courseEnrollments?: Prisma.CourseEnrollmentUncheckedCreateNestedManyWithoutMemberInput
   lessonProgress?: Prisma.LessonProgressUncheckedCreateNestedManyWithoutMemberInput
+  claimTokens?: Prisma.MemberClaimTokenUncheckedCreateNestedManyWithoutMemberInput
 }
 
 export type MemberCreateOrConnectWithoutBecGrantsInput = {
@@ -4050,6 +4188,7 @@ export type MemberUpdateWithoutBecGrantsInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
   identityVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -4092,6 +4231,7 @@ export type MemberUpdateWithoutBecGrantsInput = {
   spinResults?: Prisma.SpinResultUpdateManyWithoutMemberNestedInput
   courseEnrollments?: Prisma.CourseEnrollmentUpdateManyWithoutMemberNestedInput
   lessonProgress?: Prisma.LessonProgressUpdateManyWithoutMemberNestedInput
+  claimTokens?: Prisma.MemberClaimTokenUpdateManyWithoutMemberNestedInput
 }
 
 export type MemberUncheckedUpdateWithoutBecGrantsInput = {
@@ -4103,6 +4243,7 @@ export type MemberUncheckedUpdateWithoutBecGrantsInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
   identityVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -4145,6 +4286,7 @@ export type MemberUncheckedUpdateWithoutBecGrantsInput = {
   spinResults?: Prisma.SpinResultUncheckedUpdateManyWithoutMemberNestedInput
   courseEnrollments?: Prisma.CourseEnrollmentUncheckedUpdateManyWithoutMemberNestedInput
   lessonProgress?: Prisma.LessonProgressUncheckedUpdateManyWithoutMemberNestedInput
+  claimTokens?: Prisma.MemberClaimTokenUncheckedUpdateManyWithoutMemberNestedInput
 }
 
 export type MemberCreateWithoutSpinResultsInput = {
@@ -4155,6 +4297,7 @@ export type MemberCreateWithoutSpinResultsInput = {
   avatarUrl?: string | null
   email?: string | null
   passwordHash?: string | null
+  tokenVersion?: number
   identityVerifiedAt?: Date | string | null
   phone?: string | null
   country?: string | null
@@ -4197,6 +4340,7 @@ export type MemberCreateWithoutSpinResultsInput = {
   courseEnrollments?: Prisma.CourseEnrollmentCreateNestedManyWithoutMemberInput
   lessonProgress?: Prisma.LessonProgressCreateNestedManyWithoutMemberInput
   becGrants?: Prisma.BecGrantCreateNestedManyWithoutMemberInput
+  claimTokens?: Prisma.MemberClaimTokenCreateNestedManyWithoutMemberInput
 }
 
 export type MemberUncheckedCreateWithoutSpinResultsInput = {
@@ -4208,6 +4352,7 @@ export type MemberUncheckedCreateWithoutSpinResultsInput = {
   avatarUrl?: string | null
   email?: string | null
   passwordHash?: string | null
+  tokenVersion?: number
   identityVerifiedAt?: Date | string | null
   phone?: string | null
   country?: string | null
@@ -4250,6 +4395,7 @@ export type MemberUncheckedCreateWithoutSpinResultsInput = {
   courseEnrollments?: Prisma.CourseEnrollmentUncheckedCreateNestedManyWithoutMemberInput
   lessonProgress?: Prisma.LessonProgressUncheckedCreateNestedManyWithoutMemberInput
   becGrants?: Prisma.BecGrantUncheckedCreateNestedManyWithoutMemberInput
+  claimTokens?: Prisma.MemberClaimTokenUncheckedCreateNestedManyWithoutMemberInput
 }
 
 export type MemberCreateOrConnectWithoutSpinResultsInput = {
@@ -4276,6 +4422,7 @@ export type MemberUpdateWithoutSpinResultsInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
   identityVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -4318,6 +4465,7 @@ export type MemberUpdateWithoutSpinResultsInput = {
   courseEnrollments?: Prisma.CourseEnrollmentUpdateManyWithoutMemberNestedInput
   lessonProgress?: Prisma.LessonProgressUpdateManyWithoutMemberNestedInput
   becGrants?: Prisma.BecGrantUpdateManyWithoutMemberNestedInput
+  claimTokens?: Prisma.MemberClaimTokenUpdateManyWithoutMemberNestedInput
 }
 
 export type MemberUncheckedUpdateWithoutSpinResultsInput = {
@@ -4329,6 +4477,7 @@ export type MemberUncheckedUpdateWithoutSpinResultsInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
   identityVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -4371,6 +4520,7 @@ export type MemberUncheckedUpdateWithoutSpinResultsInput = {
   courseEnrollments?: Prisma.CourseEnrollmentUncheckedUpdateManyWithoutMemberNestedInput
   lessonProgress?: Prisma.LessonProgressUncheckedUpdateManyWithoutMemberNestedInput
   becGrants?: Prisma.BecGrantUncheckedUpdateManyWithoutMemberNestedInput
+  claimTokens?: Prisma.MemberClaimTokenUncheckedUpdateManyWithoutMemberNestedInput
 }
 
 export type MemberCreateWithoutJournalAccountsInput = {
@@ -4381,6 +4531,7 @@ export type MemberCreateWithoutJournalAccountsInput = {
   avatarUrl?: string | null
   email?: string | null
   passwordHash?: string | null
+  tokenVersion?: number
   identityVerifiedAt?: Date | string | null
   phone?: string | null
   country?: string | null
@@ -4423,6 +4574,7 @@ export type MemberCreateWithoutJournalAccountsInput = {
   courseEnrollments?: Prisma.CourseEnrollmentCreateNestedManyWithoutMemberInput
   lessonProgress?: Prisma.LessonProgressCreateNestedManyWithoutMemberInput
   becGrants?: Prisma.BecGrantCreateNestedManyWithoutMemberInput
+  claimTokens?: Prisma.MemberClaimTokenCreateNestedManyWithoutMemberInput
 }
 
 export type MemberUncheckedCreateWithoutJournalAccountsInput = {
@@ -4434,6 +4586,7 @@ export type MemberUncheckedCreateWithoutJournalAccountsInput = {
   avatarUrl?: string | null
   email?: string | null
   passwordHash?: string | null
+  tokenVersion?: number
   identityVerifiedAt?: Date | string | null
   phone?: string | null
   country?: string | null
@@ -4476,6 +4629,7 @@ export type MemberUncheckedCreateWithoutJournalAccountsInput = {
   courseEnrollments?: Prisma.CourseEnrollmentUncheckedCreateNestedManyWithoutMemberInput
   lessonProgress?: Prisma.LessonProgressUncheckedCreateNestedManyWithoutMemberInput
   becGrants?: Prisma.BecGrantUncheckedCreateNestedManyWithoutMemberInput
+  claimTokens?: Prisma.MemberClaimTokenUncheckedCreateNestedManyWithoutMemberInput
 }
 
 export type MemberCreateOrConnectWithoutJournalAccountsInput = {
@@ -4502,6 +4656,7 @@ export type MemberUpdateWithoutJournalAccountsInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
   identityVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -4544,6 +4699,7 @@ export type MemberUpdateWithoutJournalAccountsInput = {
   courseEnrollments?: Prisma.CourseEnrollmentUpdateManyWithoutMemberNestedInput
   lessonProgress?: Prisma.LessonProgressUpdateManyWithoutMemberNestedInput
   becGrants?: Prisma.BecGrantUpdateManyWithoutMemberNestedInput
+  claimTokens?: Prisma.MemberClaimTokenUpdateManyWithoutMemberNestedInput
 }
 
 export type MemberUncheckedUpdateWithoutJournalAccountsInput = {
@@ -4555,6 +4711,7 @@ export type MemberUncheckedUpdateWithoutJournalAccountsInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
   identityVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -4597,6 +4754,7 @@ export type MemberUncheckedUpdateWithoutJournalAccountsInput = {
   courseEnrollments?: Prisma.CourseEnrollmentUncheckedUpdateManyWithoutMemberNestedInput
   lessonProgress?: Prisma.LessonProgressUncheckedUpdateManyWithoutMemberNestedInput
   becGrants?: Prisma.BecGrantUncheckedUpdateManyWithoutMemberNestedInput
+  claimTokens?: Prisma.MemberClaimTokenUncheckedUpdateManyWithoutMemberNestedInput
 }
 
 export type MemberCreateWithoutSocialAccountsInput = {
@@ -4607,6 +4765,7 @@ export type MemberCreateWithoutSocialAccountsInput = {
   avatarUrl?: string | null
   email?: string | null
   passwordHash?: string | null
+  tokenVersion?: number
   identityVerifiedAt?: Date | string | null
   phone?: string | null
   country?: string | null
@@ -4649,6 +4808,7 @@ export type MemberCreateWithoutSocialAccountsInput = {
   courseEnrollments?: Prisma.CourseEnrollmentCreateNestedManyWithoutMemberInput
   lessonProgress?: Prisma.LessonProgressCreateNestedManyWithoutMemberInput
   becGrants?: Prisma.BecGrantCreateNestedManyWithoutMemberInput
+  claimTokens?: Prisma.MemberClaimTokenCreateNestedManyWithoutMemberInput
 }
 
 export type MemberUncheckedCreateWithoutSocialAccountsInput = {
@@ -4660,6 +4820,7 @@ export type MemberUncheckedCreateWithoutSocialAccountsInput = {
   avatarUrl?: string | null
   email?: string | null
   passwordHash?: string | null
+  tokenVersion?: number
   identityVerifiedAt?: Date | string | null
   phone?: string | null
   country?: string | null
@@ -4702,6 +4863,7 @@ export type MemberUncheckedCreateWithoutSocialAccountsInput = {
   courseEnrollments?: Prisma.CourseEnrollmentUncheckedCreateNestedManyWithoutMemberInput
   lessonProgress?: Prisma.LessonProgressUncheckedCreateNestedManyWithoutMemberInput
   becGrants?: Prisma.BecGrantUncheckedCreateNestedManyWithoutMemberInput
+  claimTokens?: Prisma.MemberClaimTokenUncheckedCreateNestedManyWithoutMemberInput
 }
 
 export type MemberCreateOrConnectWithoutSocialAccountsInput = {
@@ -4728,6 +4890,7 @@ export type MemberUpdateWithoutSocialAccountsInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
   identityVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -4770,6 +4933,7 @@ export type MemberUpdateWithoutSocialAccountsInput = {
   courseEnrollments?: Prisma.CourseEnrollmentUpdateManyWithoutMemberNestedInput
   lessonProgress?: Prisma.LessonProgressUpdateManyWithoutMemberNestedInput
   becGrants?: Prisma.BecGrantUpdateManyWithoutMemberNestedInput
+  claimTokens?: Prisma.MemberClaimTokenUpdateManyWithoutMemberNestedInput
 }
 
 export type MemberUncheckedUpdateWithoutSocialAccountsInput = {
@@ -4781,6 +4945,7 @@ export type MemberUncheckedUpdateWithoutSocialAccountsInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
   identityVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -4823,6 +4988,7 @@ export type MemberUncheckedUpdateWithoutSocialAccountsInput = {
   courseEnrollments?: Prisma.CourseEnrollmentUncheckedUpdateManyWithoutMemberNestedInput
   lessonProgress?: Prisma.LessonProgressUncheckedUpdateManyWithoutMemberNestedInput
   becGrants?: Prisma.BecGrantUncheckedUpdateManyWithoutMemberNestedInput
+  claimTokens?: Prisma.MemberClaimTokenUncheckedUpdateManyWithoutMemberNestedInput
 }
 
 export type MemberCreateWithoutNotificationReadsInput = {
@@ -4833,6 +4999,7 @@ export type MemberCreateWithoutNotificationReadsInput = {
   avatarUrl?: string | null
   email?: string | null
   passwordHash?: string | null
+  tokenVersion?: number
   identityVerifiedAt?: Date | string | null
   phone?: string | null
   country?: string | null
@@ -4875,6 +5042,7 @@ export type MemberCreateWithoutNotificationReadsInput = {
   courseEnrollments?: Prisma.CourseEnrollmentCreateNestedManyWithoutMemberInput
   lessonProgress?: Prisma.LessonProgressCreateNestedManyWithoutMemberInput
   becGrants?: Prisma.BecGrantCreateNestedManyWithoutMemberInput
+  claimTokens?: Prisma.MemberClaimTokenCreateNestedManyWithoutMemberInput
 }
 
 export type MemberUncheckedCreateWithoutNotificationReadsInput = {
@@ -4886,6 +5054,7 @@ export type MemberUncheckedCreateWithoutNotificationReadsInput = {
   avatarUrl?: string | null
   email?: string | null
   passwordHash?: string | null
+  tokenVersion?: number
   identityVerifiedAt?: Date | string | null
   phone?: string | null
   country?: string | null
@@ -4928,6 +5097,7 @@ export type MemberUncheckedCreateWithoutNotificationReadsInput = {
   courseEnrollments?: Prisma.CourseEnrollmentUncheckedCreateNestedManyWithoutMemberInput
   lessonProgress?: Prisma.LessonProgressUncheckedCreateNestedManyWithoutMemberInput
   becGrants?: Prisma.BecGrantUncheckedCreateNestedManyWithoutMemberInput
+  claimTokens?: Prisma.MemberClaimTokenUncheckedCreateNestedManyWithoutMemberInput
 }
 
 export type MemberCreateOrConnectWithoutNotificationReadsInput = {
@@ -4954,6 +5124,7 @@ export type MemberUpdateWithoutNotificationReadsInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
   identityVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -4996,6 +5167,7 @@ export type MemberUpdateWithoutNotificationReadsInput = {
   courseEnrollments?: Prisma.CourseEnrollmentUpdateManyWithoutMemberNestedInput
   lessonProgress?: Prisma.LessonProgressUpdateManyWithoutMemberNestedInput
   becGrants?: Prisma.BecGrantUpdateManyWithoutMemberNestedInput
+  claimTokens?: Prisma.MemberClaimTokenUpdateManyWithoutMemberNestedInput
 }
 
 export type MemberUncheckedUpdateWithoutNotificationReadsInput = {
@@ -5007,6 +5179,7 @@ export type MemberUncheckedUpdateWithoutNotificationReadsInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
   identityVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -5049,6 +5222,7 @@ export type MemberUncheckedUpdateWithoutNotificationReadsInput = {
   courseEnrollments?: Prisma.CourseEnrollmentUncheckedUpdateManyWithoutMemberNestedInput
   lessonProgress?: Prisma.LessonProgressUncheckedUpdateManyWithoutMemberNestedInput
   becGrants?: Prisma.BecGrantUncheckedUpdateManyWithoutMemberNestedInput
+  claimTokens?: Prisma.MemberClaimTokenUncheckedUpdateManyWithoutMemberNestedInput
 }
 
 export type MemberCreateWithoutCourseEnrollmentsInput = {
@@ -5059,6 +5233,7 @@ export type MemberCreateWithoutCourseEnrollmentsInput = {
   avatarUrl?: string | null
   email?: string | null
   passwordHash?: string | null
+  tokenVersion?: number
   identityVerifiedAt?: Date | string | null
   phone?: string | null
   country?: string | null
@@ -5101,6 +5276,7 @@ export type MemberCreateWithoutCourseEnrollmentsInput = {
   spinResults?: Prisma.SpinResultCreateNestedManyWithoutMemberInput
   lessonProgress?: Prisma.LessonProgressCreateNestedManyWithoutMemberInput
   becGrants?: Prisma.BecGrantCreateNestedManyWithoutMemberInput
+  claimTokens?: Prisma.MemberClaimTokenCreateNestedManyWithoutMemberInput
 }
 
 export type MemberUncheckedCreateWithoutCourseEnrollmentsInput = {
@@ -5112,6 +5288,7 @@ export type MemberUncheckedCreateWithoutCourseEnrollmentsInput = {
   avatarUrl?: string | null
   email?: string | null
   passwordHash?: string | null
+  tokenVersion?: number
   identityVerifiedAt?: Date | string | null
   phone?: string | null
   country?: string | null
@@ -5154,6 +5331,7 @@ export type MemberUncheckedCreateWithoutCourseEnrollmentsInput = {
   spinResults?: Prisma.SpinResultUncheckedCreateNestedManyWithoutMemberInput
   lessonProgress?: Prisma.LessonProgressUncheckedCreateNestedManyWithoutMemberInput
   becGrants?: Prisma.BecGrantUncheckedCreateNestedManyWithoutMemberInput
+  claimTokens?: Prisma.MemberClaimTokenUncheckedCreateNestedManyWithoutMemberInput
 }
 
 export type MemberCreateOrConnectWithoutCourseEnrollmentsInput = {
@@ -5180,6 +5358,7 @@ export type MemberUpdateWithoutCourseEnrollmentsInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
   identityVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -5222,6 +5401,7 @@ export type MemberUpdateWithoutCourseEnrollmentsInput = {
   spinResults?: Prisma.SpinResultUpdateManyWithoutMemberNestedInput
   lessonProgress?: Prisma.LessonProgressUpdateManyWithoutMemberNestedInput
   becGrants?: Prisma.BecGrantUpdateManyWithoutMemberNestedInput
+  claimTokens?: Prisma.MemberClaimTokenUpdateManyWithoutMemberNestedInput
 }
 
 export type MemberUncheckedUpdateWithoutCourseEnrollmentsInput = {
@@ -5233,6 +5413,7 @@ export type MemberUncheckedUpdateWithoutCourseEnrollmentsInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
   identityVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -5275,6 +5456,7 @@ export type MemberUncheckedUpdateWithoutCourseEnrollmentsInput = {
   spinResults?: Prisma.SpinResultUncheckedUpdateManyWithoutMemberNestedInput
   lessonProgress?: Prisma.LessonProgressUncheckedUpdateManyWithoutMemberNestedInput
   becGrants?: Prisma.BecGrantUncheckedUpdateManyWithoutMemberNestedInput
+  claimTokens?: Prisma.MemberClaimTokenUncheckedUpdateManyWithoutMemberNestedInput
 }
 
 export type MemberCreateWithoutLessonProgressInput = {
@@ -5285,6 +5467,7 @@ export type MemberCreateWithoutLessonProgressInput = {
   avatarUrl?: string | null
   email?: string | null
   passwordHash?: string | null
+  tokenVersion?: number
   identityVerifiedAt?: Date | string | null
   phone?: string | null
   country?: string | null
@@ -5327,6 +5510,7 @@ export type MemberCreateWithoutLessonProgressInput = {
   spinResults?: Prisma.SpinResultCreateNestedManyWithoutMemberInput
   courseEnrollments?: Prisma.CourseEnrollmentCreateNestedManyWithoutMemberInput
   becGrants?: Prisma.BecGrantCreateNestedManyWithoutMemberInput
+  claimTokens?: Prisma.MemberClaimTokenCreateNestedManyWithoutMemberInput
 }
 
 export type MemberUncheckedCreateWithoutLessonProgressInput = {
@@ -5338,6 +5522,7 @@ export type MemberUncheckedCreateWithoutLessonProgressInput = {
   avatarUrl?: string | null
   email?: string | null
   passwordHash?: string | null
+  tokenVersion?: number
   identityVerifiedAt?: Date | string | null
   phone?: string | null
   country?: string | null
@@ -5380,6 +5565,7 @@ export type MemberUncheckedCreateWithoutLessonProgressInput = {
   spinResults?: Prisma.SpinResultUncheckedCreateNestedManyWithoutMemberInput
   courseEnrollments?: Prisma.CourseEnrollmentUncheckedCreateNestedManyWithoutMemberInput
   becGrants?: Prisma.BecGrantUncheckedCreateNestedManyWithoutMemberInput
+  claimTokens?: Prisma.MemberClaimTokenUncheckedCreateNestedManyWithoutMemberInput
 }
 
 export type MemberCreateOrConnectWithoutLessonProgressInput = {
@@ -5406,6 +5592,7 @@ export type MemberUpdateWithoutLessonProgressInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
   identityVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -5448,6 +5635,7 @@ export type MemberUpdateWithoutLessonProgressInput = {
   spinResults?: Prisma.SpinResultUpdateManyWithoutMemberNestedInput
   courseEnrollments?: Prisma.CourseEnrollmentUpdateManyWithoutMemberNestedInput
   becGrants?: Prisma.BecGrantUpdateManyWithoutMemberNestedInput
+  claimTokens?: Prisma.MemberClaimTokenUpdateManyWithoutMemberNestedInput
 }
 
 export type MemberUncheckedUpdateWithoutLessonProgressInput = {
@@ -5459,6 +5647,7 @@ export type MemberUncheckedUpdateWithoutLessonProgressInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
   identityVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -5501,6 +5690,241 @@ export type MemberUncheckedUpdateWithoutLessonProgressInput = {
   spinResults?: Prisma.SpinResultUncheckedUpdateManyWithoutMemberNestedInput
   courseEnrollments?: Prisma.CourseEnrollmentUncheckedUpdateManyWithoutMemberNestedInput
   becGrants?: Prisma.BecGrantUncheckedUpdateManyWithoutMemberNestedInput
+  claimTokens?: Prisma.MemberClaimTokenUncheckedUpdateManyWithoutMemberNestedInput
+}
+
+export type MemberCreateWithoutClaimTokensInput = {
+  externalId?: string | null
+  code: string
+  name: string
+  displayName?: string | null
+  avatarUrl?: string | null
+  email?: string | null
+  passwordHash?: string | null
+  tokenVersion?: number
+  identityVerifiedAt?: Date | string | null
+  phone?: string | null
+  country?: string | null
+  address?: string | null
+  tradingView?: string | null
+  telegramUsername?: string | null
+  telegramUserId?: string | null
+  discordUsername?: string | null
+  discordUserId?: string | null
+  lineUserId?: string | null
+  lineDisplayName?: string | null
+  socialLinksJson?: string | null
+  joinedAt?: Date | string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  plan?: $Enums.Plan
+  requiredLotsOverride?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  requiredLotsOverrideNote?: string | null
+  crmStartDate?: Date | string | null
+  crmExpiryDate?: Date | string | null
+  currentPeriodLots?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  currentPeriodLotsAt?: Date | string | null
+  currentPeriodLotsFrom?: Date | string | null
+  currentPeriodLotsTo?: Date | string | null
+  customerStageOverride?: $Enums.CustomerStage | null
+  primaryTradeAccount?: Prisma.TradeAccountCreateNestedOneWithoutPrimaryForMembersInput
+  tradeAccounts?: Prisma.TradeAccountCreateNestedManyWithoutMemberInput
+  tradeLogs?: Prisma.TradeLogCreateNestedManyWithoutMemberInput
+  acquisitionChannels?: Prisma.MemberAcquisitionChannelCreateNestedManyWithoutMemberInput
+  indicatorAccess?: Prisma.MemberIndicatorAccessCreateNestedManyWithoutMemberInput
+  telegramAccess?: Prisma.TelegramAccessCreateNestedManyWithoutMemberInput
+  renewalHistory?: Prisma.RenewalRecordCreateNestedManyWithoutMemberInput
+  activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutMemberInput
+  rewardClaims?: Prisma.RewardClaimCreateNestedManyWithoutMemberInput
+  journalAccounts?: Prisma.JournalAccountCreateNestedManyWithoutMemberInput
+  socialAccounts?: Prisma.SocialAccountCreateNestedManyWithoutMemberInput
+  notificationReads?: Prisma.MemberNotificationReadCreateNestedManyWithoutMemberInput
+  lotCheckRuns?: Prisma.LotCheckRunCreateNestedManyWithoutMemberInput
+  activityEnrollments?: Prisma.ActivityEnrollmentCreateNestedManyWithoutMemberInput
+  spinResults?: Prisma.SpinResultCreateNestedManyWithoutMemberInput
+  courseEnrollments?: Prisma.CourseEnrollmentCreateNestedManyWithoutMemberInput
+  lessonProgress?: Prisma.LessonProgressCreateNestedManyWithoutMemberInput
+  becGrants?: Prisma.BecGrantCreateNestedManyWithoutMemberInput
+}
+
+export type MemberUncheckedCreateWithoutClaimTokensInput = {
+  id?: number
+  externalId?: string | null
+  code: string
+  name: string
+  displayName?: string | null
+  avatarUrl?: string | null
+  email?: string | null
+  passwordHash?: string | null
+  tokenVersion?: number
+  identityVerifiedAt?: Date | string | null
+  phone?: string | null
+  country?: string | null
+  address?: string | null
+  tradingView?: string | null
+  telegramUsername?: string | null
+  telegramUserId?: string | null
+  discordUsername?: string | null
+  discordUserId?: string | null
+  lineUserId?: string | null
+  lineDisplayName?: string | null
+  socialLinksJson?: string | null
+  joinedAt?: Date | string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  plan?: $Enums.Plan
+  primaryTradeAccountId?: number | null
+  requiredLotsOverride?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  requiredLotsOverrideNote?: string | null
+  crmStartDate?: Date | string | null
+  crmExpiryDate?: Date | string | null
+  currentPeriodLots?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  currentPeriodLotsAt?: Date | string | null
+  currentPeriodLotsFrom?: Date | string | null
+  currentPeriodLotsTo?: Date | string | null
+  customerStageOverride?: $Enums.CustomerStage | null
+  tradeAccounts?: Prisma.TradeAccountUncheckedCreateNestedManyWithoutMemberInput
+  tradeLogs?: Prisma.TradeLogUncheckedCreateNestedManyWithoutMemberInput
+  acquisitionChannels?: Prisma.MemberAcquisitionChannelUncheckedCreateNestedManyWithoutMemberInput
+  indicatorAccess?: Prisma.MemberIndicatorAccessUncheckedCreateNestedManyWithoutMemberInput
+  telegramAccess?: Prisma.TelegramAccessUncheckedCreateNestedManyWithoutMemberInput
+  renewalHistory?: Prisma.RenewalRecordUncheckedCreateNestedManyWithoutMemberInput
+  activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutMemberInput
+  rewardClaims?: Prisma.RewardClaimUncheckedCreateNestedManyWithoutMemberInput
+  journalAccounts?: Prisma.JournalAccountUncheckedCreateNestedManyWithoutMemberInput
+  socialAccounts?: Prisma.SocialAccountUncheckedCreateNestedManyWithoutMemberInput
+  notificationReads?: Prisma.MemberNotificationReadUncheckedCreateNestedManyWithoutMemberInput
+  lotCheckRuns?: Prisma.LotCheckRunUncheckedCreateNestedManyWithoutMemberInput
+  activityEnrollments?: Prisma.ActivityEnrollmentUncheckedCreateNestedManyWithoutMemberInput
+  spinResults?: Prisma.SpinResultUncheckedCreateNestedManyWithoutMemberInput
+  courseEnrollments?: Prisma.CourseEnrollmentUncheckedCreateNestedManyWithoutMemberInput
+  lessonProgress?: Prisma.LessonProgressUncheckedCreateNestedManyWithoutMemberInput
+  becGrants?: Prisma.BecGrantUncheckedCreateNestedManyWithoutMemberInput
+}
+
+export type MemberCreateOrConnectWithoutClaimTokensInput = {
+  where: Prisma.MemberWhereUniqueInput
+  create: Prisma.XOR<Prisma.MemberCreateWithoutClaimTokensInput, Prisma.MemberUncheckedCreateWithoutClaimTokensInput>
+}
+
+export type MemberUpsertWithoutClaimTokensInput = {
+  update: Prisma.XOR<Prisma.MemberUpdateWithoutClaimTokensInput, Prisma.MemberUncheckedUpdateWithoutClaimTokensInput>
+  create: Prisma.XOR<Prisma.MemberCreateWithoutClaimTokensInput, Prisma.MemberUncheckedCreateWithoutClaimTokensInput>
+  where?: Prisma.MemberWhereInput
+}
+
+export type MemberUpdateToOneWithWhereWithoutClaimTokensInput = {
+  where?: Prisma.MemberWhereInput
+  data: Prisma.XOR<Prisma.MemberUpdateWithoutClaimTokensInput, Prisma.MemberUncheckedUpdateWithoutClaimTokensInput>
+}
+
+export type MemberUpdateWithoutClaimTokensInput = {
+  externalId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  code?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  identityVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tradingView?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegramUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegramUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  discordUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  discordUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lineUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lineDisplayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  socialLinksJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  joinedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  plan?: Prisma.EnumPlanFieldUpdateOperationsInput | $Enums.Plan
+  requiredLotsOverride?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  requiredLotsOverrideNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  crmStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  crmExpiryDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  currentPeriodLots?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  currentPeriodLotsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  currentPeriodLotsFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  currentPeriodLotsTo?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  customerStageOverride?: Prisma.NullableEnumCustomerStageFieldUpdateOperationsInput | $Enums.CustomerStage | null
+  primaryTradeAccount?: Prisma.TradeAccountUpdateOneWithoutPrimaryForMembersNestedInput
+  tradeAccounts?: Prisma.TradeAccountUpdateManyWithoutMemberNestedInput
+  tradeLogs?: Prisma.TradeLogUpdateManyWithoutMemberNestedInput
+  acquisitionChannels?: Prisma.MemberAcquisitionChannelUpdateManyWithoutMemberNestedInput
+  indicatorAccess?: Prisma.MemberIndicatorAccessUpdateManyWithoutMemberNestedInput
+  telegramAccess?: Prisma.TelegramAccessUpdateManyWithoutMemberNestedInput
+  renewalHistory?: Prisma.RenewalRecordUpdateManyWithoutMemberNestedInput
+  activityLogs?: Prisma.ActivityLogUpdateManyWithoutMemberNestedInput
+  rewardClaims?: Prisma.RewardClaimUpdateManyWithoutMemberNestedInput
+  journalAccounts?: Prisma.JournalAccountUpdateManyWithoutMemberNestedInput
+  socialAccounts?: Prisma.SocialAccountUpdateManyWithoutMemberNestedInput
+  notificationReads?: Prisma.MemberNotificationReadUpdateManyWithoutMemberNestedInput
+  lotCheckRuns?: Prisma.LotCheckRunUpdateManyWithoutMemberNestedInput
+  activityEnrollments?: Prisma.ActivityEnrollmentUpdateManyWithoutMemberNestedInput
+  spinResults?: Prisma.SpinResultUpdateManyWithoutMemberNestedInput
+  courseEnrollments?: Prisma.CourseEnrollmentUpdateManyWithoutMemberNestedInput
+  lessonProgress?: Prisma.LessonProgressUpdateManyWithoutMemberNestedInput
+  becGrants?: Prisma.BecGrantUpdateManyWithoutMemberNestedInput
+}
+
+export type MemberUncheckedUpdateWithoutClaimTokensInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  externalId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  code?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  identityVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tradingView?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegramUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegramUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  discordUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  discordUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lineUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lineDisplayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  socialLinksJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  joinedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  plan?: Prisma.EnumPlanFieldUpdateOperationsInput | $Enums.Plan
+  primaryTradeAccountId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  requiredLotsOverride?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  requiredLotsOverrideNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  crmStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  crmExpiryDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  currentPeriodLots?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  currentPeriodLotsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  currentPeriodLotsFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  currentPeriodLotsTo?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  customerStageOverride?: Prisma.NullableEnumCustomerStageFieldUpdateOperationsInput | $Enums.CustomerStage | null
+  tradeAccounts?: Prisma.TradeAccountUncheckedUpdateManyWithoutMemberNestedInput
+  tradeLogs?: Prisma.TradeLogUncheckedUpdateManyWithoutMemberNestedInput
+  acquisitionChannels?: Prisma.MemberAcquisitionChannelUncheckedUpdateManyWithoutMemberNestedInput
+  indicatorAccess?: Prisma.MemberIndicatorAccessUncheckedUpdateManyWithoutMemberNestedInput
+  telegramAccess?: Prisma.TelegramAccessUncheckedUpdateManyWithoutMemberNestedInput
+  renewalHistory?: Prisma.RenewalRecordUncheckedUpdateManyWithoutMemberNestedInput
+  activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutMemberNestedInput
+  rewardClaims?: Prisma.RewardClaimUncheckedUpdateManyWithoutMemberNestedInput
+  journalAccounts?: Prisma.JournalAccountUncheckedUpdateManyWithoutMemberNestedInput
+  socialAccounts?: Prisma.SocialAccountUncheckedUpdateManyWithoutMemberNestedInput
+  notificationReads?: Prisma.MemberNotificationReadUncheckedUpdateManyWithoutMemberNestedInput
+  lotCheckRuns?: Prisma.LotCheckRunUncheckedUpdateManyWithoutMemberNestedInput
+  activityEnrollments?: Prisma.ActivityEnrollmentUncheckedUpdateManyWithoutMemberNestedInput
+  spinResults?: Prisma.SpinResultUncheckedUpdateManyWithoutMemberNestedInput
+  courseEnrollments?: Prisma.CourseEnrollmentUncheckedUpdateManyWithoutMemberNestedInput
+  lessonProgress?: Prisma.LessonProgressUncheckedUpdateManyWithoutMemberNestedInput
+  becGrants?: Prisma.BecGrantUncheckedUpdateManyWithoutMemberNestedInput
 }
 
 export type MemberCreateManyPrimaryTradeAccountInput = {
@@ -5512,6 +5936,7 @@ export type MemberCreateManyPrimaryTradeAccountInput = {
   avatarUrl?: string | null
   email?: string | null
   passwordHash?: string | null
+  tokenVersion?: number
   identityVerifiedAt?: Date | string | null
   phone?: string | null
   country?: string | null
@@ -5547,6 +5972,7 @@ export type MemberUpdateWithoutPrimaryTradeAccountInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
   identityVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -5589,6 +6015,7 @@ export type MemberUpdateWithoutPrimaryTradeAccountInput = {
   courseEnrollments?: Prisma.CourseEnrollmentUpdateManyWithoutMemberNestedInput
   lessonProgress?: Prisma.LessonProgressUpdateManyWithoutMemberNestedInput
   becGrants?: Prisma.BecGrantUpdateManyWithoutMemberNestedInput
+  claimTokens?: Prisma.MemberClaimTokenUpdateManyWithoutMemberNestedInput
 }
 
 export type MemberUncheckedUpdateWithoutPrimaryTradeAccountInput = {
@@ -5600,6 +6027,7 @@ export type MemberUncheckedUpdateWithoutPrimaryTradeAccountInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
   identityVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -5642,6 +6070,7 @@ export type MemberUncheckedUpdateWithoutPrimaryTradeAccountInput = {
   courseEnrollments?: Prisma.CourseEnrollmentUncheckedUpdateManyWithoutMemberNestedInput
   lessonProgress?: Prisma.LessonProgressUncheckedUpdateManyWithoutMemberNestedInput
   becGrants?: Prisma.BecGrantUncheckedUpdateManyWithoutMemberNestedInput
+  claimTokens?: Prisma.MemberClaimTokenUncheckedUpdateManyWithoutMemberNestedInput
 }
 
 export type MemberUncheckedUpdateManyWithoutPrimaryTradeAccountInput = {
@@ -5653,6 +6082,7 @@ export type MemberUncheckedUpdateManyWithoutPrimaryTradeAccountInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
   identityVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -5703,6 +6133,7 @@ export type MemberCountOutputType = {
   courseEnrollments: number
   lessonProgress: number
   becGrants: number
+  claimTokens: number
 }
 
 export type MemberCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -5723,6 +6154,7 @@ export type MemberCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions
   courseEnrollments?: boolean | MemberCountOutputTypeCountCourseEnrollmentsArgs
   lessonProgress?: boolean | MemberCountOutputTypeCountLessonProgressArgs
   becGrants?: boolean | MemberCountOutputTypeCountBecGrantsArgs
+  claimTokens?: boolean | MemberCountOutputTypeCountClaimTokensArgs
 }
 
 /**
@@ -5854,6 +6286,13 @@ export type MemberCountOutputTypeCountBecGrantsArgs<ExtArgs extends runtime.Type
   where?: Prisma.BecGrantWhereInput
 }
 
+/**
+ * MemberCountOutputType without action
+ */
+export type MemberCountOutputTypeCountClaimTokensArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.MemberClaimTokenWhereInput
+}
+
 
 export type MemberSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -5864,6 +6303,7 @@ export type MemberSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   avatarUrl?: boolean
   email?: boolean
   passwordHash?: boolean
+  tokenVersion?: boolean
   identityVerifiedAt?: boolean
   phone?: boolean
   country?: boolean
@@ -5908,6 +6348,7 @@ export type MemberSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   courseEnrollments?: boolean | Prisma.Member$courseEnrollmentsArgs<ExtArgs>
   lessonProgress?: boolean | Prisma.Member$lessonProgressArgs<ExtArgs>
   becGrants?: boolean | Prisma.Member$becGrantsArgs<ExtArgs>
+  claimTokens?: boolean | Prisma.Member$claimTokensArgs<ExtArgs>
   _count?: boolean | Prisma.MemberCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["member"]>
 
@@ -5922,6 +6363,7 @@ export type MemberSelectScalar = {
   avatarUrl?: boolean
   email?: boolean
   passwordHash?: boolean
+  tokenVersion?: boolean
   identityVerifiedAt?: boolean
   phone?: boolean
   country?: boolean
@@ -5950,7 +6392,7 @@ export type MemberSelectScalar = {
   customerStageOverride?: boolean
 }
 
-export type MemberOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "externalId" | "code" | "name" | "displayName" | "avatarUrl" | "email" | "passwordHash" | "identityVerifiedAt" | "phone" | "country" | "address" | "tradingView" | "telegramUsername" | "telegramUserId" | "discordUsername" | "discordUserId" | "lineUserId" | "lineDisplayName" | "socialLinksJson" | "joinedAt" | "createdAt" | "updatedAt" | "plan" | "primaryTradeAccountId" | "requiredLotsOverride" | "requiredLotsOverrideNote" | "crmStartDate" | "crmExpiryDate" | "currentPeriodLots" | "currentPeriodLotsAt" | "currentPeriodLotsFrom" | "currentPeriodLotsTo" | "customerStageOverride", ExtArgs["result"]["member"]>
+export type MemberOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "externalId" | "code" | "name" | "displayName" | "avatarUrl" | "email" | "passwordHash" | "tokenVersion" | "identityVerifiedAt" | "phone" | "country" | "address" | "tradingView" | "telegramUsername" | "telegramUserId" | "discordUsername" | "discordUserId" | "lineUserId" | "lineDisplayName" | "socialLinksJson" | "joinedAt" | "createdAt" | "updatedAt" | "plan" | "primaryTradeAccountId" | "requiredLotsOverride" | "requiredLotsOverrideNote" | "crmStartDate" | "crmExpiryDate" | "currentPeriodLots" | "currentPeriodLotsAt" | "currentPeriodLotsFrom" | "currentPeriodLotsTo" | "customerStageOverride", ExtArgs["result"]["member"]>
 export type MemberInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   primaryTradeAccount?: boolean | Prisma.Member$primaryTradeAccountArgs<ExtArgs>
   tradeAccounts?: boolean | Prisma.Member$tradeAccountsArgs<ExtArgs>
@@ -5970,6 +6412,7 @@ export type MemberInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   courseEnrollments?: boolean | Prisma.Member$courseEnrollmentsArgs<ExtArgs>
   lessonProgress?: boolean | Prisma.Member$lessonProgressArgs<ExtArgs>
   becGrants?: boolean | Prisma.Member$becGrantsArgs<ExtArgs>
+  claimTokens?: boolean | Prisma.Member$claimTokensArgs<ExtArgs>
   _count?: boolean | Prisma.MemberCountOutputTypeDefaultArgs<ExtArgs>
 }
 
@@ -5994,6 +6437,7 @@ export type $MemberPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
     courseEnrollments: Prisma.$CourseEnrollmentPayload<ExtArgs>[]
     lessonProgress: Prisma.$LessonProgressPayload<ExtArgs>[]
     becGrants: Prisma.$BecGrantPayload<ExtArgs>[]
+    claimTokens: Prisma.$MemberClaimTokenPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: number
@@ -6007,6 +6451,10 @@ export type $MemberPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
      * * scrypt hash for email/password sign-in (null = social-login only).
      */
     passwordHash: string | null
+    /**
+     * See Admin.tokenVersion — invalidates this member's issued sessions.
+     */
+    tokenVersion: number
     /**
      * * When the member last passed the identity check (TradingView + email vs
      *    *  the CRM-synced record). Once set, the dashboard stops asking them to
@@ -6402,6 +6850,7 @@ export interface Prisma__MemberClient<T, Null = never, ExtArgs extends runtime.T
   courseEnrollments<T extends Prisma.Member$courseEnrollmentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Member$courseEnrollmentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CourseEnrollmentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   lessonProgress<T extends Prisma.Member$lessonProgressArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Member$lessonProgressArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$LessonProgressPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   becGrants<T extends Prisma.Member$becGrantsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Member$becGrantsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$BecGrantPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  claimTokens<T extends Prisma.Member$claimTokensArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Member$claimTokensArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MemberClaimTokenPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -6439,6 +6888,7 @@ export interface MemberFieldRefs {
   readonly avatarUrl: Prisma.FieldRef<"Member", 'String'>
   readonly email: Prisma.FieldRef<"Member", 'String'>
   readonly passwordHash: Prisma.FieldRef<"Member", 'String'>
+  readonly tokenVersion: Prisma.FieldRef<"Member", 'Int'>
   readonly identityVerifiedAt: Prisma.FieldRef<"Member", 'DateTime'>
   readonly phone: Prisma.FieldRef<"Member", 'String'>
   readonly country: Prisma.FieldRef<"Member", 'String'>
@@ -7237,6 +7687,30 @@ export type Member$becGrantsArgs<ExtArgs extends runtime.Types.Extensions.Intern
   take?: number
   skip?: number
   distinct?: Prisma.BecGrantScalarFieldEnum | Prisma.BecGrantScalarFieldEnum[]
+}
+
+/**
+ * Member.claimTokens
+ */
+export type Member$claimTokensArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the MemberClaimToken
+   */
+  select?: Prisma.MemberClaimTokenSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the MemberClaimToken
+   */
+  omit?: Prisma.MemberClaimTokenOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MemberClaimTokenInclude<ExtArgs> | null
+  where?: Prisma.MemberClaimTokenWhereInput
+  orderBy?: Prisma.MemberClaimTokenOrderByWithRelationInput | Prisma.MemberClaimTokenOrderByWithRelationInput[]
+  cursor?: Prisma.MemberClaimTokenWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.MemberClaimTokenScalarFieldEnum | Prisma.MemberClaimTokenScalarFieldEnum[]
 }
 
 /**

@@ -429,7 +429,8 @@ export const ModelName = {
   Course: 'Course',
   CourseLesson: 'CourseLesson',
   CourseEnrollment: 'CourseEnrollment',
-  LessonProgress: 'LessonProgress'
+  LessonProgress: 'LessonProgress',
+  MemberClaimToken: 'MemberClaimToken'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -445,7 +446,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "member" | "memberAcquisitionChannel" | "broker" | "tradeAccount" | "tradeLog" | "indicator" | "planIndicatorEntitlement" | "memberIndicatorAccess" | "renewalRecord" | "telegramAccess" | "lotCheckRun" | "lotCheckResult" | "activityLog" | "admin" | "systemSetting" | "activity" | "activityEnrollment" | "competitionPrize" | "rewardTier" | "rewardClaim" | "becRate" | "spinPrize" | "becGrant" | "spinResult" | "journalAccount" | "journalTrade" | "riskRule" | "socialAccount" | "memberNotificationRead" | "course" | "courseLesson" | "courseEnrollment" | "lessonProgress"
+    modelProps: "member" | "memberAcquisitionChannel" | "broker" | "tradeAccount" | "tradeLog" | "indicator" | "planIndicatorEntitlement" | "memberIndicatorAccess" | "renewalRecord" | "telegramAccess" | "lotCheckRun" | "lotCheckResult" | "activityLog" | "admin" | "systemSetting" | "activity" | "activityEnrollment" | "competitionPrize" | "rewardTier" | "rewardClaim" | "becRate" | "spinPrize" | "becGrant" | "spinResult" | "journalAccount" | "journalTrade" | "riskRule" | "socialAccount" | "memberNotificationRead" | "course" | "courseLesson" | "courseEnrollment" | "lessonProgress" | "memberClaimToken"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -2627,6 +2628,72 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    MemberClaimToken: {
+      payload: Prisma.$MemberClaimTokenPayload<ExtArgs>
+      fields: Prisma.MemberClaimTokenFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.MemberClaimTokenFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemberClaimTokenPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.MemberClaimTokenFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemberClaimTokenPayload>
+        }
+        findFirst: {
+          args: Prisma.MemberClaimTokenFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemberClaimTokenPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.MemberClaimTokenFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemberClaimTokenPayload>
+        }
+        findMany: {
+          args: Prisma.MemberClaimTokenFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemberClaimTokenPayload>[]
+        }
+        create: {
+          args: Prisma.MemberClaimTokenCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemberClaimTokenPayload>
+        }
+        createMany: {
+          args: Prisma.MemberClaimTokenCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        delete: {
+          args: Prisma.MemberClaimTokenDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemberClaimTokenPayload>
+        }
+        update: {
+          args: Prisma.MemberClaimTokenUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemberClaimTokenPayload>
+        }
+        deleteMany: {
+          args: Prisma.MemberClaimTokenDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.MemberClaimTokenUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        upsert: {
+          args: Prisma.MemberClaimTokenUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemberClaimTokenPayload>
+        }
+        aggregate: {
+          args: Prisma.MemberClaimTokenAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateMemberClaimToken>
+        }
+        groupBy: {
+          args: Prisma.MemberClaimTokenGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.MemberClaimTokenGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.MemberClaimTokenCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.MemberClaimTokenCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -2675,6 +2742,7 @@ export const MemberScalarFieldEnum = {
   avatarUrl: 'avatarUrl',
   email: 'email',
   passwordHash: 'passwordHash',
+  tokenVersion: 'tokenVersion',
   identityVerifiedAt: 'identityVerifiedAt',
   phone: 'phone',
   country: 'country',
@@ -2895,6 +2963,7 @@ export const AdminScalarFieldEnum = {
   role: 'role',
   isOwner: 'isOwner',
   passwordHash: 'passwordHash',
+  tokenVersion: 'tokenVersion',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -3207,6 +3276,18 @@ export const LessonProgressScalarFieldEnum = {
 export type LessonProgressScalarFieldEnum = (typeof LessonProgressScalarFieldEnum)[keyof typeof LessonProgressScalarFieldEnum]
 
 
+export const MemberClaimTokenScalarFieldEnum = {
+  id: 'id',
+  memberId: 'memberId',
+  tokenHash: 'tokenHash',
+  expiresAt: 'expiresAt',
+  usedAt: 'usedAt',
+  createdAt: 'createdAt'
+} as const
+
+export type MemberClaimTokenScalarFieldEnum = (typeof MemberClaimTokenScalarFieldEnum)[keyof typeof MemberClaimTokenScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -3505,6 +3586,13 @@ export const CourseLessonOrderByRelevanceFieldEnum = {
 } as const
 
 export type CourseLessonOrderByRelevanceFieldEnum = (typeof CourseLessonOrderByRelevanceFieldEnum)[keyof typeof CourseLessonOrderByRelevanceFieldEnum]
+
+
+export const MemberClaimTokenOrderByRelevanceFieldEnum = {
+  tokenHash: 'tokenHash'
+} as const
+
+export type MemberClaimTokenOrderByRelevanceFieldEnum = (typeof MemberClaimTokenOrderByRelevanceFieldEnum)[keyof typeof MemberClaimTokenOrderByRelevanceFieldEnum]
 
 
 
@@ -3829,6 +3917,7 @@ export type GlobalOmitConfig = {
   courseLesson?: Prisma.CourseLessonOmit
   courseEnrollment?: Prisma.CourseEnrollmentOmit
   lessonProgress?: Prisma.LessonProgressOmit
+  memberClaimToken?: Prisma.MemberClaimTokenOmit
 }
 
 /* Types for Logging */

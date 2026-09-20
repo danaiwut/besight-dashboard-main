@@ -83,7 +83,8 @@ export const ModelName = {
   Course: 'Course',
   CourseLesson: 'CourseLesson',
   CourseEnrollment: 'CourseEnrollment',
-  LessonProgress: 'LessonProgress'
+  LessonProgress: 'LessonProgress',
+  MemberClaimToken: 'MemberClaimToken'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -111,6 +112,7 @@ export const MemberScalarFieldEnum = {
   avatarUrl: 'avatarUrl',
   email: 'email',
   passwordHash: 'passwordHash',
+  tokenVersion: 'tokenVersion',
   identityVerifiedAt: 'identityVerifiedAt',
   phone: 'phone',
   country: 'country',
@@ -331,6 +333,7 @@ export const AdminScalarFieldEnum = {
   role: 'role',
   isOwner: 'isOwner',
   passwordHash: 'passwordHash',
+  tokenVersion: 'tokenVersion',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -643,6 +646,18 @@ export const LessonProgressScalarFieldEnum = {
 export type LessonProgressScalarFieldEnum = (typeof LessonProgressScalarFieldEnum)[keyof typeof LessonProgressScalarFieldEnum]
 
 
+export const MemberClaimTokenScalarFieldEnum = {
+  id: 'id',
+  memberId: 'memberId',
+  tokenHash: 'tokenHash',
+  expiresAt: 'expiresAt',
+  usedAt: 'usedAt',
+  createdAt: 'createdAt'
+} as const
+
+export type MemberClaimTokenScalarFieldEnum = (typeof MemberClaimTokenScalarFieldEnum)[keyof typeof MemberClaimTokenScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -941,4 +956,11 @@ export const CourseLessonOrderByRelevanceFieldEnum = {
 } as const
 
 export type CourseLessonOrderByRelevanceFieldEnum = (typeof CourseLessonOrderByRelevanceFieldEnum)[keyof typeof CourseLessonOrderByRelevanceFieldEnum]
+
+
+export const MemberClaimTokenOrderByRelevanceFieldEnum = {
+  tokenHash: 'tokenHash'
+} as const
+
+export type MemberClaimTokenOrderByRelevanceFieldEnum = (typeof MemberClaimTokenOrderByRelevanceFieldEnum)[keyof typeof MemberClaimTokenOrderByRelevanceFieldEnum]
 

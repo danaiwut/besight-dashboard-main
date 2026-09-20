@@ -6,6 +6,7 @@ declare module "next-auth" {
       role?: "admin" | "member";
       memberId?: number;
       adminId?: number;
+      tokenVersion?: number;
     } & DefaultSession["user"];
   }
 
@@ -13,6 +14,7 @@ declare module "next-auth" {
     role?: "admin" | "member";
     memberId?: number;
     adminId?: number;
+    tokenVersion?: number;
   }
 }
 
@@ -21,5 +23,6 @@ declare module "next-auth/jwt" {
     role?: "admin" | "member";
     memberId?: number;
     adminId?: number;
+    tokenVersion?: number;
   }
 }

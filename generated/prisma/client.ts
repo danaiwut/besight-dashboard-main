@@ -219,3 +219,10 @@ export type CourseEnrollment = Prisma.CourseEnrollmentModel
  * 
  */
 export type LessonProgress = Prisma.LessonProgressModel
+/**
+ * Model MemberClaimToken
+ * Single-use token letting an existing member claim their account and set a
+ * password. Members are only ever created by the CRM sync, so this grants no
+ * new accounts — it just proves control of the address already on the row.
+ */
+export type MemberClaimToken = Prisma.MemberClaimTokenModel

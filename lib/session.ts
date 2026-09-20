@@ -15,6 +15,10 @@ export type SessionUser = {
   role?: "admin" | "member";
   memberId?: number;
   adminId?: number;
+  /** Snapshot of the account's tokenVersion when this JWT was issued. A bump on
+   *  the row invalidates every token minted before it — the revocation the
+   *  stateless-JWT strategy otherwise has no way to express. */
+  tokenVersion?: number;
   email?: string | null;
   name?: string | null;
 };
@@ -54,9 +58,14 @@ export async function adminGuard(): Promise<AdminGuard> {
   if (!isDatabaseConfigured()) {
     return { ok: false, response: NextResponse.json({ ok: false, error: "DATABASE_URL is not configured" }, { status: 503 }) };
   }
-  const admin = await getPrisma().admin.findUnique({ where: { id: user.adminId }, select: { role: true, isOwner: true } });
+  const admin = await getPrisma().admin.findUnique({
+    where: { id: user.adminId },
+    select: { role: true, isOwner: true, tokenVersion: true },
+  });
   // A deleted admin loses access immediately, not when the JWT expires.
   if (!admin) return { ok: false, response: authRequired() };
+  // Same for one whose sessions were revoked (password change, forced sign-out).
+  if ((user.tokenVersion ?? 0) !== admin.tokenVersion) return { ok: false, response: authRequired() };
   return { ok: true, user: { ...user, adminId: user.adminId, adminRole: toAdminRole(admin.role), isOwner: admin.isOwner } };
 }
 
@@ -93,9 +102,19 @@ export function actorFromSession(user: SessionUser): string {
 export async function memberGuard(): Promise<AnyGuard> {
   const user = await getSessionUser();
   if (!user) return { ok: false, response: authRequired() };
-  if (user.role === "admin") return { ok: true, user };
-  if (user.role === "member" && user.memberId) return { ok: true, user };
-  return { ok: false, response: forbidden() };
+  // Admins are validated (including tokenVersion) by the admin guard.
+  if (user.role === "admin") {
+    const guard = await adminGuard();
+    return guard.ok ? { ok: true, user: guard.user } : guard;
+  }
+  if (user.role !== "member" || !user.memberId) return { ok: false, response: forbidden() };
+  if (!isDatabaseConfigured()) {
+    return { ok: false, response: NextResponse.json({ ok: false, error: "DATABASE_URL is not configured" }, { status: 503 }) };
+  }
+  const member = await getPrisma().member.findUnique({ where: { id: user.memberId }, select: { tokenVersion: true } });
+  // Deleted member, or sessions revoked since this token was minted.
+  if (!member || (user.tokenVersion ?? 0) !== member.tokenVersion) return { ok: false, response: authRequired() };
+  return { ok: true, user };
 }
 
 /** Member-scoped endpoints: signed in AND resolvable to a Member row.

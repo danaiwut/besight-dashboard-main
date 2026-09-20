@@ -6,8 +6,8 @@ import { verifyPassword } from "./password";
    provisioned by the CRM sync — signing in only claims an existing row, it
    never creates one. */
 
-export type AdminIdentity = { role: "admin"; adminId: number; email: string; name: string };
-export type MemberIdentity = { role: "member"; memberId: number; email: string; name: string };
+export type AdminIdentity = { role: "admin"; adminId: number; email: string; name: string; tokenVersion: number };
+export type MemberIdentity = { role: "member"; memberId: number; email: string; name: string; tokenVersion: number };
 export type Identity = AdminIdentity | MemberIdentity;
 
 /** Member-only lookup, used by the social sign-in path.
@@ -24,10 +24,10 @@ export async function resolveMemberIdentityByEmail(email: string): Promise<Membe
 
   const member = await getPrisma().member.findFirst({
     where: { email: normalized },
-    select: { id: true, name: true, displayName: true, email: true },
+    select: { id: true, name: true, displayName: true, email: true, tokenVersion: true },
   });
   if (!member?.email) return null;
-  return { role: "member", memberId: member.id, email: member.email, name: member.displayName?.trim() || member.name };
+  return { role: "member", memberId: member.id, email: member.email, name: member.displayName?.trim() || member.name, tokenVersion: member.tokenVersion };
 }
 
 /** Email + password sign-in (admins first, then members). Returns null on any
@@ -38,12 +38,12 @@ export async function verifyCredentials(email: string, password: string): Promis
 
   const admin = await prisma.admin.findFirst({ where: { email: email.trim() } });
   if (admin && (await verifyPassword(password, admin.passwordHash))) {
-    return { role: "admin", adminId: admin.id, email: admin.email, name: admin.name };
+    return { role: "admin", adminId: admin.id, email: admin.email, name: admin.name, tokenVersion: admin.tokenVersion };
   }
 
   const member = await prisma.member.findFirst({ where: { email: email.trim() } });
   if (member?.email && (await verifyPassword(password, member.passwordHash))) {
-    return { role: "member", memberId: member.id, email: member.email, name: member.displayName?.trim() || member.name };
+    return { role: "member", memberId: member.id, email: member.email, name: member.displayName?.trim() || member.name, tokenVersion: member.tokenVersion };
   }
   return null;
 }

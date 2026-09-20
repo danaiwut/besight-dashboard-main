@@ -28,10 +28,12 @@ export type AggregateAdmin = {
 
 export type AdminAvgAggregateOutputType = {
   id: number | null
+  tokenVersion: number | null
 }
 
 export type AdminSumAggregateOutputType = {
   id: number | null
+  tokenVersion: number | null
 }
 
 export type AdminMinAggregateOutputType = {
@@ -41,6 +43,7 @@ export type AdminMinAggregateOutputType = {
   role: string | null
   isOwner: boolean | null
   passwordHash: string | null
+  tokenVersion: number | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -52,6 +55,7 @@ export type AdminMaxAggregateOutputType = {
   role: string | null
   isOwner: boolean | null
   passwordHash: string | null
+  tokenVersion: number | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -63,6 +67,7 @@ export type AdminCountAggregateOutputType = {
   role: number
   isOwner: number
   passwordHash: number
+  tokenVersion: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -71,10 +76,12 @@ export type AdminCountAggregateOutputType = {
 
 export type AdminAvgAggregateInputType = {
   id?: true
+  tokenVersion?: true
 }
 
 export type AdminSumAggregateInputType = {
   id?: true
+  tokenVersion?: true
 }
 
 export type AdminMinAggregateInputType = {
@@ -84,6 +91,7 @@ export type AdminMinAggregateInputType = {
   role?: true
   isOwner?: true
   passwordHash?: true
+  tokenVersion?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -95,6 +103,7 @@ export type AdminMaxAggregateInputType = {
   role?: true
   isOwner?: true
   passwordHash?: true
+  tokenVersion?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -106,6 +115,7 @@ export type AdminCountAggregateInputType = {
   role?: true
   isOwner?: true
   passwordHash?: true
+  tokenVersion?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -204,6 +214,7 @@ export type AdminGroupByOutputType = {
   role: string
   isOwner: boolean
   passwordHash: string | null
+  tokenVersion: number
   createdAt: Date
   updatedAt: Date
   _count: AdminCountAggregateOutputType | null
@@ -238,6 +249,7 @@ export type AdminWhereInput = {
   role?: Prisma.StringFilter<"Admin"> | string
   isOwner?: Prisma.BoolFilter<"Admin"> | boolean
   passwordHash?: Prisma.StringNullableFilter<"Admin"> | string | null
+  tokenVersion?: Prisma.IntFilter<"Admin"> | number
   createdAt?: Prisma.DateTimeFilter<"Admin"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Admin"> | Date | string
 }
@@ -249,6 +261,7 @@ export type AdminOrderByWithRelationInput = {
   role?: Prisma.SortOrder
   isOwner?: Prisma.SortOrder
   passwordHash?: Prisma.SortOrderInput | Prisma.SortOrder
+  tokenVersion?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _relevance?: Prisma.AdminOrderByRelevanceInput
@@ -264,6 +277,7 @@ export type AdminWhereUniqueInput = Prisma.AtLeast<{
   role?: Prisma.StringFilter<"Admin"> | string
   isOwner?: Prisma.BoolFilter<"Admin"> | boolean
   passwordHash?: Prisma.StringNullableFilter<"Admin"> | string | null
+  tokenVersion?: Prisma.IntFilter<"Admin"> | number
   createdAt?: Prisma.DateTimeFilter<"Admin"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Admin"> | Date | string
 }, "id" | "email">
@@ -275,6 +289,7 @@ export type AdminOrderByWithAggregationInput = {
   role?: Prisma.SortOrder
   isOwner?: Prisma.SortOrder
   passwordHash?: Prisma.SortOrderInput | Prisma.SortOrder
+  tokenVersion?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.AdminCountOrderByAggregateInput
@@ -294,6 +309,7 @@ export type AdminScalarWhereWithAggregatesInput = {
   role?: Prisma.StringWithAggregatesFilter<"Admin"> | string
   isOwner?: Prisma.BoolWithAggregatesFilter<"Admin"> | boolean
   passwordHash?: Prisma.StringNullableWithAggregatesFilter<"Admin"> | string | null
+  tokenVersion?: Prisma.IntWithAggregatesFilter<"Admin"> | number
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Admin"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Admin"> | Date | string
 }
@@ -304,6 +320,7 @@ export type AdminCreateInput = {
   role: string
   isOwner?: boolean
   passwordHash?: string | null
+  tokenVersion?: number
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -315,6 +332,7 @@ export type AdminUncheckedCreateInput = {
   role: string
   isOwner?: boolean
   passwordHash?: string | null
+  tokenVersion?: number
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -325,6 +343,7 @@ export type AdminUpdateInput = {
   role?: Prisma.StringFieldUpdateOperationsInput | string
   isOwner?: Prisma.BoolFieldUpdateOperationsInput | boolean
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -336,6 +355,7 @@ export type AdminUncheckedUpdateInput = {
   role?: Prisma.StringFieldUpdateOperationsInput | string
   isOwner?: Prisma.BoolFieldUpdateOperationsInput | boolean
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -347,6 +367,7 @@ export type AdminCreateManyInput = {
   role: string
   isOwner?: boolean
   passwordHash?: string | null
+  tokenVersion?: number
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -357,6 +378,7 @@ export type AdminUpdateManyMutationInput = {
   role?: Prisma.StringFieldUpdateOperationsInput | string
   isOwner?: Prisma.BoolFieldUpdateOperationsInput | boolean
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -368,6 +390,7 @@ export type AdminUncheckedUpdateManyInput = {
   role?: Prisma.StringFieldUpdateOperationsInput | string
   isOwner?: Prisma.BoolFieldUpdateOperationsInput | boolean
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -385,12 +408,14 @@ export type AdminCountOrderByAggregateInput = {
   role?: Prisma.SortOrder
   isOwner?: Prisma.SortOrder
   passwordHash?: Prisma.SortOrder
+  tokenVersion?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
 
 export type AdminAvgOrderByAggregateInput = {
   id?: Prisma.SortOrder
+  tokenVersion?: Prisma.SortOrder
 }
 
 export type AdminMaxOrderByAggregateInput = {
@@ -400,6 +425,7 @@ export type AdminMaxOrderByAggregateInput = {
   role?: Prisma.SortOrder
   isOwner?: Prisma.SortOrder
   passwordHash?: Prisma.SortOrder
+  tokenVersion?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -411,12 +437,14 @@ export type AdminMinOrderByAggregateInput = {
   role?: Prisma.SortOrder
   isOwner?: Prisma.SortOrder
   passwordHash?: Prisma.SortOrder
+  tokenVersion?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
 
 export type AdminSumOrderByAggregateInput = {
   id?: Prisma.SortOrder
+  tokenVersion?: Prisma.SortOrder
 }
 
 
@@ -428,6 +456,7 @@ export type AdminSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   role?: boolean
   isOwner?: boolean
   passwordHash?: boolean
+  tokenVersion?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["admin"]>
@@ -441,11 +470,12 @@ export type AdminSelectScalar = {
   role?: boolean
   isOwner?: boolean
   passwordHash?: boolean
+  tokenVersion?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type AdminOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "email" | "role" | "isOwner" | "passwordHash" | "createdAt" | "updatedAt", ExtArgs["result"]["admin"]>
+export type AdminOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "email" | "role" | "isOwner" | "passwordHash" | "tokenVersion" | "createdAt" | "updatedAt", ExtArgs["result"]["admin"]>
 
 export type $AdminPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "Admin"
@@ -457,6 +487,11 @@ export type $AdminPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
     role: string
     isOwner: boolean
     passwordHash: string | null
+    /**
+     * Bumped to invalidate every JWT already issued to this admin (password
+     * change, forced sign-out). Compared on each guarded request.
+     */
+    tokenVersion: number
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["admin"]>
@@ -834,6 +869,7 @@ export interface AdminFieldRefs {
   readonly role: Prisma.FieldRef<"Admin", 'String'>
   readonly isOwner: Prisma.FieldRef<"Admin", 'Boolean'>
   readonly passwordHash: Prisma.FieldRef<"Admin", 'String'>
+  readonly tokenVersion: Prisma.FieldRef<"Admin", 'Int'>
   readonly createdAt: Prisma.FieldRef<"Admin", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Admin", 'DateTime'>
 }

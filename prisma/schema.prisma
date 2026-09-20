@@ -66,6 +66,8 @@ model Member {
   email                    String?                    @unique @db.VarChar(191)
   /** scrypt hash for email/password sign-in (null = social-login only). */
   passwordHash             String?                    @db.VarChar(255)
+  /// See Admin.tokenVersion — invalidates this member's issued sessions.
+  tokenVersion             Int                        @default(0)
   /** When the member last passed the identity check (TradingView + email vs
    *  the CRM-synced record). Once set, the dashboard stops asking them to
    *  verify again — the check is only needed to claim/add a trade account. */
@@ -117,6 +119,7 @@ model Member {
   courseEnrollments        CourseEnrollment[]
   lessonProgress           LessonProgress[]
   becGrants                BecGrant[]
+  claimTokens              MemberClaimToken[]
 
   @@index([joinedAt])
   @@index([plan])
@@ -337,6 +340,9 @@ model Admin {
   role         String   @db.VarChar(32)
   isOwner      Boolean  @default(false)
   passwordHash String?  @db.VarChar(255)
+  /// Bumped to invalidate every JWT already issued to this admin (password
+  /// change, forced sign-out). Compared on each guarded request.
+  tokenVersion Int      @default(0)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 }
@@ -785,4 +791,20 @@ model LessonProgress {
 
   @@unique([lessonId, memberId])
   @@index([memberId, completedAt])
+}
+
+/// Single-use token letting an existing member claim their account and set a
+/// password. Members are only ever created by the CRM sync, so this grants no
+/// new accounts — it just proves control of the address already on the row.
+model MemberClaimToken {
+  id        Int       @id @default(autoincrement())
+  memberId  Int
+  /// SHA-256 of the emailed token; the plaintext never touches the database.
+  tokenHash String    @unique @db.VarChar(64)
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+  member    Member    @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  @@index([memberId, usedAt])
 }

@@ -63,6 +63,7 @@ providers.push(
         role: identity.role,
         memberId: identity.role === "member" ? identity.memberId : undefined,
         adminId: identity.role === "admin" ? identity.adminId : undefined,
+        tokenVersion: identity.tokenVersion,
       };
     },
   }),
@@ -91,11 +92,12 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     },
     async jwt({ token, user }) {
       if (user) {
-        const u = user as { role?: "admin" | "member"; memberId?: number; adminId?: number; email?: string | null; name?: string | null };
+        const u = user as { role?: "admin" | "member"; memberId?: number; adminId?: number; tokenVersion?: number; email?: string | null; name?: string | null };
         if (u.role) {
           token.role = u.role;
           token.memberId = u.memberId;
           token.adminId = u.adminId;
+          token.tokenVersion = u.tokenVersion;
         } else if (u.email) {
           /* Social path. Member-only, mirroring the signIn callback — belt and
              braces, so a token can never be minted with an admin role from an
@@ -105,6 +107,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             token.role = identity.role;
             token.memberId = identity.memberId;
             token.adminId = undefined;
+            token.tokenVersion = identity.tokenVersion;
           }
         }
         if (u.name) token.name = u.name;
@@ -112,10 +115,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       return token;
     },
     async session({ session, token }) {
-      const t = token as { role?: "admin" | "member"; memberId?: number; adminId?: number };
+      const t = token as { role?: "admin" | "member"; memberId?: number; adminId?: number; tokenVersion?: number };
       session.user.role = t.role;
       session.user.memberId = t.memberId;
       session.user.adminId = t.adminId;
+      session.user.tokenVersion = t.tokenVersion;
       return session;
     },
   },
