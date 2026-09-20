@@ -1,28 +1,24 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getPrisma, isDatabaseConfigured } from "@/lib/server/prisma";
+import { findOwnedJournalAccount } from "@/lib/server/journal";
 import { bumpDataVersion } from "@/lib/server/dataVersion";
 import { encryptSecret } from "@/lib/server/secrets";
 import { resolveMemberIdForUser } from "@/lib/server/authIdentity";
-import { memberGuard } from "@/lib/session";
+import { memberScopeGuard } from "@/lib/session";
 
 export const dynamic = "force-dynamic";
 
 type Params = { params: Promise<{ id: string }> };
 
-async function ownAccount(memberId: number, id: number) {
-  return getPrisma().journalAccount.findFirst({ where: { id, memberId }, select: { id: true } });
-}
-
 export async function PATCH(request: NextRequest, { params }: Params) {
-  const guard = await memberGuard();
+  const guard = await memberScopeGuard();
   if (!guard.ok) return guard.response;
   if (!isDatabaseConfigured()) return NextResponse.json({ ok: false, error: "DATABASE_URL is not configured" }, { status: 503 });
   try {
-    const memberId = await resolveMemberIdForUser(guard.user);
-    if (!memberId) return NextResponse.json({ ok: false, error: "No member profile for this account" }, { status: 404 });
+    const memberId = guard.memberId;
     const id = Number((await params).id);
     if (!Number.isInteger(id) || id <= 0) return NextResponse.json({ ok: false, error: "Invalid id" }, { status: 400 });
-    if (!(await ownAccount(memberId, id))) return NextResponse.json({ ok: false, error: "Journal account not found" }, { status: 404 });
+    if (!(await findOwnedJournalAccount(memberId, id))) return NextResponse.json({ ok: false, error: "Journal account not found" }, { status: 404 });
 
     const body = await request.json().catch(() => ({})) as {
       platform?: string; startingBalance?: number; startDate?: string; accountType?: string;
@@ -69,15 +65,14 @@ export async function PATCH(request: NextRequest, { params }: Params) {
 }
 
 export async function DELETE(_request: NextRequest, { params }: Params) {
-  const guard = await memberGuard();
+  const guard = await memberScopeGuard();
   if (!guard.ok) return guard.response;
   if (!isDatabaseConfigured()) return NextResponse.json({ ok: false, error: "DATABASE_URL is not configured" }, { status: 503 });
   try {
-    const memberId = await resolveMemberIdForUser(guard.user);
-    if (!memberId) return NextResponse.json({ ok: false, error: "No member profile for this account" }, { status: 404 });
+    const memberId = guard.memberId;
     const id = Number((await params).id);
     if (!Number.isInteger(id) || id <= 0) return NextResponse.json({ ok: false, error: "Invalid id" }, { status: 400 });
-    if (!(await ownAccount(memberId, id))) return NextResponse.json({ ok: false, error: "Journal account not found" }, { status: 404 });
+    if (!(await findOwnedJournalAccount(memberId, id))) return NextResponse.json({ ok: false, error: "Journal account not found" }, { status: 404 });
     // Trades, rules and notes cascade with the account.
     await getPrisma().journalAccount.delete({ where: { id } });
     await bumpDataVersion();

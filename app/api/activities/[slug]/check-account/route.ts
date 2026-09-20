@@ -2,20 +2,19 @@ import { NextRequest, NextResponse } from "next/server";
 import { getPrisma, isDatabaseConfigured } from "@/lib/server/prisma";
 import { PARTNER_BROKER_CODES } from "@/lib/activities";
 import { resolveMemberIdForUser } from "@/lib/server/authIdentity";
-import { memberGuard } from "@/lib/session";
+import { memberScopeGuard } from "@/lib/session";
 
 export const dynamic = "force-dynamic";
 
 /** Pre-checks one of the member's own accounts for competition entry (the
  *  enroll endpoint re-validates everything — this is convenience only). */
 export async function POST(request: NextRequest, { params }: { params: Promise<{ slug: string }> }) {
-  const guard = await memberGuard();
+  const guard = await memberScopeGuard();
   if (!guard.ok) return guard.response;
   if (!isDatabaseConfigured()) return NextResponse.json({ ok: false, error: "DATABASE_URL is not configured" }, { status: 503 });
   try {
     const { slug } = await params;
-    const memberId = await resolveMemberIdForUser(guard.user);
-    if (!memberId) return NextResponse.json({ ok: false, error: "No member profile for this account" }, { status: 404 });
+    const memberId = guard.memberId;
     const body = await request.json().catch(() => ({})) as { tradeAccountId?: number };
     const tradeAccountId = Number(body.tradeAccountId);
     if (!Number.isInteger(tradeAccountId) || tradeAccountId <= 0) {

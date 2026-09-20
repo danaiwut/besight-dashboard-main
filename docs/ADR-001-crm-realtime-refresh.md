@@ -44,4 +44,7 @@ The store is MariaDB (no `LISTEN/NOTIFY`-style push), hosted on Vercel serverles
   ledger rows) are discarded on the next reload — documented in code.
 - `log()` (activity feed) POSTs bump the version, so any admin action — even a
   local-only one — triggers a harmless idempotent reload.
-- Known limitation: no per-user auth on CRM routes yet; version endpoint included.
+- Superseded: CRM routes are no longer unauthenticated. Every `/api/crm` handler
+  (the version endpoint included) calls an admin guard from `lib/session.ts`, so
+  the poll only runs for a signed-in admin. Cron endpoints authenticate with
+  `CRON_SECRET` via `cronGuard` instead of a session.

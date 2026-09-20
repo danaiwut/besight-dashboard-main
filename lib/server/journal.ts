@@ -5,6 +5,13 @@ import type { ImportPreviewRow, InsightDto, JournalAccountDto, JournalTrade, Ris
     CSV import parsing + rule-based insights. Stats themselves stay
     client-side (lib/journal.ts) over the loaded trade rows. */
 
+/** Ownership check for every journal-account route: does this account belong to
+ *  this member? Shared rather than copied per route — three identical copies of
+ *  an authorisation predicate only need one to drift to open a hole. */
+export async function findOwnedJournalAccount(memberId: number, id: number) {
+  return getPrisma().journalAccount.findFirst({ where: { id, memberId }, select: { id: true } });
+}
+
 // ── DTOs ────────────────────────────────────────────────────────────────
 
 function tagsOf(tagsJson: string | null): string[] {

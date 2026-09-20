@@ -1,5 +1,6 @@
-import { NextResponse } from "next/server";
+import { NextResponse, type NextRequest } from "next/server";
 import { isDatabaseConfigured, getPrisma } from "./server/prisma";
+import { resolveMemberIdForUser } from "./server/authIdentity";
 import { auth } from "@/auth";
 
 /* Server-side session accessors. Route handlers call the `*Guard` helpers
@@ -31,9 +32,19 @@ export function forbidden() {
   return NextResponse.json({ ok: false, error: "Forbidden", code: "role_required" }, { status: 403 });
 }
 
-type AdminUser = SessionUser & { adminId: number; adminRole: string; isOwner: boolean };
+/** The CRM role levels. A union rather than `string` so a mistyped comparison
+ *  is a compile error instead of a silently-never-true permission check. */
+export type AdminRole = "Owner" | "Admin" | "Support" | "Viewer";
+
+function toAdminRole(value: string): AdminRole {
+  // Anything unrecognised falls to the least privilege we have.
+  return value === "Owner" || value === "Admin" || value === "Support" ? value : "Viewer";
+}
+
+type AdminUser = SessionUser & { adminId: number; adminRole: AdminRole; isOwner: boolean };
 type AdminGuard = { ok: true; user: AdminUser } | { ok: false; response: NextResponse };
 type AnyGuard = { ok: true; user: SessionUser } | { ok: false; response: NextResponse };
+type MemberScopeGuard = { ok: true; user: SessionUser; memberId: number } | { ok: false; response: NextResponse };
 
 /** Admin-only endpoints (everything under /api/crm). */
 export async function adminGuard(): Promise<AdminGuard> {
@@ -46,7 +57,7 @@ export async function adminGuard(): Promise<AdminGuard> {
   const admin = await getPrisma().admin.findUnique({ where: { id: user.adminId }, select: { role: true, isOwner: true } });
   // A deleted admin loses access immediately, not when the JWT expires.
   if (!admin) return { ok: false, response: authRequired() };
-  return { ok: true, user: { ...user, adminId: user.adminId, adminRole: admin.role, isOwner: admin.isOwner } };
+  return { ok: true, user: { ...user, adminId: user.adminId, adminRole: toAdminRole(admin.role), isOwner: admin.isOwner } };
 }
 
 /** Non-GET admin endpoints — Viewers are read-only. */
@@ -85,4 +96,39 @@ export async function memberGuard(): Promise<AnyGuard> {
   if (user.role === "admin") return { ok: true, user };
   if (user.role === "member" && user.memberId) return { ok: true, user };
   return { ok: false, response: forbidden() };
+}
+
+/** Member-scoped endpoints: signed in AND resolvable to a Member row.
+ *
+ *  Folds in the member-id resolution every /api/me handler needs, so the
+ *  "which member is this?" policy — including what a member-less admin sees —
+ *  lives in one place instead of being copied into each handler. */
+export async function memberScopeGuard(): Promise<MemberScopeGuard> {
+  const guard = await memberGuard();
+  if (!guard.ok) return guard;
+  // Resolution needs the database; without it the honest answer is 503, not
+  // "no such member" — same ordering the handlers used before this existed.
+  if (!isDatabaseConfigured()) {
+    return { ok: false, response: NextResponse.json({ ok: false, error: "DATABASE_URL is not configured" }, { status: 503 }) };
+  }
+  const memberId = await resolveMemberIdForUser(guard.user);
+  if (!memberId) {
+    return {
+      ok: false,
+      response: NextResponse.json({ ok: false, error: "No member profile for this account", code: "no_member" }, { status: 404 }),
+    };
+  }
+  return { ok: true, user: guard.user, memberId };
+}
+
+/** Cron endpoints. The only caller is Vercel Cron (or an operator holding the
+ *  secret) — there is no session, so this is the one guard that authenticates
+ *  from a header. Centralised for the same reason as the session guards: an
+ *  inlined copy is one edit away from drifting. */
+export function cronGuard(request: NextRequest): { ok: true } | { ok: false; response: NextResponse } {
+  const secret = process.env.CRON_SECRET;
+  if (!secret || request.headers.get("authorization") !== `Bearer ${secret}`) {
+    return { ok: false, response: NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 }) };
+  }
+  return { ok: true };
 }

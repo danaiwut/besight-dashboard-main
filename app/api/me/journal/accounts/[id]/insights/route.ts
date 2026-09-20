@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getPrisma, isDatabaseConfigured } from "@/lib/server/prisma";
 import { buildInsights, toRiskRuleDto } from "@/lib/server/journal";
 import { resolveMemberIdForUser } from "@/lib/server/authIdentity";
-import { memberGuard } from "@/lib/session";
+import { memberScopeGuard } from "@/lib/session";
 
 export const dynamic = "force-dynamic";
 
@@ -11,12 +11,11 @@ type Params = { params: Promise<{ id: string }> };
 /** Rule-based coaching notes from the account's own closed trades — no
  *  external AI involved. Computed on read, never stored. */
 export async function GET(_request: NextRequest, { params }: Params) {
-  const guard = await memberGuard();
+  const guard = await memberScopeGuard();
   if (!guard.ok) return guard.response;
   if (!isDatabaseConfigured()) return NextResponse.json({ ok: false, error: "DATABASE_URL is not configured" }, { status: 503 });
   try {
-    const memberId = await resolveMemberIdForUser(guard.user);
-    if (!memberId) return NextResponse.json({ ok: false, error: "No member profile for this account" }, { status: 404 });
+    const memberId = guard.memberId;
     const id = Number((await params).id);
     if (!Number.isInteger(id) || id <= 0) return NextResponse.json({ ok: false, error: "Invalid id" }, { status: 400 });
     const prisma = getPrisma();

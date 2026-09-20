@@ -4,18 +4,17 @@ import { bumpDataVersion } from "@/lib/server/dataVersion";
 import { toJournalAccountDto } from "@/lib/server/journal";
 import { encryptSecret } from "@/lib/server/secrets";
 import { resolveMemberIdForUser } from "@/lib/server/authIdentity";
-import { memberGuard } from "@/lib/session";
+import { memberScopeGuard } from "@/lib/session";
 
 export const dynamic = "force-dynamic";
 
 /** The member's journal accounts (one per linked registered trade account). */
 export async function GET() {
-  const guard = await memberGuard();
+  const guard = await memberScopeGuard();
   if (!guard.ok) return guard.response;
   if (!isDatabaseConfigured()) return NextResponse.json({ ok: false, error: "DATABASE_URL is not configured" }, { status: 503 });
   try {
-    const memberId = await resolveMemberIdForUser(guard.user);
-    if (!memberId) return NextResponse.json({ ok: false, error: "No member profile for this account" }, { status: 404 });
+    const memberId = guard.memberId;
     const rows = await getPrisma().journalAccount.findMany({
       where: { memberId },
       orderBy: { createdAt: "asc" },
@@ -30,12 +29,11 @@ export async function GET() {
 /** Links one of the member's own registered trade accounts as a journal
  *  account (active + ownership-confirmed). One journal per trade account. */
 export async function POST(request: NextRequest) {
-  const guard = await memberGuard();
+  const guard = await memberScopeGuard();
   if (!guard.ok) return guard.response;
   if (!isDatabaseConfigured()) return NextResponse.json({ ok: false, error: "DATABASE_URL is not configured" }, { status: 503 });
   try {
-    const memberId = await resolveMemberIdForUser(guard.user);
-    if (!memberId) return NextResponse.json({ ok: false, error: "No member profile for this account" }, { status: 404 });
+    const memberId = guard.memberId;
     const body = await request.json().catch(() => ({})) as {
       tradeAccountId?: number; platform?: string; startingBalance?: number; startDate?: string;
       mtServer?: string; investorPassword?: string;

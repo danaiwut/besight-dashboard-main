@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getPrisma, isDatabaseConfigured } from "@/lib/server/prisma";
 import { resolveMemberIdForUser } from "@/lib/server/authIdentity";
-import { memberGuard } from "@/lib/session";
+import { memberScopeGuard } from "@/lib/session";
 import { recordWatchProgress } from "@/lib/server/courses";
 import { memberLevelFor } from "@/lib/server/memberLevel";
 import { levelAtLeast } from "@/lib/memberLevel";
@@ -12,12 +12,11 @@ export const dynamic = "force-dynamic";
  *  Never completes anything — completion is the explicit tick endpoint, which
  *  verifies ≥90% watched server-side. Same level gate as the tick. */
 export async function PUT(request: NextRequest, { params }: { params: Promise<{ lessonId: string }> }) {
-  const guard = await memberGuard();
+  const guard = await memberScopeGuard();
   if (!guard.ok) return guard.response;
   if (!isDatabaseConfigured()) return NextResponse.json({ ok: false, error: "DATABASE_URL is not configured" }, { status: 503 });
   try {
-    const memberId = await resolveMemberIdForUser(guard.user);
-    if (!memberId) return NextResponse.json({ ok: false, error: "No member profile for this account" }, { status: 404 });
+    const memberId = guard.memberId;
 
     const lessonId = Number((await params).lessonId);
     if (!Number.isInteger(lessonId) || lessonId <= 0) return NextResponse.json({ ok: false, error: "Invalid lesson id" }, { status: 400 });

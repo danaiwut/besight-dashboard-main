@@ -3,18 +3,17 @@ import { getPrisma, isDatabaseConfigured } from "@/lib/server/prisma";
 import { toRewardClaimDto } from "@/lib/server/crmDtos";
 import { createTierClaim, lifetimeLots } from "@/lib/server/rewardClaims";
 import { resolveMemberIdForUser } from "@/lib/server/authIdentity";
-import { memberGuard } from "@/lib/session";
+import { memberScopeGuard } from "@/lib/session";
 
 export const dynamic = "force-dynamic";
 
 /** The signed-in member's own reward claims (newest first). */
 export async function GET() {
-  const guard = await memberGuard();
+  const guard = await memberScopeGuard();
   if (!guard.ok) return guard.response;
   if (!isDatabaseConfigured()) return NextResponse.json({ ok: false, error: "DATABASE_URL is not configured" }, { status: 503 });
   try {
-    const memberId = await resolveMemberIdForUser(guard.user);
-    if (!memberId) return NextResponse.json({ ok: false, error: "No member profile for this account" }, { status: 404 });
+    const memberId = guard.memberId;
     const prisma = getPrisma();
     const [rows, lots] = await Promise.all([
       prisma.rewardClaim.findMany({
@@ -34,12 +33,11 @@ export async function GET() {
 /** Claims one loyalty tier. The threshold is re-checked server-side from the
  *  trade ledger — the button state in the UI is convenience only. */
 export async function POST(request: NextRequest) {
-  const guard = await memberGuard();
+  const guard = await memberScopeGuard();
   if (!guard.ok) return guard.response;
   if (!isDatabaseConfigured()) return NextResponse.json({ ok: false, error: "DATABASE_URL is not configured" }, { status: 503 });
   try {
-    const memberId = await resolveMemberIdForUser(guard.user);
-    if (!memberId) return NextResponse.json({ ok: false, error: "No member profile for this account" }, { status: 404 });
+    const memberId = guard.memberId;
     const body = await request.json().catch(() => ({})) as { tierKey?: string };
     const tierKey = String(body.tierKey || "").trim();
     if (!tierKey) return NextResponse.json({ ok: false, error: "tierKey is required" }, { status: 400 });

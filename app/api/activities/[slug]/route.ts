@@ -5,7 +5,7 @@ import { bumpDataVersion } from "@/lib/server/dataVersion";
 import { toActivityDto } from "@/lib/server/crmDtos";
 import { PARTNER_BROKER_CODES } from "@/lib/activities";
 import { resolveMemberIdForUser } from "@/lib/server/authIdentity";
-import { memberGuard } from "@/lib/session";
+import { memberGuard, memberScopeGuard } from "@/lib/session";
 
 export const dynamic = "force-dynamic";
 
@@ -68,13 +68,12 @@ export async function GET(_request: NextRequest, { params }: Params) {
  *  that account's lots over the activity window via the lot webhook.
  *  Legacy demo competitions are frozen: viewable, no new enrollments. */
 export async function POST(request: NextRequest, { params }: Params) {
-  const guard = await memberGuard();
+  const guard = await memberScopeGuard();
   if (!guard.ok) return guard.response;
   if (!isDatabaseConfigured()) return NextResponse.json({ ok: false, error: "DATABASE_URL is not configured" }, { status: 503 });
   try {
     const { slug } = await params;
-    const memberId = await resolveMemberIdForUser(guard.user);
-    if (!memberId) return NextResponse.json({ ok: false, error: "No member profile for this account" }, { status: 404 });
+    const memberId = guard.memberId;
 
     const body = await request.json().catch(() => ({})) as { tradeAccountId?: number };
     const tradeAccountId = Number(body.tradeAccountId);
@@ -145,13 +144,12 @@ export async function POST(request: NextRequest, { params }: Params) {
 
 /** Cancel the signed-in member's registration. */
 export async function DELETE(_request: NextRequest, { params }: Params) {
-  const guard = await memberGuard();
+  const guard = await memberScopeGuard();
   if (!guard.ok) return guard.response;
   if (!isDatabaseConfigured()) return NextResponse.json({ ok: false, error: "DATABASE_URL is not configured" }, { status: 503 });
   try {
     const { slug } = await params;
-    const memberId = await resolveMemberIdForUser(guard.user);
-    if (!memberId) return NextResponse.json({ ok: false, error: "No member profile for this account" }, { status: 404 });
+    const memberId = guard.memberId;
 
     const prisma = getPrisma();
     const activity = await prisma.activity.findFirst({ where: { slug, ...visibleWhere() }, select: { id: true } });

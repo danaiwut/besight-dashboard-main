@@ -3,19 +3,18 @@ import { isDatabaseConfigured } from "@/lib/server/prisma";
 import { socialStatusFor } from "@/lib/server/social";
 import { readGeneralSettings } from "@/lib/server/generalSettings";
 import { resolveMemberIdForUser } from "@/lib/server/authIdentity";
-import { memberGuard } from "@/lib/session";
+import { memberScopeGuard } from "@/lib/session";
 
 export const dynamic = "force-dynamic";
 
 /** Link status for the three VIP channels + the Telegram bot name the Login
  *  Widget needs (null until TELEGRAM_BOT_USERNAME is configured). */
 export async function GET() {
-  const guard = await memberGuard();
+  const guard = await memberScopeGuard();
   if (!guard.ok) return guard.response;
   if (!isDatabaseConfigured()) return NextResponse.json({ ok: false, error: "DATABASE_URL is not configured" }, { status: 503 });
   try {
-    const memberId = await resolveMemberIdForUser(guard.user);
-    if (!memberId) return NextResponse.json({ ok: false, error: "No member profile for this account" }, { status: 404 });
+    const memberId = guard.memberId;
     const status = await socialStatusFor(memberId);
     const general = await readGeneralSettings();
     return NextResponse.json({

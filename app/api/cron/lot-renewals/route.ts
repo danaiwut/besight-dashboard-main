@@ -5,15 +5,14 @@ import { persistLotCheckAndAutomate } from "@/lib/server/indicatorAutomation";
 import { getMemberLotsForWindow } from "@/lib/server/lotService";
 import { lotWindowForExpiry } from "@/lib/server/lotCheck";
 import { getPrisma, isDatabaseConfigured } from "@/lib/server/prisma";
+import { cronGuard } from "@/lib/session";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 300;
 
 export async function GET(request: NextRequest) {
-  const secret = process.env.CRON_SECRET;
-  if (!secret || request.headers.get("authorization") !== `Bearer ${secret}`) {
-    return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
-  }
+  const guard = cronGuard(request);
+  if (!guard.ok) return guard.response;
   if (!isDatabaseConfigured()) {
     return NextResponse.json({ ok: false, error: "DATABASE_URL is not configured" }, { status: 503 });
   }

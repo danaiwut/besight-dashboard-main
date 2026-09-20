@@ -3,7 +3,7 @@ import { getPrisma, isDatabaseConfigured } from "@/lib/server/prisma";
 import { bumpDataVersion } from "@/lib/server/dataVersion";
 import { parseTradeBody, toJournalTrade } from "@/lib/server/journal";
 import { resolveMemberIdForUser } from "@/lib/server/authIdentity";
-import { memberGuard } from "@/lib/session";
+import { memberScopeGuard } from "@/lib/session";
 
 export const dynamic = "force-dynamic";
 
@@ -17,12 +17,11 @@ async function ownTrade(memberId: number, id: number) {
 }
 
 export async function PATCH(request: NextRequest, { params }: Params) {
-  const guard = await memberGuard();
+  const guard = await memberScopeGuard();
   if (!guard.ok) return guard.response;
   if (!isDatabaseConfigured()) return NextResponse.json({ ok: false, error: "DATABASE_URL is not configured" }, { status: 503 });
   try {
-    const memberId = await resolveMemberIdForUser(guard.user);
-    if (!memberId) return NextResponse.json({ ok: false, error: "No member profile for this account" }, { status: 404 });
+    const memberId = guard.memberId;
     const id = Number((await params).id);
     if (!Number.isInteger(id) || id <= 0) return NextResponse.json({ ok: false, error: "Invalid id" }, { status: 400 });
     if (!(await ownTrade(memberId, id))) return NextResponse.json({ ok: false, error: "Trade not found" }, { status: 404 });
@@ -54,12 +53,11 @@ export async function PATCH(request: NextRequest, { params }: Params) {
 }
 
 export async function DELETE(_request: NextRequest, { params }: Params) {
-  const guard = await memberGuard();
+  const guard = await memberScopeGuard();
   if (!guard.ok) return guard.response;
   if (!isDatabaseConfigured()) return NextResponse.json({ ok: false, error: "DATABASE_URL is not configured" }, { status: 503 });
   try {
-    const memberId = await resolveMemberIdForUser(guard.user);
-    if (!memberId) return NextResponse.json({ ok: false, error: "No member profile for this account" }, { status: 404 });
+    const memberId = guard.memberId;
     const id = Number((await params).id);
     if (!Number.isInteger(id) || id <= 0) return NextResponse.json({ ok: false, error: "Invalid id" }, { status: 400 });
     if (!(await ownTrade(memberId, id))) return NextResponse.json({ ok: false, error: "Trade not found" }, { status: 404 });

@@ -3,7 +3,7 @@ import { isDatabaseConfigured } from "@/lib/server/prisma";
 import { bumpDataVersion } from "@/lib/server/dataVersion";
 import { linkSocialAccount, unlinkSocialAccount, verifyTelegramLogin, type SocialProvider } from "@/lib/server/social";
 import { resolveMemberIdForUser } from "@/lib/server/authIdentity";
-import { memberGuard } from "@/lib/session";
+import { memberScopeGuard } from "@/lib/session";
 
 export const dynamic = "force-dynamic";
 
@@ -16,14 +16,13 @@ function parseProvider(raw: string): SocialProvider | null {
 /** Telegram Login Widget callback: the widget posts the signed user object
  *  after the member confirms inside the Telegram app. */
 export async function POST(request: NextRequest, { params }: Params) {
-  const guard = await memberGuard();
+  const guard = await memberScopeGuard();
   if (!guard.ok) return guard.response;
   if (!isDatabaseConfigured()) return NextResponse.json({ ok: false, error: "DATABASE_URL is not configured" }, { status: 503 });
   try {
     const provider = parseProvider((await params).provider);
     if (provider !== "telegram") return NextResponse.json({ ok: false, error: "Use the OAuth flow for this provider" }, { status: 400 });
-    const memberId = await resolveMemberIdForUser(guard.user);
-    if (!memberId) return NextResponse.json({ ok: false, error: "No member profile for this account" }, { status: 404 });
+    const memberId = guard.memberId;
 
     const body = (await request.json().catch(() => ({}))) as Record<string, unknown>;
     const params_: Record<string, string | undefined> = {};
@@ -42,14 +41,13 @@ export async function POST(request: NextRequest, { params }: Params) {
 }
 
 export async function DELETE(_request: NextRequest, { params }: Params) {
-  const guard = await memberGuard();
+  const guard = await memberScopeGuard();
   if (!guard.ok) return guard.response;
   if (!isDatabaseConfigured()) return NextResponse.json({ ok: false, error: "DATABASE_URL is not configured" }, { status: 503 });
   try {
     const provider = parseProvider((await params).provider);
     if (!provider) return NextResponse.json({ ok: false, error: "Unknown provider" }, { status: 400 });
-    const memberId = await resolveMemberIdForUser(guard.user);
-    if (!memberId) return NextResponse.json({ ok: false, error: "No member profile for this account" }, { status: 404 });
+    const memberId = guard.memberId;
     await unlinkSocialAccount(memberId, provider);
     await bumpDataVersion();
     return NextResponse.json({ ok: true, provider });

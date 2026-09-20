@@ -1,30 +1,25 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getPrisma, isDatabaseConfigured } from "@/lib/server/prisma";
 import { bumpDataVersion } from "@/lib/server/dataVersion";
-import { parseTradeBody, toJournalTrade } from "@/lib/server/journal";
+import { parseTradeBody, toJournalTrade, findOwnedJournalAccount } from "@/lib/server/journal";
 import { resolveMemberIdForUser } from "@/lib/server/authIdentity";
-import { memberGuard } from "@/lib/session";
+import { memberScopeGuard } from "@/lib/session";
 
 export const dynamic = "force-dynamic";
 
 type Params = { params: Promise<{ id: string }> };
 
-async function ownAccount(memberId: number, id: number) {
-  return getPrisma().journalAccount.findFirst({ where: { id, memberId }, select: { id: true } });
-}
-
 /** Trades of one journal account (newest first, cap 2000). Filters: `?symbol=`
  *  `?side=buy|sell` `?open=1` (still-open only) `?from=` `?to=` (close-date window). */
 export async function GET(request: NextRequest, { params }: Params) {
-  const guard = await memberGuard();
+  const guard = await memberScopeGuard();
   if (!guard.ok) return guard.response;
   if (!isDatabaseConfigured()) return NextResponse.json({ ok: false, error: "DATABASE_URL is not configured" }, { status: 503 });
   try {
-    const memberId = await resolveMemberIdForUser(guard.user);
-    if (!memberId) return NextResponse.json({ ok: false, error: "No member profile for this account" }, { status: 404 });
+    const memberId = guard.memberId;
     const id = Number((await params).id);
     if (!Number.isInteger(id) || id <= 0) return NextResponse.json({ ok: false, error: "Invalid id" }, { status: 400 });
-    if (!(await ownAccount(memberId, id))) return NextResponse.json({ ok: false, error: "Journal account not found" }, { status: 404 });
+    if (!(await findOwnedJournalAccount(memberId, id))) return NextResponse.json({ ok: false, error: "Journal account not found" }, { status: 404 });
 
     const query = request.nextUrl.searchParams;
     const symbol = query.get("symbol")?.trim().toUpperCase() || undefined;
@@ -52,15 +47,14 @@ export async function GET(request: NextRequest, { params }: Params) {
 
 /** Hand-enters one trade (open trades omit close fields). */
 export async function POST(request: NextRequest, { params }: Params) {
-  const guard = await memberGuard();
+  const guard = await memberScopeGuard();
   if (!guard.ok) return guard.response;
   if (!isDatabaseConfigured()) return NextResponse.json({ ok: false, error: "DATABASE_URL is not configured" }, { status: 503 });
   try {
-    const memberId = await resolveMemberIdForUser(guard.user);
-    if (!memberId) return NextResponse.json({ ok: false, error: "No member profile for this account" }, { status: 404 });
+    const memberId = guard.memberId;
     const id = Number((await params).id);
     if (!Number.isInteger(id) || id <= 0) return NextResponse.json({ ok: false, error: "Invalid id" }, { status: 400 });
-    if (!(await ownAccount(memberId, id))) return NextResponse.json({ ok: false, error: "Journal account not found" }, { status: 404 });
+    if (!(await findOwnedJournalAccount(memberId, id))) return NextResponse.json({ ok: false, error: "Journal account not found" }, { status: 404 });
 
     const body = await request.json().catch(() => ({})) as Record<string, unknown>;
     const data = parseTradeBody(body);
