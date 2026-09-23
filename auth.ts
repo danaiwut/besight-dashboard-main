@@ -3,7 +3,7 @@ import Credentials from "next-auth/providers/credentials";
 import Google from "next-auth/providers/google";
 import Facebook from "next-auth/providers/facebook";
 import LINE from "next-auth/providers/line";
-import { resolveMemberIdentityByEmail, verifyCredentials } from "@/lib/server/authIdentity";
+import { resolveMemberIdentityByEmail, resolveOrCreateMemberIdentityByEmail, verifyCredentials } from "@/lib/server/authIdentity";
 
 /* ── Auth.js (NextAuth v5) ──
    Identity lives in the existing Member/Admin tables — signing in only claims
@@ -87,8 +87,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
          email would otherwise let anyone claim a member's account. */
       if (profile?.email_verified !== true) return false;
 
-      // Social sign-in claims an existing MEMBER row only — never an admin.
-      return Boolean(await resolveMemberIdentityByEmail(user.email));
+      // Verified-email providers may also self-register: claim an existing
+      // MEMBER row by email, or mint a new one if none exists yet — never
+      // an admin, and never for a provider that didn't independently verify
+      // the address (the check above already screens those out).
+      return Boolean(await resolveOrCreateMemberIdentityByEmail(user.email, user.name ?? ""));
     },
     async jwt({ token, user }) {
       if (user) {

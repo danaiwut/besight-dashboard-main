@@ -1,5 +1,6 @@
 import { getPrisma, isDatabaseConfigured } from "./prisma";
 import { verifyPassword } from "./password";
+import { insertNewMember } from "./memberProvisioning";
 
 /* Maps an email to the one account it belongs to. Identity lives in the
    existing Member/Admin tables (no separate auth user store): members are
@@ -28,6 +29,37 @@ export async function resolveMemberIdentityByEmail(email: string): Promise<Membe
   });
   if (!member?.email) return null;
   return { role: "member", memberId: member.id, email: member.email, name: member.displayName?.trim() || member.name, tokenVersion: member.tokenVersion };
+}
+
+/** Social sign-in's self-registration path: claim an existing member row by
+ *  email as before, or — if no row owns that address yet — mint a brand-new
+ *  one, the Google-sign-in equivalent of the public /signup form.
+ *  `passwordHash` stays null (social-login only) until the person sets one
+ *  through /claim.
+ *
+ *  SECURITY: only call this for a provider whose email the caller has
+ *  already confirmed is independently verified (auth.ts gates this on
+ *  `profile.email_verified === true` before calling in). Without that
+ *  check, this would let anyone mint an account under an address they
+ *  don't own — the entire reason /claim proves ownership via an emailed
+ *  link instead of trusting the address outright. */
+export async function resolveOrCreateMemberIdentityByEmail(email: string, name: string): Promise<MemberIdentity | null> {
+  if (!isDatabaseConfigured()) return null;
+  const normalized = email.trim();
+  if (!normalized) return null;
+
+  const existing = await resolveMemberIdentityByEmail(normalized);
+  if (existing) return existing;
+
+  const displayName = name.trim() || normalized.split("@")[0];
+  const created = await insertNewMember({ name: displayName, email: normalized, passwordHash: null });
+  if (!created.ok) {
+    // Lost a race with another sign-in/register for the same address
+    // between the lookup above and this insert — re-resolve rather than
+    // fail the sign-in outright.
+    return resolveMemberIdentityByEmail(normalized);
+  }
+  return { role: "member", memberId: created.memberId, email: normalized, name: displayName, tokenVersion: 0 };
 }
 
 /** Email + password sign-in (admins first, then members). Returns null on any
