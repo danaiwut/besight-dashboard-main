@@ -20,6 +20,8 @@ const EN: Record<string, string> = {
   "auth.login.socialUnavailable": "Social sign-in isn't configured yet. Use your email and password.",
   "auth.login.noAccount": "Don't have an account?",
   "auth.login.signUp": "Sign up",
+  "auth.login.error.accessDenied": "This account can't sign in. If you signed in with Google, make sure the Google account's email is verified.",
+  "auth.login.error.generic": "Sign-in failed. Please try again.",
 
   // ── Auth: Sign Up ──
   "auth.register.title": "Create Account",
@@ -1776,6 +1778,8 @@ const TH: Record<string, string> = {
   "auth.login.socialUnavailable": "ยังไม่ได้ตั้งค่าการเข้าสู่ระบบผ่านโซเชียล — กรุณาใช้อีเมลและรหัสผ่าน",
   "auth.login.noAccount": "ยังไม่มีบัญชี?",
   "auth.login.signUp": "สมัครสมาชิก",
+  "auth.login.error.accessDenied": "บัญชีนี้เข้าสู่ระบบไม่ได้ ถ้าใช้ Google กรุณาตรวจสอบว่าอีเมลของบัญชี Google ได้รับการยืนยันแล้ว",
+  "auth.login.error.generic": "เข้าสู่ระบบไม่สำเร็จ กรุณาลองใหม่",
 
   // ── Auth: Sign Up ──
   "auth.register.title": "สร้างบัญชี",

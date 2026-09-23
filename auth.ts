@@ -6,9 +6,11 @@ import LINE from "next-auth/providers/line";
 import { resolveMemberIdentityByEmail, resolveOrCreateMemberIdentityByEmail, verifyCredentials } from "@/lib/server/authIdentity";
 
 /* ── Auth.js (NextAuth v5) ──
-   Identity lives in the existing Member/Admin tables — signing in only claims
-   an existing row, it never creates one (members are provisioned by the CRM
-   sync). Sessions are stateless JWTs, so no Session/Account tables are needed.
+   Identity lives in the existing Member/Admin tables. Most members are
+   provisioned by the CRM sync; a verified Google sign-in for an unknown email
+   (or the public /signup form) mints a new Member row. Admins are never
+   created here. Sessions are stateless JWTs, so no Session/Account tables are
+   needed.
 
    Google + Facebook are registered only when their client id/secret are
    present, so the app still works with email/password until OAuth credentials
@@ -73,7 +75,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   trustHost: true,
   secret: process.env.AUTH_SECRET,
   session: { strategy: "jwt" },
-  pages: { signIn: "/login" },
+  // Errors (e.g. AccessDenied from the signIn callback) land back on our own
+  // login page as ?error=<code> instead of Auth.js's bare default page.
+  pages: { signIn: "/login", error: "/login" },
   providers,
   callbacks: {
     async signIn({ user, account, profile }) {

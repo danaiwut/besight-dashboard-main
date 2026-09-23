@@ -12,9 +12,15 @@ import Icon from "../Icon";
 
 const BG_VIDEO_SRC = "https://stream.mux.com/QgTir2Bu4u6d01CqyKEBCks68PIm2nCM7vhwXgenS00tw.m3u8";
 
-export default function LoginView({ google, facebook, line }: { google: boolean; facebook: boolean; line: boolean }) {
+/** Auth.js error codes → message keys. Anything unlisted gets the generic one. */
+const AUTH_ERROR_KEYS: Record<string, string> = {
+  AccessDenied: "auth.login.error.accessDenied",
+  CredentialsSignin: "auth.login.invalid",
+};
+
+export default function LoginView({ google, facebook, line, authError }: { google: boolean; facebook: boolean; line: boolean; authError?: string }) {
   const { t } = useLanguage();
-  const [error, setError] = useState("");
+  const [error, setError] = useState(() => (authError ? t(AUTH_ERROR_KEYS[authError] ?? "auth.login.error.generic") : ""));
   const [busy, setBusy] = useState(false);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
