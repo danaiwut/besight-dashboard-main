@@ -55,10 +55,14 @@ function loadYouTubeApi(): Promise<void> {
 }
 
 function embedUrl(videoId: string, startSec: number, endSec: number | null) {
-  const params = new URLSearchParams({ rel: "0", modestbranding: "1", playsinline: "1" });
+  // youtube-nocookie + iv_load_policy=3/cc_load_policy=0 minimizes YouTube's own
+  // top gradient (title/author) and annotation overlays that read as a "shadow
+  // covering the video". The title strip on pause/hover is YouTube-native and
+  // cannot be fully disabled via the embed API.
+  const params = new URLSearchParams({ rel: "0", modestbranding: "1", playsinline: "1", iv_load_policy: "3", cc_load_policy: "0" });
   if (startSec > 0) params.set("start", String(startSec));
   if (endSec != null) params.set("end", String(endSec));
-  return `https://www.youtube.com/embed/${videoId}?${params.toString()}`;
+  return `https://www.youtube-nocookie.com/embed/${videoId}?${params.toString()}`;
 }
 
 export function fmtTimecode(sec: number) {
@@ -123,6 +127,8 @@ const LessonPlayer = forwardRef<LessonPlayerHandle, { lesson: CourseLessonDto; o
           modestbranding: 1,
           playsinline: 1,
           fs: 1,
+          iv_load_policy: 3,
+          cc_load_policy: 0,
         },
         events: {
           onStateChange: (event: { data: number }) => {

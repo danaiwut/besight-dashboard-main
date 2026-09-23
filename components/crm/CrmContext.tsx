@@ -314,9 +314,13 @@ const CrmContext = createContext<CrmContextValue | null>(null);
 /* Module-level: when the last successful upstream sync finished. Mounts
    within SYNC_COOLDOWN_MS reuse current DB state instead of firing another
    ~9s replace-sync (freshness still comes from the 10s version poll, the
-   crons, and the manual Re-sync button, which always forces). */
+   15min customer-sync cron, and the manual Re-sync button, which always forces). */
 let lastSyncFinishedAt = 0;
-const SYNC_COOLDOWN_MS = 120_000;
+const SYNC_COOLDOWN_MS = 60_000;
+/* Background auto-sync: re-runs the upstream replace-sync every 5min while an
+   admin tab is visible and the cooldown has elapsed, so the member list does
+   not go stale during long sessions without manual refresh. */
+const AUTO_SYNC_INTERVAL_MS = 5 * 60_000;
 
 /* A failed read and an empty table must never look alike: returning null for both
    is what let a 401 silently repaint the UI with seed data. Callers get an
@@ -641,6 +645,29 @@ export function CrmProvider({ children, mode = "admin", viewer }: { children: Re
     document.addEventListener("visibilitychange", onVisibility);
     return () => document.removeEventListener("visibilitychange", onVisibility);
   }, [mode, reloadFromDatabase]);
+
+  /* ── Background upstream auto-sync (admin only) ──
+     The 10s version poll only re-reads the DB; without this the Supabase
+     upstream replace-sync runs once per mount and the member list goes stale
+     during long sessions. Every 5min (visible tab only, cooldown-respecting)
+     re-run the upstream sync so fresh customers flow in automatically. */
+  useEffect(() => {
+    if (mode !== "admin") return;
+    if (crmDataStatus !== "ready" || gateRequired) return;
+    const timer = window.setInterval(() => {
+      if (document.hidden || gateBlocked.current) return;
+      if (Date.now() - lastSyncFinishedAt <= SYNC_COOLDOWN_MS) return;
+      // Skip if a reload is already in flight; refreshMembers re-reads after.
+      if (reloadInFlight.current) return;
+      void refreshMembers();
+    }, AUTO_SYNC_INTERVAL_MS);
+    const onVisibility = () => {
+      if (document.hidden || gateBlocked.current) return;
+      if (Date.now() - lastSyncFinishedAt > AUTO_SYNC_INTERVAL_MS) void refreshMembers();
+    };
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => { window.clearInterval(timer); document.removeEventListener("visibilitychange", onVisibility); };
+  }, [mode, crmDataStatus, gateRequired, refreshMembers]);
 
   function toast(msg: string) {
     setToastMsg(msg);

@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { isDatabaseConfigured, getPrisma } from "./server/prisma";
+import { hasCrmGateAccess, isCrmGateConfigured } from "./server/crmGate";
 import { resolveMemberIdForUser } from "./server/authIdentity";
 import { auth } from "@/auth";
 
@@ -66,6 +67,13 @@ export async function adminGuard(): Promise<AdminGuard> {
   if (!admin) return { ok: false, response: authRequired() };
   // Same for one whose sessions were revoked (password change, forced sign-out).
   if ((user.tokenVersion ?? 0) !== admin.tokenVersion) return { ok: false, response: authRequired() };
+  // Second layer: the shared CRM gate password (when configured). Pages and
+  // APIs share this check so unlocking the form can't be skipped by calling
+  // /api/crm/* directly. The unlock endpoint itself uses getSessionUser, not
+  // this guard, so it stays reachable while locked.
+  if (isCrmGateConfigured() && !(await hasCrmGateAccess())) {
+    return { ok: false, response: NextResponse.json({ ok: false, error: "CRM gate is locked", code: "gate_required" }, { status: 403 }) };
+  }
   return { ok: true, user: { ...user, adminId: user.adminId, adminRole: toAdminRole(admin.role), isOwner: admin.isOwner } };
 }
 

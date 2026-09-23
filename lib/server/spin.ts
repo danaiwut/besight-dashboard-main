@@ -72,12 +72,25 @@ export function parseSpinPrizeBody(body: Record<string, unknown>): Record<string
     data.name = name;
   }
   if (body.icon !== undefined) data.icon = String(body.icon).trim() || "redeem";
-  if (body.image !== undefined) data.image = String(body.image).trim() || null;
+  if (body.image !== undefined) {
+    const image = String(body.image).trim() || null;
+    // Data-URL uploads (file picker) can be large — cap ~1.5MB so a prize row
+    // never blows up the response payload or the DB TEXT column.
+    if (image && image.length > 1_500_000) throw new Error("Image is too large (max ~1MB)");
+    data.image = image;
+  }
   if (body.valueNote !== undefined) data.valueNote = String(body.valueNote).trim() || null;
   if (body.weight !== undefined) {
     const weight = Math.floor(Number(body.weight));
     if (!Number.isFinite(weight) || weight < 1) throw new Error("Weight must be at least 1");
     data.weight = weight;
+  } else if (body.percent !== undefined) {
+    // Lets the admin UI submit a 0-100% drop rate directly; converted to the
+    // relative weight scale (x10) the picker uses. 0% is rejected — use the
+    // active toggle to disable a prize instead.
+    const percent = Number(body.percent);
+    if (!Number.isFinite(percent) || percent <= 0 || percent > 100) throw new Error("Percent must be 0-100");
+    data.weight = Math.max(1, Math.round(percent * 10));
   }
   if (body.stock !== undefined) {
     if (body.stock === null || body.stock === "") data.stock = null;

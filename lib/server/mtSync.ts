@@ -18,6 +18,12 @@ export type MtSyncTrade = {
   profit?: number;
   commission?: number;
   swap?: number;
+  /** Optional full-trade fields — accepted from EA/Broker push so the journal
+      API covers everything the manual form + CSV import accept. */
+  tp?: number;
+  sl?: number;
+  note?: string;
+  tags?: unknown;
 };
 
 function sameSecret(provided: string, encrypted: string): boolean {
@@ -48,6 +54,14 @@ function toNum(value: unknown): number | null {
   if (value == null || value === "") return null;
   const parsed = Number(value);
   return Number.isFinite(parsed) ? parsed : null;
+}
+
+function toTags(value: unknown): string[] {
+  if (!Array.isArray(value)) return [];
+  return value
+    .map((tag) => String(tag || "").trim().slice(0, 32))
+    .filter(Boolean)
+    .slice(0, 10);
 }
 
 /** Verifies the investor password and upserts the closed trades. Returns per
@@ -90,6 +104,7 @@ export async function syncMtTrades(input: {
       accountId: number; externalKey: string; ticket: string | null; symbol: string; side: string;
       openAt: Date; closeAt: Date; openPrice: number; closePrice: number | null;
       lots: number; pnl: number | null; commission: number; swap: number;
+      tp: number | null; sl: number | null; note: string | null; tagsJson: string;
     }> = [];
     for (const raw of input.trades) {
       const side = toSide(raw.type);
@@ -102,6 +117,7 @@ export async function syncMtTrades(input: {
         continue;
       }
       const ticket = String(raw.ticket || "").trim().slice(0, 64) || `${symbol}-${closeAt.getTime()}`;
+      const note = String(raw.note || "").trim().slice(0, 2000) || null;
       rows.push({
         accountId: journal.id,
         externalKey: `${journal.id}:${ticket}:${closeAt.toISOString()}`,
@@ -116,12 +132,40 @@ export async function syncMtTrades(input: {
         pnl: toNum(raw.profit),
         commission: toNum(raw.commission) ?? 0,
         swap: toNum(raw.swap) ?? 0,
+        tp: toNum(raw.tp),
+        sl: toNum(raw.sl),
+        note,
+        tagsJson: JSON.stringify(toTags(raw.tags)),
       });
     }
     if (rows.length) {
-      const created = await prisma.journalTrade.createMany({ data: rows, skipDuplicates: true });
-      imported += created.count;
-      skipped += rows.length - created.count;
+      // Upsert per trade so re-pushes fill in tp/sl/note/tags on existing rows
+      // instead of silently dropping them (createMany+skipDuplicates did).
+      for (const row of rows) {
+        const { externalKey, ...data } = row;
+        const existing = await prisma.journalTrade.findUnique({ where: { externalKey }, select: { id: true } });
+        if (existing) {
+          await prisma.journalTrade.update({
+            where: { externalKey },
+            data: {
+              ticket: data.ticket, symbol: data.symbol, side: data.side,
+              openAt: data.openAt, closeAt: data.closeAt,
+              openPrice: data.openPrice, closePrice: data.closePrice,
+              lots: data.lots, pnl: data.pnl,
+              commission: data.commission, swap: data.swap,
+              // Only overwrite enrichment fields when the push carries them.
+              ...(data.tp !== null ? { tp: data.tp } : {}),
+              ...(data.sl !== null ? { sl: data.sl } : {}),
+              ...(data.note ? { note: data.note } : {}),
+              ...(data.tagsJson !== "[]" ? { tagsJson: data.tagsJson } : {}),
+            },
+          });
+          skipped += 1;
+        } else {
+          await prisma.journalTrade.create({ data: { ...data, externalKey } });
+          imported += 1;
+        }
+      }
     }
     await prisma.journalAccount.update({ where: { id: journal.id }, data: { mtLastSyncAt: now } });
   }

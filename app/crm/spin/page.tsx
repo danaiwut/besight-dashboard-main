@@ -46,6 +46,63 @@ export default function CrmSpinPage() {
   const [statusFilter, setStatusFilter] = useState<"all" | SpinStatus>("all");
   const [results, setResults] = useState<SpinResultDto[]>([]);
   const [summary, setSummary] = useState({ pending: 0, fulfilled: 0, cancelled: 0, total: 0 });
+  const [imageError, setImageError] = useState("");
+
+  /* % chance is derived from weights of drawable prizes (active + in stock).
+     Kept client-side so the admin sees the real drop rate while editing. */
+  const drawableTotal = prizes
+    .filter((p) => p.active && (p.stock === null || p.stock > 0))
+    .reduce((sum, p) => sum + Math.max(1, p.weight), 0);
+  const prizePercent = (weight: number) =>
+    drawableTotal > 0 ? (Math.max(1, weight) / drawableTotal) * 100 : 0;
+
+  /* Weight of the other drawable prizes (excluding the open draft) — used to
+     convert a % input back to a weight: w = p*others/(100-p). */
+  function othersWeight(excludeId: number | null): number {
+    return prizes
+      .filter((p) => p.id !== excludeId && p.active && (p.stock === null || p.stock > 0))
+      .reduce((sum, p) => sum + Math.max(1, p.weight), 0);
+  }
+  function draftPercentValue(): string {
+    if (!draft) return "";
+    const others = othersWeight(draft.id);
+    const total = others + Math.max(1, draft.weight);
+    if (total <= 0) return "";
+    return (((Math.max(1, draft.weight) / total) * 100).toFixed(1));
+  }
+  function setDraftPercent(raw: string) {
+    if (!draft) return;
+    const pct = parseFloat(raw);
+    if (!Number.isFinite(pct) || pct <= 0 || pct >= 100) {
+      // Allow clearing/typing; weight stays until a valid % is entered.
+      return;
+    }
+    const others = othersWeight(draft.id);
+    const weight = others > 0
+      ? Math.min(10000, Math.max(1, Math.round((pct * others) / (100 - pct))))
+      : Math.min(10000, Math.max(1, Math.round(pct * 10)));
+    setDraft({ ...draft, weight });
+  }
+
+  function onPrizeImageFile(file: File | undefined) {
+    setImageError("");
+    if (!file || !draft) return;
+    if (!file.type.startsWith("image/")) return;
+    if (file.size > 1_000_000) {
+      setImageError(t("spin.prizes.imageTooLarge"));
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      const url = String(reader.result || "");
+      if (url.length > 1_500_000) {
+        setImageError(t("spin.prizes.imageTooLarge"));
+        return;
+      }
+      setDraft({ ...draft, image: url });
+    };
+    reader.readAsDataURL(file);
+  }
 
   const load = useCallback(async () => {
     try {
@@ -246,7 +303,7 @@ export default function CrmSpinPage() {
             <h3>{t("spin.prizes.title")}</h3>
             <div className="desc" style={{ fontSize: 12.5, color: "var(--text-sub)", marginTop: 2 }}>{t("spin.prizes.desc")}</div>
           </div>
-          <button className="btn btn-primary" onClick={() => setDraft({ ...EMPTY_PRIZE, sortOrder: prizes.length })}>
+          <button className="btn btn-primary" onClick={() => { setImageError(""); setDraft({ ...EMPTY_PRIZE, sortOrder: prizes.length }); }}>
             <Icon name="add" />
             {t("spin.prizes.add")}
           </button>
@@ -258,6 +315,7 @@ export default function CrmSpinPage() {
                 <th>{t("spin.prizes.col.name")}</th>
                 <th>{t("spin.prizes.col.value")}</th>
                 <th>{t("spin.prizes.col.weight")}</th>
+                <th>{t("spin.prizes.col.percent")}</th>
                 <th>{t("spin.prizes.col.stock")}</th>
                 <th>{t("spin.prizes.col.active")}</th>
                 <th></th>
@@ -280,6 +338,11 @@ export default function CrmSpinPage() {
                     </td>
                     <td>{prize.valueNote || "—"}</td>
                     <td className="mono">{prize.weight}</td>
+                    <td className="mono">
+                      {prize.active && (prize.stock === null || prize.stock > 0)
+                        ? `${prizePercent(prize.weight).toFixed(1)}%`
+                        : "—"}
+                    </td>
                     <td className="mono">{prize.stock === null ? t("spin.prizes.stockUnlimited") : prize.stock}</td>
                     <td>
                       <span className={`badge ${prize.active ? "active" : "suspended"}`}>{prize.active ? t("common.active") : t("common.inactive")}</span>
@@ -288,7 +351,7 @@ export default function CrmSpinPage() {
                       <button
                         className="kebab"
                         aria-label={t("common.edit")}
-                        onClick={() => setDraft({ id: prize.id, name: prize.name, icon: prize.icon, image: prize.image ?? "", valueNote: prize.valueNote ?? "", weight: prize.weight, stock: prize.stock === null ? "" : String(prize.stock), sortOrder: prize.sortOrder, active: prize.active })}
+                        onClick={() => { setImageError(""); setDraft({ id: prize.id, name: prize.name, icon: prize.icon, image: prize.image ?? "", valueNote: prize.valueNote ?? "", weight: prize.weight, stock: prize.stock === null ? "" : String(prize.stock), sortOrder: prize.sortOrder, active: prize.active }); }}
                       >
                         <Icon name="edit" />
                       </button>
@@ -300,7 +363,7 @@ export default function CrmSpinPage() {
                 ))
               ) : (
                 <tr>
-                  <td colSpan={6}>
+                  <td colSpan={7}>
                     <div className="table-empty">{t("spin.prizes.empty")}</div>
                   </td>
                 </tr>
@@ -435,7 +498,7 @@ export default function CrmSpinPage() {
       <Drawer
         open={!!draft}
         title={draft?.id ? t("spin.prizes.edit") : t("spin.prizes.add")}
-        onClose={() => setDraft(null)}
+        onClose={() => { setDraft(null); setImageError(""); }}
         body={
           draft && (
             <>
@@ -450,11 +513,33 @@ export default function CrmSpinPage() {
               <div className="form-grid2">
                 <div className="field">
                   <label>{t("spin.prizes.col.weight")}</label>
-                  <input className="input" type="number" min={1} value={draft.weight} onChange={(e) => setDraft({ ...draft, weight: Math.max(1, parseInt(e.target.value) || 1) })} />
+                  <input className="input" type="number" min={1} value={draft.weight} onChange={(e) => setDraft({ ...draft, weight: Math.min(10000, Math.max(1, parseInt(e.target.value) || 1)) })} />
                 </div>
+                <div className="field">
+                  <label>{t("spin.prizes.col.percent")} (%)</label>
+                  <input
+                    className="input"
+                    type="number"
+                    min={0.1}
+                    max={99.9}
+                    step={0.1}
+                    defaultValue={draftPercentValue()}
+                    key={draft.id ?? `new-${prizes.length}`}
+                    onBlur={(e) => { if (e.target.value) setDraftPercent(e.target.value); }}
+                    onKeyDown={(e) => { if (e.key === "Enter") setDraftPercent((e.target as HTMLInputElement).value); }}
+                    placeholder="เช่น 12.5"
+                  />
+                </div>
+              </div>
+              <div className="desc" style={{ fontSize: 12, color: "var(--text-sub)", marginTop: -4, marginBottom: 10 }}>{t("spin.prizes.percentHint")}</div>
+              <div className="form-grid2">
                 <div className="field">
                   <label>{t("spin.prizes.col.stock")}</label>
                   <input className="input" type="number" min={0} value={draft.stock} onChange={(e) => setDraft({ ...draft, stock: e.target.value })} placeholder={t("spin.prizes.stockUnlimited")} />
+                </div>
+                <div className="field">
+                  <label>{t("spin.prizes.col.sort")}</label>
+                  <input className="input" type="number" value={draft.sortOrder} onChange={(e) => setDraft({ ...draft, sortOrder: parseInt(e.target.value) || 0 })} />
                 </div>
               </div>
               <div className="field">
@@ -463,13 +548,34 @@ export default function CrmSpinPage() {
               </div>
               <div className="field">
                 <label>{t("spin.prizes.col.image")}</label>
-                <input className="input" value={draft.image} onChange={(e) => setDraft({ ...draft, image: e.target.value })} placeholder="https://..." />
+                <input className="input" value={draft.image} onChange={(e) => { setImageError(""); setDraft({ ...draft, image: e.target.value }); }} placeholder="https://..." />
+                <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 8, flexWrap: "wrap" }}>
+                  {draft.image ? (
+                    // eslint-disable-next-line @next/next/no-img-element -- admin-provided prize image preview
+                    <img src={draft.image} alt="" style={{ width: 48, height: 48, borderRadius: 8, objectFit: "cover", border: "1px solid var(--border)" }} />
+                  ) : (
+                    <span style={{ width: 48, height: 48, borderRadius: 8, display: "inline-flex", alignItems: "center", justifyContent: "center", background: "var(--bg-elev)" }}>
+                      <Icon name={draft.icon || "redeem"} />
+                    </span>
+                  )}
+                  <label className="btn btn-ghost" style={{ cursor: "pointer" }}>
+                    {t("spin.prizes.col.upload")}
+                    <input
+                      type="file"
+                      accept="image/*"
+                      hidden
+                      onChange={(e) => { void onPrizeImageFile(e.target.files?.[0]); e.target.value = ""; }}
+                    />
+                  </label>
+                  {draft.image && (
+                    <button type="button" className="btn btn-ghost" onClick={() => { setImageError(""); setDraft({ ...draft, image: "" }); }}>
+                      {t("spin.prizes.col.removeImage")}
+                    </button>
+                  )}
+                </div>
+                {imageError && <div style={{ fontSize: 12, color: "var(--red)", marginTop: 6 }}>{imageError}</div>}
               </div>
               <div className="form-grid2">
-                <div className="field">
-                  <label>{t("spin.prizes.col.sort")}</label>
-                  <input className="input" type="number" value={draft.sortOrder} onChange={(e) => setDraft({ ...draft, sortOrder: parseInt(e.target.value) || 0 })} />
-                </div>
                 <div className="field">
                   <label>{t("spin.prizes.col.active")}</label>
                   <label className="pop-toggle" style={{ marginTop: 6 }}>
