@@ -60,6 +60,32 @@ export function claimEmail(memberName: string, link: string, expiresInHours: num
   return { subject: "ตั้งรหัสผ่านบัญชี BeSight", html, text };
 }
 
+/** Sent when an existing admin adds a new one: set your first CRM password. */
+export function adminClaimEmail(adminName: string, link: string, expiresInHours: number) {
+  const greeting = adminName.trim() ? adminName.trim() : "สวัสดีครับ";
+  const text = [
+    `${greeting}`,
+    "",
+    "คุณถูกเพิ่มเป็นแอดมินของ BeSight CRM — ตั้งรหัสผ่านสำหรับเข้าสู่ระบบได้ที่ลิงก์นี้:",
+    link,
+    "",
+    `ลิงก์นี้ใช้ได้ครั้งเดียวและหมดอายุใน ${expiresInHours} ชั่วโมง`,
+    "ถ้าคุณไม่ได้คาดว่าจะได้รับอีเมลนี้ ไม่ต้องดำเนินการใดๆ",
+  ].join("\n");
+
+  const html = `
+    <div style="font-family:system-ui,-apple-system,'Segoe UI',sans-serif;font-size:15px;line-height:1.6;color:#1b1f2a">
+      <p>${escapeHtml(greeting)}</p>
+      <p>คุณถูกเพิ่มเป็นแอดมินของ BeSight CRM — ตั้งรหัสผ่านสำหรับเข้าสู่ระบบได้ที่ปุ่มด้านล่าง</p>
+      <p style="margin:24px 0">
+        <a href="${escapeHtml(link)}" style="display:inline-block;padding:11px 20px;border-radius:10px;background:#3b62f6;color:#fff;text-decoration:none;font-weight:600">ตั้งรหัสผ่านแอดมิน</a>
+      </p>
+      <p style="font-size:13px;color:#61697d">ลิงก์นี้ใช้ได้ครั้งเดียวและหมดอายุใน ${expiresInHours} ชั่วโมง<br>ถ้าคุณไม่ได้คาดว่าจะได้รับอีเมลนี้ ไม่ต้องดำเนินการใดๆ</p>
+    </div>`;
+
+  return { subject: "ตั้งรหัสผ่านแอดมิน BeSight CRM", html, text };
+}
+
 function escapeHtml(value: string): string {
   return value.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c] as string));
 }

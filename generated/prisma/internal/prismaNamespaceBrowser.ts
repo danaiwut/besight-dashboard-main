@@ -84,7 +84,8 @@ export const ModelName = {
   CourseLesson: 'CourseLesson',
   CourseEnrollment: 'CourseEnrollment',
   LessonProgress: 'LessonProgress',
-  MemberClaimToken: 'MemberClaimToken'
+  MemberClaimToken: 'MemberClaimToken',
+  AdminClaimToken: 'AdminClaimToken'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -658,6 +659,18 @@ export const MemberClaimTokenScalarFieldEnum = {
 export type MemberClaimTokenScalarFieldEnum = (typeof MemberClaimTokenScalarFieldEnum)[keyof typeof MemberClaimTokenScalarFieldEnum]
 
 
+export const AdminClaimTokenScalarFieldEnum = {
+  id: 'id',
+  adminId: 'adminId',
+  tokenHash: 'tokenHash',
+  expiresAt: 'expiresAt',
+  usedAt: 'usedAt',
+  createdAt: 'createdAt'
+} as const
+
+export type AdminClaimTokenScalarFieldEnum = (typeof AdminClaimTokenScalarFieldEnum)[keyof typeof AdminClaimTokenScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -963,4 +976,11 @@ export const MemberClaimTokenOrderByRelevanceFieldEnum = {
 } as const
 
 export type MemberClaimTokenOrderByRelevanceFieldEnum = (typeof MemberClaimTokenOrderByRelevanceFieldEnum)[keyof typeof MemberClaimTokenOrderByRelevanceFieldEnum]
+
+
+export const AdminClaimTokenOrderByRelevanceFieldEnum = {
+  tokenHash: 'tokenHash'
+} as const
+
+export type AdminClaimTokenOrderByRelevanceFieldEnum = (typeof AdminClaimTokenOrderByRelevanceFieldEnum)[keyof typeof AdminClaimTokenOrderByRelevanceFieldEnum]
 

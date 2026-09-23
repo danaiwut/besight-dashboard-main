@@ -262,6 +262,11 @@ function TeamPermissions() {
   const { admins, setAdmins, toast, backendLive } = useCrm();
   const { t } = useLanguage();
   const [drawerOpen, setDrawerOpen] = useState<{ admin: Admin | null } | null>(null);
+  // Hidden while AdminForm is showing the just-created setup link — that
+  // screen has its own "Done" button, so the drawer's own Cancel/Save pair
+  // would otherwise sit there doing nothing useful (or re-submitting stale
+  // data if clicked).
+  const [showingSetupLink, setShowingSetupLink] = useState(false);
   const formRef = useRef<AdminFormHandle>(null);
 
   async function setRole(a: Admin, role: string) {
@@ -368,10 +373,23 @@ function TeamPermissions() {
       <Drawer
         open={!!drawerOpen}
         title={drawerOpen?.admin ? t("set.drawer.edit") : t("set.drawer.add")}
-        onClose={() => setDrawerOpen(null)}
-        body={drawerOpen ? <AdminForm ref={formRef} admin={drawerOpen.admin} onDone={() => setDrawerOpen(null)} /> : null}
+        onClose={() => {
+          setDrawerOpen(null);
+          setShowingSetupLink(false);
+        }}
+        body={
+          drawerOpen ? (
+            <AdminForm
+              ref={formRef}
+              admin={drawerOpen.admin}
+              onDone={() => setDrawerOpen(null)}
+              onSetupLinkChange={setShowingSetupLink}
+            />
+          ) : null
+        }
         foot={
-          drawerOpen && (
+          drawerOpen &&
+          !showingSetupLink && (
             <>
               <button className="btn btn-ghost" onClick={() => setDrawerOpen(null)}>
                 {t("common.cancel")}

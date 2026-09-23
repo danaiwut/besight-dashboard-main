@@ -226,3 +226,12 @@ export type LessonProgress = Prisma.LessonProgressModel
  * new accounts — it just proves control of the address already on the row.
  */
 export type MemberClaimToken = Prisma.MemberClaimTokenModel
+/**
+ * Model AdminClaimToken
+ * Single-use token letting a freshly-created admin set their first password.
+ * Only an existing admin (via POST /api/crm/admins) can mint one of these —
+ * there is no public self-request form, unlike MemberClaimToken's /claim
+ * page, since exposing that would let anyone probe which addresses belong
+ * to admins.
+ */
+export type AdminClaimToken = Prisma.AdminClaimTokenModel

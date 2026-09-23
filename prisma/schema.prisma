@@ -345,6 +345,7 @@ model Admin {
   tokenVersion Int      @default(0)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
+  claimTokens  AdminClaimToken[]
 }
 
 model SystemSetting {
@@ -807,4 +808,22 @@ model MemberClaimToken {
   member    Member    @relation(fields: [memberId], references: [id], onDelete: Cascade)
 
   @@index([memberId, usedAt])
+}
+
+/// Single-use token letting a freshly-created admin set their first password.
+/// Only an existing admin (via POST /api/crm/admins) can mint one of these —
+/// there is no public self-request form, unlike MemberClaimToken's /claim
+/// page, since exposing that would let anyone probe which addresses belong
+/// to admins.
+model AdminClaimToken {
+  id        Int       @id @default(autoincrement())
+  adminId   Int
+  /// SHA-256 of the emailed token; the plaintext never touches the database.
+  tokenHash String    @unique @db.VarChar(64)
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+  admin     Admin     @relation(fields: [adminId], references: [id], onDelete: Cascade)
+
+  @@index([adminId, usedAt])
 }
