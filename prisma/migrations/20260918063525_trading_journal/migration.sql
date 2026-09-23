@@ -36,7 +36,7 @@ CREATE TABLE `JournalTrade` (
     `commission` DECIMAL(18, 2) NOT NULL DEFAULT 0,
     `swap` DECIMAL(18, 2) NOT NULL DEFAULT 0,
     `note` TEXT NULL,
-    `tagsJson` TEXT NOT NULL DEFAULT '[]',
+    `tagsJson` TEXT NOT NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
 
