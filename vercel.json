@@ -1,27 +1,5 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": "nextjs",
-  "buildCommand": "npm run build",
-  "crons": [
-    {
-      "path": "/api/cron/lot-renewals/",
-      "schedule": "0 1 * * *"
-    },
-    {
-      "path": "/api/cron/trade-log-snapshot/",
-      "schedule": "30 0 * * *"
-    },
-    {
-      "path": "/api/cron/member-lots-snapshot/",
-      "schedule": "0 */4 * * *"
-    },
-    {
-      "path": "/api/cron/activity-scores/",
-      "schedule": "*/15 * * * *"
-    },
-    {
-      "path": "/api/cron/customer-sync/",
-      "schedule": "*/10 * * * *"
-    }
-  ]
+  "buildCommand": "npm run build"
 }
