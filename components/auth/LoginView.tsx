@@ -81,12 +81,21 @@ export default function LoginView({ google, facebook, line }: { google: boolean;
                 <PasswordToggleInput id="password" name="password" placeholder={t("auth.login.passwordPlaceholder")} autoComplete="current-password" />
               </div>
 
+              <Link className="auth-forgot" href="/claim/">
+                {t("auth.login.forgot")}
+              </Link>
+
               {error && <p className="auth-error" role="alert">{error}</p>}
 
               <button type="submit" className="auth-cinema-submit" disabled={busy}>
                 {busy ? t("auth.login.submitting") : t("auth.login.submit")}
               </button>
             </form>
+
+            <p className="auth-alt">
+              {t("auth.login.noAccount")}{" "}
+              <Link href="/signup/">{t("auth.login.signUp")}</Link>
+            </p>
           </div>
         </div>
       </div>

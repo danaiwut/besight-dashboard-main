@@ -21,6 +21,25 @@ const EN: Record<string, string> = {
   "auth.login.noAccount": "Don't have an account?",
   "auth.login.signUp": "Sign up",
 
+  // ── Auth: Sign Up ──
+  "auth.register.title": "Create Account",
+  "auth.register.subtitle": "Join BeSight — set up your account to get started.",
+  "auth.register.name": "Full name",
+  "auth.register.namePlaceholder": "eg. John Fransisco",
+  "auth.register.email": "Email",
+  "auth.register.password": "Password",
+  "auth.register.passwordPlaceholder": "At least 8 characters",
+  "auth.register.confirmPassword": "Confirm password",
+  "auth.register.confirmPasswordPlaceholder": "Re-enter your password",
+  "auth.register.submit": "Create Account",
+  "auth.register.submitting": "Creating account…",
+  "auth.register.haveAccount": "Already have an account?",
+  "auth.register.logIn": "Log in",
+  "auth.register.error.invalid": "Check your name, email and password (at least 8 characters).",
+  "auth.register.error.mismatch": "Passwords don't match.",
+  "auth.register.error.emailTaken": "That email is already registered — log in, or use \u201cForgot password?\u201d if you don't remember your password.",
+  "auth.register.error.generic": "Couldn't create your account. Try again in a moment.",
+
   // ── Auth: Re-login (/gate) ──
   "auth.gate.title": "Sign In Again",
   "auth.gate.subtitle": "Your session expired — sign in again to pick up where you left off.",
@@ -1757,6 +1776,25 @@ const TH: Record<string, string> = {
   "auth.login.socialUnavailable": "ยังไม่ได้ตั้งค่าการเข้าสู่ระบบผ่านโซเชียล — กรุณาใช้อีเมลและรหัสผ่าน",
   "auth.login.noAccount": "ยังไม่มีบัญชี?",
   "auth.login.signUp": "สมัครสมาชิก",
+
+  // ── Auth: Sign Up ──
+  "auth.register.title": "สร้างบัญชี",
+  "auth.register.subtitle": "สมัครใช้งาน BeSight — ตั้งค่าบัญชีของคุณเพื่อเริ่มต้นใช้งาน",
+  "auth.register.name": "ชื่อ-นามสกุล",
+  "auth.register.namePlaceholder": "เช่น สมชาย ใจดี",
+  "auth.register.email": "อีเมล",
+  "auth.register.password": "รหัสผ่าน",
+  "auth.register.passwordPlaceholder": "อย่างน้อย 8 ตัวอักษร",
+  "auth.register.confirmPassword": "ยืนยันรหัสผ่าน",
+  "auth.register.confirmPasswordPlaceholder": "กรอกรหัสผ่านอีกครั้ง",
+  "auth.register.submit": "สร้างบัญชี",
+  "auth.register.submitting": "กำลังสร้างบัญชี…",
+  "auth.register.haveAccount": "มีบัญชีอยู่แล้ว?",
+  "auth.register.logIn": "เข้าสู่ระบบ",
+  "auth.register.error.invalid": "กรุณากรอกชื่อ อีเมล และรหัสผ่านให้ถูกต้อง (รหัสผ่านอย่างน้อย 8 ตัวอักษร)",
+  "auth.register.error.mismatch": "รหัสผ่านทั้งสองช่องไม่ตรงกัน",
+  "auth.register.error.emailTaken": "อีเมลนี้ถูกสมัครไว้แล้ว — เข้าสู่ระบบ หรือกด \u201cลืมรหัสผ่าน?\u201d ถ้าจำรหัสผ่านไม่ได้",
+  "auth.register.error.generic": "สร้างบัญชีไม่สำเร็จ ลองใหม่อีกครั้ง",
 
   // ── Auth: เข้าสู่ระบบใหม่ (/gate) ──
   "auth.gate.title": "เข้าสู่ระบบอีกครั้ง",
