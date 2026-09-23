@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useCrm } from "../../../components/crm/CrmContext";
+import MemberCombobox from "../../../components/crm/MemberCombobox";
 import { useLanguage } from "../../../components/crm/LanguageContext";
 import { TableSkeleton } from "../../../components/crm/Skeletons";
 import Drawer from "../../../components/crm/Drawer";
@@ -27,7 +28,7 @@ const STATUS_BADGE: Record<SpinStatus, string> = { pending: "pending", fulfilled
 
 export default function CrmSpinPage() {
   const { t } = useLanguage();
-  const { toast, log, dataVersion, crmDataStatus } = useCrm();
+  const { toast, log, dataVersion, crmDataStatus, members } = useCrm();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -47,6 +48,14 @@ export default function CrmSpinPage() {
   const [results, setResults] = useState<SpinResultDto[]>([]);
   const [summary, setSummary] = useState({ pending: 0, fulfilled: 0, cancelled: 0, total: 0 });
   const [imageError, setImageError] = useState("");
+
+  /* ── Manual BEC grants (admin test tool) ── */
+  type BecGrantDto = { id: number; memberId: number; memberCode: string; memberName: string; points: number; note: string | null; createdAt: string };
+  const [grants, setGrants] = useState<BecGrantDto[]>([]);
+  const [grantMemberId, setGrantMemberId] = useState(0);
+  const [grantPoints, setGrantPoints] = useState("100");
+  const [grantNote, setGrantNote] = useState("");
+  const [granting, setGranting] = useState(false);
 
   /* % chance is derived from weights of drawable prizes (active + in stock).
      Kept client-side so the admin sees the real drop rate while editing. */
@@ -106,17 +115,19 @@ export default function CrmSpinPage() {
 
   const load = useCallback(async () => {
     try {
-      const [settingsPayload, prizesPayload, ratesPayload, resultsPayload] = await Promise.all([
+      const [settingsPayload, prizesPayload, ratesPayload, resultsPayload, grantsPayload] = await Promise.all([
         apiCall<{ settings: SpinSettings }>("/api/crm/spin/settings/", "GET"),
         apiCall<{ prizes: SpinPrizeDto[] }>("/api/crm/spin/prizes/", "GET"),
         apiCall<{ rates: BecRateDto[] }>("/api/crm/spin/rates/", "GET"),
         apiCall<{ results: SpinResultDto[]; summary: typeof summary }>(`/api/crm/spin/results/?status=${statusFilter === "all" ? "" : statusFilter}`, "GET"),
+        apiCall<{ grants: BecGrantDto[] }>("/api/crm/spin/grants/", "GET"),
       ]);
       setSettings(settingsPayload.settings);
       setPrizes(prizesPayload.prizes);
       setRates(ratesPayload.rates);
       setResults(resultsPayload.results);
       setSummary(resultsPayload.summary);
+      setGrants(grantsPayload.grants);
       setError("");
     } catch (loadError) {
       setError(loadError instanceof Error ? loadError.message : "Unable to load spin data");
@@ -142,6 +153,38 @@ export default function CrmSpinPage() {
       toast(saveError instanceof Error ? saveError.message : "Unable to save settings");
     } finally {
       setSavingSettings(false);
+    }
+  }
+
+  async function grantBec() {
+    const points = parseFloat(grantPoints);
+    if (!grantMemberId) {
+      toast(t("spin.grant.pickMember"));
+      return;
+    }
+    if (!Number.isFinite(points) || points <= 0) {
+      toast(t("spin.grant.badPoints"));
+      return;
+    }
+    setGranting(true);
+    try {
+      const payload = await apiCall<{ balance: { balance: number } }>("/api/crm/spin/grants/", "POST", {
+        memberId: grantMemberId,
+        points,
+        note: grantNote.trim(),
+      });
+      const member = members.find((m) => m.id === grantMemberId);
+      const name = member ? `${member.code} ${member.name}` : `#${grantMemberId}`;
+      log({ actor: "Admin", action: "BEC Granted", description: `${points} BEC → ${name}.` });
+      toast(t("spin.grant.done", { points, name, balance: payload.balance.balance }));
+      setGrantMemberId(0);
+      setGrantNote("");
+      const grantsPayload = await apiCall<{ grants: BecGrantDto[] }>("/api/crm/spin/grants/", "GET");
+      setGrants(grantsPayload.grants);
+    } catch (grantError) {
+      toast(grantError instanceof Error ? grantError.message : "Unable to grant BEC");
+    } finally {
+      setGranting(false);
     }
   }
 
@@ -295,6 +338,68 @@ export default function CrmSpinPage() {
           </div>
         </div>
       )}
+
+      {/* ── Manual BEC grants (test tool) ── */}
+      <div className="card" style={{ padding: 22, marginBottom: 22 }}>
+        <div className="settings-head">
+          <h3>{t("spin.grant.title")}</h3>
+          <div className="desc" style={{ fontSize: 12.5, color: "var(--text-sub)", marginTop: 2 }}>{t("spin.grant.desc")}</div>
+        </div>
+        <div className="form-grid2">
+          <div className="field">
+            <label>{t("spin.grant.member")}</label>
+            <MemberCombobox members={members} value={grantMemberId} onChange={setGrantMemberId} placeholder={t("spin.grant.memberPlaceholder")} ariaLabel={t("spin.grant.member")} />
+          </div>
+          <div className="field">
+            <label>{t("spin.grant.points")}</label>
+            <input className="input" type="number" min={0} step="0.01" value={grantPoints} onChange={(e) => setGrantPoints(e.target.value)} />
+          </div>
+        </div>
+        <div className="field">
+          <label>{t("spin.grant.note")}</label>
+          <input className="input" value={grantNote} onChange={(e) => setGrantNote(e.target.value)} placeholder={t("spin.grant.notePlaceholder")} />
+        </div>
+        <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 14 }}>
+          <button className="btn btn-primary" onClick={() => void grantBec()} disabled={granting}>
+            <Icon name="add" />
+            {granting ? t("spin.grant.granting") : t("spin.grant.submit")}
+          </button>
+        </div>
+        <div className="desc" style={{ fontSize: 12.5, color: "var(--text-sub)", marginTop: 18, marginBottom: 8 }}>{t("spin.grant.recent")}</div>
+        <div className="table-wrap">
+          <table className="data" style={{ minWidth: 640 }}>
+            <thead>
+              <tr>
+                <th>{t("spin.results.col.member")}</th>
+                <th>{t("spin.grant.col.points")}</th>
+                <th>{t("spin.grant.col.note")}</th>
+                <th>{t("spin.grant.col.when")}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {grants.length ? (
+                grants.map((grant) => (
+                  <tr key={grant.id}>
+                    <td>
+                      <div className="cn">{grant.memberName}</div>
+                      <div className="ce mono">{grant.memberCode}</div>
+                    </td>
+                    <td className="mono">+{grant.points}</td>
+                    <td>{grant.note || "—"}</td>
+                    <td className="mono">{new Date(grant.createdAt).toLocaleString("en-GB", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}</td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={4}>
+                    <div className="table-empty">{t("spin.grant.empty")}</div>
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
 
       {/* ── Prizes ── */}
       <div className="card" style={{ padding: 22, marginBottom: 22 }}>

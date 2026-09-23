@@ -154,7 +154,7 @@ export default function CrmOverviewPage() {
             </select>
           </div>
         </div>
-        <div style={{ display: "flex", alignItems: "flex-end", gap: 8, height: 120, padding: "0 4px" }}>
+        <div style={{ display: "flex", alignItems: "flex-end", gap: 8, height: 120, padding: "0 4px", overflowX: "auto", overflowY: "hidden" }}>
           {chartByMonth.map((m) => (
             <div key={m.month} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
               <span style={{ fontSize: 12, fontWeight: 600, color: "var(--muted)" }}>{m.count}</span>

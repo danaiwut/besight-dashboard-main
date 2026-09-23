@@ -21,7 +21,7 @@
     },
     {
       "path": "/api/cron/customer-sync/",
-      "schedule": "*/15 * * * *"
+      "schedule": "*/10 * * * *"
     }
   ]
 }

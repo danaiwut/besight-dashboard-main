@@ -10,7 +10,7 @@
 /* Sidebar runs the full page height on the left, ahead of the ticker —
    the ticker only spans the content column to its right, so the rail sits
    above/over where the ticker would otherwise be in that top-left corner. */
-.dashx-shell { min-height: 100vh; display: flex; }
+.dashx-shell { min-height: 100vh; min-height: 100dvh; display: flex; padding-left: var(--safe-left); padding-right: var(--safe-right); }
 
 /* ── Shell: labeled sidebar + content column ──
    Same nav look as the admin CRM's own sidebar (.sidebar-label, .nav-item,
@@ -19,14 +19,14 @@
    ask, and groups the 6 nav items under two section labels instead of one
    flat icon-only list. */
 .icon-rail {
-  width: 232px; flex-shrink: 0; position: sticky; top: 0; height: 100vh; z-index: 65;
-  display: flex; flex-direction: column; align-items: stretch; gap: 4px; padding: 20px 16px 16px;
+  width: 232px; flex-shrink: 0; position: sticky; top: 0; height: 100vh; height: 100dvh; z-index: 65;
+  display: flex; flex-direction: column; align-items: stretch; gap: 4px; padding: calc(20px + var(--safe-top)) 16px calc(16px + var(--safe-bottom));
   background: var(--bg-dark); border-right: 1px solid var(--border); overflow-y: auto;
 }
 .dashx-content { flex: 1; min-width: 0; display: flex; flex-direction: column; }
 
 /* ── Promo ticker ── scrolls away with the page (not pinned). */
-.ticker-bar { height: 34px; flex-shrink: 0; background: var(--blue); }
+.ticker-bar { height: calc(34px + var(--safe-top)); padding-top: var(--safe-top); flex-shrink: 0; background: var(--blue); }
 .ticker-viewport { height: 100%; overflow: hidden; }
 .ticker-track { display: flex; width: max-content; height: 100%; animation: ticker-scroll 26s linear infinite; }
 .ticker-item { display: flex; align-items: center; height: 100%; padding: 0 32px; font-size: 12.5px; font-weight: 600; letter-spacing: 0.2px; color: #fff; white-space: nowrap; }
@@ -63,7 +63,7 @@
 .icon-rail .theme-switch { display: none; }
 .icon-rail .lang-menu { display: none; }
 
-.dashx-main { flex: 1; min-width: 0; padding: 22px 28px 48px; }
+.dashx-main { flex: 1; min-width: 0; padding: 22px 28px calc(48px + var(--safe-bottom)); }
 
 /* ── Topbar ── */
 .dashx-topbar { display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; margin-bottom: 22px; flex-wrap: wrap; }
@@ -485,7 +485,7 @@
    and only space between the two rows. */
 .accounts-actions .accounts-break { flex-basis: 100%; height: 0; }
 .accounts-actions .trade-id-inline { margin-top: 10px; }
-.trade-id-inline { display: flex; gap: 8px; flex: 3; min-width: 320px; }
+.trade-id-inline { display: flex; gap: 8px; flex: 3; min-width: min(320px, 100%); }
 /* Broker select + Trade ID input share one bordered box (one background,
    one focus ring) instead of reading as two separate fields side by side —
    a divider between the two segments is the only thing marking them apart. */
@@ -807,7 +807,7 @@
    already behave together in crm.css. */
 @media (max-width: 860px) {
   .icon-rail {
-    position: fixed; left: 0; top: 0; width: 232px; height: 100vh;
+    position: fixed; left: 0; top: 0; width: 232px; max-width: 85vw; height: 100vh; height: 100dvh;
     transform: translateX(-100%); transition: transform 260ms ease;
   }
   .icon-rail.open { transform: translateX(0); }
@@ -832,7 +832,7 @@
   .icon-rail .lang-dropdown { left: 0; right: auto; width: 100%; }
 }
 @media (max-width: 620px) {
-  .dashx-main { padding: 18px 16px 40px; }
+  .dashx-main { padding: 18px 16px calc(40px + var(--safe-bottom)); }
   .wallet-balance-value { font-size: 34px; }
 }
 
@@ -1522,7 +1522,6 @@
 /* ── Profile: two-column layout (main form | Social Media + linked-accounts cards) ── */
 .profile-grid { display: grid; grid-template-columns: minmax(0, 640px) minmax(260px, 320px); gap: 20px; align-items: start; }
 .profile-col-side { display: flex; flex-direction: column; gap: 20px; }
-@media (max-width: 860px) { .profile-grid { grid-template-columns: 1fr; } }
 
 /* Activity detail: side column carries a full leaderboard table (avatar +
    name + prize), which needs more breathing room than the profile-grid
@@ -1537,6 +1536,13 @@
    little more room so the two feel like a balanced pair instead of a wide
    column and a narrow leftover strip. */
 .profile-page-grid { grid-template-columns: minmax(0, 1fr) minmax(320px, 380px); }
+/* Declared after the per-page overrides above so it actually wins on
+   phones — otherwise their fixed-min side column keeps two columns and
+   squeezes the main form to nothing. */
+@media (max-width: 860px) {
+  .profile-grid, .activity-detail-grid, .profile-page-grid { grid-template-columns: minmax(0, 1fr); }
+}
+.profile-grid > * { min-width: 0; }
 
 /* ── Profile: avatar upload ── */
 .profile-avatar-row { display: flex; align-items: center; gap: 16px; margin: 16px 0 24px; }
@@ -1967,3 +1973,30 @@
 .fs-side-total .v { font-weight: 700; }
 .fs-learn-head { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; padding: 20px 22px; }
 .fs-learn-cover { width: 120px; height: 78px; border-radius: 10px; object-fit: cover; background: var(--gradient-cta); flex-shrink: 0; }
+
+/* ── PWA install banner (components/dashboard/InstallPrompt.tsx) ──
+   Floats above the bottom safe area; sits under the toast (z 90) so a
+   toast fired while it's visible still reads on top. */
+.install-prompt {
+  position: fixed; z-index: 85;
+  left: calc(12px + var(--safe-left)); right: calc(12px + var(--safe-right));
+  bottom: calc(12px + var(--safe-bottom));
+  max-width: 480px; margin: 0 auto;
+  display: flex; align-items: center; gap: 12px; padding: 12px 12px 12px 14px;
+  background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px;
+  box-shadow: var(--shadow-pop);
+  animation: install-prompt-in 240ms ease both;
+}
+.install-prompt-icon { width: 40px; height: 40px; border-radius: 10px; flex-shrink: 0; }
+.install-prompt-text { flex: 1; min-width: 0; display: flex; flex-direction: column; line-height: 1.35; }
+.install-prompt-text strong { font-size: 13.5px; font-weight: 700; color: var(--white); }
+.install-prompt-text span { font-size: 12px; color: var(--text-sub); }
+.install-prompt .btn-sm { flex-shrink: 0; }
+.install-prompt-close {
+  flex-shrink: 0; width: 32px; height: 32px; display: grid; place-items: center;
+  background: none; border: none; border-radius: 8px; color: var(--text-sub); cursor: pointer;
+}
+.install-prompt-close:hover { background: var(--bg-card2); color: var(--white); }
+.install-prompt-close .icon { font-size: 18px; }
+@keyframes install-prompt-in { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .install-prompt { animation: none; } }

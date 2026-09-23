@@ -6,7 +6,7 @@ import { cronGuard } from "@/lib/session";
 export const dynamic = "force-dynamic";
 export const maxDuration = 300;
 
-/* Vercel Cron (every 15min): runs the Supabase customer replace-sync in the
+/* Vercel Cron (every 10min): runs the Supabase customer replace-sync in the
    background so the member list never goes stale during long admin sessions.
    saveCustomers() already bumps the data version, so live tabs reload via the
    10s version poll. Manual Re-sync in the UI still forces an immediate run. */

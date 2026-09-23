@@ -43,3 +43,27 @@
   vertical-align: middle;
   color: currentColor;
 }
+
+/* ── Installed-app (PWA) + mobile base ──
+   The root layout sets viewport-fit=cover with a black-translucent iOS
+   status bar, so in the installed app content runs edge-to-edge under the
+   notch / home indicator. These insets are 0 in a normal browser tab, so
+   every rule that adds them is a no-op there. */
+:root {
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+}
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+body { -webkit-tap-highlight-color: transparent; }
+/* iOS Safari zooms the whole page when a field under 16px gets focus and
+   never zooms back out — in the standalone app there's no browser chrome
+   to recover with. @supports scopes this to iOS WebKit only. */
+@supports (-webkit-touch-callout: none) {
+  @media (max-width: 860px) {
+    input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+    select,
+    textarea { font-size: 16px !important; }
+  }
+}

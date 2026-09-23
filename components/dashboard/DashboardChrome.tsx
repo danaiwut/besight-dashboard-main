@@ -11,6 +11,7 @@ import { useTheme } from "./ThemeContext";
 import CustomerMenu from "./CustomerMenu";
 import CustomerNotifications from "./CustomerNotifications";
 import LanguageMenu from "./LanguageMenu";
+import InstallPrompt from "./InstallPrompt";
 import Avatar from "../Avatar";
 import Icon from "../Icon";
 
@@ -303,6 +304,7 @@ export default function DashboardChrome({ children }: { children: ReactNode }) {
         </main>
       </div>
       <DashboardToast />
+      <InstallPrompt />
     </div>
   );
 }

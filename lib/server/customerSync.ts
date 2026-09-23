@@ -1,4 +1,4 @@
-import { AccessSource, IndicatorAccessStatus, Plan, RecordStatus, TelegramStatus, VerificationStatus } from "@/generated/prisma/client";
+import { AccessSource, IndicatorAccessStatus, Plan, Prisma, RecordStatus, TelegramStatus, VerificationStatus } from "@/generated/prisma/client";
 import { getPrisma, isDatabaseConfigured } from "./prisma";
 import { bumpDataVersion } from "./dataVersion";
 import { toMemberDto, toTradeAccountDto } from "./crmDtos";
@@ -275,6 +275,19 @@ async function saveCustomers(customers: NormalizedCustomer[]) {
   /** Members whose qualification window is new/changed — their persisted lots
    *  belong to another window and must be recomputed before anyone reads them. */
   const recomputeIds: number[] = [];
+  /* Every member code claimed so far (DB preload + rows saved/renamed during
+     this run). The desired code can belong to another row — an upstream code
+     change or a generated-code collision — so updates/creates suffix it
+     instead of crashing the whole sync on Member_code_key. */
+  const codeToId = new Map<string, number>(
+    (await prisma.member.findMany({ select: { id: true, code: true } })).map((m) => [m.code, m.id]),
+  );
+  let recoded = 0;
+  /* Customers the sync refused to save: upstream identity keys point at two
+     different stored rows (e.g. one holds the externalId, another the email),
+     so no automatic pick is safe. They are reported for a human to merge in
+     the CRM instead of failing the other 900+ customers. */
+  const skipped: Array<{ code: string; externalId?: string; email: string; fields: string[] }> = [];
 
   async function resolveIndicatorId(name: string, pubId?: string) {
     const cached = indicatorIdByName.get(name);
@@ -288,19 +301,29 @@ async function saveCustomers(customers: NormalizedCustomer[]) {
     return indicator.id;
   }
   for (const customer of customers) {
+    /* Stable identity first: matching by code as well would let an upstream
+       code change (or a generated-code collision) merge two different people
+       into one row. The code stays a fallback identity only for rows that
+       carry neither externalId nor email. */
+    const identityOr = [
+      ...(customer.externalId ? [{ externalId: customer.externalId }] : []),
+      ...(customer.member.email ? [{ email: customer.member.email }] : []),
+    ];
     const existing = await prisma.member.findFirst({
-      where: {
-        OR: [
-          ...(customer.externalId ? [{ externalId: customer.externalId }] : []),
-          { code: customer.member.code },
-          ...(customer.member.email ? [{ email: customer.member.email }] : []),
-        ],
-      },
-      select: { id: true, crmStartDate: true, crmExpiryDate: true },
+      where: identityOr.length ? { OR: identityOr } : { code: customer.member.code },
+      select: { id: true, code: true, crmStartDate: true, crmExpiryDate: true },
     });
+    let code = customer.member.code;
+    const codeOwner = codeToId.get(code);
+    if (codeOwner !== undefined && codeOwner !== existing?.id) {
+      let n = 2;
+      while (codeToId.get(`${code}-${n}`) !== undefined) n++;
+      code = `${code}-${n}`;
+      recoded++;
+    }
     const data = {
       externalId: customer.externalId,
-      code: customer.member.code,
+      code,
       name: customer.member.name,
       displayName: customer.member.displayName,
       avatarUrl: customer.member.avatarUrl,
@@ -319,9 +342,26 @@ async function saveCustomers(customers: NormalizedCustomer[]) {
       crmStartDate: optionalDateValue(customer.member.crmStartDate) || null,
       crmExpiryDate: optionalDateValue(customer.member.crmExpiryDate) || null,
     };
-    const member = existing
-      ? await prisma.member.update({ where: { id: existing.id }, data })
-      : await prisma.member.create({ data });
+    const member = await (async () => {
+      try {
+        return existing
+          ? await prisma.member.update({ where: { id: existing.id }, data })
+          : await prisma.member.create({ data });
+      } catch (error) {
+        if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
+          const meta = error.meta as { target?: unknown } | undefined;
+          const fields = Array.isArray(meta?.target) ? (meta.target as unknown[]).map(String) : [];
+          skipped.push({ code: customer.member.code, externalId: customer.externalId, email: customer.member.email, fields });
+          return null;
+        }
+        throw error;
+      }
+    })();
+    if (!member) continue;
+    // Keep the code map truthful for the rest of the run: the old code is
+    // free again, the final code belongs to this row.
+    if (existing && existing.code !== member.code) codeToId.delete(existing.code);
+    codeToId.set(member.code, member.id);
     savedMemberIds.add(member.id);
     if (!tradeIdsByMember.has(member.id)) tradeIdsByMember.set(member.id, new Set());
     let memberHasActiveIndicator = false;
@@ -425,7 +465,7 @@ async function saveCustomers(customers: NormalizedCustomer[]) {
     recomputedLots += results.filter((v) => v !== null).length;
   }
   await bumpDataVersion();
-  return { removedMembers: removedMembers.count, removedTradeAccounts, recomputedLots };
+  return { removedMembers: removedMembers.count, removedTradeAccounts, recomputedLots, recoded, skipped };
 }
 
 export async function readDatabaseDtos() {

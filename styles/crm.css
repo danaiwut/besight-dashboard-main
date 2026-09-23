@@ -41,12 +41,15 @@ img { display: block; max-width: 100%; }
 button, input, select { font-family: inherit; color: inherit; }
 .sr-only { position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0,0,0,0); }
 
-.crm { display: grid; grid-template-columns: var(--sidebar-w) 1fr; min-height: 100vh; }
+.crm { display: grid; grid-template-columns: var(--sidebar-w) 1fr; min-height: 100vh; min-height: 100dvh; padding-left: var(--safe-left); padding-right: var(--safe-right); }
+/* Installed iOS app: the status bar is translucent with white text, so give
+   it a dark strip to sit on instead of the light page background. */
+.crm::before { content: ""; position: fixed; top: 0; left: 0; right: 0; height: var(--safe-top); background: #1D1D1F; z-index: 100; pointer-events: none; }
 
 /* ── Sidebar ── */
 .sidebar {
-  position: sticky; top: 0; height: 100vh;
-  display: flex; flex-direction: column; padding: 22px 16px;
+  position: sticky; top: 0; height: 100vh; height: 100dvh; overflow-y: auto;
+  display: flex; flex-direction: column; padding: calc(22px + var(--safe-top)) 16px calc(22px + var(--safe-bottom));
   background: var(--bg-dark); border-right: 1px solid var(--border); z-index: 40;
 }
 .sidebar-head { display: flex; align-items: center; justify-content: space-between; }
@@ -78,7 +81,7 @@ button, input, select { font-family: inherit; color: inherit; }
 .logout-link .icon { font-size: 17px; }
 
 /* ── Main ── */
-.main { min-width: 0; padding: 22px 28px 40px; }
+.main { min-width: 0; padding: calc(22px + var(--safe-top)) 28px calc(40px + var(--safe-bottom)); }
 .topbar { display: flex; align-items: center; justify-content: space-between; gap: 12px 20px; margin-bottom: 24px; flex-wrap: wrap; }
 .topbar-left { display: flex; align-items: center; gap: 14px; min-width: 0; }
 .menu-toggle { display: none; background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; width: 40px; height: 40px; place-items: center; cursor: pointer; }
@@ -177,7 +180,7 @@ button, input, select { font-family: inherit; color: inherit; }
 
 /* overview */
 .ov-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-.dist-row { display: grid; grid-template-columns: 130px 1fr 44px; align-items: center; gap: 12px; padding: 9px 0; }
+.dist-row { display: grid; grid-template-columns: minmax(84px, 130px) minmax(0, 1fr) auto; align-items: center; gap: 12px; padding: 9px 0; }
 .dist-row .dn { font-size: 13px; color: var(--muted); }
 .dist-bar { height: 8px; border-radius: 999px; background: var(--bg-elev); overflow: hidden; }
 .dist-bar span { display: block; height: 100%; border-radius: 999px; background: var(--gradient-cta); }
@@ -231,6 +234,7 @@ button, input, select { font-family: inherit; color: inherit; }
 .modal {
   position: fixed; z-index: 81; top: 50%; left: 50%; transform: translate(-50%, -46%);
   width: 400px; max-width: 92vw; padding: 30px 26px; text-align: center;
+  max-height: calc(100dvh - 32px - var(--safe-top) - var(--safe-bottom)); overflow-y: auto; overscroll-behavior: contain;
   background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px;
   box-shadow: var(--shadow-pop);
   opacity: 0; transition: opacity 180ms ease, transform 180ms ease;
@@ -376,7 +380,7 @@ label .ppr-hint { margin-top: 0; }
 .toolbar .search input,
 .toolbar .btn { height: 42px; }
 .toolbar .tabs { align-items: center; }
-.tabs { display: inline-flex; gap: 4px; padding: 4px; background: var(--bg-card2); border: 1px solid var(--border); border-radius: 10px; }
+.tabs { display: inline-flex; max-width: 100%; overflow-x: auto; scrollbar-width: none; gap: 4px; padding: 4px; background: var(--bg-card2); border: 1px solid var(--border); border-radius: 10px; }
 /* wrapping variant for segmented controls with long labels (e.g. lot-check periods) */
 .tabs.tabs-wrap { flex-wrap: wrap; height: auto !important; row-gap: 8px; max-width: 100%; }
 .tab { display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; border-radius: 7px; font-size: 13px; font-weight: 500; color: var(--text-sub); background: none; border: none; cursor: pointer; white-space: nowrap; transition: background var(--transition), color var(--transition); }
@@ -611,12 +615,12 @@ table.data tbody tr:last-child td { border-bottom: none; }
   display: flex; flex-direction: column;
 }
 .drawer.open { transform: translateX(0); }
-.drawer-head { display: flex; align-items: center; justify-content: space-between; padding: 20px; border-bottom: 1px solid var(--border); }
+.drawer-head { display: flex; align-items: center; justify-content: space-between; padding: calc(20px + var(--safe-top)) 20px 20px; border-bottom: 1px solid var(--border); }
 .drawer-head h3 { font-size: 16px; font-weight: 600; }
 .drawer-close { background: none; border: none; color: var(--text-sub); cursor: pointer; padding: 6px; border-radius: 8px; }
 .drawer-close:hover { background: var(--bg-card2); color: var(--white); }
 .drawer-close .icon { font-size: 20px; }
-.drawer-body { padding: 22px 20px; overflow-y: auto; flex: 1; }
+.drawer-body { padding: 22px 20px; overflow-y: auto; overscroll-behavior: contain; flex: 1; }
 .drawer-profile { display: flex; align-items: center; gap: 14px; margin-bottom: 8px; }
 .drawer-profile .avatar { width: 60px; height: 60px; font-size: 20px; }
 .drawer-profile .dn { font-size: 18px; font-weight: 700; }
@@ -632,13 +636,13 @@ table.data tbody tr:last-child td { border-bottom: none; }
 .field-hint { font-size: 11.5px; color: var(--text-sub); margin-top: -3px; }
 .input { width: 100%; background: var(--bg-card2); border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; color: var(--white); font-size: 14px; }
 .input:focus { outline: none; border-color: var(--blue); box-shadow: 0 0 0 3px rgba(0,48,236,0.16); }
-.drawer-foot { padding: 16px 20px; border-top: 1px solid var(--border); display: flex; gap: 10px; }
+.drawer-foot { padding: 16px 20px calc(16px + var(--safe-bottom)); border-top: 1px solid var(--border); display: flex; gap: 10px; }
 .drawer-foot .btn { flex: 1; }
 .btn-danger { background: rgba(224,41,62,0.10); color: var(--red); border: 1px solid rgba(224,41,62,0.3); }
 .btn-danger:hover { background: rgba(224,41,62,0.18); }
 
 /* toast */
-.toast { position: fixed; bottom: 24px; left: 50%; transform: translate(-50%, 20px); background: #1D1D1F; border: 1px solid rgba(255,255,255,0.08); color: #fff; font-size: 13px; font-weight: 500; padding: 11px 18px; border-radius: 10px; opacity: 0; pointer-events: none; transition: opacity var(--transition), transform var(--transition); z-index: 90; box-shadow: var(--shadow-pop); }
+.toast { position: fixed; bottom: calc(24px + var(--safe-bottom)); max-width: calc(100vw - 32px); text-align: center; left: 50%; transform: translate(-50%, 20px); background: #1D1D1F; border: 1px solid rgba(255,255,255,0.08); color: #fff; font-size: 13px; font-weight: 500; padding: 11px 18px; border-radius: 10px; opacity: 0; pointer-events: none; transition: opacity var(--transition), transform var(--transition); z-index: 90; box-shadow: var(--shadow-pop); }
 .toast.show { opacity: 1; transform: translate(-50%, 0); }
 
 /* ── Responsive ── */
@@ -682,7 +686,7 @@ table.data tbody tr:last-child td { border-bottom: none; }
   .toolbar > .btn:not(.filters-toggle) { flex: 1 1 100%; }
 }
 @media (max-width: 560px) {
-  .main { padding: 16px 16px 32px; }
+  .main { padding: calc(16px + var(--safe-top)) 16px calc(32px + var(--safe-bottom)); }
   .stat-grid, .stat-grid.cols-5 { grid-template-columns: 1fr 1fr; gap: 12px; }
   .stat-grid.cols-3 { grid-template-columns: 1fr; gap: 12px; }
   .toolbar { padding: 14px; }
@@ -810,7 +814,7 @@ table.data tbody tr:last-child td { border-bottom: none; }
 /* ── CRM gate (second password layer) ──
    Centered lock screen rendered by app/crm/layout.tsx instead of the CRM
    chrome while the shared gate is still locked. Reuses .card/.field/.input/.btn above. */
-.gate-wrap { min-height: 100vh; display: grid; place-items: center; padding: 24px; background: var(--bg-page); }
+.gate-wrap { min-height: 100vh; min-height: 100dvh; display: grid; place-items: center; padding: 24px; background: var(--bg-page); }
 .gate-card { width: min(100%, 400px); padding: 32px 28px 28px; text-align: center; }
 .gate-icon { width: 52px; height: 52px; margin: 0 auto 14px; display: grid; place-items: center; border-radius: 16px; background: var(--blue-tint); color: var(--blue); }
 .gate-icon .icon { font-size: 26px; }

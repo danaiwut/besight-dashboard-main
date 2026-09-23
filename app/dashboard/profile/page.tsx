@@ -82,8 +82,11 @@ export default function DashboardProfilePage() {  const { t, lang } = useLanguag
   const [displayName, setDisplayName] = useState(member.displayName ?? "");
   const [phone, setPhone] = useState(member.phone);
   const [country, setCountry] = useState(member.country ?? "");
+  // Locale is pinned for both languages: a bare localeCompare() uses the
+  // runtime default, which differs between the server and a Thai-locale
+  // browser and reorders the options → hydration mismatch.
   const sortedCountries = useMemo(
-    () => [...WORLD_COUNTRIES].sort((a, b) => (lang === "th" ? a.th.localeCompare(b.th, "th") : a.en.localeCompare(b.en))),
+    () => [...WORLD_COUNTRIES].sort((a, b) => (lang === "th" ? a.th.localeCompare(b.th, "th") : a.en.localeCompare(b.en, "en"))),
     [lang],
   );
   const [address, setAddress] = useState(member.address ?? "");

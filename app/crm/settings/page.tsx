@@ -1,9 +1,10 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { signOut } from "next-auth/react";
 import { useCrm, initials, ROLE_DESC, ROLES, type Admin } from "../../../components/crm/CrmContext";
 import { useLanguage } from "../../../components/crm/LanguageContext";
-import { apiCall } from "../../../lib/crmApi";
+import { apiCall, ApiError } from "../../../lib/crmApi";
 import { SettingsSkeleton } from "../../../components/crm/Skeletons";
 import Icon from "../../../components/Icon";
 import Drawer from "../../../components/crm/Drawer";
@@ -167,6 +168,96 @@ function SocialInviteCard() {
 }
 
 
+function PasswordCard() {
+  const { t } = useLanguage();
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [error, setError] = useState("");
+  const [busy, setBusy] = useState(false);
+
+  async function save() {
+    setError("");
+    if (newPassword !== confirmPassword) {
+      setError(t("set.password.mismatch"));
+      return;
+    }
+    setBusy(true);
+    try {
+      await apiCall("/api/crm/admins/me/password/", "POST", { currentPassword, newPassword });
+      // The change bumped tokenVersion, so this session is already dead —
+      // sign out to the login page instead of hitting 401s.
+      await signOut({ callbackUrl: "/login" });
+    } catch (err) {
+      if (err instanceof ApiError && err.code === "wrong_current_password") {
+        setError(t("set.password.wrongCurrent"));
+      } else if (err instanceof ApiError && err.code === "password_too_short") {
+        setError(t("set.password.tooShort"));
+      } else {
+        setError(err instanceof Error ? err.message : t("set.password.failed"));
+      }
+      setBusy(false);
+    }
+  }
+
+  return (
+    <div className="card" style={{ padding: 22, marginBottom: 22 }}>
+      <div className="settings-head">
+        <h3>{t("set.password.title")}</h3>
+        <div className="desc" style={{ fontSize: 12.5, color: "var(--text-sub)", marginTop: 2 }}>
+          {t("set.password.desc")}
+        </div>
+      </div>
+      <div className="form-grid2">
+        <div className="field">
+          <label>{t("set.password.current")}</label>
+          <input
+            className="input"
+            type="password"
+            value={currentPassword}
+            onChange={(e) => setCurrentPassword(e.target.value)}
+            autoComplete="current-password"
+          />
+        </div>
+        <div />
+        <div className="field">
+          <label>{t("set.password.new")}</label>
+          <input
+            className="input"
+            type="password"
+            value={newPassword}
+            onChange={(e) => setNewPassword(e.target.value)}
+            autoComplete="new-password"
+          />
+        </div>
+        <div className="field">
+          <label>{t("set.password.confirm")}</label>
+          <input
+            className="input"
+            type="password"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            autoComplete="new-password"
+          />
+        </div>
+      </div>
+      <div className="field-hint" style={{ marginBottom: 12 }}>
+        {t("set.password.hint")}
+      </div>
+      {error && (
+        <p className="gate-error" role="alert" style={{ marginBottom: 12 }}>
+          {error}
+        </p>
+      )}
+      <div style={{ display: "flex", justifyContent: "flex-end" }}>
+        <button className="btn btn-primary" disabled={busy} onClick={() => void save()}>
+          {busy ? t("set.password.saving") : t("set.password.save")}
+        </button>
+      </div>
+    </div>
+  );
+}
+
 function TeamPermissions() {
   const { admins, setAdmins, toast, backendLive } = useCrm();
   const { t } = useLanguage();
@@ -304,6 +395,7 @@ export default function CrmSettingsPage() {
   return (
     <section className="panel is-active">
       <LanguageCard />
+      <PasswordCard />
       <TelegramSettingsCard />
       <SocialInviteCard />
       <TeamPermissions />
