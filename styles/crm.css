@@ -804,6 +804,16 @@ table.data tbody tr:last-child td { border-bottom: none; }
 .course-editor-steps b { width: 20px; height: 20px; display: grid; place-items: center; border: 1px solid var(--border); border-radius: 999px; color: var(--text-sub); font-size: 10px; }
 .course-editor-steps .is-done { color: var(--green); }
 .course-editor-steps .is-done b { border-color: var(--green); background: var(--green); color: #fff; }
+.admin-name-picker { position: relative; }
+.admin-name-suggestions { position: absolute; z-index: 12; top: calc(100% + 6px); right: 0; left: 0; overflow: hidden; border: 1px solid var(--border); border-radius: 10px; background: var(--bg-card); box-shadow: 0 14px 30px rgba(25, 35, 60, .16); }
+.admin-name-suggestions button { display: flex; align-items: center; gap: 9px; width: 100%; padding: 9px 11px; border: 0; border-bottom: 1px solid var(--border); background: none; color: inherit; text-align: left; cursor: pointer; }
+.admin-name-suggestions button:last-child { border-bottom: 0; }
+.admin-name-suggestions button:hover { background: var(--blue-tint); }
+.admin-name-suggestion-avatar { width: 28px; height: 28px; display: grid; place-items: center; flex: 0 0 auto; border-radius: 999px; background: var(--blue-tint); color: var(--blue); font-size: 11px; font-weight: 800; }
+.admin-name-suggestions strong, .admin-name-suggestions small { display: block; }
+.admin-name-suggestions strong { font-size: 12.5px; }
+.admin-name-suggestions small { margin-top: 1px; color: var(--text-sub); font-size: 11px; }
+.admin-name-no-match { padding: 12px; color: var(--text-sub); font-size: 12px; }
 .lms-edit-item { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 10px; border: 1px solid var(--border); background: none; color: inherit; width: 100%; text-align: left; cursor: pointer; }
 .lms-edit-item:hover { background: var(--bg-card2); }
 .lms-edit-item.is-current { border-color: var(--blue); background: var(--blue-tint); }

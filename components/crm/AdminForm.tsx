@@ -20,10 +20,22 @@ const AdminForm = forwardRef<AdminFormHandle, { admin: Admin | null; onDone: () 
     const [name, setName] = useState(admin?.name ?? "");
     const [email, setEmail] = useState(admin?.email ?? "");
     const [role, setRole] = useState(admin?.role ?? "Support");
+    const [nameFocused, setNameFocused] = useState(false);
     const [setupLink, setSetupLink] = useState<{ url: string; emailSent: boolean } | null>(null);
     const [copied, setCopied] = useState(false);
 
     const selectedMember = members.find((m) => m.id === memberId) ?? null;
+    const matchingMembers = name.trim()
+      ? members
+          .filter((member) => `${member.name} ${member.displayName ?? ""} ${member.email ?? ""} ${member.code}`.toLowerCase().includes(name.trim().toLowerCase()))
+          .slice(0, 6)
+      : [];
+
+    function chooseMember(member: (typeof members)[number]) {
+      setName(member.displayName?.trim() || member.name);
+      setEmail(member.email ?? "");
+      setNameFocused(false);
+    }
 
     useImperativeHandle(ref, () => ({
       save() {
@@ -157,7 +169,33 @@ const AdminForm = forwardRef<AdminFormHandle, { admin: Admin | null; onDone: () 
           <>
             <div className="field">
               <label>Full name</label>
-              <input className="input" value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Jane Doe" />
+              <div className="admin-name-picker">
+                <input
+                  className="input"
+                  value={name}
+                  onFocus={() => setNameFocused(true)}
+                  onBlur={() => window.setTimeout(() => setNameFocused(false), 120)}
+                  onChange={(e) => {
+                    setName(e.target.value);
+                    setNameFocused(true);
+                  }}
+                  placeholder="Search an existing member or type a new name"
+                  autoComplete="off"
+                />
+                {nameFocused && name.trim() && (
+                  <div className="admin-name-suggestions" role="listbox" aria-label="Matching members">
+                    {matchingMembers.length ? matchingMembers.map((member) => (
+                      <button type="button" key={member.id} onMouseDown={(event) => event.preventDefault()} onClick={() => chooseMember(member)}>
+                        <span className="admin-name-suggestion-avatar">{(member.displayName?.trim() || member.name).slice(0, 1)}</span>
+                        <span>
+                          <strong>{member.displayName?.trim() || member.name}</strong>
+                          <small>{member.email || member.code}</small>
+                        </span>
+                      </button>
+                    )) : <div className="admin-name-no-match">No existing members match — you can add them manually.</div>}
+                  </div>
+                )}
+              </div>
             </div>
             <div className="field">
               <label>Email</label>
