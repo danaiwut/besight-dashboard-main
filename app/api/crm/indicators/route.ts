@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { RecordStatus } from "@/generated/prisma/client";
 import { getPrisma, isDatabaseConfigured } from "@/lib/server/prisma";
 import { bumpDataVersion } from "@/lib/server/dataVersion";
+import { normalizeEaUrl } from "@/lib/server/eaPolicy";
 import { toIndicatorAccessDto, toIndicatorDto } from "@/lib/server/crmDtos";
 import { adminGuard, adminWriteGuard } from "@/lib/session";
 
@@ -40,11 +41,14 @@ export async function POST(request: NextRequest) {
     if (await prisma.indicator.findUnique({ where: { name }, select: { id: true } })) {
       return NextResponse.json({ ok: false, error: `Indicator ${name} already exists` }, { status: 400 });
     }
+    const ea = normalizeEaUrl(body.eaFileUrl ?? body.eaFile);
+    if (!ea.ok) return NextResponse.json({ ok: false, error: ea.error }, { status: 400 });
     const indicator = await prisma.indicator.create({
       data: {
         name,
         publicationId: String(body.publicationId ?? body.pubId ?? "").trim() || null,
         status: body.status === "inactive" ? RecordStatus.inactive : RecordStatus.active,
+        eaFileUrl: ea.url,
       },
     });
     await bumpDataVersion();

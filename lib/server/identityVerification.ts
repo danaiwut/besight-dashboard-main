@@ -1,9 +1,10 @@
 import { getPrisma } from "./prisma";
 
 /* Identity check for claiming a trade account. The member proves they are the
-   person the CRM has on file by entering the TradingView username and email
-   that the CRM sync stored — both must match. This is a data-consistency check,
-   not a secret: it confirms the claimant knows the member's own CRM details. */
+   person the CRM has on file by entering the TradingView username the CRM sync
+   stored. The email is not typed: it is the address the member signed in with
+   (taken from the session), which must match the CRM record. This is a
+   data-consistency check, not a secret. */
 
 export type IdentityCheck =
   | { verified: true }
@@ -13,7 +14,8 @@ function normUsername(value: string) {
   return value.trim().toLowerCase().replace(/^@+/, "");
 }
 
-export async function verifyMemberIdentity(memberId: number, tradingView: string, email: string): Promise<IdentityCheck> {
+/** `sessionEmail` is the signed-in account's email, never user input. */
+export async function verifyMemberIdentity(memberId: number, tradingView: string, sessionEmail: string | null | undefined): Promise<IdentityCheck> {
   const member = await getPrisma().member.findUnique({
     where: { id: memberId },
     select: { tradingView: true, email: true },
@@ -26,7 +28,7 @@ export async function verifyMemberIdentity(memberId: number, tradingView: string
   if (!expectedTv || !expectedEmail) return { verified: false, reason: "no_crm_data" };
 
   const givenTv = normUsername(tradingView);
-  const givenEmail = email.trim().toLowerCase();
+  const givenEmail = (sessionEmail || "").trim().toLowerCase();
   if (!givenTv || !givenEmail) return { verified: false, reason: "mismatch" };
   if (givenTv !== expectedTv || givenEmail !== expectedEmail) return { verified: false, reason: "mismatch" };
 
@@ -40,7 +42,7 @@ export function identityMessage(reason: string): string {
     case "no_crm_data":
       return "ระบบยังไม่มีข้อมูล TradingView/อีเมลของคุณ — กรุณาติดต่อฝ่ายสนับสนุน";
     default:
-      return "ข้อมูล TradingView หรืออีเมลไม่ตรงกับที่ระบบมี — กรุณาตรวจสอบอีกครั้ง";
+      return "ชื่อผู้ใช้ TradingView ไม่ตรงกับที่ระบบมี (หรืออีเมลที่ใช้เข้าสู่ระบบไม่ตรงกับอีเมลในระบบ) — กรุณาตรวจสอบอีกครั้ง";
   }
 }
 

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getPrisma, isDatabaseConfigured } from "@/lib/server/prisma";
 import { memberGuard } from "@/lib/session";
-import { toIndicatorAccessDto, toIndicatorDto, toMemberDto, toTelegramAccessDto, toTradeAccountDto, toRenewalRecordDto, toBrokerDto } from "@/lib/server/crmDtos";
+import { toIndicatorAccessDto, toMemberIndicatorDto, toMemberDto, toTelegramAccessDto, toTradeAccountDto, toRenewalRecordDto, toBrokerDto } from "@/lib/server/crmDtos";
 import { readIndicatorAutomationSettings } from "@/lib/server/indicatorSettings";
 import { resolveMemberIdForUser } from "@/lib/server/authIdentity";
 
@@ -91,7 +91,7 @@ export async function GET() {
       indicatorAccess: access.map((a) => toIndicatorAccessDto(a.indicator.name, a)),
       telegramAccess: telegram.map(toTelegramAccessDto),
       renewalHistory: renewals.map((r) => toRenewalRecordDto(r.indicator.name, r)),
-      indicators: indicatorRecords.map(toIndicatorDto),
+      indicators: indicatorRecords.map(toMemberIndicatorDto),
       planEntitlements,
       brokers: brokers.map(toBrokerDto),
       settings: {

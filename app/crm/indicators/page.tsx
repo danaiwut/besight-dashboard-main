@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { useCrm, PLAN_LABELS, type Indicator, type LotCalculationMode, type Plan } from "../../../components/crm/CrmContext";
+import { useCrm, PLAN_LABELS, fmtDate, type Indicator, type LotCalculationMode, type Plan } from "../../../components/crm/CrmContext";
 import { useLanguage } from "../../../components/crm/LanguageContext";
 import { apiCall } from "../../../lib/crmApi";
 import { IndicatorsSkeleton } from "../../../components/crm/Skeletons";
@@ -59,6 +59,11 @@ function IndicatorsCard() {
               </div>
               <div className="d">
                 {t("set.membersWithAccess", { n: memberCount })} · <span className={`status-pill ${ind.status === "active" ? "published" : "draft"}`}>{ind.status === "active" ? t("common.active") : t("common.inactive")}</span>
+                {ind.eaFile && (
+                  <>
+                    {" "}· <a href={ind.eaFile} target="_blank" rel="noopener noreferrer" className="status-pill published" style={{ textDecoration: "none" }}>EA ↗</a>
+                  </>
+                )}
               </div>
             </div>
             <div style={{ display: "flex", gap: 6 }}>
@@ -289,6 +294,92 @@ function IndicatorSettingsCard() {
   );
 }
 
+type EaPolicy = { text: string; version: number; updatedAt: string | null; updatedBy: string | null };
+
+/** EA download policy — members must accept this text before an indicator's
+ *  EA link is released. Each change bumps the version; acceptances are logged
+ *  in Activity Logs as "EA Policy Accepted" with the exact wording agreed to. */
+function EaPolicyCard() {
+  const { toast, backendLive } = useCrm();
+  const { t } = useLanguage();
+  const [policy, setPolicy] = useState<EaPolicy | null>(null);
+  const [draft, setDraft] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    if (!backendLive) return;
+    let cancelled = false;
+    apiCall<{ policy: EaPolicy }>("/api/crm/settings/ea-policy/", "GET")
+      .then((payload) => {
+        if (cancelled) return;
+        setPolicy(payload.policy);
+        setDraft(payload.policy.text);
+      })
+      .catch((e) => !cancelled && setError(e instanceof Error ? e.message : "Unable to load EA policy"));
+    return () => { cancelled = true; };
+  }, [backendLive]);
+
+  async function save() {
+    if (!draft.trim()) {
+      toast(t("set.eaPolicy.required"));
+      return;
+    }
+    setSaving(true);
+    try {
+      const payload = await apiCall<{ policy: EaPolicy }>("/api/crm/settings/ea-policy/", "PUT", { text: draft });
+      setPolicy(payload.policy);
+      setDraft(payload.policy.text);
+      toast(t("set.eaPolicy.saved", { v: payload.policy.version }));
+    } catch (e) {
+      toast(e instanceof Error ? e.message : "Unable to save EA policy");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  const dirty = policy ? draft.trim() !== policy.text.trim() : false;
+
+  return (
+    <div className="card" style={{ padding: 22, marginBottom: 22 }}>
+      <div className="settings-head" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 14, flexWrap: "wrap" }}>
+        <div>
+          <h3>{t("set.eaPolicy.title")}</h3>
+          <div className="desc" style={{ fontSize: 12.5, color: "var(--text-sub)", marginTop: 2 }}>
+            {t("set.eaPolicy.desc")}
+          </div>
+        </div>
+        {policy && (
+          <span className="status-pill published">
+            {t("set.eaPolicy.version", { v: policy.version })}
+            {policy.updatedAt ? ` · ${fmtDate(policy.updatedAt.slice(0, 10))}` : ""}
+          </span>
+        )}
+      </div>
+      {error ? (
+        <div style={{ color: "var(--red)", fontSize: 13, marginTop: 12 }}>{error}</div>
+      ) : (
+        <>
+          <textarea
+            className="input"
+            style={{ width: "100%", minHeight: 260, marginTop: 14, fontFamily: "inherit", lineHeight: 1.6, resize: "vertical" }}
+            value={draft}
+            onChange={(e) => setDraft(e.target.value)}
+            disabled={!policy}
+            aria-label={t("set.eaPolicy.title")}
+          />
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12, flexWrap: "wrap", marginTop: 12 }}>
+            <div style={{ fontSize: 12, color: "var(--text-sub)" }}>{t("set.eaPolicy.hint")}</div>
+            <button className="btn btn-primary" onClick={() => void save()} disabled={!policy || !dirty || saving}>
+              {saving ? "Saving..." : t("set.eaPolicy.save")}
+            </button>
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
 export default function IndicatorsPage() {
   const { crmDataStatus } = useCrm();
 
@@ -297,6 +388,7 @@ export default function IndicatorsPage() {
   return (
     <section className="panel is-active">
       <IndicatorsCard />
+      <EaPolicyCard />
       <PlansCard />
       <IndicatorSettingsCard />
     </section>

@@ -26,14 +26,14 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ ok: false, error: "No member profile for this account" }, { status: 404 });
   }
   try {
-    const body = await request.json() as { tradeId?: string; brokerId?: number; tradingView?: string; email?: string };
+    const body = await request.json() as { tradeId?: string; brokerId?: number; tradingView?: string };
     const tradeId = String(body.tradeId || "").trim();
     if (!tradeId) return NextResponse.json({ ok: false, error: "กรุณากรอก Trade ID" }, { status: 400 });
     if (tradeId.length > 64) return NextResponse.json({ ok: false, error: "Trade ID ยาวเกินไป" }, { status: 400 });
 
     // Prove the claimant is the member on file BEFORE touching any account:
-    // the TradingView username + email must match the CRM-synced record.
-    const identity = await verifyMemberIdentity(memberId, String(body.tradingView || ""), String(body.email || ""));
+    // the TradingView username + the signed-in email must match the CRM record.
+    const identity = await verifyMemberIdentity(memberId, String(body.tradingView || ""), guard.user.email);
     if (!identity.verified) {
       return NextResponse.json(
         { ok: false, error: identityMessage(identity.reason), code: identity.reason === "mismatch" ? "identity_mismatch" : "identity_unavailable" },

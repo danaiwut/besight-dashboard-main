@@ -2,21 +2,27 @@ import { NextRequest, NextResponse } from "next/server";
 import { getPrisma, isDatabaseConfigured } from "@/lib/server/prisma";
 import { resolveMemberIdForUser } from "@/lib/server/authIdentity";
 import { memberGuard } from "@/lib/session";
+import { symbolsByMember } from "@/lib/server/memberSymbols";
 
 export const dynamic = "force-dynamic";
 
 export type LeaderboardPeriod = "daily" | "monthly";
 
-/* Every signed-in member can read this board, so it carries the minimum needed
-   to render a ranking: standing, a display label and the lot count it is ranked
-   on. Deliberately absent: other members' rebate earnings (financial data),
-   country, and any un-masked legal name. */
+/* Every signed-in member can read this board: standing, a display label, the
+   lot count it is ranked on, the period's rebate and the symbols traded.
+   Showing every member's rebate is a deliberate product decision by the
+   BeSight owner (it used to be hidden as financial data). Still absent:
+   country and any un-masked legal name. */
 export type LeaderboardRowDto = {
   rank: number;
   memberId: number;
   name: string;
   code: string;
   lots: number;
+  /** Rebate earned in the same window. */
+  rebate: number;
+  /** Symbols the member has traded (real data only — see memberSymbols). */
+  symbols: string[];
   /** Rank in the previous comparable window, when one exists. */
   previousRank: number | null;
 };
@@ -126,8 +132,13 @@ export async function GET(request: NextRequest) {
       .sort((a, b) => b.lots - a.lots || b.rebate - a.rebate)
       .slice(0, 200);
 
-    const info = await memberInfo(ranked.map((row) => row.memberId));
     const memberId = await resolveMemberIdForUser(guard.user);
+    const idsOnBoard = ranked.map((row) => row.memberId);
+    const [info, symbols] = await Promise.all([
+      memberInfo(idsOnBoard),
+      symbolsByMember(memberId && !idsOnBoard.includes(memberId) ? [...idsOnBoard, memberId] : idsOnBoard),
+    ]);
+    const symbolsOf = (id: number) => (symbols.get(id) ?? []).map((s) => s.symbol);
 
     const rows: LeaderboardRowDto[] = ranked.map((row) => {
       const member = info.get(row.memberId);
@@ -137,6 +148,8 @@ export async function GET(request: NextRequest) {
         name: member?.name ?? "—",
         code: member?.code ?? "—",
         lots: Math.round(row.lots * 100) / 100,
+        rebate: Math.round(row.rebate * 100) / 100,
+        symbols: symbolsOf(row.memberId),
         previousRank: prevRanks.get(row.memberId) ?? null,
       };
     });
@@ -153,6 +166,8 @@ export async function GET(request: NextRequest) {
           name: member?.name ?? "—",
           code: member?.code ?? "—",
           lots: Math.round(mine.lots * 100) / 100,
+          rebate: Math.round(mine.rebate * 100) / 100,
+          symbols: symbolsOf(memberId),
           previousRank: prevRanks.get(memberId) ?? null,
         };
       }

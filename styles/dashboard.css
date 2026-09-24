@@ -926,7 +926,7 @@
   background: radial-gradient(120% 40% at 12% 0%, rgba(255,255,255,0.6), transparent 55%);
 }
 .lbd-row {
-  position: relative; z-index: 1; display: grid; grid-template-columns: 40px 1.6fr 1fr 1fr 1fr 0.8fr; align-items: center; gap: 10px;
+  position: relative; z-index: 1; display: grid; grid-template-columns: 40px 2fr 0.9fr 0.9fr 0.9fr 0.9fr 0.7fr; align-items: center; gap: 10px;
   padding: 14px 0; font-size: 13.5px;
 }
 .lbd-row:not(.lbd-head):not(:last-child) { border-bottom: 1px solid var(--border); }
@@ -942,6 +942,9 @@
 .lbd-member-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .lbd-member-name { font-weight: 600; color: var(--white); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .lbd-member-code { font-size: 11px; color: var(--text-sub); margin-top: 1px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lbd-rebate { color: var(--green); font-weight: 700; font-variant-numeric: tabular-nums; }
+.lbd-symbols { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 5px; }
+.lbd-symbols .lbd-symbol { font-size: 10.5px; padding: 2px 7px; line-height: 1.4; }
 .lbd-rebate-pill { justify-self: end; font-weight: 700; font-size: 13.5px; color: var(--white); }
 .lbd-change { justify-self: end; display: inline-flex; align-items: center; gap: 2px; font-weight: 700; font-size: 12.5px; font-variant-numeric: tabular-nums; }
 .lbd-change .icon { font-size: 14px; }
@@ -967,9 +970,9 @@
   .lbd-updated { text-align: left; }
   .lbd-podium { grid-template-columns: 1fr; max-width: 320px; }
   .lbd-podium-card.rank-1 { order: -1; transform: none; }
-  .lbd-row { grid-template-columns: 28px 1.4fr 1fr; }
-  .lbd-row > span:nth-child(3), .lbd-row > span:nth-child(5), .lbd-row > span:nth-child(6) { display: none; }
-  .lbd-head span:nth-child(3), .lbd-head span:nth-child(5), .lbd-head span:nth-child(6) { display: none; }
+  .lbd-row { grid-template-columns: 28px 1.6fr 0.8fr 0.8fr; }
+  .lbd-row > span:nth-child(3), .lbd-row > span:nth-child(6), .lbd-row > span:nth-child(7) { display: none; }
+  .lbd-head span:nth-child(3), .lbd-head span:nth-child(6), .lbd-head span:nth-child(7) { display: none; }
 }
 
 /* ── Light-mode glassmorphism (customer dashboard only) ──
@@ -2001,3 +2004,24 @@
 .install-prompt-close .icon { font-size: 18px; }
 @keyframes install-prompt-in { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
 @media (prefers-reduced-motion: reduce) { .install-prompt { animation: none; } }
+
+/* ── BEC rates dialog (opened from the Benefits page) ── */
+.bec-rates-modal { width: 880px; text-align: left; padding: 22px 22px 24px; }
+.bec-rates-modal-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 16px; }
+.bec-rates-modal-sub { font-size: 12.5px; color: var(--text-sub); margin-top: 2px; }
+.bec-rates-panel { display: grid; grid-template-columns: minmax(0, 1fr) 260px; gap: 18px; align-items: start; }
+.bec-rates-main { min-width: 0; }
+.bec-rates-side { display: flex; flex-direction: column; gap: 12px; }
+.bec-rates-box { border: 1px solid var(--border); border-radius: 12px; padding: 16px; }
+@media (max-width: 760px) {
+  .bec-rates-panel { grid-template-columns: 1fr; }
+  .bec-rates-side { order: -1; }
+}
+
+/* Long names/emails in the avatar chip + dropdown truncate with "…" instead of
+   stretching the topbar (full value on hover via title). */
+.user-chip .utext { display: flex; flex-direction: column; min-width: 0; max-width: 200px; text-align: left; line-height: 1.25; }
+.user-chip .uname, .user-chip .uhandle { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.user-dropdown-head { min-width: 0; }
+.user-dropdown-head .dd-text { display: flex; flex-direction: column; min-width: 0; line-height: 1.2; }
+.user-dropdown-head .dd-name, .user-dropdown-head .dd-mail { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

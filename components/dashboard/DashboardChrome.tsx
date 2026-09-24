@@ -28,7 +28,6 @@ const NAV_GROUPS = [
         children: [
           { href: "/dashboard/activities", labelKey: "dash.nav.activities" },
           { href: "/dashboard/spin-wheel", labelKey: "dash.nav.spinWheel" },
-          { href: "/dashboard/bec-rates", labelKey: "dash.nav.becRates" },
           { href: "/dashboard/rewards", labelKey: "dash.nav.rewardsPrograms" },
           { href: "/dashboard/my-rewards", labelKey: "dash.nav.myRewards" },
         ],

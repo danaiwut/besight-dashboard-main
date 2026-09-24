@@ -5,6 +5,7 @@ import { useLanguage } from "../../../components/crm/LanguageContext";
 import { useCrm, accessLabel, accessBadgeClass, accessLabelKey, progressTone, memberLotRange, fmtDate, lot } from "../../../components/crm/CrmContext";
 import { useCustomerData } from "../../../components/dashboard/useCustomerData";
 import VerifyResultModal, { type VerifyResult } from "../../../components/crm/VerifyResultModal";
+import EaPolicyModal from "../../../components/dashboard/EaPolicyModal";
 import Icon from "../../../components/Icon";
 
 export default function DashboardIndicatorsPage() {
@@ -31,6 +32,7 @@ export default function DashboardIndicatorsPage() {
   const activeCount = rows.filter((r) => r.label === "Active").length;
 
   const [query, setQuery] = useState("");
+  const [eaTarget, setEaTarget] = useState<{ id: number; name: string } | null>(null);
   const filteredRows = query.trim() ? rows.filter((r) => r.access.indicator.toLowerCase().includes(query.trim().toLowerCase())) : rows;
 
   const [tv, setTv] = useState(member.tv);
@@ -185,16 +187,16 @@ export default function DashboardIndicatorsPage() {
                         )}
                       </td>
                       <td>
-                        {indicator?.eaFile ? (
-                          <a
+                        {indicator?.hasEa && (label === "Active" || label === "Expiring Soon") ? (
+                          <button
+                            type="button"
                             className="btn btn-ghost"
                             style={{ padding: "6px 12px", minWidth: "auto", display: "inline-flex" }}
-                            href={indicator.eaFile}
-                            download
+                            onClick={() => setEaTarget({ id: indicator.id, name: indicator.name })}
                           >
                             <Icon name="download" style={{ fontSize: 15 }} />
                             {t("dash.indicators.downloadEa")}
-                          </a>
+                          </button>
                         ) : (
                           "—"
                         )}
@@ -260,6 +262,7 @@ export default function DashboardIndicatorsPage() {
       </div>
 
       <VerifyResultModal result={tvResult} onClose={() => setTvResult(null)} />
+      <EaPolicyModal indicator={eaTarget} onClose={() => setEaTarget(null)} />
     </>
   );
 }

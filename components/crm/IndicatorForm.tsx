@@ -13,6 +13,7 @@ const IndicatorForm = forwardRef<IndicatorFormHandle, { indicator: Indicator | n
     const [name, setName] = useState(indicator?.name ?? "");
     const [pubId, setPubId] = useState(indicator?.pubId ?? "");
     const [status, setStatus] = useState<Indicator["status"]>(indicator?.status ?? "active");
+    const [eaFile, setEaFile] = useState(indicator?.eaFile ?? "");
 
     useImperativeHandle(ref, () => ({
       save() {
@@ -27,7 +28,12 @@ const IndicatorForm = forwardRef<IndicatorFormHandle, { indicator: Indicator | n
         return;
       }
       const trimmedPubId = pubId.trim();
-      const data = { name: trimmedName, pubId: trimmedPubId, status };
+      const trimmedEa = eaFile.trim();
+      if (trimmedEa && !/^https?:\/\/\S+$/i.test(trimmedEa)) {
+        toast("EA download link must start with https://");
+        return;
+      }
+      const data = { name: trimmedName, pubId: trimmedPubId, status, eaFile: trimmedEa || undefined, hasEa: Boolean(trimmedEa) };
       if (!backendLive) {
         if (isNew) {
           setIndicators((cur) => [...cur, { id: Math.max(0, ...cur.map((i) => i.id)) + 1, ...data }]);
@@ -41,11 +47,11 @@ const IndicatorForm = forwardRef<IndicatorFormHandle, { indicator: Indicator | n
       }
       try {
         if (isNew) {
-          const payload = await apiCall<{ indicator: Indicator }>("/api/crm/indicators/", "POST", data);
+          const payload = await apiCall<{ indicator: Indicator }>("/api/crm/indicators/", "POST", { ...data, eaFileUrl: trimmedEa });
           setIndicators((cur) => [...cur, payload.indicator]);
           toast("Indicator added");
         } else {
-          const payload = await apiCall<{ indicator: Indicator }>(`/api/crm/indicators/${indicator!.id}/`, "PUT", data);
+          const payload = await apiCall<{ indicator: Indicator }>(`/api/crm/indicators/${indicator!.id}/`, "PUT", { ...data, eaFileUrl: trimmedEa });
           setIndicators((cur) => cur.map((i) => (i.id === indicator!.id ? payload.indicator : i)));
           toast("Indicator updated");
         }
@@ -64,6 +70,20 @@ const IndicatorForm = forwardRef<IndicatorFormHandle, { indicator: Indicator | n
         <div className="field">
           <label>Pub ID</label>
           <input className="input" value={pubId} onChange={(e) => setPubId(e.target.value)} placeholder="e.g. smart-entry-zones" />
+        </div>
+        <div className="field">
+          <label>EA download link (Google Drive)</label>
+          <input
+            className="input"
+            type="url"
+            inputMode="url"
+            value={eaFile}
+            onChange={(e) => setEaFile(e.target.value)}
+            placeholder="https://drive.google.com/file/d/…/view"
+          />
+          <div style={{ fontSize: 12, color: "var(--text-sub)", marginTop: 6 }}>
+            Shown as a Download EA button to members with active access, after they accept the EA policy. Set the Drive file to &quot;Anyone with the link&quot;. Leave empty to hide.
+          </div>
         </div>
         <div className="field" style={{ marginBottom: 0 }}>
           <label>Status</label>

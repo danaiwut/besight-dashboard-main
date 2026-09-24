@@ -14,8 +14,12 @@ type Row = {
   name: string;
   code: string;
   lots: number;
+  rebate: number;
+  symbols: string[];
   previousRank: number | null;
 };
+
+const MAX_SYMBOL_BADGES = 6;
 
 const PAGE_SIZE = 8;
 
@@ -231,6 +235,7 @@ export default function DashboardLeaderboardPage() {
                 <span>{t("dash.leaderboard.colUsername")}</span>
                 <span>{t("dash.leaderboard.colTier")}</span>
                 <span>{t("dash.leaderboard.colLots")}</span>
+                <span>{t("dash.leaderboard.colRebateAccum")}</span>
                 <span>{t("dash.leaderboard.colGap")}</span>
                 <span>{t("dash.leaderboard.colChange")}</span>
               </div>
@@ -248,10 +253,21 @@ export default function DashboardLeaderboardPage() {
                         <span className="lbd-member-info">
                           <div className="lbd-member-name">{row.name}</div>
                           {row.code !== row.name && <div className="lbd-member-code">{row.code}</div>}
+                          {row.symbols?.length > 0 && (
+                            <div className="lbd-symbols" title={row.symbols.join(", ")}>
+                              {row.symbols.slice(0, MAX_SYMBOL_BADGES).map((symbol) => (
+                                <span className="badge active lbd-symbol" key={symbol}>{symbol}</span>
+                              ))}
+                              {row.symbols.length > MAX_SYMBOL_BADGES && (
+                                <span className="badge suspended lbd-symbol">+{row.symbols.length - MAX_SYMBOL_BADGES}</span>
+                              )}
+                            </div>
+                          )}
                         </span>
                       </span>
                       <span>{t(tierFor(row.lots).titleKey)}</span>
                       <span>{lot(row.lots)}</span>
+                      <span className="lbd-rebate">${(row.rebate ?? 0).toFixed(2)}</span>
                       <span className="lbd-rebate-pill">{leaderLots > 0 && row.lots < leaderLots ? `-${lot(leaderLots - row.lots)}` : "—"}</span>
                       <span className={`lbd-change${chg ? (chg > 0 ? " is-up" : " is-down") : " is-flat"}`}>
                         {!chg ? (

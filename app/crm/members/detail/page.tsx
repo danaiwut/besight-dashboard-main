@@ -141,6 +141,51 @@ function MemberRenewalHistory({ memberId }: { memberId: number }) {
   );
 }
 
+/* Symbols (currency pairs) the member has traded — real data only, from the
+   member's MT-synced journal (and per-symbol trade logs once the lot API
+   provides them). Shows an honest empty state when there is none. */
+function MemberSymbolsCard({ memberId }: { memberId: number }) {
+  const { t } = useLanguage();
+  const { dataVersion, backendLive } = useCrm();
+  const [symbols, setSymbols] = useState<{ symbol: string; trades: number; lots: number }[] | null>(null);
+
+  useEffect(() => {
+    if (!backendLive) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setSymbols([]);
+      return;
+    }
+    let cancelled = false;
+    fetch(`/api/crm/members/${memberId}/symbols/`, { cache: "no-store" })
+      .then(async (response) => {
+        const payload = await response.json() as { ok?: boolean; symbols?: { symbol: string; trades: number; lots: number }[] };
+        if (!cancelled) setSymbols(response.ok && payload.ok && payload.symbols ? payload.symbols : []);
+      })
+      .catch(() => { if (!cancelled) setSymbols([]); });
+    return () => { cancelled = true; };
+  }, [memberId, dataVersion, backendLive]);
+
+  return (
+    <div className="card" style={{ padding: 20, marginBottom: 16 }}>
+      <div className="panel-section-title">{t("members.section.symbols")}</div>
+      {symbols === null ? (
+        <span className="skeleton" style={{ width: 220, height: 22 }} />
+      ) : symbols.length ? (
+        <div className="member-symbols">
+          {symbols.map((s) => (
+            <span className="badge active member-symbol" key={s.symbol} title={t("members.symbols.tooltip", { trades: s.trades, lots: lot(s.lots) })}>
+              {s.symbol}
+              <span className="member-symbol-meta">{lot(s.lots)}</span>
+            </span>
+          ))}
+        </div>
+      ) : (
+        <div style={{ fontSize: 13, color: "var(--text-sub)" }}>{t("members.symbols.empty")}</div>
+      )}
+    </div>
+  );
+}
+
 function MemberDetailContent() {
   const params = useSearchParams();
   const router = useRouter();
@@ -424,6 +469,8 @@ function MemberDetailContent() {
           <MemberIndicatorAccessPanel member={member} />
         </div>
       </div>
+
+      <MemberSymbolsCard memberId={member.id} />
 
       <MemberRenewalHistory memberId={member.id} />
 

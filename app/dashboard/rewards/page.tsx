@@ -8,6 +8,7 @@ import { useCustomerData } from "../../../components/dashboard/useCustomerData";
 import { apiCall } from "../../../lib/crmApi";
 import type { RewardClaimDto, RewardTierDto } from "../../../lib/activities";
 import Icon from "../../../components/Icon";
+import BecRatesPanel from "../../../components/dashboard/BecRatesPanel";
 
 type ClaimState = "locked" | "available" | "pending" | "fulfilled";
 
@@ -22,6 +23,7 @@ export default function DashboardRewardsPage() {
   const [loading, setLoading] = useState(true);
   const [claimingKey, setClaimingKey] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const [becOpen, setBecOpen] = useState(false);
   const rewardsRef = useRef<HTMLDivElement>(null);
 
   const load = useCallback(async () => {
@@ -43,6 +45,19 @@ export default function DashboardRewardsPage() {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     void load();
   }, [load]);
+
+  // Old /dashboard/bec-rates links land here with ?bec=1.
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- one-time sync from the URL
+    if (new URLSearchParams(window.location.search).get("bec") === "1") setBecOpen(true);
+  }, []);
+
+  useEffect(() => {
+    if (!becOpen) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setBecOpen(false); };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [becOpen]);
 
   function copyCode() {
     navigator.clipboard
@@ -137,6 +152,10 @@ export default function DashboardRewardsPage() {
             <Icon name="card_giftcard" style={{ fontSize: 16 }} />
             {t("dash.rewards.myRewardsCta")}
           </Link>
+          <button type="button" className="btn btn-primary" style={{ width: "100%", marginTop: 8 }} onClick={() => setBecOpen(true)}>
+            <Icon name="toll" style={{ fontSize: 16 }} />
+            {t("dash.rewards.becRatesCta")}
+          </button>
         </div>
 
         <div className="card rewards-hero-card">
@@ -271,6 +290,23 @@ export default function DashboardRewardsPage() {
           <Icon name="chevron_right" />
         </button>
       </div>
+      {becOpen && (
+        <>
+          <div className="modal-scrim show" onClick={() => setBecOpen(false)}></div>
+          <div className="modal show bec-rates-modal" role="dialog" aria-modal="true" aria-labelledby="bec-rates-title">
+            <div className="bec-rates-modal-head">
+              <div>
+                <h3 className="modal-title" id="bec-rates-title">{t("dash.title.becRates")}</h3>
+                <div className="bec-rates-modal-sub">{t("dash.sub.becRates")}</div>
+              </div>
+              <button type="button" className="kebab" aria-label={t("common.close")} onClick={() => setBecOpen(false)}>
+                <Icon name="close" />
+              </button>
+            </div>
+            <BecRatesPanel />
+          </div>
+        </>
+      )}
     </>
   );
 }

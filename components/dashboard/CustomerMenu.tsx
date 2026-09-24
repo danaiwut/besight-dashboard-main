@@ -43,19 +43,17 @@ export default function CustomerMenu() {
       >
         <Avatar member={member} size={38} />
         <span className="utext">
-          <span className="uname">{displayNameOf(member)}</span>
-          <br />
-          <span className="uhandle">{member.email}</span>
+          <span className="uname" title={displayNameOf(member)}>{displayNameOf(member)}</span>
+          <span className="uhandle" title={member.email}>{member.email}</span>
         </span>
         <Icon name="expand_more" className="chev" />
       </button>
       <div className="user-dropdown" role="menu" aria-label="Account">
         <div className="user-dropdown-head">
           <Avatar member={member} size={38} />
-          <span style={{ lineHeight: 1.2 }}>
-            <span className="dd-name">{displayNameOf(member)}</span>
-            <br />
-            <span className="dd-mail">{member.email}</span>
+          <span className="dd-text">
+            <span className="dd-name" title={displayNameOf(member)}>{displayNameOf(member)}</span>
+            <span className="dd-mail" title={member.email}>{member.email}</span>
           </span>
         </div>
         <Link className="dd-item" role="menuitem" href="/dashboard/profile" onClick={() => setOpen(false)}>

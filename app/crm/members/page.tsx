@@ -32,19 +32,56 @@ import { MembersSkeleton } from "../../../components/crm/Skeletons";
 import Icon from "../../../components/Icon";
 import Drawer from "../../../components/crm/Drawer";
 import MemberForm from "../../../components/crm/MemberForm";
+import MemberIndicatorAccessPanel from "../../../components/crm/MemberIndicatorAccessPanel";
 import DateRangePicker from "../../../components/crm/DateRangePicker";
 import Pagination from "../../../components/crm/Pagination";
 import { apiCall } from "../../../lib/crmApi";
 import { exportCsv } from "../../../lib/exportCsv";
 import { MEMBER_LEVEL_LABEL_KEYS, PREMIUM_MONTHS, levelFromMonthlyLots, recentMonthKeys, type MemberLevel } from "../../../lib/memberLevel";
 
-type DrawerMode = { kind: "form"; member: Member | null } | null;
+type DrawerMode = { kind: "form"; member: Member | null } | { kind: "access"; member: Member } | null;
 type LotsFilter = "all" | "qualified" | "not_qualified";
 const STATUS_FILTERS = ["Active", "Expiring Soon", "Expired", "Suspended", "Pending"];
+
+const FILTERS_STORAGE_KEY = "crm.members.filters";
+type SavedFilters = {
+  status: string;
+  broker: string;
+  plan: string;
+  stage: "all" | CustomerStage;
+  lots: LotsFilter;
+  dateRange: { from: string; to: string };
+  query: string;
+  page: number;
+  sortKey: "lots" | "startDate" | "expiryDate" | null;
+  sortDir: "asc" | "desc";
+};
+
+function readSavedFilters(): SavedFilters | null {
+  try {
+    const raw = sessionStorage.getItem(FILTERS_STORAGE_KEY);
+    if (!raw) return null;
+    const v = JSON.parse(raw) as Partial<SavedFilters>;
+    return {
+      status: typeof v.status === "string" ? v.status : "all",
+      broker: typeof v.broker === "string" ? v.broker : "all",
+      plan: typeof v.plan === "string" ? v.plan : "all",
+      stage: v.stage === "new" || v.stage === "existing" ? v.stage : "all",
+      lots: v.lots === "qualified" || v.lots === "not_qualified" ? v.lots : "all",
+      dateRange: { from: typeof v.dateRange?.from === "string" ? v.dateRange.from : "", to: typeof v.dateRange?.to === "string" ? v.dateRange.to : "" },
+      query: typeof v.query === "string" ? v.query : "",
+      page: Number.isInteger(v.page) && Number(v.page) > 0 ? Number(v.page) : 1,
+      sortKey: v.sortKey === "lots" || v.sortKey === "startDate" || v.sortKey === "expiryDate" ? v.sortKey : null,
+      sortDir: v.sortDir === "desc" ? "desc" : "asc",
+    };
+  } catch {
+    return null;
+  }
+}
 const PAGE_SIZE = 50;
 
 export default function MembersPage() {
-  const { members, tradeAccounts, tradeLogs, indicatorAccess, brokers, settings, toast, memberSyncStatus, memberSyncError, refreshMembers, crmDataStatus, reloadFromDatabase, lotSummaries, lotOverview, backendLive } = useCrm();
+  const { members, tradeAccounts, tradeLogs, indicatorAccess, setIndicatorAccess, brokers, settings, toast, memberSyncStatus, memberSyncError, refreshMembers, crmDataStatus, reloadFromDatabase, lotSummaries, lotOverview, backendLive } = useCrm();
   const { t } = useLanguage();
   const router = useRouter();
   const [statusFilter, setStatusFilter] = useState("all");
@@ -125,17 +162,54 @@ export default function MembersPage() {
   const isQualified = (m: Member): boolean =>
     lotSummaries[m.id]?.qualified ?? qualification(summaryLots(m), summaryRequired(m)) === "qualified";
 
-  // Overview stat cards deep-link here (?status=Expired, ?lots=qualified…).
-  // Read once on mount rather than useSearchParams, which would force a
-  // Suspense boundary around the whole page.
+  /* Filters survive opening a member and coming back: they are saved for the
+     browser session and restored on mount. Overview stat cards deep-link with
+     ?status= / ?lots=, which start from a clean slate instead. Read in an effect
+     (not useSearchParams) to avoid a Suspense boundary around the page. */
+  const skipFirstSave = useRef(true);
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const status = params.get("status");
     const lots = params.get("lots");
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- one-time sync from the URL
-    if (status && STATUS_FILTERS.includes(status)) setStatusFilter(status);
-    if (lots === "qualified" || lots === "not_qualified") setLotsFilter(lots);
+    /* eslint-disable react-hooks/set-state-in-effect -- one-time restore on mount */
+    if (status || lots) {
+      if (status && STATUS_FILTERS.includes(status)) setStatusFilter(status);
+      if (lots === "qualified" || lots === "not_qualified") setLotsFilter(lots);
+    } else {
+      const saved = readSavedFilters();
+      if (saved) {
+        if (saved.status === "all" || STATUS_FILTERS.includes(saved.status)) setStatusFilter(saved.status);
+        setBrokerFilter(saved.broker);
+        setPlanFilter(saved.plan);
+        setStageFilter(saved.stage);
+        setLotsFilter(saved.lots);
+        setDateRange(saved.dateRange);
+        setQuery(saved.query);
+        setPage(saved.page);
+        setSortKey(saved.sortKey);
+        setSortDir(saved.sortDir);
+      }
+    }
+    /* eslint-enable react-hooks/set-state-in-effect */
   }, []);
+
+  useEffect(() => {
+    // Skip the mount run: state still holds the defaults at that point, and
+    // saving them would clobber what the restore effect above is applying.
+    if (skipFirstSave.current) {
+      skipFirstSave.current = false;
+      return;
+    }
+    try {
+      const value: SavedFilters = {
+        status: statusFilter, broker: brokerFilter, plan: planFilter, stage: stageFilter, lots: lotsFilter,
+        dateRange, query, page, sortKey, sortDir,
+      };
+      sessionStorage.setItem(FILTERS_STORAGE_KEY, JSON.stringify(value));
+    } catch {
+      // storage blocked (private mode) — filters just won't persist
+    }
+  }, [statusFilter, brokerFilter, planFilter, stageFilter, lotsFilter, dateRange, query, page, sortKey, sortDir]);
 
   function applyLotsFilter(next: LotsFilter) {
     setLotsFilter(next);
@@ -287,6 +361,30 @@ export default function MembersPage() {
     setDrawerMode(null);
   }
 
+  /** Row "Renew": one indicator → confirm and extend right away (server adds
+   *  renewalPeriodMonths from max(expiry, now) and logs the manual renewal);
+   *  several (or none) → open the access panel to pick. */
+  const [renewingId, setRenewingId] = useState<number | null>(null);
+  async function renewFromRow(m: Member) {
+    const renewable = memberIndicatorAccess(m.id, indicatorAccess).filter((a) => a.status !== "suspended");
+    if (renewable.length !== 1) {
+      setDrawerMode({ kind: "access", member: m });
+      return;
+    }
+    const access = renewable[0];
+    if (!window.confirm(t("members.renewConfirm", { name: m.name, indicator: access.indicator, months: settings.renewalPeriodMonths }))) return;
+    setRenewingId(m.id);
+    try {
+      const payload = await apiCall<{ indicatorAccess: typeof access }>(`/api/crm/indicator-access/${access.id}/`, "PATCH", { extend: true });
+      setIndicatorAccess((cur) => cur.map((a) => (a.id === access.id ? payload.indicatorAccess : a)));
+      toast(t("ia.toast.extended", { name: m.name }));
+    } catch (error) {
+      toast(error instanceof Error ? error.message : "Unable to extend indicator access");
+    } finally {
+      setRenewingId(null);
+    }
+  }
+
   function goToPage(p: number) {
     setPage(p);
   }
@@ -319,7 +417,11 @@ export default function MembersPage() {
     toast(t("members.toast.exported", { n: list.length }));
   }
 
-  const title = drawerMode?.kind === "form" ? (drawerMode.member ? t("members.drawer.edit") : t("members.drawer.add")) : "";
+  const title = drawerMode?.kind === "form"
+    ? (drawerMode.member ? t("members.drawer.edit") : t("members.drawer.add"))
+    : drawerMode?.kind === "access"
+      ? t("members.drawer.access", { name: drawerMode.member.name })
+      : "";
 
   if (crmDataStatus === "loading") return <MembersSkeleton />;
 
@@ -658,6 +760,29 @@ export default function MembersPage() {
                         </td>
                         <td className="row-actions" data-noopen>
                           <button
+                            className="btn btn-ghost row-mini-btn"
+                            title={t("members.row.addIndicator")}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setDrawerMode({ kind: "access", member: m });
+                            }}
+                          >
+                            <Icon name="add_circle" />
+                            {t("members.row.addIndicator")}
+                          </button>
+                          <button
+                            className="btn btn-ghost row-mini-btn"
+                            title={t("members.row.renew")}
+                            disabled={renewingId === m.id || !memberIndicatorAccess(m.id, indicatorAccess).length}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              void renewFromRow(m);
+                            }}
+                          >
+                            <Icon name="autorenew" />
+                            {t("members.row.renew")}
+                          </button>
+                          <button
                             className="kebab"
                             aria-label={`Open ${m.name}`}
                             onClick={(e) => {
@@ -722,7 +847,13 @@ export default function MembersPage() {
         open={!!drawerMode}
         title={title}
         onClose={closeDrawer}
-        body={drawerMode?.kind === "form" ? <MemberForm ref={formRef} member={drawerMode.member} onDone={closeDrawer} /> : null}
+        body={
+          drawerMode?.kind === "form" ? (
+            <MemberForm ref={formRef} member={drawerMode.member} onDone={closeDrawer} />
+          ) : drawerMode?.kind === "access" ? (
+            <MemberIndicatorAccessPanel member={drawerMode.member} />
+          ) : null
+        }
         foot={
           drawerMode?.kind === "form" ? (
             <>
@@ -733,6 +864,10 @@ export default function MembersPage() {
                 {drawerMode.member ? t("common.saveChanges") : t("members.addMember")}
               </button>
             </>
+          ) : drawerMode?.kind === "access" ? (
+            <button className="btn btn-ghost" onClick={closeDrawer}>
+              {t("common.close")}
+            </button>
           ) : null
         }
       />

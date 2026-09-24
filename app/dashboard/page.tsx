@@ -187,7 +187,6 @@ export default function DashboardOverviewPage() {
             <h2>{t("dash.accounts.title")}</h2>
             <DateRangePicker value={accountsRange} onChange={setAccountsRange} placeholder={t("dash.history.filter.label")} />
           </div>
-          <IdentityVerifyCard />
           {pendingTradeAccounts.length > 0 && (
             <div style={{ margin: "0 0 14px", padding: "12px 14px", border: "1px solid var(--border)", borderRadius: 10, background: "var(--bg-card2, rgba(0,0,0,0.03))" }}>
               <div className="panel-section-title" style={{ marginBottom: 4 }}>{t("dash.accounts.pendingTitle")}</div>
@@ -258,6 +257,7 @@ export default function DashboardOverviewPage() {
             <div className="accounts-break" aria-hidden="true" />
             <TradeIdInline />
           </div>
+          <IdentityVerifyCard />
         </div>
       </div>
 

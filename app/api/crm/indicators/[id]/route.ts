@@ -4,6 +4,7 @@ import { getPrisma, isDatabaseConfigured } from "@/lib/server/prisma";
 import { bumpDataVersion } from "@/lib/server/dataVersion";
 import { toIndicatorDto } from "@/lib/server/crmDtos";
 import { adminWriteGuard } from "@/lib/session";
+import { normalizeEaUrl } from "@/lib/server/eaPolicy";
 
 
 export const dynamic = "force-dynamic";
@@ -33,6 +34,11 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
       data.publicationId = String(body.publicationId ?? body.pubId ?? "").trim() || null;
     }
     if (body.status !== undefined) data.status = body.status === "inactive" ? RecordStatus.inactive : RecordStatus.active;
+    if (body.eaFileUrl !== undefined || body.eaFile !== undefined) {
+      const ea = normalizeEaUrl(body.eaFileUrl ?? body.eaFile);
+      if (!ea.ok) return NextResponse.json({ ok: false, error: ea.error }, { status: 400 });
+      data.eaFileUrl = ea.url;
+    }
 
     const indicator = await prisma.indicator.update({ where: { id }, data });
     await bumpDataVersion();

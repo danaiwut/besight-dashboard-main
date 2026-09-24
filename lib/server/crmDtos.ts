@@ -86,6 +86,9 @@ export type IndicatorDto = {
   name: string;
   pubId: string;
   status: "active" | "inactive";
+  /** Admin-only: the EA download link (Google Drive etc.). */
+  eaFile?: string;
+  hasEa: boolean;
 };
 
 export function toIndicatorDto(indicator: Indicator): IndicatorDto {
@@ -94,7 +97,18 @@ export function toIndicatorDto(indicator: Indicator): IndicatorDto {
     name: indicator.name,
     pubId: indicator.publicationId || "",
     status: indicator.status,
+    eaFile: indicator.eaFileUrl || undefined,
+    hasEa: Boolean(indicator.eaFileUrl),
   };
+}
+
+/** Member-facing variant: says whether an EA download exists but never the
+ *  link itself — that is only released by /api/me/ea-download after the
+ *  member accepts the EA policy (and the acceptance is logged). */
+export function toMemberIndicatorDto(indicator: Indicator): IndicatorDto {
+  const { eaFile: _eaFile, ...dto } = toIndicatorDto(indicator);
+  void _eaFile;
+  return dto;
 }
 
 const ACCESS_SOURCE_LABEL = {

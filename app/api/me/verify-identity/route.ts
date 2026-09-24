@@ -7,7 +7,8 @@ import { identityMessage, markIdentityVerified, verifyMemberIdentity } from "@/l
 export const dynamic = "force-dynamic";
 
 /** Member proves they are the person the CRM has on file: the TradingView
- *  username + email they enter must both match the synced Member record. */
+ *  username they enter must match the synced Member record, and so must the
+ *  email they signed in with (from the session — no longer typed). */
 export async function POST(request: NextRequest) {
   const guard = await memberGuard();
   if (!guard.ok) return guard.response;
@@ -18,10 +19,9 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const body = await request.json() as { tradingView?: string; email?: string };
+    const body = await request.json() as { tradingView?: string };
     const tradingView = String(body.tradingView || "");
-    const email = String(body.email || "");
-    const result = await verifyMemberIdentity(memberId, tradingView, email);
+    const result = await verifyMemberIdentity(memberId, tradingView, guard.user.email);
     if (!result.verified) {
       return NextResponse.json(
         { ok: false, error: identityMessage(result.reason), code: result.reason === "mismatch" ? "identity_mismatch" : "identity_unavailable" },

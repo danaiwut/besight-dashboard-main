@@ -65,7 +65,9 @@ export type AccessSource = "Broker" | "Admin" | "Special Access" | "Plan";
 export type Plan = "free" | "ib_partner";
 export const PLAN_LABELS: Record<Plan, string> = { free: "Free", ib_partner: "IB Partner" };
 
-export type Indicator = { id: number; name: string; pubId: string; status: "active" | "inactive"; eaFile?: string };
+/** eaFile (the download link) is only sent to admins; members get hasEa and
+ *  fetch the link through the policy-acceptance flow. */
+export type Indicator = { id: number; name: string; pubId: string; status: "active" | "inactive"; eaFile?: string; hasEa?: boolean };
 
 export type IndicatorAccess = {
   id: number;
@@ -306,7 +308,8 @@ type CrmContextValue = {
    *  record, once the member has verified their identity. Required before a
    *  trade account can be claimed. */
   identity: { tradingView: string; email: string } | null;
-  verifyIdentity: (tradingView: string, email: string) => Promise<{ ok: boolean; error?: string }>;
+  /** Email is not passed: the server checks the signed-in account's email. */
+  verifyIdentity: (tradingView: string) => Promise<{ ok: boolean; error?: string }>;
 };
 
 const CrmContext = createContext<CrmContextValue | null>(null);
@@ -465,16 +468,17 @@ export function CrmProvider({ children, mode = "admin", viewer }: { children: Re
   const [backendLive, setBackendLive] = useState(false);
   const [identity, setIdentity] = useState<{ tradingView: string; email: string } | null>(null);
 
-  const verifyIdentity = useCallback(async (tradingView: string, email: string) => {
+  const viewerEmail = viewer?.email ?? "";
+  const verifyIdentity = useCallback(async (tradingView: string) => {
     try {
-      await apiCall("/api/me/verify-identity/", "POST", { tradingView, email });
-      setIdentity({ tradingView, email });
+      await apiCall("/api/me/verify-identity/", "POST", { tradingView });
+      setIdentity({ tradingView, email: viewerEmail });
       return { ok: true };
     } catch (error) {
       setIdentity(null);
       return { ok: false, error: error instanceof Error ? error.message : "ยืนยันตัวตนไม่สำเร็จ" };
     }
-  }, []);
+  }, [viewerEmail]);
 
   /* Applies one full set of backend payloads to state. The database always wins,
      including when it legitimately returns nothing — an empty table must render
