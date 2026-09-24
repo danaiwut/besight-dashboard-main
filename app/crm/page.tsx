@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useCrm, accessLabel, primaryIndicatorAccess, memberLots, requiredLotsFor, initials, fmtDate } from "../../components/crm/CrmContext";
 import { useLanguage } from "../../components/crm/LanguageContext";
 import { MONTHS_SHORT } from "../../lib/dateLocale";
@@ -31,10 +32,10 @@ export default function CrmOverviewPage() {
 
   const recent = [...members].sort((a, b) => b.joinedDate.localeCompare(a.joinedDate)).slice(0, 5);
 
-  const distribution: { label: string; count: number }[] = [
-    { label: t("common.active"), count: active },
-    { label: t("common.expiringSoon"), count: expiringSoon },
-    { label: t("common.expired"), count: expired },
+  const distribution: { label: string; count: number; href?: string }[] = [
+    { label: t("common.active"), count: active, href: "/crm/members/?status=Active" },
+    { label: t("common.expiringSoon"), count: expiringSoon, href: "/crm/members/?status=Expiring+Soon" },
+    { label: t("common.expired"), count: expired, href: "/crm/members/?status=Expired" },
     { label: t("ov.suspendedPending"), count: total - active - expiringSoon - expired },
   ];
 
@@ -71,7 +72,7 @@ export default function CrmOverviewPage() {
   return (
     <section className="panel is-active">
       <div className="stat-grid cols-5">
-        <div className="stat-card">
+        <Link href="/crm/members/" className="stat-card stat-card-link">
           <div className="top">
             <span className="stat-icon c1">
               <Icon name="group" />
@@ -79,8 +80,8 @@ export default function CrmOverviewPage() {
           </div>
           <div className="value">{total}</div>
           <div className="label">{t("ov.totalMembers")}</div>
-        </div>
-        <div className="stat-card">
+        </Link>
+        <Link href="/crm/members/?status=Active" className="stat-card stat-card-link">
           <div className="top">
             <span className="stat-icon c2">
               <Icon name="check_circle" />
@@ -88,8 +89,8 @@ export default function CrmOverviewPage() {
           </div>
           <div className="value">{active}</div>
           <div className="label">{t("ov.activeMembers")}</div>
-        </div>
-        <div className="stat-card">
+        </Link>
+        <Link href="/crm/members/?status=Expiring+Soon" className="stat-card stat-card-link">
           <div className="top">
             <span className="stat-icon c3">
               <Icon name="schedule" />
@@ -100,8 +101,8 @@ export default function CrmOverviewPage() {
           </div>
           <div className="value">{expiringSoon}</div>
           <div className="label">{t("ov.expiringWithin", { days: settings.expiringSoonDays })}</div>
-        </div>
-        <div className="stat-card">
+        </Link>
+        <Link href="/crm/members/?status=Expired" className="stat-card stat-card-link">
           <div className="top">
             <span className="stat-icon c5">
               <Icon name="cancel" />
@@ -110,8 +111,8 @@ export default function CrmOverviewPage() {
           </div>
           <div className="value">{expired}</div>
           <div className="label">{t("ov.expiredAccess")}</div>
-        </div>
-        <div className="stat-card">
+        </Link>
+        <Link href="/crm/members/?lots=qualified" className="stat-card stat-card-link">
           <div className="top">
             <span className="stat-icon c4">
               <Icon name="task_alt" />
@@ -120,7 +121,7 @@ export default function CrmOverviewPage() {
           </div>
           <div className="value">{qualifiedLots}</div>
           <div className="label">{t("ov.qualifiedLots")}</div>
-        </div>
+        </Link>
       </div>
 
       <div className="stat-grid" style={{ gridTemplateColumns: "1fr" }}>
@@ -178,13 +179,22 @@ export default function CrmOverviewPage() {
           <div className="panel-section-title">{t("ov.accessDistribution")}</div>
           {distribution.map((d) => {
             const pct = total ? Math.round((d.count / total) * 100) : 0;
-            return (
-              <div className="dist-row" key={d.label}>
+            const row = (
+              <>
                 <span className="dn">{d.label}</span>
                 <div className="dist-bar">
                   <span style={{ width: `${pct}%` }}></span>
                 </div>
                 <span className="dv">{d.count}</span>
+              </>
+            );
+            return d.href ? (
+              <Link href={d.href} className="dist-row dist-row-link" key={d.label}>
+                {row}
+              </Link>
+            ) : (
+              <div className="dist-row" key={d.label}>
+                {row}
               </div>
             );
           })}

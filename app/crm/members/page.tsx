@@ -39,6 +39,8 @@ import { exportCsv } from "../../../lib/exportCsv";
 import { MEMBER_LEVEL_LABEL_KEYS, PREMIUM_MONTHS, levelFromMonthlyLots, recentMonthKeys, type MemberLevel } from "../../../lib/memberLevel";
 
 type DrawerMode = { kind: "form"; member: Member | null } | null;
+type LotsFilter = "all" | "qualified" | "not_qualified";
+const STATUS_FILTERS = ["Active", "Expiring Soon", "Expired", "Suspended", "Pending"];
 const PAGE_SIZE = 50;
 
 export default function MembersPage() {
@@ -49,6 +51,7 @@ export default function MembersPage() {
   const [brokerFilter, setBrokerFilter] = useState("all");
   const [planFilter, setPlanFilter] = useState("all");
   const [stageFilter, setStageFilter] = useState<"all" | CustomerStage>("all");
+  const [lotsFilter, setLotsFilter] = useState<LotsFilter>("all");
   const [dateRange, setDateRange] = useState({ from: "", to: "" });
   const [query, setQuery] = useState("");
   const [expanded, setExpanded] = useState<Set<number>>(new Set());
@@ -117,6 +120,27 @@ export default function MembersPage() {
     lotSummaries[m.id]?.required ?? requiredLotsFor(m, settings);
 
   const accessOf = (memberId: number) => primaryIndicatorAccess(memberId, indicatorAccess);
+  /** Same verdict the server counted for the Overview/qualified cards, so a
+   *  filtered list always matches the number that was clicked. */
+  const isQualified = (m: Member): boolean =>
+    lotSummaries[m.id]?.qualified ?? qualification(summaryLots(m), summaryRequired(m)) === "qualified";
+
+  // Overview stat cards deep-link here (?status=Expired, ?lots=qualified…).
+  // Read once on mount rather than useSearchParams, which would force a
+  // Suspense boundary around the whole page.
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const status = params.get("status");
+    const lots = params.get("lots");
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- one-time sync from the URL
+    if (status && STATUS_FILTERS.includes(status)) setStatusFilter(status);
+    if (lots === "qualified" || lots === "not_qualified") setLotsFilter(lots);
+  }, []);
+
+  function applyLotsFilter(next: LotsFilter) {
+    setLotsFilter(next);
+    setPage(1);
+  }
 
   /** Member level (basic/standard/premium) from the CRM's monthly lot totals —
    *  same rule the course level gate uses, computed once for the whole page. */
@@ -212,6 +236,7 @@ export default function MembersPage() {
       })
       .filter((m) => planFilter === "all" || m.plan === planFilter)
       .filter((m) => stageFilter === "all" || customerStage(m, indicatorAccess) === stageFilter)
+      .filter((m) => lotsFilter === "all" || isQualified(m) === (lotsFilter === "qualified"))
       .filter((m) => !dateRange.from || m.joinedDate >= dateRange.from)
       .filter((m) => !dateRange.to || m.joinedDate <= dateRange.to)
       .filter((m) => {
@@ -236,7 +261,7 @@ export default function MembersPage() {
       return av.localeCompare(bv) * dir;
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [members, statusFilter, brokerFilter, planFilter, stageFilter, dateRange, query, tradeAccounts, tradeLogs, indicatorAccess, settings, lotSummaries, sortKey, sortDir]);
+  }, [members, statusFilter, brokerFilter, planFilter, stageFilter, lotsFilter, dateRange, query, tradeAccounts, tradeLogs, indicatorAccess, settings, lotSummaries, sortKey, sortDir]);
 
   const paged = list.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
@@ -324,14 +349,24 @@ export default function MembersPage() {
           <div className="value">{(lotOverview?.requiredLots ?? settings.requiredLots).toFixed(2)}</div>
           <div className="label">{t("lm.requiredLotsCard")}</div>
         </div>
-        <div className="stat-card">
+        <button
+          type="button"
+          className={`stat-card stat-card-link${lotsFilter === "qualified" ? " is-selected" : ""}`}
+          aria-pressed={lotsFilter === "qualified"}
+          onClick={() => applyLotsFilter(lotsFilter === "qualified" ? "all" : "qualified")}
+        >
           <div className="value">{qualificationCounts.qualified}</div>
           <div className="label">{t("lm.qualifiedThisMonth")}</div>
-        </div>
-        <div className="stat-card">
+        </button>
+        <button
+          type="button"
+          className={`stat-card stat-card-link${lotsFilter === "not_qualified" ? " is-selected" : ""}`}
+          aria-pressed={lotsFilter === "not_qualified"}
+          onClick={() => applyLotsFilter(lotsFilter === "not_qualified" ? "all" : "not_qualified")}
+        >
           <div className="value">{qualificationCounts.notQualified}</div>
           <div className="label">{t("lm.notYetQualified")}</div>
-        </div>
+        </button>
       </div>
 
       <div className="card" style={{ padding: 20, marginBottom: 16 }}>
@@ -456,6 +491,11 @@ export default function MembersPage() {
                 <option value="all">{t("members.allStages")}</option>
                 <option value="new">{t("members.stage.new")}</option>
                 <option value="existing">{t("members.stage.existing")}</option>
+              </select>
+              <select className="filter-select" aria-label="Filter by lot qualification" value={lotsFilter} onChange={(e) => applyLotsFilter(e.target.value as LotsFilter)}>
+                <option value="all">{t("members.allLots")}</option>
+                <option value="qualified">{t("members.lots.qualified")} ({qualificationCounts.qualified})</option>
+                <option value="not_qualified">{t("members.lots.notQualified")} ({qualificationCounts.notQualified})</option>
               </select>
               <DateRangePicker value={dateRange} onChange={setDateRange} placeholder={t("members.joinedRange")} />
             </div>
