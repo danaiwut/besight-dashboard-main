@@ -431,7 +431,8 @@ export const ModelName = {
   CourseEnrollment: 'CourseEnrollment',
   LessonProgress: 'LessonProgress',
   MemberClaimToken: 'MemberClaimToken',
-  AdminClaimToken: 'AdminClaimToken'
+  AdminClaimToken: 'AdminClaimToken',
+  LeaderboardAvatarOption: 'LeaderboardAvatarOption'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -447,7 +448,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "member" | "memberAcquisitionChannel" | "broker" | "tradeAccount" | "tradeLog" | "indicator" | "planIndicatorEntitlement" | "memberIndicatorAccess" | "renewalRecord" | "telegramAccess" | "lotCheckRun" | "lotCheckResult" | "activityLog" | "admin" | "systemSetting" | "activity" | "activityEnrollment" | "competitionPrize" | "rewardTier" | "rewardClaim" | "becRate" | "spinPrize" | "becGrant" | "spinResult" | "journalAccount" | "journalTrade" | "riskRule" | "socialAccount" | "memberNotificationRead" | "course" | "courseLesson" | "courseEnrollment" | "lessonProgress" | "memberClaimToken" | "adminClaimToken"
+    modelProps: "member" | "memberAcquisitionChannel" | "broker" | "tradeAccount" | "tradeLog" | "indicator" | "planIndicatorEntitlement" | "memberIndicatorAccess" | "renewalRecord" | "telegramAccess" | "lotCheckRun" | "lotCheckResult" | "activityLog" | "admin" | "systemSetting" | "activity" | "activityEnrollment" | "competitionPrize" | "rewardTier" | "rewardClaim" | "becRate" | "spinPrize" | "becGrant" | "spinResult" | "journalAccount" | "journalTrade" | "riskRule" | "socialAccount" | "memberNotificationRead" | "course" | "courseLesson" | "courseEnrollment" | "lessonProgress" | "memberClaimToken" | "adminClaimToken" | "leaderboardAvatarOption"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -2761,6 +2762,72 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    LeaderboardAvatarOption: {
+      payload: Prisma.$LeaderboardAvatarOptionPayload<ExtArgs>
+      fields: Prisma.LeaderboardAvatarOptionFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.LeaderboardAvatarOptionFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LeaderboardAvatarOptionPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.LeaderboardAvatarOptionFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LeaderboardAvatarOptionPayload>
+        }
+        findFirst: {
+          args: Prisma.LeaderboardAvatarOptionFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LeaderboardAvatarOptionPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.LeaderboardAvatarOptionFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LeaderboardAvatarOptionPayload>
+        }
+        findMany: {
+          args: Prisma.LeaderboardAvatarOptionFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LeaderboardAvatarOptionPayload>[]
+        }
+        create: {
+          args: Prisma.LeaderboardAvatarOptionCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LeaderboardAvatarOptionPayload>
+        }
+        createMany: {
+          args: Prisma.LeaderboardAvatarOptionCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        delete: {
+          args: Prisma.LeaderboardAvatarOptionDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LeaderboardAvatarOptionPayload>
+        }
+        update: {
+          args: Prisma.LeaderboardAvatarOptionUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LeaderboardAvatarOptionPayload>
+        }
+        deleteMany: {
+          args: Prisma.LeaderboardAvatarOptionDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.LeaderboardAvatarOptionUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        upsert: {
+          args: Prisma.LeaderboardAvatarOptionUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LeaderboardAvatarOptionPayload>
+        }
+        aggregate: {
+          args: Prisma.LeaderboardAvatarOptionAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateLeaderboardAvatarOption>
+        }
+        groupBy: {
+          args: Prisma.LeaderboardAvatarOptionGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.LeaderboardAvatarOptionGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.LeaderboardAvatarOptionCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.LeaderboardAvatarOptionCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -3368,6 +3435,21 @@ export const AdminClaimTokenScalarFieldEnum = {
 export type AdminClaimTokenScalarFieldEnum = (typeof AdminClaimTokenScalarFieldEnum)[keyof typeof AdminClaimTokenScalarFieldEnum]
 
 
+export const LeaderboardAvatarOptionScalarFieldEnum = {
+  id: 'id',
+  label: 'label',
+  imageUrl: 'imageUrl',
+  imageData: 'imageData',
+  builtIn: 'builtIn',
+  active: 'active',
+  sortOrder: 'sortOrder',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type LeaderboardAvatarOptionScalarFieldEnum = (typeof LeaderboardAvatarOptionScalarFieldEnum)[keyof typeof LeaderboardAvatarOptionScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -3681,6 +3763,15 @@ export const AdminClaimTokenOrderByRelevanceFieldEnum = {
 } as const
 
 export type AdminClaimTokenOrderByRelevanceFieldEnum = (typeof AdminClaimTokenOrderByRelevanceFieldEnum)[keyof typeof AdminClaimTokenOrderByRelevanceFieldEnum]
+
+
+export const LeaderboardAvatarOptionOrderByRelevanceFieldEnum = {
+  label: 'label',
+  imageUrl: 'imageUrl',
+  imageData: 'imageData'
+} as const
+
+export type LeaderboardAvatarOptionOrderByRelevanceFieldEnum = (typeof LeaderboardAvatarOptionOrderByRelevanceFieldEnum)[keyof typeof LeaderboardAvatarOptionOrderByRelevanceFieldEnum]
 
 
 
@@ -4007,6 +4098,7 @@ export type GlobalOmitConfig = {
   lessonProgress?: Prisma.LessonProgressOmit
   memberClaimToken?: Prisma.MemberClaimTokenOmit
   adminClaimToken?: Prisma.AdminClaimTokenOmit
+  leaderboardAvatarOption?: Prisma.LeaderboardAvatarOptionOmit
 }
 
 /* Types for Logging */

@@ -1,0 +1,50 @@
+-- CreateTable
+CREATE TABLE `LeaderboardAvatarOption` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `label` VARCHAR(96) NOT NULL,
+    `imageUrl` VARCHAR(255) NULL,
+    `imageData` MEDIUMTEXT NULL,
+    `builtIn` BOOLEAN NOT NULL DEFAULT false,
+    `active` BOOLEAN NOT NULL DEFAULT true,
+    `sortOrder` INTEGER NOT NULL DEFAULT 0,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NOT NULL,
+
+    INDEX `LeaderboardAvatarOption_active_sortOrder_idx`(`active`, `sortOrder`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- Built-in avatars: the 32 BeSight bears (static files in /public).
+INSERT INTO `LeaderboardAvatarOption` (`id`, `label`, `imageUrl`, `builtIn`, `active`, `sortOrder`, `updatedAt`) VALUES
+    (1, 'Bear 1', '/img/leaderboard-avatars/bear-01.webp', true, true, 1, CURRENT_TIMESTAMP(3)),
+    (2, 'Bear 2', '/img/leaderboard-avatars/bear-02.webp', true, true, 2, CURRENT_TIMESTAMP(3)),
+    (3, 'Bear 3', '/img/leaderboard-avatars/bear-03.webp', true, true, 3, CURRENT_TIMESTAMP(3)),
+    (4, 'Bear 4', '/img/leaderboard-avatars/bear-04.webp', true, true, 4, CURRENT_TIMESTAMP(3)),
+    (5, 'Bear 5', '/img/leaderboard-avatars/bear-05.webp', true, true, 5, CURRENT_TIMESTAMP(3)),
+    (6, 'Bear 6', '/img/leaderboard-avatars/bear-06.webp', true, true, 6, CURRENT_TIMESTAMP(3)),
+    (7, 'Bear 7', '/img/leaderboard-avatars/bear-07.webp', true, true, 7, CURRENT_TIMESTAMP(3)),
+    (8, 'Bear 8', '/img/leaderboard-avatars/bear-08.webp', true, true, 8, CURRENT_TIMESTAMP(3)),
+    (9, 'Bear 9', '/img/leaderboard-avatars/bear-09.webp', true, true, 9, CURRENT_TIMESTAMP(3)),
+    (10, 'Bear 10', '/img/leaderboard-avatars/bear-10.webp', true, true, 10, CURRENT_TIMESTAMP(3)),
+    (11, 'Bear 11', '/img/leaderboard-avatars/bear-11.webp', true, true, 11, CURRENT_TIMESTAMP(3)),
+    (12, 'Bear 12', '/img/leaderboard-avatars/bear-12.webp', true, true, 12, CURRENT_TIMESTAMP(3)),
+    (13, 'Bear 13', '/img/leaderboard-avatars/bear-13.webp', true, true, 13, CURRENT_TIMESTAMP(3)),
+    (14, 'Bear 14', '/img/leaderboard-avatars/bear-14.webp', true, true, 14, CURRENT_TIMESTAMP(3)),
+    (15, 'Bear 15', '/img/leaderboard-avatars/bear-15.webp', true, true, 15, CURRENT_TIMESTAMP(3)),
+    (16, 'Bear 16', '/img/leaderboard-avatars/bear-16.webp', true, true, 16, CURRENT_TIMESTAMP(3)),
+    (17, 'Bear 17', '/img/leaderboard-avatars/bear-17.webp', true, true, 17, CURRENT_TIMESTAMP(3)),
+    (18, 'Bear 18', '/img/leaderboard-avatars/bear-18.webp', true, true, 18, CURRENT_TIMESTAMP(3)),
+    (19, 'Bear 19', '/img/leaderboard-avatars/bear-19.webp', true, true, 19, CURRENT_TIMESTAMP(3)),
+    (20, 'Bear 20', '/img/leaderboard-avatars/bear-20.webp', true, true, 20, CURRENT_TIMESTAMP(3)),
+    (21, 'Bear 21', '/img/leaderboard-avatars/bear-21.webp', true, true, 21, CURRENT_TIMESTAMP(3)),
+    (22, 'Bear 22', '/img/leaderboard-avatars/bear-22.webp', true, true, 22, CURRENT_TIMESTAMP(3)),
+    (23, 'Bear 23', '/img/leaderboard-avatars/bear-23.webp', true, true, 23, CURRENT_TIMESTAMP(3)),
+    (24, 'Bear 24', '/img/leaderboard-avatars/bear-24.webp', true, true, 24, CURRENT_TIMESTAMP(3)),
+    (25, 'Bear 25', '/img/leaderboard-avatars/bear-25.webp', true, true, 25, CURRENT_TIMESTAMP(3)),
+    (26, 'Bear 26', '/img/leaderboard-avatars/bear-26.webp', true, true, 26, CURRENT_TIMESTAMP(3)),
+    (27, 'Bear 27', '/img/leaderboard-avatars/bear-27.webp', true, true, 27, CURRENT_TIMESTAMP(3)),
+    (28, 'Bear 28', '/img/leaderboard-avatars/bear-28.webp', true, true, 28, CURRENT_TIMESTAMP(3)),
+    (29, 'Bear 29', '/img/leaderboard-avatars/bear-29.webp', true, true, 29, CURRENT_TIMESTAMP(3)),
+    (30, 'Bear 30', '/img/leaderboard-avatars/bear-30.webp', true, true, 30, CURRENT_TIMESTAMP(3)),
+    (31, 'Bear 31', '/img/leaderboard-avatars/bear-31.webp', true, true, 31, CURRENT_TIMESTAMP(3)),
+    (32, 'Bear 32', '/img/leaderboard-avatars/bear-32.webp', true, true, 32, CURRENT_TIMESTAMP(3));

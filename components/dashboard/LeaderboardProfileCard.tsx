@@ -8,11 +8,11 @@ import Icon from "../Icon";
 import LeaderboardAvatar from "./LeaderboardAvatar";
 import {
   DEFAULT_LEADERBOARD_PROFILE,
-  LEADERBOARD_AVATAR_PRESETS,
   LEADERBOARD_NICKNAME_MAX,
   LEADERBOARD_PHOTO_MAX_CHARS,
   LEADERBOARD_PHOTO_PX,
-  avatarDto,
+  type AvatarOptionDto,
+  type LeaderboardAvatarDto,
   type LeaderboardProfile,
 } from "../../lib/leaderboardProfile";
 
@@ -53,6 +53,7 @@ export default function LeaderboardProfileCard() {
   const [code, setCode] = useState("");
   const [loadError, setLoadError] = useState("");
   const [saving, setSaving] = useState(false);
+  const [options, setOptions] = useState<AvatarOptionDto[]>([]);
   const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -66,8 +67,22 @@ export default function LeaderboardProfileCard() {
         setCode(payload.code);
       })
       .catch((e) => !cancelled && setLoadError(e instanceof Error ? e.message : t("dash.lbProfile.loadFailed")));
+    apiCall<{ options: AvatarOptionDto[] }>("/api/leaderboard/avatar-options/", "GET")
+      .then((payload) => !cancelled && setOptions(payload.options))
+      .catch(() => {});
     return () => { cancelled = true; };
   }, [t]);
+
+  /** Image for the chosen avatar: own photo, a catalog option, or initials. */
+  function avatarUrlOf(p: LeaderboardProfile): LeaderboardAvatarDto {
+    if (p.avatar.kind === "photo") return { url: p.avatar.dataUrl };
+    if (p.avatar.kind === "preset") {
+      const preset = p.avatar.preset;
+      const option = options.find((o) => o.id === preset);
+      return option ? { url: option.url } : null;
+    }
+    return null;
+  }
 
   const set = (patch: Partial<LeaderboardProfile>) => setProfile((cur) => ({ ...cur, ...patch }));
   const dirty = saved !== null && JSON.stringify(profile) !== JSON.stringify(saved);
@@ -107,7 +122,7 @@ export default function LeaderboardProfileCard() {
   }
 
   const previewName = profile.anonymous ? t("dash.leaderboard.anonymous") : profile.nickname.trim() || defaultLabel;
-  const previewAvatar = profile.anonymous ? null : avatarDto(profile.avatar);
+  const previewAvatar = profile.anonymous ? null : avatarUrlOf(profile);
 
   return (
     <div className="card" style={{ padding: 24, marginTop: 20 }}>
@@ -155,6 +170,7 @@ export default function LeaderboardProfileCard() {
                 disabled={profile.anonymous}
                 onClick={() => set({ avatar: { kind: "initials" } })}
                 title={t("dash.lbProfile.avatarInitials")}
+                aria-label={t("dash.lbProfile.avatarInitials")}
               >
                 <LeaderboardAvatar avatar={null} name={previewName} />
               </button>
@@ -166,14 +182,16 @@ export default function LeaderboardProfileCard() {
                 disabled={profile.anonymous}
                 onClick={() => fileRef.current?.click()}
                 title={t("dash.lbProfile.avatarUpload")}
+                aria-label={t("dash.lbProfile.avatarUpload")}
               >
                 {profile.avatar.kind === "photo" ? (
-                  <LeaderboardAvatar avatar={avatarDto(profile.avatar)} name={previewName} />
+                  <LeaderboardAvatar avatar={avatarUrlOf(profile)} name={previewName} />
                 ) : (
                   <span className="lbd-avatar-fallback lbp-upload"><Icon name="add_a_photo" /></span>
                 )}
               </button>
-              {Array.from({ length: LEADERBOARD_AVATAR_PRESETS }, (_, i) => i + 1).map((preset) => {
+              {options.map((option) => {
+                const preset = option.id;
                 const selected = profile.avatar.kind === "preset" && profile.avatar.preset === preset;
                 return (
                   <button
@@ -182,10 +200,12 @@ export default function LeaderboardProfileCard() {
                     aria-checked={selected}
                     key={preset}
                     className={`lbp-avatar-opt${selected ? " is-selected" : ""}`}
+                    aria-label={option.label}
+                    title={option.label}
                     disabled={profile.anonymous}
                     onClick={() => set({ avatar: { kind: "preset", preset } })}
                   >
-                    <LeaderboardAvatar avatar={{ kind: "preset", preset }} name={`Avatar ${preset}`} />
+                    <LeaderboardAvatar avatar={{ url: option.url }} name={option.label} />
                   </button>
                 );
               })}

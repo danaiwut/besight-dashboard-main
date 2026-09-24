@@ -2038,9 +2038,10 @@
 .lbp-preview-label { display: block; font-size: 11px; font-weight: 600; color: var(--text-sub); text-transform: uppercase; letter-spacing: .4px; margin-bottom: 8px; }
 .lbp-preview-row { display: flex; align-items: center; gap: 10px; min-width: 0; }
 .lbp-avatars { display: flex; flex-wrap: wrap; gap: 8px; }
-.lbp-avatar-opt { width: 46px; height: 46px; padding: 0; border-radius: 50%; overflow: hidden; border: 2px solid transparent; background: var(--bg-elev, rgba(127,127,127,.1)); cursor: pointer; display: grid; place-items: center; transition: border-color .15s, transform .15s; font-size: 14px; }
+.lbp-avatar-opt { width: 56px; height: 56px; padding: 0; border-radius: 50%; overflow: hidden; border: 2px solid transparent; background: var(--bg-elev, rgba(127,127,127,.1)); cursor: pointer; display: grid; place-items: center; transition: border-color .15s, transform .15s; font-size: 14px; }
 .lbp-avatar-opt:hover:not(:disabled) { transform: translateY(-1px); }
 .lbp-avatar-opt.is-selected { border-color: var(--blue); box-shadow: 0 0 0 2px rgba(26,79,214,.25); }
 .lbp-avatar-opt:disabled { opacity: .4; cursor: not-allowed; }
 .lbp-avatar-opt img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .lbp-upload { background: transparent; color: var(--text-sub); }
+.lbp-preview-row .lbd-member-avatar { width: 44px; height: 44px; }

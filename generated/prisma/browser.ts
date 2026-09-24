@@ -211,3 +211,11 @@ export type MemberClaimToken = Prisma.MemberClaimTokenModel
  * to admins.
  */
 export type AdminClaimToken = Prisma.AdminClaimTokenModel
+/**
+ * Model LeaderboardAvatarOption
+ * Avatars members can pick for their leaderboard profile (Settings). The 32
+ * built-in bears ship as static files (imageUrl); admins add more from
+ * /crm/leaderboard-avatars as uploaded images (imageData). Hiding one
+ * (active=false) makes members who picked it fall back to initials.
+ */
+export type LeaderboardAvatarOption = Prisma.LeaderboardAvatarOptionModel

@@ -830,3 +830,23 @@ model AdminClaimToken {
 
   @@index([adminId, usedAt])
 }
+
+/// Avatars members can pick for their leaderboard profile (Settings). The 32
+/// built-in bears ship as static files (imageUrl); admins add more from
+/// /crm/leaderboard-avatars as uploaded images (imageData). Hiding one
+/// (active=false) makes members who picked it fall back to initials.
+model LeaderboardAvatarOption {
+  id        Int      @id @default(autoincrement())
+  label     String   @db.VarChar(96)
+  /** Static file under /public for built-ins. */
+  imageUrl  String?  @db.VarChar(255)
+  /** Admin-uploaded image as a data URL (downscaled client-side). */
+  imageData String?  @db.MediumText
+  builtIn   Boolean  @default(false)
+  active    Boolean  @default(true)
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([active, sortOrder])
+}

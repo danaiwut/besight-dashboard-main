@@ -85,7 +85,8 @@ export const ModelName = {
   CourseEnrollment: 'CourseEnrollment',
   LessonProgress: 'LessonProgress',
   MemberClaimToken: 'MemberClaimToken',
-  AdminClaimToken: 'AdminClaimToken'
+  AdminClaimToken: 'AdminClaimToken',
+  LeaderboardAvatarOption: 'LeaderboardAvatarOption'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -672,6 +673,21 @@ export const AdminClaimTokenScalarFieldEnum = {
 export type AdminClaimTokenScalarFieldEnum = (typeof AdminClaimTokenScalarFieldEnum)[keyof typeof AdminClaimTokenScalarFieldEnum]
 
 
+export const LeaderboardAvatarOptionScalarFieldEnum = {
+  id: 'id',
+  label: 'label',
+  imageUrl: 'imageUrl',
+  imageData: 'imageData',
+  builtIn: 'builtIn',
+  active: 'active',
+  sortOrder: 'sortOrder',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type LeaderboardAvatarOptionScalarFieldEnum = (typeof LeaderboardAvatarOptionScalarFieldEnum)[keyof typeof LeaderboardAvatarOptionScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -985,4 +1001,13 @@ export const AdminClaimTokenOrderByRelevanceFieldEnum = {
 } as const
 
 export type AdminClaimTokenOrderByRelevanceFieldEnum = (typeof AdminClaimTokenOrderByRelevanceFieldEnum)[keyof typeof AdminClaimTokenOrderByRelevanceFieldEnum]
+
+
+export const LeaderboardAvatarOptionOrderByRelevanceFieldEnum = {
+  label: 'label',
+  imageUrl: 'imageUrl',
+  imageData: 'imageData'
+} as const
+
+export type LeaderboardAvatarOptionOrderByRelevanceFieldEnum = (typeof LeaderboardAvatarOptionOrderByRelevanceFieldEnum)[keyof typeof LeaderboardAvatarOptionOrderByRelevanceFieldEnum]
 

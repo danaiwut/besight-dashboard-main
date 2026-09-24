@@ -5,6 +5,7 @@ import { memberGuard } from "@/lib/session";
 import { symbolsByMember } from "@/lib/server/memberSymbols";
 import { publicLabel } from "@/lib/server/leaderboardLabel";
 import { parseLeaderboardProfile, type LeaderboardAvatarDto } from "@/lib/leaderboardProfile";
+import { activeOptionUrls } from "@/lib/server/avatarCatalog";
 import { createHash } from "node:crypto";
 
 export const dynamic = "force-dynamic";
@@ -77,15 +78,23 @@ async function memberInfo(ids: number[]) {
     where: { id: { in: ids } },
     select: { id: true, name: true, displayName: true, code: true, leaderboardProfileJson: true },
   });
+  const profiles = new Map(rows.map((row) => [row.id, parseLeaderboardProfile(row.leaderboardProfileJson)]));
+  // Hidden/deleted catalog avatars resolve to nothing → initials.
+  const presetUrls = await activeOptionUrls(
+    [...profiles.values()].flatMap((p) => (p.avatar.kind === "preset" && !p.anonymous ? [p.avatar.preset] : [])),
+  );
   return new Map(rows.map((row): [number, PublicInfo] => {
-    const profile = parseLeaderboardProfile(row.leaderboardProfileJson);
+    const profile = profiles.get(row.id)!;
     if (profile.anonymous) return [row.id, { name: "", code: "", avatar: null, showSymbols: false, anonymous: true }];
     let avatar: LeaderboardAvatarDto = null;
-    if (profile.avatar.kind === "preset") avatar = { kind: "preset", preset: profile.avatar.preset };
+    if (profile.avatar.kind === "preset") {
+      const url = presetUrls.get(profile.avatar.preset);
+      avatar = url ? { url } : null;
+    }
     if (profile.avatar.kind === "photo") {
       // Version the URL by content so a new photo busts the browser cache.
       const v = createHash("sha1").update(profile.avatar.dataUrl).digest("hex").slice(0, 10);
-      avatar = { kind: "photo", url: `/api/leaderboard/avatar/${row.id}/?v=${v}` };
+      avatar = { url: `/api/leaderboard/avatar/${row.id}/?v=${v}` };
     }
     return [row.id, {
       name: profile.nickname || publicLabel(row.displayName, row.name, row.code),

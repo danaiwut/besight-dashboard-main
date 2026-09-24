@@ -2,7 +2,10 @@
    Member.leaderboardProfileJson; parsed + validated here so the API, the
    leaderboard and the settings page share one shape. Client-safe. */
 
-export const LEADERBOARD_AVATAR_PRESETS = 12;
+/** Admin-uploaded catalog avatars are downscaled client-side to this square. */
+export const AVATAR_OPTION_PX = 256;
+/** Cap on a stored catalog avatar data URL (a 256px WebP/PNG is ~10-60 KB). */
+export const AVATAR_OPTION_MAX_CHARS = 400_000;
 /** Uploaded leaderboard photos are downscaled client-side to this square. */
 export const LEADERBOARD_PHOTO_PX = 128;
 /** Hard cap on the stored data URL (~a 128px JPEG is 5-15 KB). */
@@ -11,6 +14,7 @@ export const LEADERBOARD_NICKNAME_MAX = 32;
 
 export type LeaderboardAvatar =
   | { kind: "initials" }
+  /** A LeaderboardAvatarOption id (the catalog admins manage in the CRM). */
   | { kind: "preset"; preset: number }
   | { kind: "photo"; dataUrl: string };
 
@@ -37,7 +41,8 @@ function parseAvatar(value: unknown): LeaderboardAvatar {
   const v = value as Record<string, unknown>;
   if (v.kind === "preset") {
     const preset = Number(v.preset);
-    if (Number.isInteger(preset) && preset >= 1 && preset <= LEADERBOARD_AVATAR_PRESETS) return { kind: "preset", preset };
+    // Existence/active is checked against the catalog by the API.
+    if (Number.isInteger(preset) && preset >= 1) return { kind: "preset", preset };
   }
   if (v.kind === "photo" && typeof v.dataUrl === "string"
     && /^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/=]+$/.test(v.dataUrl)
@@ -73,11 +78,9 @@ export function parseLeaderboardProfile(json: string | null | undefined): Leader
   }
 }
 
-/** What the leaderboard sends for a row's avatar (null = initials). */
-export type LeaderboardAvatarDto = { kind: "preset"; preset: number } | { kind: "photo"; url: string } | null;
+/** What the leaderboard sends for a row's avatar (null = initials). The
+ *  server resolves presets/photos to an image URL. */
+export type LeaderboardAvatarDto = { url: string } | null;
 
-export function avatarDto(avatar: LeaderboardAvatar): LeaderboardAvatarDto {
-  if (avatar.kind === "preset") return { kind: "preset", preset: avatar.preset };
-  if (avatar.kind === "photo") return { kind: "photo", url: avatar.dataUrl };
-  return null;
-}
+/** Catalog entry as members/admins receive it. */
+export type AvatarOptionDto = { id: number; label: string; url: string; builtIn: boolean; active: boolean; sortOrder: number };

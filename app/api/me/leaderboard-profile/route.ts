@@ -43,6 +43,10 @@ export async function PUT(request: NextRequest) {
     if (wantedPhoto && profile.avatar.kind !== "photo") {
       return NextResponse.json({ ok: false, error: "Unsupported or too large profile photo" }, { status: 400 });
     }
+    if (profile.avatar.kind === "preset") {
+      const option = await getPrisma().leaderboardAvatarOption.findUnique({ where: { id: profile.avatar.preset }, select: { active: true } });
+      if (!option?.active) return NextResponse.json({ ok: false, error: "That avatar is no longer available" }, { status: 400 });
+    }
     await getPrisma().member.update({
       where: { id: guard.memberId },
       data: { leaderboardProfileJson: JSON.stringify(profile) },

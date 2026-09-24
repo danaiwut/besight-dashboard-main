@@ -19,6 +19,7 @@ const TITLE_KEYS: Record<string, [string, string]> = {
   "/crm/activities": ["title.activities", "sub.activities"],
   "/crm/spin": ["title.spin", "sub.spin"],
   "/crm/reward-tiers": ["title.rewardTiers", "sub.rewardTiers"],
+  "/crm/leaderboard-avatars": ["title.leaderboardAvatars", "sub.leaderboardAvatars"],
   "/crm/reward-claims": ["title.rewardClaims", "sub.rewardClaims"],
   "/crm/courses": ["title.courses", "sub.courses"],
   "/crm/indicators": ["title.indicators", "sub.indicators"],
@@ -59,6 +60,11 @@ const NAV_ITEMS = [
     href: "/crm/reward-tiers",
     labelKey: "nav.rewardTiers",
     icon: <Icon name="military_tech" />,
+  },
+  {
+    href: "/crm/leaderboard-avatars",
+    labelKey: "nav.leaderboardAvatars",
+    icon: <Icon name="face" />,
   },
   {
     href: "/crm/reward-claims",
