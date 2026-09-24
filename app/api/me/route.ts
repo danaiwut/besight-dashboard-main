@@ -23,7 +23,7 @@ export async function GET() {
 
   try {
     const prisma = getPrisma();
-    const [member, tradeLogs, access, telegram, renewals, brokers, indicatorRecords, entitlements, automation] = await Promise.all([
+    const [member, tradeLogs, access, telegram, renewals, brokers, indicatorRecords, entitlements, automation, top] = await Promise.all([
       prisma.member.findUnique({ where: { id: memberId }, include: { acquisitionChannels: true, tradeAccounts: true } }),
       prisma.tradeLog.findMany({ where: { memberId }, orderBy: { tradeDate: "desc" }, take: 5000 }),
       prisma.memberIndicatorAccess.findMany({ where: { memberId }, include: { indicator: true }, orderBy: { expiresAt: "desc" } }),
@@ -36,6 +36,14 @@ export async function GET() {
       // dashboard's Free/Premium classification can't drift from the CRM.
       prisma.planIndicatorEntitlement.findMany(),
       readIndicatorAutomationSettings(),
+      // Current-period leaderboard from the persisted per-member lots (real
+      // numbers; no PII beyond the public display name + country).
+      prisma.member.findMany({
+        where: { currentPeriodLots: { gt: 0 } },
+        orderBy: { currentPeriodLots: "desc" },
+        take: 20,
+        select: { id: true, name: true, displayName: true, country: true, currentPeriodLots: true },
+      }),
     ]);
 
     const planEntitlements: { free: number[]; ib_partner: number[] } = { free: [], ib_partner: [] };
@@ -56,14 +64,6 @@ export async function GET() {
       memberDto.currentPeriodLotsAt = undefined;
     }
 
-    // Current-period leaderboard from the persisted per-member lots (real
-    // numbers; no PII beyond the public display name + country).
-    const top = await prisma.member.findMany({
-      where: { currentPeriodLots: { gt: 0 } },
-      orderBy: { currentPeriodLots: "desc" },
-      take: 20,
-      select: { id: true, name: true, displayName: true, country: true, currentPeriodLots: true },
-    });
 
     return NextResponse.json({
       ok: true,
