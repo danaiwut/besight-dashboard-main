@@ -6,6 +6,8 @@ import { lot, currentMonthRange } from "../../../components/crm/CrmContext";
 import { useCustomerData } from "../../../components/dashboard/useCustomerData";
 import { apiCall } from "../../../lib/crmApi";
 import Icon from "../../../components/Icon";
+import LeaderboardAvatar from "../../../components/dashboard/LeaderboardAvatar";
+import type { LeaderboardAvatarDto } from "../../../lib/leaderboardProfile";
 
 type Period = "daily" | "monthly";
 type Row = {
@@ -16,6 +18,8 @@ type Row = {
   lots: number;
   rebate: number;
   symbols: string[];
+  avatar: LeaderboardAvatarDto;
+  anonymous: boolean;
   previousRank: number | null;
 };
 
@@ -82,16 +86,11 @@ function pageList(current: number, total: number): (number | "…")[] {
   return out;
 }
 
-// 12 placeholder portraits cycled by member id — this is a demo dataset
-// with no real profile photos, so a small local set stands in for one.
-const AVATAR_COUNT = 12;
-function avatarFor(id: number): string {
-  return `/img/avatars/avatar-${((id - 1) % AVATAR_COUNT) + 1}.png`;
-}
 
 export default function DashboardLeaderboardPage() {
   const { t } = useLanguage();
   const { member } = useCustomerData();
+  const nameOf = (row: Row) => (row.anonymous ? t("dash.leaderboard.anonymous") : row.name);
   const [period, setPeriod] = useState<Period>("monthly");
   const [page, setPage] = useState(1);
   const [board, setBoard] = useState<Row[]>([]);
@@ -189,13 +188,12 @@ export default function DashboardLeaderboardPage() {
                     <div className="lbd-avatar-wrap">
                       <Icon name="emoji_events" className="lbd-crown" />
                       <div className="lbd-avatar">
-                        {/* eslint-disable-next-line @next/next/no-img-element -- static export, small local demo avatar */}
-                        <img src={avatarFor(row.memberId)} alt={row.name} />
+                        <LeaderboardAvatar avatar={row.avatar} name={nameOf(row)} anonymous={row.anonymous} />
                       </div>
                     </div>
                     <div className="lbd-rank-badge">#{rank}</div>
-                    <div className="lbd-name">{row.name}</div>
-                    {row.code !== row.name && <div className="lbd-code">{row.code}</div>}
+                    <div className="lbd-name">{nameOf(row)}</div>
+                    {row.code && row.code !== row.name && <div className="lbd-code">{row.code}</div>}
                     <div className="lbd-amount">{lot(row.lots)}</div>
                     {rank === 1 && (
                       <div className="lbd-top-pill">
@@ -247,12 +245,11 @@ export default function DashboardLeaderboardPage() {
                       <span className="lbd-place">{row.rank}</span>
                       <span className="lbd-member">
                         <span className="lbd-member-avatar">
-                        {/* eslint-disable-next-line @next/next/no-img-element -- static export, small local demo avatar */}
-                        <img src={avatarFor(row.memberId)} alt={row.name} />
-                      </span>
+                          <LeaderboardAvatar avatar={row.avatar} name={nameOf(row)} anonymous={row.anonymous} />
+                        </span>
                         <span className="lbd-member-info">
-                          <div className="lbd-member-name">{row.name}</div>
-                          {row.code !== row.name && <div className="lbd-member-code">{row.code}</div>}
+                          <div className="lbd-member-name">{nameOf(row)}</div>
+                          {row.code && row.code !== row.name && <div className="lbd-member-code">{row.code}</div>}
                           {row.symbols?.length > 0 && (
                             <div className="lbd-symbols" title={row.symbols.join(", ")}>
                               {row.symbols.slice(0, MAX_SYMBOL_BADGES).map((symbol) => (

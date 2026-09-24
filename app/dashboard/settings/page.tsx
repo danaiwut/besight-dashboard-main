@@ -6,6 +6,7 @@ import { useLanguage } from "../../../components/crm/LanguageContext";
 import { useTheme } from "../../../components/dashboard/ThemeContext";
 import { useCustomerData } from "../../../components/dashboard/useCustomerData";
 import Icon from "../../../components/Icon";
+import LeaderboardProfileCard from "../../../components/dashboard/LeaderboardProfileCard";
 
 const MAX_BG_BYTES = 6 * 1024 * 1024;
 
@@ -143,6 +144,8 @@ export default function DashboardSettingsPage() {
           onReset={() => setDarkBgUrl(null)}
         />
       </div>
+
+      <LeaderboardProfileCard />
 
       <div className="card" style={{ padding: 24, marginTop: 20 }}>
         <div className="panel-section-title">{t("dash.settings.section.notifications")}</div>

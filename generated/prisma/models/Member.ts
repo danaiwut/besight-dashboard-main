@@ -49,6 +49,7 @@ export type MemberMinAggregateOutputType = {
   name: string | null
   displayName: string | null
   avatarUrl: string | null
+  leaderboardProfileJson: string | null
   email: string | null
   passwordHash: string | null
   tokenVersion: number | null
@@ -87,6 +88,7 @@ export type MemberMaxAggregateOutputType = {
   name: string | null
   displayName: string | null
   avatarUrl: string | null
+  leaderboardProfileJson: string | null
   email: string | null
   passwordHash: string | null
   tokenVersion: number | null
@@ -125,6 +127,7 @@ export type MemberCountAggregateOutputType = {
   name: number
   displayName: number
   avatarUrl: number
+  leaderboardProfileJson: number
   email: number
   passwordHash: number
   tokenVersion: number
@@ -181,6 +184,7 @@ export type MemberMinAggregateInputType = {
   name?: true
   displayName?: true
   avatarUrl?: true
+  leaderboardProfileJson?: true
   email?: true
   passwordHash?: true
   tokenVersion?: true
@@ -219,6 +223,7 @@ export type MemberMaxAggregateInputType = {
   name?: true
   displayName?: true
   avatarUrl?: true
+  leaderboardProfileJson?: true
   email?: true
   passwordHash?: true
   tokenVersion?: true
@@ -257,6 +262,7 @@ export type MemberCountAggregateInputType = {
   name?: true
   displayName?: true
   avatarUrl?: true
+  leaderboardProfileJson?: true
   email?: true
   passwordHash?: true
   tokenVersion?: true
@@ -382,6 +388,7 @@ export type MemberGroupByOutputType = {
   name: string
   displayName: string | null
   avatarUrl: string | null
+  leaderboardProfileJson: string | null
   email: string | null
   passwordHash: string | null
   tokenVersion: number
@@ -443,6 +450,7 @@ export type MemberWhereInput = {
   name?: Prisma.StringFilter<"Member"> | string
   displayName?: Prisma.StringNullableFilter<"Member"> | string | null
   avatarUrl?: Prisma.StringNullableFilter<"Member"> | string | null
+  leaderboardProfileJson?: Prisma.StringNullableFilter<"Member"> | string | null
   email?: Prisma.StringNullableFilter<"Member"> | string | null
   passwordHash?: Prisma.StringNullableFilter<"Member"> | string | null
   tokenVersion?: Prisma.IntFilter<"Member"> | number
@@ -500,6 +508,7 @@ export type MemberOrderByWithRelationInput = {
   name?: Prisma.SortOrder
   displayName?: Prisma.SortOrderInput | Prisma.SortOrder
   avatarUrl?: Prisma.SortOrderInput | Prisma.SortOrder
+  leaderboardProfileJson?: Prisma.SortOrderInput | Prisma.SortOrder
   email?: Prisma.SortOrderInput | Prisma.SortOrder
   passwordHash?: Prisma.SortOrderInput | Prisma.SortOrder
   tokenVersion?: Prisma.SortOrder
@@ -563,6 +572,7 @@ export type MemberWhereUniqueInput = Prisma.AtLeast<{
   name?: Prisma.StringFilter<"Member"> | string
   displayName?: Prisma.StringNullableFilter<"Member"> | string | null
   avatarUrl?: Prisma.StringNullableFilter<"Member"> | string | null
+  leaderboardProfileJson?: Prisma.StringNullableFilter<"Member"> | string | null
   passwordHash?: Prisma.StringNullableFilter<"Member"> | string | null
   tokenVersion?: Prisma.IntFilter<"Member"> | number
   identityVerifiedAt?: Prisma.DateTimeNullableFilter<"Member"> | Date | string | null
@@ -618,6 +628,7 @@ export type MemberOrderByWithAggregationInput = {
   name?: Prisma.SortOrder
   displayName?: Prisma.SortOrderInput | Prisma.SortOrder
   avatarUrl?: Prisma.SortOrderInput | Prisma.SortOrder
+  leaderboardProfileJson?: Prisma.SortOrderInput | Prisma.SortOrder
   email?: Prisma.SortOrderInput | Prisma.SortOrder
   passwordHash?: Prisma.SortOrderInput | Prisma.SortOrder
   tokenVersion?: Prisma.SortOrder
@@ -664,6 +675,7 @@ export type MemberScalarWhereWithAggregatesInput = {
   name?: Prisma.StringWithAggregatesFilter<"Member"> | string
   displayName?: Prisma.StringNullableWithAggregatesFilter<"Member"> | string | null
   avatarUrl?: Prisma.StringNullableWithAggregatesFilter<"Member"> | string | null
+  leaderboardProfileJson?: Prisma.StringNullableWithAggregatesFilter<"Member"> | string | null
   email?: Prisma.StringNullableWithAggregatesFilter<"Member"> | string | null
   passwordHash?: Prisma.StringNullableWithAggregatesFilter<"Member"> | string | null
   tokenVersion?: Prisma.IntWithAggregatesFilter<"Member"> | number
@@ -701,6 +713,7 @@ export type MemberCreateInput = {
   name: string
   displayName?: string | null
   avatarUrl?: string | null
+  leaderboardProfileJson?: string | null
   email?: string | null
   passwordHash?: string | null
   tokenVersion?: number
@@ -757,6 +770,7 @@ export type MemberUncheckedCreateInput = {
   name: string
   displayName?: string | null
   avatarUrl?: string | null
+  leaderboardProfileJson?: string | null
   email?: string | null
   passwordHash?: string | null
   tokenVersion?: number
@@ -812,6 +826,7 @@ export type MemberUpdateInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  leaderboardProfileJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
@@ -868,6 +883,7 @@ export type MemberUncheckedUpdateInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  leaderboardProfileJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
@@ -924,6 +940,7 @@ export type MemberCreateManyInput = {
   name: string
   displayName?: string | null
   avatarUrl?: string | null
+  leaderboardProfileJson?: string | null
   email?: string | null
   passwordHash?: string | null
   tokenVersion?: number
@@ -961,6 +978,7 @@ export type MemberUpdateManyMutationInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  leaderboardProfileJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
@@ -998,6 +1016,7 @@ export type MemberUncheckedUpdateManyInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  leaderboardProfileJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1042,6 +1061,7 @@ export type MemberCountOrderByAggregateInput = {
   name?: Prisma.SortOrder
   displayName?: Prisma.SortOrder
   avatarUrl?: Prisma.SortOrder
+  leaderboardProfileJson?: Prisma.SortOrder
   email?: Prisma.SortOrder
   passwordHash?: Prisma.SortOrder
   tokenVersion?: Prisma.SortOrder
@@ -1088,6 +1108,7 @@ export type MemberMaxOrderByAggregateInput = {
   name?: Prisma.SortOrder
   displayName?: Prisma.SortOrder
   avatarUrl?: Prisma.SortOrder
+  leaderboardProfileJson?: Prisma.SortOrder
   email?: Prisma.SortOrder
   passwordHash?: Prisma.SortOrder
   tokenVersion?: Prisma.SortOrder
@@ -1126,6 +1147,7 @@ export type MemberMinOrderByAggregateInput = {
   name?: Prisma.SortOrder
   displayName?: Prisma.SortOrder
   avatarUrl?: Prisma.SortOrder
+  leaderboardProfileJson?: Prisma.SortOrder
   email?: Prisma.SortOrder
   passwordHash?: Prisma.SortOrder
   tokenVersion?: Prisma.SortOrder
@@ -1545,6 +1567,7 @@ export type MemberCreateWithoutAcquisitionChannelsInput = {
   name: string
   displayName?: string | null
   avatarUrl?: string | null
+  leaderboardProfileJson?: string | null
   email?: string | null
   passwordHash?: string | null
   tokenVersion?: number
@@ -1600,6 +1623,7 @@ export type MemberUncheckedCreateWithoutAcquisitionChannelsInput = {
   name: string
   displayName?: string | null
   avatarUrl?: string | null
+  leaderboardProfileJson?: string | null
   email?: string | null
   passwordHash?: string | null
   tokenVersion?: number
@@ -1670,6 +1694,7 @@ export type MemberUpdateWithoutAcquisitionChannelsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  leaderboardProfileJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1725,6 +1750,7 @@ export type MemberUncheckedUpdateWithoutAcquisitionChannelsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  leaderboardProfileJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1779,6 +1805,7 @@ export type MemberCreateWithoutTradeAccountsInput = {
   name: string
   displayName?: string | null
   avatarUrl?: string | null
+  leaderboardProfileJson?: string | null
   email?: string | null
   passwordHash?: string | null
   tokenVersion?: number
@@ -1834,6 +1861,7 @@ export type MemberUncheckedCreateWithoutTradeAccountsInput = {
   name: string
   displayName?: string | null
   avatarUrl?: string | null
+  leaderboardProfileJson?: string | null
   email?: string | null
   passwordHash?: string | null
   tokenVersion?: number
@@ -1893,6 +1921,7 @@ export type MemberCreateWithoutPrimaryTradeAccountInput = {
   name: string
   displayName?: string | null
   avatarUrl?: string | null
+  leaderboardProfileJson?: string | null
   email?: string | null
   passwordHash?: string | null
   tokenVersion?: number
@@ -1948,6 +1977,7 @@ export type MemberUncheckedCreateWithoutPrimaryTradeAccountInput = {
   name: string
   displayName?: string | null
   avatarUrl?: string | null
+  leaderboardProfileJson?: string | null
   email?: string | null
   passwordHash?: string | null
   tokenVersion?: number
@@ -2023,6 +2053,7 @@ export type MemberUpdateWithoutTradeAccountsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  leaderboardProfileJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
@@ -2078,6 +2109,7 @@ export type MemberUncheckedUpdateWithoutTradeAccountsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  leaderboardProfileJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
@@ -2152,6 +2184,7 @@ export type MemberScalarWhereInput = {
   name?: Prisma.StringFilter<"Member"> | string
   displayName?: Prisma.StringNullableFilter<"Member"> | string | null
   avatarUrl?: Prisma.StringNullableFilter<"Member"> | string | null
+  leaderboardProfileJson?: Prisma.StringNullableFilter<"Member"> | string | null
   email?: Prisma.StringNullableFilter<"Member"> | string | null
   passwordHash?: Prisma.StringNullableFilter<"Member"> | string | null
   tokenVersion?: Prisma.IntFilter<"Member"> | number
@@ -2189,6 +2222,7 @@ export type MemberCreateWithoutTradeLogsInput = {
   name: string
   displayName?: string | null
   avatarUrl?: string | null
+  leaderboardProfileJson?: string | null
   email?: string | null
   passwordHash?: string | null
   tokenVersion?: number
@@ -2244,6 +2278,7 @@ export type MemberUncheckedCreateWithoutTradeLogsInput = {
   name: string
   displayName?: string | null
   avatarUrl?: string | null
+  leaderboardProfileJson?: string | null
   email?: string | null
   passwordHash?: string | null
   tokenVersion?: number
@@ -2314,6 +2349,7 @@ export type MemberUpdateWithoutTradeLogsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  leaderboardProfileJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
@@ -2369,6 +2405,7 @@ export type MemberUncheckedUpdateWithoutTradeLogsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  leaderboardProfileJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
@@ -2423,6 +2460,7 @@ export type MemberCreateWithoutIndicatorAccessInput = {
   name: string
   displayName?: string | null
   avatarUrl?: string | null
+  leaderboardProfileJson?: string | null
   email?: string | null
   passwordHash?: string | null
   tokenVersion?: number
@@ -2478,6 +2516,7 @@ export type MemberUncheckedCreateWithoutIndicatorAccessInput = {
   name: string
   displayName?: string | null
   avatarUrl?: string | null
+  leaderboardProfileJson?: string | null
   email?: string | null
   passwordHash?: string | null
   tokenVersion?: number
@@ -2548,6 +2587,7 @@ export type MemberUpdateWithoutIndicatorAccessInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  leaderboardProfileJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
@@ -2603,6 +2643,7 @@ export type MemberUncheckedUpdateWithoutIndicatorAccessInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  leaderboardProfileJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
@@ -2657,6 +2698,7 @@ export type MemberCreateWithoutRenewalHistoryInput = {
   name: string
   displayName?: string | null
   avatarUrl?: string | null
+  leaderboardProfileJson?: string | null
   email?: string | null
   passwordHash?: string | null
   tokenVersion?: number
@@ -2712,6 +2754,7 @@ export type MemberUncheckedCreateWithoutRenewalHistoryInput = {
   name: string
   displayName?: string | null
   avatarUrl?: string | null
+  leaderboardProfileJson?: string | null
   email?: string | null
   passwordHash?: string | null
   tokenVersion?: number
@@ -2782,6 +2825,7 @@ export type MemberUpdateWithoutRenewalHistoryInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  leaderboardProfileJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
@@ -2837,6 +2881,7 @@ export type MemberUncheckedUpdateWithoutRenewalHistoryInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  leaderboardProfileJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
@@ -2891,6 +2936,7 @@ export type MemberCreateWithoutTelegramAccessInput = {
   name: string
   displayName?: string | null
   avatarUrl?: string | null
+  leaderboardProfileJson?: string | null
   email?: string | null
   passwordHash?: string | null
   tokenVersion?: number
@@ -2946,6 +2992,7 @@ export type MemberUncheckedCreateWithoutTelegramAccessInput = {
   name: string
   displayName?: string | null
   avatarUrl?: string | null
+  leaderboardProfileJson?: string | null
   email?: string | null
   passwordHash?: string | null
   tokenVersion?: number
@@ -3016,6 +3063,7 @@ export type MemberUpdateWithoutTelegramAccessInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  leaderboardProfileJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
@@ -3071,6 +3119,7 @@ export type MemberUncheckedUpdateWithoutTelegramAccessInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  leaderboardProfileJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
@@ -3125,6 +3174,7 @@ export type MemberCreateWithoutLotCheckRunsInput = {
   name: string
   displayName?: string | null
   avatarUrl?: string | null
+  leaderboardProfileJson?: string | null
   email?: string | null
   passwordHash?: string | null
   tokenVersion?: number
@@ -3180,6 +3230,7 @@ export type MemberUncheckedCreateWithoutLotCheckRunsInput = {
   name: string
   displayName?: string | null
   avatarUrl?: string | null
+  leaderboardProfileJson?: string | null
   email?: string | null
   passwordHash?: string | null
   tokenVersion?: number
@@ -3250,6 +3301,7 @@ export type MemberUpdateWithoutLotCheckRunsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  leaderboardProfileJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
@@ -3305,6 +3357,7 @@ export type MemberUncheckedUpdateWithoutLotCheckRunsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  leaderboardProfileJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
@@ -3359,6 +3412,7 @@ export type MemberCreateWithoutActivityLogsInput = {
   name: string
   displayName?: string | null
   avatarUrl?: string | null
+  leaderboardProfileJson?: string | null
   email?: string | null
   passwordHash?: string | null
   tokenVersion?: number
@@ -3414,6 +3468,7 @@ export type MemberUncheckedCreateWithoutActivityLogsInput = {
   name: string
   displayName?: string | null
   avatarUrl?: string | null
+  leaderboardProfileJson?: string | null
   email?: string | null
   passwordHash?: string | null
   tokenVersion?: number
@@ -3484,6 +3539,7 @@ export type MemberUpdateWithoutActivityLogsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  leaderboardProfileJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
@@ -3539,6 +3595,7 @@ export type MemberUncheckedUpdateWithoutActivityLogsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  leaderboardProfileJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
@@ -3593,6 +3650,7 @@ export type MemberCreateWithoutActivityEnrollmentsInput = {
   name: string
   displayName?: string | null
   avatarUrl?: string | null
+  leaderboardProfileJson?: string | null
   email?: string | null
   passwordHash?: string | null
   tokenVersion?: number
@@ -3648,6 +3706,7 @@ export type MemberUncheckedCreateWithoutActivityEnrollmentsInput = {
   name: string
   displayName?: string | null
   avatarUrl?: string | null
+  leaderboardProfileJson?: string | null
   email?: string | null
   passwordHash?: string | null
   tokenVersion?: number
@@ -3718,6 +3777,7 @@ export type MemberUpdateWithoutActivityEnrollmentsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  leaderboardProfileJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
@@ -3773,6 +3833,7 @@ export type MemberUncheckedUpdateWithoutActivityEnrollmentsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  leaderboardProfileJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
@@ -3827,6 +3888,7 @@ export type MemberCreateWithoutRewardClaimsInput = {
   name: string
   displayName?: string | null
   avatarUrl?: string | null
+  leaderboardProfileJson?: string | null
   email?: string | null
   passwordHash?: string | null
   tokenVersion?: number
@@ -3882,6 +3944,7 @@ export type MemberUncheckedCreateWithoutRewardClaimsInput = {
   name: string
   displayName?: string | null
   avatarUrl?: string | null
+  leaderboardProfileJson?: string | null
   email?: string | null
   passwordHash?: string | null
   tokenVersion?: number
@@ -3952,6 +4015,7 @@ export type MemberUpdateWithoutRewardClaimsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  leaderboardProfileJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
@@ -4007,6 +4071,7 @@ export type MemberUncheckedUpdateWithoutRewardClaimsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  leaderboardProfileJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
@@ -4061,6 +4126,7 @@ export type MemberCreateWithoutBecGrantsInput = {
   name: string
   displayName?: string | null
   avatarUrl?: string | null
+  leaderboardProfileJson?: string | null
   email?: string | null
   passwordHash?: string | null
   tokenVersion?: number
@@ -4116,6 +4182,7 @@ export type MemberUncheckedCreateWithoutBecGrantsInput = {
   name: string
   displayName?: string | null
   avatarUrl?: string | null
+  leaderboardProfileJson?: string | null
   email?: string | null
   passwordHash?: string | null
   tokenVersion?: number
@@ -4186,6 +4253,7 @@ export type MemberUpdateWithoutBecGrantsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  leaderboardProfileJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
@@ -4241,6 +4309,7 @@ export type MemberUncheckedUpdateWithoutBecGrantsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  leaderboardProfileJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
@@ -4295,6 +4364,7 @@ export type MemberCreateWithoutSpinResultsInput = {
   name: string
   displayName?: string | null
   avatarUrl?: string | null
+  leaderboardProfileJson?: string | null
   email?: string | null
   passwordHash?: string | null
   tokenVersion?: number
@@ -4350,6 +4420,7 @@ export type MemberUncheckedCreateWithoutSpinResultsInput = {
   name: string
   displayName?: string | null
   avatarUrl?: string | null
+  leaderboardProfileJson?: string | null
   email?: string | null
   passwordHash?: string | null
   tokenVersion?: number
@@ -4420,6 +4491,7 @@ export type MemberUpdateWithoutSpinResultsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  leaderboardProfileJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
@@ -4475,6 +4547,7 @@ export type MemberUncheckedUpdateWithoutSpinResultsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  leaderboardProfileJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
@@ -4529,6 +4602,7 @@ export type MemberCreateWithoutJournalAccountsInput = {
   name: string
   displayName?: string | null
   avatarUrl?: string | null
+  leaderboardProfileJson?: string | null
   email?: string | null
   passwordHash?: string | null
   tokenVersion?: number
@@ -4584,6 +4658,7 @@ export type MemberUncheckedCreateWithoutJournalAccountsInput = {
   name: string
   displayName?: string | null
   avatarUrl?: string | null
+  leaderboardProfileJson?: string | null
   email?: string | null
   passwordHash?: string | null
   tokenVersion?: number
@@ -4654,6 +4729,7 @@ export type MemberUpdateWithoutJournalAccountsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  leaderboardProfileJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
@@ -4709,6 +4785,7 @@ export type MemberUncheckedUpdateWithoutJournalAccountsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  leaderboardProfileJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
@@ -4763,6 +4840,7 @@ export type MemberCreateWithoutSocialAccountsInput = {
   name: string
   displayName?: string | null
   avatarUrl?: string | null
+  leaderboardProfileJson?: string | null
   email?: string | null
   passwordHash?: string | null
   tokenVersion?: number
@@ -4818,6 +4896,7 @@ export type MemberUncheckedCreateWithoutSocialAccountsInput = {
   name: string
   displayName?: string | null
   avatarUrl?: string | null
+  leaderboardProfileJson?: string | null
   email?: string | null
   passwordHash?: string | null
   tokenVersion?: number
@@ -4888,6 +4967,7 @@ export type MemberUpdateWithoutSocialAccountsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  leaderboardProfileJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
@@ -4943,6 +5023,7 @@ export type MemberUncheckedUpdateWithoutSocialAccountsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  leaderboardProfileJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
@@ -4997,6 +5078,7 @@ export type MemberCreateWithoutNotificationReadsInput = {
   name: string
   displayName?: string | null
   avatarUrl?: string | null
+  leaderboardProfileJson?: string | null
   email?: string | null
   passwordHash?: string | null
   tokenVersion?: number
@@ -5052,6 +5134,7 @@ export type MemberUncheckedCreateWithoutNotificationReadsInput = {
   name: string
   displayName?: string | null
   avatarUrl?: string | null
+  leaderboardProfileJson?: string | null
   email?: string | null
   passwordHash?: string | null
   tokenVersion?: number
@@ -5122,6 +5205,7 @@ export type MemberUpdateWithoutNotificationReadsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  leaderboardProfileJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
@@ -5177,6 +5261,7 @@ export type MemberUncheckedUpdateWithoutNotificationReadsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  leaderboardProfileJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
@@ -5231,6 +5316,7 @@ export type MemberCreateWithoutCourseEnrollmentsInput = {
   name: string
   displayName?: string | null
   avatarUrl?: string | null
+  leaderboardProfileJson?: string | null
   email?: string | null
   passwordHash?: string | null
   tokenVersion?: number
@@ -5286,6 +5372,7 @@ export type MemberUncheckedCreateWithoutCourseEnrollmentsInput = {
   name: string
   displayName?: string | null
   avatarUrl?: string | null
+  leaderboardProfileJson?: string | null
   email?: string | null
   passwordHash?: string | null
   tokenVersion?: number
@@ -5356,6 +5443,7 @@ export type MemberUpdateWithoutCourseEnrollmentsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  leaderboardProfileJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
@@ -5411,6 +5499,7 @@ export type MemberUncheckedUpdateWithoutCourseEnrollmentsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  leaderboardProfileJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
@@ -5465,6 +5554,7 @@ export type MemberCreateWithoutLessonProgressInput = {
   name: string
   displayName?: string | null
   avatarUrl?: string | null
+  leaderboardProfileJson?: string | null
   email?: string | null
   passwordHash?: string | null
   tokenVersion?: number
@@ -5520,6 +5610,7 @@ export type MemberUncheckedCreateWithoutLessonProgressInput = {
   name: string
   displayName?: string | null
   avatarUrl?: string | null
+  leaderboardProfileJson?: string | null
   email?: string | null
   passwordHash?: string | null
   tokenVersion?: number
@@ -5590,6 +5681,7 @@ export type MemberUpdateWithoutLessonProgressInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  leaderboardProfileJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
@@ -5645,6 +5737,7 @@ export type MemberUncheckedUpdateWithoutLessonProgressInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  leaderboardProfileJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
@@ -5699,6 +5792,7 @@ export type MemberCreateWithoutClaimTokensInput = {
   name: string
   displayName?: string | null
   avatarUrl?: string | null
+  leaderboardProfileJson?: string | null
   email?: string | null
   passwordHash?: string | null
   tokenVersion?: number
@@ -5754,6 +5848,7 @@ export type MemberUncheckedCreateWithoutClaimTokensInput = {
   name: string
   displayName?: string | null
   avatarUrl?: string | null
+  leaderboardProfileJson?: string | null
   email?: string | null
   passwordHash?: string | null
   tokenVersion?: number
@@ -5824,6 +5919,7 @@ export type MemberUpdateWithoutClaimTokensInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  leaderboardProfileJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
@@ -5879,6 +5975,7 @@ export type MemberUncheckedUpdateWithoutClaimTokensInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  leaderboardProfileJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
@@ -5934,6 +6031,7 @@ export type MemberCreateManyPrimaryTradeAccountInput = {
   name: string
   displayName?: string | null
   avatarUrl?: string | null
+  leaderboardProfileJson?: string | null
   email?: string | null
   passwordHash?: string | null
   tokenVersion?: number
@@ -5970,6 +6068,7 @@ export type MemberUpdateWithoutPrimaryTradeAccountInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  leaderboardProfileJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
@@ -6025,6 +6124,7 @@ export type MemberUncheckedUpdateWithoutPrimaryTradeAccountInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  leaderboardProfileJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
@@ -6080,6 +6180,7 @@ export type MemberUncheckedUpdateManyWithoutPrimaryTradeAccountInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  leaderboardProfileJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
@@ -6301,6 +6402,7 @@ export type MemberSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   name?: boolean
   displayName?: boolean
   avatarUrl?: boolean
+  leaderboardProfileJson?: boolean
   email?: boolean
   passwordHash?: boolean
   tokenVersion?: boolean
@@ -6361,6 +6463,7 @@ export type MemberSelectScalar = {
   name?: boolean
   displayName?: boolean
   avatarUrl?: boolean
+  leaderboardProfileJson?: boolean
   email?: boolean
   passwordHash?: boolean
   tokenVersion?: boolean
@@ -6392,7 +6495,7 @@ export type MemberSelectScalar = {
   customerStageOverride?: boolean
 }
 
-export type MemberOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "externalId" | "code" | "name" | "displayName" | "avatarUrl" | "email" | "passwordHash" | "tokenVersion" | "identityVerifiedAt" | "phone" | "country" | "address" | "tradingView" | "telegramUsername" | "telegramUserId" | "discordUsername" | "discordUserId" | "lineUserId" | "lineDisplayName" | "socialLinksJson" | "joinedAt" | "createdAt" | "updatedAt" | "plan" | "primaryTradeAccountId" | "requiredLotsOverride" | "requiredLotsOverrideNote" | "crmStartDate" | "crmExpiryDate" | "currentPeriodLots" | "currentPeriodLotsAt" | "currentPeriodLotsFrom" | "currentPeriodLotsTo" | "customerStageOverride", ExtArgs["result"]["member"]>
+export type MemberOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "externalId" | "code" | "name" | "displayName" | "avatarUrl" | "leaderboardProfileJson" | "email" | "passwordHash" | "tokenVersion" | "identityVerifiedAt" | "phone" | "country" | "address" | "tradingView" | "telegramUsername" | "telegramUserId" | "discordUsername" | "discordUserId" | "lineUserId" | "lineDisplayName" | "socialLinksJson" | "joinedAt" | "createdAt" | "updatedAt" | "plan" | "primaryTradeAccountId" | "requiredLotsOverride" | "requiredLotsOverrideNote" | "crmStartDate" | "crmExpiryDate" | "currentPeriodLots" | "currentPeriodLotsAt" | "currentPeriodLotsFrom" | "currentPeriodLotsTo" | "customerStageOverride", ExtArgs["result"]["member"]>
 export type MemberInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   primaryTradeAccount?: boolean | Prisma.Member$primaryTradeAccountArgs<ExtArgs>
   tradeAccounts?: boolean | Prisma.Member$tradeAccountsArgs<ExtArgs>
@@ -6446,6 +6549,11 @@ export type $MemberPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
     name: string
     displayName: string | null
     avatarUrl: string | null
+    /**
+     * * Member-chosen public profile for the leaderboard (nickname, avatar,
+     *    *  what to show) — see lib/leaderboardProfile.ts. Null = defaults.
+     */
+    leaderboardProfileJson: string | null
     email: string | null
     /**
      * * scrypt hash for email/password sign-in (null = social-login only).
@@ -6886,6 +6994,7 @@ export interface MemberFieldRefs {
   readonly name: Prisma.FieldRef<"Member", 'String'>
   readonly displayName: Prisma.FieldRef<"Member", 'String'>
   readonly avatarUrl: Prisma.FieldRef<"Member", 'String'>
+  readonly leaderboardProfileJson: Prisma.FieldRef<"Member", 'String'>
   readonly email: Prisma.FieldRef<"Member", 'String'>
   readonly passwordHash: Prisma.FieldRef<"Member", 'String'>
   readonly tokenVersion: Prisma.FieldRef<"Member", 'Int'>

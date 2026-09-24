@@ -63,6 +63,9 @@ model Member {
   name                     String                     @db.VarChar(191)
   displayName              String?                    @db.VarChar(191)
   avatarUrl                String?                    @db.Text
+  /** Member-chosen public profile for the leaderboard (nickname, avatar,
+   *  what to show) — see lib/leaderboardProfile.ts. Null = defaults. */
+  leaderboardProfileJson   String?                    @db.Text
   email                    String?                    @unique @db.VarChar(191)
   /** scrypt hash for email/password sign-in (null = social-login only). */
   passwordHash             String?                    @db.VarChar(255)
