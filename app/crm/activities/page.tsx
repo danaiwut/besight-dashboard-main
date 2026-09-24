@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useCrm, fmtDate } from "../../../components/crm/CrmContext";
 import { useLanguage } from "../../../components/crm/LanguageContext";
 import { TableSkeleton } from "../../../components/crm/Skeletons";
@@ -66,6 +66,12 @@ export default function CrmActivitiesPage() {
     }
   }
 
+  const overview = useMemo(() => ({
+    live: activities.filter((activity) => activity.status === "live").length,
+    upcoming: activities.filter((activity) => activity.status === "upcoming").length,
+    registrations: activities.reduce((total, activity) => total + activity.traders, 0),
+  }), [activities]);
+
   if (crmDataStatus === "loading" || loading) {
     return (
       <section className="panel is-active">
@@ -75,12 +81,21 @@ export default function CrmActivitiesPage() {
   }
 
   return (
-    <section className="panel is-active">
-      <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 18 }}>
+    <section className="panel is-active crm-operations-page">
+      <div className="crm-page-command">
+        <div>
+          <span className="crm-page-eyebrow"><Icon name="emoji_events" /> {t("title.activities")}</span>
+          <p>{t("sub.activities")}</p>
+        </div>
         <button className="btn btn-primary" onClick={() => setDrawer({ activity: null })}>
           <Icon name="add" />
           {t("act.add")}
         </button>
+      </div>
+      <div className="crm-kpi-row">
+        <div><Icon name="bolt" /><strong>{overview.live}</strong><span>{t("act.status.live")}</span></div>
+        <div><Icon name="event_upcoming" /><strong>{overview.upcoming}</strong><span>{t("act.status.upcoming")}</span></div>
+        <div><Icon name="groups" /><strong>{overview.registrations.toLocaleString()}</strong><span>{t("act.col.traders")}</span></div>
       </div>
 
       {error && (
@@ -89,7 +104,7 @@ export default function CrmActivitiesPage() {
         </div>
       )}
 
-      <div className="card">
+      <div className="card crm-data-card activity-data-card">
         <div className="table-wrap">
           <table className="data" style={{ minWidth: 900 }}>
             <thead>

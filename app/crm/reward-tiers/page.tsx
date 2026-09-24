@@ -132,8 +132,12 @@ export default function CrmRewardTiersPage() {
   const set = (patch: Partial<TierDraft>) => setDraft((cur) => ({ ...cur, ...patch }));
 
   return (
-    <section className="panel is-active">
-      <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 18 }}>
+    <section className="panel is-active crm-operations-page">
+      <div className="crm-page-command">
+        <div>
+          <span className="crm-page-eyebrow"><Icon name="workspace_premium" /> {t("crm.page.tiers")}</span>
+          <p>{t("crm.page.tiersDesc")}</p>
+        </div>
         <button className="btn btn-primary" onClick={() => openDraft("new")}>
           <Icon name="add" />
           {t("rw.tiers.add")}
@@ -146,7 +150,7 @@ export default function CrmRewardTiersPage() {
         </div>
       )}
 
-      <div className="card">
+      <div className="card crm-data-card reward-tiers-card">
         <div className="table-wrap">
           <table className="data" style={{ minWidth: 900 }}>
             <thead>
@@ -203,10 +207,11 @@ export default function CrmRewardTiersPage() {
 
       <Drawer
         open={draftIndex !== null}
+        className="drawer-compact tier-drawer"
         title={draftIndex === "new" ? t("rw.tiers.add") : t("rw.tiers.edit")}
         onClose={() => setDraftIndex(null)}
         body={
-          <>
+          <div className="drawer-form">
             <div className="form-grid2">
               <div className="field">
                 <label>{t("rw.tiers.field.key")}</label>
@@ -256,7 +261,7 @@ export default function CrmRewardTiersPage() {
                 <input type="checkbox" checked={draft.active} onChange={(e) => set({ active: e.target.checked })} /> {t("rw.tiers.field.active")}
               </label>
             </div>
-          </>
+          </div>
         }
         foot={
           <>

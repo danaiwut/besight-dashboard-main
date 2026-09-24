@@ -105,9 +105,19 @@ export default function CrmCoursesPage() {
   }
 
   return (
-    <section className="panel is-active">
+    <section className="panel is-active crm-operations-page course-catalog-page">
+      <div className="crm-page-command">
+        <div>
+          <span className="crm-page-eyebrow"><Icon name="school" /> {t("title.courses")}</span>
+          <p>{t("crm.page.coursesDesc")}</p>
+        </div>
+        <button className="btn btn-primary" onClick={() => void createCourse()} disabled={creating}>
+          <Icon name="add" />
+          {creating ? "…" : t("courseAdmin.add")}
+        </button>
+      </div>
       {/* Summary */}
-      <div className="stat-grid cols-4" style={{ marginBottom: 18 }}>
+      <div className="stat-grid cols-4 course-catalog-stats" style={{ marginBottom: 18 }}>
         <div className="stat-card">
           <div className="value">{stats.total}</div>
           <div className="label">{t("courseAdmin.totalCourses")}</div>
@@ -134,12 +144,6 @@ export default function CrmCoursesPage() {
           </button>
           <button type="button" className={`tab${view === "table" ? " is-active" : ""}`} onClick={() => setView("table")}>
             <Icon name="list" style={{ fontSize: 15 }} /> {t("courseAdmin.view.table")}
-          </button>
-        </div>
-        <div className="toolbar-actions">
-          <button className="btn btn-primary" onClick={() => void createCourse()} disabled={creating}>
-            <Icon name="add" />
-            {creating ? "…" : t("courseAdmin.add")}
           </button>
         </div>
       </div>

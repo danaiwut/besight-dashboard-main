@@ -18,12 +18,15 @@ export default function Drawer({
   onClose,
   body,
   foot,
+  className = "",
 }: {
   open: boolean;
   title: string;
   onClose: () => void;
   body: ReactNode;
   foot?: ReactNode;
+  /** Use for short, task-focused forms that should read as a sheet, not an empty full-height panel. */
+  className?: string;
 }) {
   const [mounted, setMounted] = useState(false);
   useEffect(() => {
@@ -47,7 +50,7 @@ export default function Drawer({
   return createPortal(
     <>
       <div className={`scrim${open ? " show" : ""}`} onClick={onClose}></div>
-      <aside className={`drawer${open ? " open" : ""}`} aria-label="Details">
+      <aside className={`drawer${open ? " open" : ""}${className ? ` ${className}` : ""}`} aria-label="Details">
         <div className="drawer-head">
           <h3>{title}</h3>
           <button className="drawer-close" aria-label="Close" onClick={onClose}>

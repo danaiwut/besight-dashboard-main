@@ -296,7 +296,22 @@ export default function CrmSpinPage() {
   }
 
   return (
-    <section className="panel is-active">
+    <section className="panel is-active crm-operations-page spin-operations-page">
+      <div className="crm-page-command spin-page-command">
+        <div>
+          <span className="crm-page-eyebrow"><Icon name="casino" /> {t("title.spin")}</span>
+          <p>{t("spin.set.desc")}</p>
+        </div>
+        <span className={`course-visibility-control ${settings?.enabled ? "is-published" : "is-draft"}`}>
+          <Icon name={settings?.enabled ? "check_circle" : "pause_circle"} />
+          {settings?.enabled ? t("common.active") : t("common.inactive")}
+        </span>
+      </div>
+      <div className="crm-kpi-row spin-kpi-row">
+        <div><Icon name="redeem" /><strong>{prizes.filter((prize) => prize.active).length}</strong><span>{t("spin.prizes.title")}</span></div>
+        <div className={summary.pending ? "is-attention" : ""}><Icon name="schedule" /><strong>{summary.pending}</strong><span>{t("spin.status.pending")}</span></div>
+        <div><Icon name="emoji_events" /><strong>{summary.fulfilled}</strong><span>{t("spin.status.fulfilled")}</span></div>
+      </div>
       {error && (
         <div className="card" style={{ padding: 16, marginBottom: 16, color: "var(--red)" }}>
           {error}
@@ -305,7 +320,7 @@ export default function CrmSpinPage() {
 
       {/* ── Settings ── */}
       {settings && (
-        <div className="card" style={{ padding: 22, marginBottom: 22 }}>
+        <div className="card crm-section-card" style={{ padding: 22, marginBottom: 22 }}>
           <div className="settings-head">
             <h3>{t("spin.set.title")}</h3>
             <div className="desc" style={{ fontSize: 12.5, color: "var(--text-sub)", marginTop: 2 }}>{t("spin.set.desc")}</div>
@@ -340,7 +355,7 @@ export default function CrmSpinPage() {
       )}
 
       {/* ── Manual BEC grants (test tool) ── */}
-      <div className="card" style={{ padding: 22, marginBottom: 22 }}>
+      <div className="card crm-section-card" style={{ padding: 22, marginBottom: 22 }}>
         <div className="settings-head">
           <h3>{t("spin.grant.title")}</h3>
           <div className="desc" style={{ fontSize: 12.5, color: "var(--text-sub)", marginTop: 2 }}>{t("spin.grant.desc")}</div>
@@ -402,7 +417,7 @@ export default function CrmSpinPage() {
       </div>
 
       {/* ── Prizes ── */}
-      <div className="card" style={{ padding: 22, marginBottom: 22 }}>
+      <div className="card crm-section-card" style={{ padding: 22, marginBottom: 22 }}>
         <div className="settings-head" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 14, flexWrap: "wrap" }}>
           <div>
             <h3>{t("spin.prizes.title")}</h3>
@@ -479,7 +494,7 @@ export default function CrmSpinPage() {
       </div>
 
       {/* ── BEC rates ── */}
-      <div className="card" style={{ padding: 22, marginBottom: 22 }}>
+      <div className="card crm-section-card" style={{ padding: 22, marginBottom: 22 }}>
         <div className="settings-head" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 14, flexWrap: "wrap" }}>
           <div>
             <h3>{t("spin.rates.title")}</h3>
@@ -533,7 +548,7 @@ export default function CrmSpinPage() {
       </div>
 
       {/* ── Results ── */}
-      <div className="card" style={{ padding: 22 }}>
+      <div className="card crm-section-card" style={{ padding: 22 }}>
         <div className="settings-head" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 14, flexWrap: "wrap" }}>
           <div>
             <h3>{t("spin.results.title")}</h3>
@@ -602,11 +617,12 @@ export default function CrmSpinPage() {
 
       <Drawer
         open={!!draft}
+        className="drawer-compact prize-drawer"
         title={draft?.id ? t("spin.prizes.edit") : t("spin.prizes.add")}
         onClose={() => { setDraft(null); setImageError(""); }}
         body={
           draft && (
-            <>
+            <div className="drawer-form">
               <div className="field">
                 <label>{t("spin.prizes.col.name")}</label>
                 <input className="input" value={draft.name} onChange={(e) => setDraft({ ...draft, name: e.target.value })} placeholder="เช่น $15 Bonus Rebate" />
@@ -689,7 +705,7 @@ export default function CrmSpinPage() {
                   </label>
                 </div>
               </div>
-            </>
+            </div>
           )
         }
         foot={

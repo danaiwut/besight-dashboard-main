@@ -5,6 +5,7 @@ import { useCrm } from "../../../components/crm/CrmContext";
 import { useLanguage } from "../../../components/crm/LanguageContext";
 import { TableSkeleton } from "../../../components/crm/Skeletons";
 import Drawer from "../../../components/crm/Drawer";
+import MemberCombobox from "../../../components/crm/MemberCombobox";
 import { apiCall } from "../../../lib/crmApi";
 import type { RewardClaimDto, RewardClaimKind, RewardClaimStatus } from "../../../lib/activities";
 import Icon from "../../../components/Icon";
@@ -15,7 +16,7 @@ const STATUS_BADGE: Record<RewardClaimStatus, string> = { pending: "pending", fu
  *  grants all land here — fulfil or cancel with a note, in one place. */
 export default function CrmRewardClaimsPage() {
   const { t } = useLanguage();
-  const { toast, log, dataVersion, crmDataStatus } = useCrm();
+  const { toast, log, dataVersion, crmDataStatus, members } = useCrm();
   const [claims, setClaims] = useState<RewardClaimDto[]>([]);
   const [summary, setSummary] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
@@ -26,7 +27,7 @@ export default function CrmRewardClaimsPage() {
   const [noteFor, setNoteFor] = useState<RewardClaimDto | null>(null);
   const [note, setNote] = useState("");
   const [manualOpen, setManualOpen] = useState(false);
-  const [manualMemberId, setManualMemberId] = useState("");
+  const [manualMemberId, setManualMemberId] = useState(0);
   const [manualTitle, setManualTitle] = useState("");
   const [manualDetail, setManualDetail] = useState("");
   const [workingId, setWorkingId] = useState<number | null>(null);
@@ -104,7 +105,7 @@ export default function CrmRewardClaimsPage() {
       });
       setClaims((cur) => [payload.claim, ...cur]);
       setManualOpen(false);
-      setManualMemberId("");
+      setManualMemberId(0);
       setManualTitle("");
       setManualDetail("");
       toast(t("rw.claims.manualCreated"));
@@ -124,17 +125,28 @@ export default function CrmRewardClaimsPage() {
   }
 
   return (
-    <section className="panel is-active">
-      <div className="stat-grid cols-3" style={{ marginBottom: 16 }}>
+    <section className="panel is-active crm-operations-page">
+      <div className="crm-page-command">
+        <div>
+          <span className="crm-page-eyebrow"><Icon name="redeem" /> {t("crm.page.claims")}</span>
+          <p>{t("crm.page.claimsDesc")}</p>
+        </div>
+        <button className="btn btn-primary" onClick={() => setManualOpen(true)}>
+          <Icon name="add" />
+          {t("rw.claims.manualAdd")}
+        </button>
+      </div>
+      <div className="crm-kpi-row claims-kpi-row">
         {(["pending", "fulfilled", "cancelled"] as const).map((key) => (
-          <div className="stat-card" key={key}>
-            <div className="value">{summary[key] ?? 0}</div>
-            <div className="label">{t(`rw.claims.status.${key}`)}</div>
+          <div key={key} className={key === "pending" ? "is-attention" : ""}>
+            <Icon name={key === "pending" ? "schedule" : key === "fulfilled" ? "check_circle" : "cancel"} />
+            <strong>{summary[key] ?? 0}</strong>
+            <span>{t(`rw.claims.status.${key}`)}</span>
           </div>
         ))}
       </div>
 
-      <div className="card">
+      <div className="card crm-data-card claims-data-card">
         <div className="toolbar">
           <select className="filter-select" aria-label="Status" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value as "all" | RewardClaimStatus)}>
             <option value="all">{t("common.all")}</option>
@@ -158,12 +170,6 @@ export default function CrmRewardClaimsPage() {
               onChange={(e) => setQuery(e.target.value)}
               onKeyDown={(e) => { if (e.key === "Enter") void load(); }}
             />
-          </div>
-          <div className="toolbar-actions">
-            <button className="btn btn-primary" onClick={() => setManualOpen(true)}>
-              <Icon name="add" />
-              {t("rw.claims.manualAdd")}
-            </button>
           </div>
         </div>
 
@@ -259,13 +265,20 @@ export default function CrmRewardClaimsPage() {
 
       <Drawer
         open={manualOpen}
+        className="drawer-compact manual-grant-drawer"
         title={t("rw.claims.manualAdd")}
         onClose={() => setManualOpen(false)}
         body={
-          <>
+          <div className="drawer-form">
             <div className="field">
               <label>{t("rw.claims.field.memberId")}</label>
-              <input className="input mono" value={manualMemberId} onChange={(e) => setManualMemberId(e.target.value.replace(/\D/g, ""))} placeholder="123" />
+              <MemberCombobox
+                members={members}
+                value={manualMemberId}
+                onChange={setManualMemberId}
+                placeholder={t("spin.grant.memberPlaceholder")}
+                ariaLabel={t("rw.claims.field.memberId")}
+              />
             </div>
             <div className="field">
               <label>{t("rw.claims.field.title")}</label>
@@ -275,7 +288,7 @@ export default function CrmRewardClaimsPage() {
               <label>{t("rw.claims.field.detail")}</label>
               <input className="input" value={manualDetail} onChange={(e) => setManualDetail(e.target.value)} />
             </div>
-          </>
+          </div>
         }
         foot={
           <>
