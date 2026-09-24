@@ -3,7 +3,6 @@ import { PrismaMariaDb } from "@prisma/adapter-mariadb";
 import { ActivityStatus, Plan, PrismaClient, RecordStatus } from "../generated/prisma/client";
 import { hashPassword } from "../lib/server/password";
 import { DEFAULT_BEC_RATES } from "../lib/becRates";
-import { COURSE_SEED, seedLessonsFor } from "../lib/courses";
 
 const databaseUrl = process.env.DATABASE_URL;
 if (!databaseUrl) throw new Error("DATABASE_URL is not configured");
@@ -103,51 +102,6 @@ async function main() {
       create: { symbol, pointsPerLot, active: true },
     });
   }
-  // Wheel prizes from the rewards sheet. Weight = relative chance.
-  const prizes = [
-    { name: 'Apple iPad 11" หรือเงินสด $300', icon: "emoji_events", valueNote: "$300.00", weight: 1, sortOrder: 0 },
-    { name: "เงินสด $200", icon: "payments", valueNote: "$200.00", weight: 2, sortOrder: 1 },
-    { name: "เงินสด $120", icon: "payments", valueNote: "$120.00", weight: 4, sortOrder: 2 },
-    { name: "เงินสด $40", icon: "payments", valueNote: "$40.00", weight: 10, sortOrder: 3 },
-    { name: "เงินสด $15", icon: "card_giftcard", valueNote: "$15.00", weight: 20, sortOrder: 4 },
-  ];
-  for (const prize of prizes) {
-    const existing = await prisma.spinPrize.findFirst({ where: { name: prize.name }, select: { id: true } });
-    if (!existing) await prisma.spinPrize.create({ data: { ...prize, active: true } });
-  }
-
-  /* ── Course Online (LMS): one course per curriculum in lib/courses.ts ── */
-  for (const [index, seed] of COURSE_SEED.entries()) {
-    const course = await prisma.course.upsert({
-      where: { slug: seed.slug },
-      update: {},
-      create: {
-        slug: seed.slug,
-        title: seed.title,
-        description: seed.description,
-        category: seed.category,
-        level: seed.level,
-        instructor: seed.instructor,
-        sortOrder: index,
-        published: true,
-      },
-    });
-    const lessons = await prisma.courseLesson.count({ where: { courseId: course.id } });
-    const seeds = seedLessonsFor(seed, index);
-    if (!lessons) {
-      for (const lesson of seeds) {
-        await prisma.courseLesson.create({ data: { courseId: course.id, ...lesson } });
-      }
-    } else {
-      // Backfill section titles for lessons created before sections existed.
-      const existing = await prisma.courseLesson.findMany({ where: { courseId: course.id }, orderBy: [{ sortOrder: "asc" }, { id: "asc" }] });
-      for (const [i, lesson] of existing.entries()) {
-        if (!lesson.sectionTitle && seeds[i]) {
-          await prisma.courseLesson.update({ where: { id: lesson.id }, data: { sectionTitle: seeds[i].sectionTitle } });
-        }
-      }
-    }
-  }
 
   /* One real activity so the customer /dashboard/activities page has content
      out of the box. Dates track the current calendar month (stable slug), so a
@@ -187,33 +141,6 @@ async function main() {
       published: true,
     },
   });
-
-  /* ── Loyalty tier ladder (admin-editable in /crm/reward-tiers; update: {}
-     keeps admin edits on re-seed) ── */
-  const tiers = [
-    { key: "bronze", title: "บรอนซ์", titleEn: "Bronze", threshold: 1, reward: "เพิ่มเรทเงินคืน 5%", rewardEn: "5% rebate boost", icon: "military_tech", image: "/img/Loyalty/rebate-boost.jpg", accent: "#A3673F", sortOrder: 0 },
-    { key: "silver", title: "ซิลเวอร์", titleEn: "Silver", threshold: 50, reward: "โบนัสเงินสด $50", rewardEn: "$50 cash bonus", icon: "military_tech", image: "/img/Loyalty/cash-bonus.jpg", accent: "#9AA3B0", sortOrder: 1 },
-    { key: "gold", title: "โกลด์", titleEn: "Gold", threshold: 150, reward: "แจก BeSight Orca ฟรี", rewardEn: "Free BeSight Orca indicator", icon: "military_tech", image: "/img/Loyalty/orca-indicator.jpg", accent: "#D4AF37", sortOrder: 2 },
-    { key: "beyond", title: "Beyond", titleEn: "Beyond", threshold: 500, reward: "มือถือเรือธงรุ่นล่าสุด", rewardEn: "Latest flagship phone", icon: "rocket_launch", image: "/img/Loyalty/flagship-phone.jpg", accent: "#2F6FED", sortOrder: 3 },
-    { key: "exclusive", title: "Exclusive", titleEn: "Exclusive", threshold: 2000, reward: "รถยนต์ไฟฟ้า Geely EX2", rewardEn: "Geely EX2 Electric SUV", icon: "diamond", image: "/img/Loyalty/geely20ex2-1775018889656.webp", accent: "#8B3FE0", sortOrder: 4 },
-  ];
-  for (const tier of tiers) {
-    await prisma.rewardTier.upsert({ where: { key: tier.key }, update: {}, create: tier });
-  }
-
-  /* Default prize table for the seeded monthly activity (only when empty). */
-  const seededActivity = await prisma.activity.findUnique({ where: { slug: activitySlug }, select: { id: true } });
-  if (seededActivity && (await prisma.competitionPrize.count({ where: { activityId: seededActivity.id } })) === 0) {
-    await prisma.competitionPrize.createMany({
-      data: [
-        { activityId: seededActivity.id, rankFrom: 1, rankTo: 1, title: "รางวัลชนะเลิศอันดับ 1", valueNote: "$500.00", sortOrder: 0 },
-        { activityId: seededActivity.id, rankFrom: 2, rankTo: 2, title: "รางวัลอันดับ 2", valueNote: "$350.00", sortOrder: 1 },
-        { activityId: seededActivity.id, rankFrom: 3, rankTo: 3, title: "รางวัลอันดับ 3", valueNote: "$250.00", sortOrder: 2 },
-        { activityId: seededActivity.id, rankFrom: 4, rankTo: 10, title: "รางวัลอันดับ 4–10", valueNote: "$100.00", sortOrder: 3 },
-        { activityId: seededActivity.id, rankFrom: 11, rankTo: 20, title: "รางวัลอันดับ 11–20", valueNote: "$20.00", sortOrder: 4 },
-      ],
-    });
-  }
 }
 
 main()

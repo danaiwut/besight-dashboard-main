@@ -6,7 +6,7 @@ import { useLanguage } from "../../../components/crm/LanguageContext";
 import { lot } from "../../../components/crm/CrmContext";
 import { apiCall } from "../../../lib/crmApi";
 import Icon from "../../../components/Icon";
-import { MENTORS, TABS, type Category, type CourseDto } from "../../../lib/courses";
+import { TABS, type Category, type CourseDto } from "../../../lib/courses";
 import { MEMBER_LEVEL_LABEL_KEYS, type MemberLevel } from "../../../lib/memberLevel";
 
 export default function DashboardCoursesPage() {
@@ -40,6 +40,17 @@ export default function DashboardCoursesPage() {
     () => new Date().toLocaleDateString(lang === "th" ? "th-TH" : "en-US", { month: "long", year: "numeric" }),
     [lang],
   );
+
+  // Real instructors only — taken from the admin-authored courses, with how
+  // many courses each one teaches.
+  const instructors = useMemo(() => {
+    const counts = new Map<string, number>();
+    for (const course of courses) {
+      const name = course.instructor?.trim();
+      if (name) counts.set(name, (counts.get(name) ?? 0) + 1);
+    }
+    return [...counts.entries()].map(([name, count]) => ({ name, count }));
+  }, [courses]);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -196,27 +207,27 @@ export default function DashboardCoursesPage() {
           <p style={{ fontSize: 12, color: "var(--text-sub)", margin: "10px 0 0" }}>{t("dash.courses.levelHint")}</p>
         </div>
 
-        <div className="card" style={{ padding: 20 }}>
-          <div className="course-calendar-head">
-            <span className="m">{monthLabel}</span>
-          </div>
-          <div className="panel-section-title" style={{ marginBottom: 4, fontSize: 13 }}>
-            {t("dash.courses.mentors.title")}
-          </div>
-          {MENTORS.map((mentor) => (
-            <div className="course-mentor-row" key={mentor.name}>
-              <span className="course-mentor-avatar">
-                {/* eslint-disable-next-line @next/next/no-img-element -- static export, small local demo avatar */}
-                <img src={`/img/avatars/avatar-${mentor.avatar}.png`} alt={mentor.name} />
-              </span>
-              <span className="course-mentor-info">
-                <div className="course-mentor-name">{mentor.name}</div>
-                <div className="course-mentor-role">{t(mentor.roleKey)}</div>
-              </span>
-              <span className="course-mentor-exp">{t("dash.courses.mentors.exp", { n: mentor.exp })}</span>
+        {instructors.length > 0 && (
+          <div className="card" style={{ padding: 20 }}>
+            <div className="course-calendar-head">
+              <span className="m">{monthLabel}</span>
             </div>
-          ))}
-        </div>
+            <div className="panel-section-title" style={{ marginBottom: 4, fontSize: 13 }}>
+              {t("dash.courses.mentors.title")}
+            </div>
+            {instructors.map((instructor) => (
+              <div className="course-mentor-row" key={instructor.name}>
+                <span className="course-mentor-avatar">
+                  <Icon name="person" />
+                </span>
+                <span className="course-mentor-info">
+                  <div className="course-mentor-name">{instructor.name}</div>
+                </span>
+                <span className="course-mentor-exp">{t("dash.courses.mentors.courses", { n: instructor.count })}</span>
+              </div>
+            ))}
+          </div>
+        )}
 
         <div className="card" style={{ padding: 20 }}>
           <div className="panel-section-title" style={{ marginBottom: 4 }}>

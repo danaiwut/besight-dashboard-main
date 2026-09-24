@@ -321,6 +321,8 @@ const SYNC_COOLDOWN_MS = 60_000;
    admin tab is visible and the cooldown has elapsed, so the member list does
    not go stale during long sessions without manual refresh. */
 const AUTO_SYNC_INTERVAL_MS = 5 * 60_000;
+/** Minimum gap between member-dashboard refetches triggered by tab focus. */
+const MEMBER_FOCUS_RELOAD_MS = 60_000;
 
 /* A failed read and an empty table must never look alike: returning null for both
    is what let a 401 silently repaint the UI with seed data. Callers get an
@@ -638,10 +640,16 @@ export function CrmProvider({ children, mode = "admin", viewer }: { children: Re
   }, [crmDataStatus, gateRequired, reloadFromDatabase, mode]);
 
   /* Member dashboards have no version counter to poll — reload on focus so a
-     background sync or cron is reflected without a manual refresh. */
+     background sync or cron is reflected without a manual refresh. Throttled
+     so quick tab switches don't refetch the whole payload every time. */
   useEffect(() => {
     if (mode !== "member") return;
-    const onVisibility = () => { if (!document.hidden) void reloadFromDatabase(); };
+    let lastReloadAt = Date.now();
+    const onVisibility = () => {
+      if (document.hidden || Date.now() - lastReloadAt < MEMBER_FOCUS_RELOAD_MS) return;
+      lastReloadAt = Date.now();
+      void reloadFromDatabase();
+    };
     document.addEventListener("visibilitychange", onVisibility);
     return () => document.removeEventListener("visibilitychange", onVisibility);
   }, [mode, reloadFromDatabase]);

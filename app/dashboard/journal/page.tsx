@@ -1346,6 +1346,38 @@ export default function TradingJournalPage() {
     const webhook = typeof window !== "undefined" ? `${window.location.origin}/api/mt/journal/sync` : "/api/mt/journal/sync";
     const mtLogin = tradeAccounts.find((a) => a.id === account.tradeAccountId)?.tradeId ?? account.id;
     const steps = [1, 2, 3, 4].map((n) => t(`dash.journal.mtsync.step${n}`));
+
+    // An account can already exist without an investor password on file (it
+    // was optional at link time) — the EA can't authenticate at all until
+    // one is saved, so this has to be settable here too, not only when
+    // first linking the account.
+    const [editingPassword, setEditingPassword] = useState(false);
+    const [pwServer, setPwServer] = useState(account.mtServer ?? "");
+    const [pwValue, setPwValue] = useState("");
+    const [savingPassword, setSavingPassword] = useState(false);
+
+    async function savePassword() {
+      if (!pwValue.trim()) {
+        toast(t("dash.journal.mtsync.passwordRequired"));
+        return;
+      }
+      setSavingPassword(true);
+      try {
+        await apiCall(`/api/me/journal/accounts/${account.accountId}/`, "PATCH", {
+          mtServer: pwServer.trim() || undefined,
+          investorPassword: pwValue,
+        });
+        setAccounts((cur) => cur.map((a) => (a.id === account.id ? { ...a, mtServer: pwServer.trim() || undefined, hasInvestorPassword: true } : a)));
+        setPwValue("");
+        setEditingPassword(false);
+        toast(t("dash.journal.mtsync.passwordSaved"));
+      } catch (error) {
+        toast(error instanceof Error ? error.message : t("dash.journal.mtsync.passwordSaveFailed"));
+      } finally {
+        setSavingPassword(false);
+      }
+    }
+
     return (
       <div>
         <p style={{ fontSize: 13, color: "var(--text-sub)", marginTop: 0 }}>{t("dash.journal.mtsync.intro")}</p>
@@ -1380,12 +1412,65 @@ export default function TradingJournalPage() {
           <Icon name="download" style={{ fontSize: 16 }} />
           {t("dash.journal.mtsync.download")}
         </a>
-        <p style={{ fontSize: 12, color: "var(--text-sub)", marginBottom: 0 }}>
+        <p style={{ fontSize: 12, color: "var(--text-sub)", marginBottom: editingPassword ? 8 : 0 }}>
           {t("dash.journal.mtsync.investorNote", {
             server: account.mtServer ?? "—",
             status: account.hasInvestorPassword ? t("dash.journal.mtsync.saved") : t("dash.journal.mtsync.notSet"),
           })}
+          {!editingPassword && (
+            <>
+              {" · "}
+              <button
+                type="button"
+                onClick={() => setEditingPassword(true)}
+                style={{ background: "none", border: "none", padding: 0, color: "var(--blue)", fontSize: 12, fontWeight: 600, cursor: "pointer" }}
+              >
+                {account.hasInvestorPassword ? t("dash.journal.mtsync.changePassword") : t("dash.journal.mtsync.addPassword")}
+              </button>
+            </>
+          )}
         </p>
+
+        {editingPassword && (
+          <div className="card" style={{ padding: 14, marginTop: 4 }}>
+            <div className="field">
+              <label>{t("dash.journal.account.mtServer")}</label>
+              <input
+                className="input mono"
+                value={pwServer}
+                onChange={(e) => setPwServer(e.target.value)}
+                placeholder="XMGlobal-MT5"
+                autoComplete="off"
+              />
+            </div>
+            <div className="field">
+              <label>{t("dash.journal.account.investorPassword")}</label>
+              <input
+                className="input"
+                type="password"
+                value={pwValue}
+                onChange={(e) => setPwValue(e.target.value)}
+                placeholder="••••••••"
+                autoComplete="new-password"
+              />
+            </div>
+            <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
+              <button
+                type="button"
+                className="btn btn-ghost btn-sm"
+                onClick={() => {
+                  setEditingPassword(false);
+                  setPwValue("");
+                }}
+              >
+                {t("common.cancel")}
+              </button>
+              <button type="button" className="btn btn-primary btn-sm" disabled={savingPassword} onClick={() => void savePassword()}>
+                {savingPassword ? t("dash.journal.mtsync.passwordSaving") : t("dash.journal.mtsync.passwordSave")}
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     );
   }
